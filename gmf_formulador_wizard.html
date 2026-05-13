@@ -314,6 +314,9 @@ tr:last-child td{border-bottom:none}
   <button class="step-btn" id="s6btn" onclick="abrirAbaLaudos()" style="background:#059669;color:#fff;border-radius:8px;margin-left:8px">
     &#128203; Laudos
   </button>
+  <button class="step-btn" onclick="_logout()" style="background:#dc2626;color:#fff;border-radius:8px;margin-left:4px">
+    &#x2192; Sair
+  </button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════
@@ -905,7 +908,7 @@ async function _initAuth() {
     window.location.href = 'login.html';
     return;
   }
-  // Forçar refresh da sessão no servidor
+  // Forçar refresh da sessão no servidor — garante que sessão é válida no servidor
   const { data: refreshData, error } = await _sb.auth.refreshSession();
   if (error || !refreshData.session) {
     await _sb.auth.signOut();
@@ -939,7 +942,7 @@ async function _initAuth() {
   if (perfil.data) {
     const el = document.getElementById('userInfo');
     if (el) el.innerHTML = `<span style="font-size:12px;color:var(--text2)">👤 ${perfil.data.nome}</span>
-      <button class="btn" style="height:28px;font-size:11px;padding:0 10px;background:#059669;margin-right:6px" onclick="abrirAbaLaudos()">&#128203; Laudos</button><button class="btn" style="height:28px;font-size:11px;padding:0 10px;background:#dc2626" onclick="_logout()">&#x2192; Sair</button>`;
+      `;
   }
 }
 
