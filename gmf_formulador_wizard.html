@@ -899,8 +899,8 @@ const _sb = (_cfg.url && _cfg.key)
 let _currentUser = null;
 async function _initAuth() {
   if (!_sb) {
-    // Sem Supabase configurado: modo offline (localStorage)
-    console.warn('GMF: Supabase não configurado — usando localStorage.');
+    // Sem Supabase configurado: redirecionar para login
+    window.location.href = 'gmf_login.html';
     return;
   }
   const { data } = await _sb.auth.getSession();
