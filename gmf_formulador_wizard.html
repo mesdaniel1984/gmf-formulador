@@ -936,8 +936,33 @@ async function _initAuth() {
   if (perfil.data) {
     const el = document.getElementById('userInfo');
     if (el) el.innerHTML = `<span style="font-size:12px;color:var(--text2)">👤 ${perfil.data.nome}</span>
-      <button class="btn" style="height:28px;font-size:11px;padding:0 10px" onclick="_logout()">Sair</button>`;
+      <button class="btn" style="height:28px;font-size:11px;padding:0 10px;background:#059669;margin-right:6px" onclick="abrirAbaLaudos()">&#128203; Laudos</button><button class="btn" style="height:28px;font-size:11px;padding:0 10px;background:#059669;margin-right:6px" onclick="abrirAbaLaudos()">&#128203; Laudos</button><button class="btn" style="height:28px;font-size:11px;padding:0 10px" onclick="_logout()">Sair</button>`;
   }
+}
+
+async function salvarLaudoNoBanco(dadosLaudo) {
+  // Salvar laudo imutável no banco
+  const registro = {
+    user_id: _currentUser?.id || null,
+    user_email: _currentUser?.email || 'desconhecido',
+    produto_nome: dadosLaudo.produto_nome || '',
+    lote: dadosLaudo.lote || '',
+    data_fab: dadosLaudo.data_fab || '',
+    data_val: dadosLaudo.data_val || '',
+    num_laudo: dadosLaudo.num_laudo || '',
+    status: dadosLaudo.status || 'aprovado',
+    elaborado: dadosLaudo.elaborado || '',
+    dados: dadosLaudo
+  };
+  try {
+    if (_sb) {
+      await _sb.from('laudos').insert([registro]);
+    }
+  } catch(e) {}
+  // Sempre salvar também no localStorage como backup
+  const local = JSON.parse(localStorage.getItem('gmf_laudos_salvos') || '[]');
+  local.unshift(registro);
+  localStorage.setItem('gmf_laudos_salvos', JSON.stringify(local.slice(0, 200)));
 }
 
 async function _logout() {
@@ -2976,7 +3001,38 @@ function _ltFmtData(val) {
   return val;
 }
 
-function ltGerarLaudo() {
+async function ltGerarLaudo() {
+  // Salvar automaticamente antes de gerar
+  const dadosLaudo = {
+    num_laudo: document.getElementById('lt_num')?.value || '',
+    produto_nome: gv('p_nome') || '',
+    lote: document.getElementById('lt_lote')?.value || '',
+    data_fab: document.getElementById('lt_fab')?.value || '',
+    data_val: document.getElementById('lt_val')?.value || '',
+    data_emissao: document.getElementById('lt_emissao')?.value || new Date().toLocaleDateString('pt-BR'),
+    qtd_prod: document.getElementById('lt_qtd')?.value || '',
+    registro_sif: gv('p_registro') || 'SIF 5460',
+    status: (() => {
+      const sels = document.querySelectorAll('.lt-status-sel');
+      for (const s of sels) { if (s.value === 'nao_conforme') return 'reprovado'; }
+      return 'aprovado';
+    })(),
+    elaborado: document.getElementById('lt_elab_nome')?.value || _currentUser?.email || '',
+    cargo_resp: document.getElementById('lt_elab_cargo')?.value || '',
+    outras_info: document.getElementById('lt_outras')?.value || '',
+    analises: Array.from(document.querySelectorAll('.lt-analise-row')).map(row => ({
+      param: row.querySelector('.lt-param')?.textContent || '',
+      ref: row.querySelector('.lt-ref')?.value || '',
+      status: row.querySelector('.lt-status-sel')?.value || 'conforme',
+      obs: row.querySelector('.lt-obs')?.value || ''
+    }))
+  };
+  await salvarLaudoNoBanco(dadosLaudo);
+  // Continuar gerando o laudo normalmente
+  _ltGerarLaudoOriginal();
+}
+
+function _ltGerarLaudoOriginal() {
   const T = calcT();
   const P100 = parseFloat(document.getElementById('p_porcao').value) || 30;
   const pesoTotal = parseFloat(document.getElementById('p_peso').value) || 1000;
