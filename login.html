@@ -3,342 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GMF Formulador — Acesso</title>
+<title>GMF Formulador</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #0ea5e9 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 40px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  }
-  .logo-area {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .logo-circle {
-    width: 72px; height: 72px;
-    background: #1e3a8a;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 12px;
-    font-size: 28px;
-  }
-  .logo-area h1 { font-size: 20px; font-weight: 800; color: #1e3a8a; }
-  .logo-area p  { font-size: 13px; color: #666; margin-top: 4px; }
-
-  .tabs {
-    display: flex; gap: 0;
-    background: #f3f4f6;
-    border-radius: 8px;
-    padding: 3px;
-    margin-bottom: 24px;
-  }
-  .tab {
-    flex: 1;
-    padding: 8px;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    font-size: 13px;
-    font-weight: 600;
-    color: #666;
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .tab.active { background: #fff; color: #1e3a8a; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
-
-  .form-group { margin-bottom: 16px; }
-  label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
-  input {
-    width: 100%; height: 44px;
-    border: 1.5px solid #d1d5db;
-    border-radius: 8px;
-    padding: 0 12px;
-    font-size: 14px;
-    color: #111;
-    outline: none;
-    transition: border .15s;
-  }
-  input:focus { border-color: #1e3a8a; }
-
-  .btn-primary {
-    width: 100%; height: 46px;
-    background: #1e3a8a;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background .15s;
-    margin-top: 4px;
-  }
-  .btn-primary:hover { background: #1d4ed8; }
-  .btn-primary:disabled { background: #93c5fd; cursor: default; }
-
-  .msg {
-    margin-top: 14px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    display: none;
-  }
-  .msg.erro  { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; display: block; }
-  .msg.ok    { background: #f0fdf4; color: #166534; border: 1px solid #86efac; display: block; }
-
-  .divider { text-align: center; color: #9ca3af; font-size: 12px; margin: 18px 0; position: relative; }
-  .divider::before, .divider::after {
-    content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #e5e7eb;
-  }
-  .divider::before { left: 0; }
-  .divider::after  { right: 0; }
-
-  .footer-note { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 24px; }
-
-  /* Loading spinner */
-  .spinner {
-    display: inline-block; width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    vertical-align: middle; margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  #formCadastro { display: none; }
-
-  /* Config panel */
-  .config-panel {
-    background: #f8f9fa;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 14px;
-    margin-bottom: 20px;
-    font-size: 12px;
-  }
-  .config-panel summary { cursor: pointer; font-weight: 700; color: #374151; }
-  .config-panel input { height: 36px; font-size: 12px; margin-top: 6px; }
-  .config-hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
-  a.link { color: #1e3a8a; font-size: 11px; }
-  @media(max-width:480px){
-    body{padding:12px;align-items:flex-start;padding-top:20px}
-    .card{padding:24px 18px}
-    .logo-circle{width:56px;height:56px;font-size:22px}
-    .logo-area h1{font-size:17px}
-    .logo-area{margin-bottom:20px}
-    input{font-size:16px;height:48px} /* font-size:16px evita zoom automático no iOS */
-    .btn-primary{height:50px;font-size:15px}
-    .tab{padding:10px}
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#1e3a8a,#0ea5e9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.logo{text-align:center;margin-bottom:28px}
+.logo-icon{width:64px;height:64px;background:#1e3a8a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:26px}
+h1{font-size:19px;font-weight:800;color:#1e3a8a;text-align:center}
+p{font-size:12px;color:#666;text-align:center;margin-top:3px}
+.tabs{display:flex;background:#f3f4f6;border-radius:8px;padding:3px;margin:20px 0}
+.tab{flex:1;padding:8px;border:none;border-radius:6px;background:transparent;font-size:13px;font-weight:600;color:#666;cursor:pointer}
+.tab.on{background:#fff;color:#1e3a8a;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.fg{margin-bottom:14px}
+label{display:block;font-size:11px;font-weight:600;color:#374151;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+input{width:100%;height:46px;border:1.5px solid #d1d5db;border-radius:8px;padding:0 12px;font-size:16px;color:#111;outline:none}
+input:focus{border-color:#1e3a8a}
+.btn{width:100%;height:48px;background:#1e3a8a;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px}
+.btn:hover{background:#1d4ed8}
+.btn:disabled{background:#93c5fd}
+.btn2{background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;margin-top:10px}
+.msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;display:none}
+.err{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;display:block}
+.ok{background:#f0fdf4;color:#166534;border:1px solid #86efac;display:block}
+#cad{display:none}
 </style>
 </head>
 <body>
-
 <div class="card">
-  <div class="logo-area">
-    <div class="logo-circle">🧪</div>
+  <div class="logo">
+    <div class="logo-icon">🧪</div>
     <h1>GMF Formulador Nutricional</h1>
     <p>Grupo MF Paris Alimentos · SIF 5460</p>
   </div>
-
-  <!-- Configuração Supabase (admin, primeira vez) -->
-  <details class="config-panel" id="configPanel">
-    <summary>⚙️ Configuração do banco de dados</summary>
-    <div style="margin-top:10px">
-      <div class="form-group">
-        <label>URL do Projeto Supabase</label>
-        <input id="cfgUrl" type="text" placeholder="https://xxxx.supabase.co" value="">
-        <div class="config-hint">Encontre em: Supabase → Settings → API → Project URL</div>
-      </div>
-      <div class="form-group">
-        <label>Chave Anon (pública)</label>
-        <input id="cfgKey" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-        <div class="config-hint">Encontre em: Supabase → Settings → API → anon public key</div>
-      </div>
-      <button class="btn-primary" style="height:38px;font-size:13px;margin-top:4px" onclick="salvarConfig()">
-        💾 Salvar configuração
-      </button>
-      <div style="margin-top:8px;font-size:11px;color:#6b7280">
-        As chaves são salvas localmente no seu navegador. 
-        <a class="link" href="https://supabase.com/dashboard" target="_blank">Abrir Supabase →</a>
-      </div>
-    </div>
-  </details>
-
-  <!-- Tabs Login / Cadastro -->
   <div class="tabs">
-    <button class="tab active" onclick="mostrarTab('login')">Entrar</button>
-    <button class="tab"        onclick="mostrarTab('cadastro')">Criar conta</button>
+    <button class="tab on" onclick="aba('login')">Entrar</button>
+    <button class="tab" onclick="aba('cad')">Criar conta</button>
   </div>
-
-  <!-- FORM LOGIN -->
-  <div id="formLogin">
-    <div class="form-group">
-      <label>E-mail</label>
-      <input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label>Senha</label>
-      <input id="loginSenha" type="password" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="btn-primary" id="btnLogin" onclick="fazerLogin()">Entrar</button>
-    <div class="msg" id="msgLogin"></div>
-    <div class="divider">ou</div>
-    <button class="btn-primary" style="background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;" onclick="loginMagico()">
-      📧 Receber link de acesso por e-mail
-    </button>
+  <div id="login">
+    <div class="fg"><label>E-mail</label><input id="le" type="email" placeholder="seu@email.com"></div>
+    <div class="fg"><label>Senha</label><input id="ls" type="password" placeholder="••••••••"></div>
+    <button class="btn" onclick="entrar()">Entrar</button>
+    <div class="msg" id="ml"></div>
+    <button class="btn btn2" onclick="magico()">📧 Receber link por e-mail</button>
   </div>
-
-  <!-- FORM CADASTRO -->
-  <div id="formCadastro">
-    <div class="form-group">
-      <label>Nome completo</label>
-      <input id="cadNome" type="text" placeholder="Seu nome">
-    </div>
-    <div class="form-group">
-      <label>Cargo / função</label>
-      <input id="cadCargo" type="text" placeholder="Ex: Analista de Qualidade">
-    </div>
-    <div class="form-group">
-      <label>E-mail</label>
-      <input id="cadEmail" type="email" placeholder="seu@email.com">
-    </div>
-    <div class="form-group">
-      <label>Senha (mínimo 8 caracteres)</label>
-      <input id="cadSenha" type="password" placeholder="Crie uma senha forte">
-    </div>
-    <button class="btn-primary" id="btnCadastro" onclick="fazerCadastro()">Criar conta</button>
-    <div class="msg" id="msgCadastro"></div>
-  </div>
-
-  <div class="footer-note">
-    GMF Formulador Nutricional v2.0 · Powered by Supabase<br>
-    Dados armazenados com segurança na nuvem ☁️
+  <div id="cad">
+    <div class="fg"><label>Nome</label><input id="cn" type="text" placeholder="Seu nome completo"></div>
+    <div class="fg"><label>Cargo</label><input id="cc" type="text" placeholder="Ex: Analista de Qualidade"></div>
+    <div class="fg"><label>E-mail</label><input id="ce" type="email" placeholder="seu@email.com"></div>
+    <div class="fg"><label>Senha (mín. 6 caracteres)</label><input id="cs" type="password" placeholder="Crie uma senha"></div>
+    <button class="btn" onclick="cadastrar()">Criar conta</button>
+    <div class="msg" id="mc"></div>
   </div>
 </div>
-
 <script>
-const SUPA_URL = 'https://ailzblgrxtdakpkchstl.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
-localStorage.setItem('gmf_supabase_config', JSON.stringify({url:SUPA_URL,key:SUPA_KEY}));
-let supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-supabase.auth.getSession().then(({ data }) => {
-  if (data.session) redirecionarParaApp();
-});
+const URL_ = 'https://ailzblgrxtdakpkchstl.supabase.co';
+const KEY_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
+localStorage.setItem('gmf_supabase_config', JSON.stringify({url:URL_,key:KEY_}));
+const sb = window.supabase.createClient(URL_, KEY_);
+sb.auth.getSession().then(({data})=>{ if(data.session) go(); });
 
-// ── UI helpers ────────────────────────────────────────────────────────────────
-function mostrarTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='cadastro')));
-  document.getElementById('formLogin').style.display   = tab === 'login'    ? '' : 'none';
-  document.getElementById('formCadastro').style.display = tab === 'cadastro' ? '' : 'none';
+function go(){ location.href='gmf_formulador_wizard.html'; }
+function msg(id,t,c){const e=document.getElementById(id);e.textContent=t;e.className='msg '+c;}
+function aba(t){
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',(i===0&&t==='login')||(i===1&&t==='cad')));
+  document.getElementById('login').style.display=t==='login'?'':'none';
+  document.getElementById('cad').style.display=t==='cad'?'':'none';
+}
+document.getElementById('ls').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
+
+async function entrar(){
+  const e=document.getElementById('le').value.trim();
+  const s=document.getElementById('ls').value;
+  if(!e||!s){msg('ml','Preencha e-mail e senha.','err');return;}
+  const {error}=await sb.auth.signInWithPassword({email:e,password:s});
+  if(error){msg('ml',error.message==='Invalid login credentials'?'E-mail ou senha incorretos.':error.message,'err');}
+  else{msg('ml','✅ Entrando...','ok');setTimeout(go,800);}
 }
 
-function setLoading(btnId, loading) {
-  const btn = document.getElementById(btnId);
-  btn.disabled = loading;
-  btn.innerHTML = loading ? '<span class="spinner"></span> Aguarde...' : btn.dataset.label;
+async function magico(){
+  const e=document.getElementById('le').value.trim();
+  if(!e){msg('ml','Digite seu e-mail acima.','err');return;}
+  const {error}=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.href}});
+  if(error)msg('ml',error.message,'err');
+  else msg('ml','📧 Link enviado! Verifique seu e-mail.','ok');
 }
 
-function showMsg(id, text, tipo) {
-  const el = document.getElementById(id);
-  el.textContent = text;
-  el.className = 'msg ' + tipo;
+async function cadastrar(){
+  const n=document.getElementById('cn').value.trim();
+  const c=document.getElementById('cc').value.trim();
+  const e=document.getElementById('ce').value.trim();
+  const s=document.getElementById('cs').value;
+  if(!n||!e||!s){msg('mc','Preencha todos os campos.','err');return;}
+  if(s.length<6){msg('mc','Senha mínimo 6 caracteres.','err');return;}
+  const {error}=await sb.auth.signUp({email:e,password:s,options:{data:{nome:n,cargo:c}}});
+  if(error)msg('mc',error.message,'err');
+  else msg('mc','✅ Conta criada! Você já pode entrar.','ok');
 }
 
-// Guardar labels originais
-document.getElementById('btnLogin').dataset.label    = 'Entrar';
-document.getElementById('btnCadastro').dataset.label = 'Criar conta';
-
-// ── Login com senha ───────────────────────────────────────────────────────────
-async function fazerLogin() {
-  if (!supabase) { alert('Configure o banco de dados primeiro (⚙️ acima).'); return; }
-  const email = document.getElementById('loginEmail').value.trim();
-  const senha = document.getElementById('loginSenha').value;
-  if (!email || !senha) { showMsg('msgLogin','Preencha e-mail e senha.','erro'); return; }
-
-  setLoading('btnLogin', true);
-  const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-  setLoading('btnLogin', false);
-
-  if (error) {
-    const msgs = {
-      'Invalid login credentials': 'E-mail ou senha incorretos.',
-      'Email not confirmed':       'Confirme seu e-mail antes de entrar (verifique a caixa de entrada).',
-    };
-    showMsg('msgLogin', msgs[error.message] || error.message, 'erro');
-  } else {
-    showMsg('msgLogin','✅ Entrando...','ok');
-    setTimeout(redirecionarParaApp, 500);
-  }
-}
-
-// Enter no campo de senha faz login
-document.getElementById('loginSenha').addEventListener('keydown', e => {
-  if (e.key === 'Enter') fazerLogin();
-});
-
-// ── Link mágico (magic link) ──────────────────────────────────────────────────
-async function loginMagico() {
-  if (!supabase) { alert('Configure o banco de dados primeiro.'); return; }
-  const email = document.getElementById('loginEmail').value.trim();
-  if (!email) { showMsg('msgLogin','Digite seu e-mail acima para receber o link.','erro'); return; }
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: location.href }
-  });
-  if (error) showMsg('msgLogin', error.message, 'erro');
-  else showMsg('msgLogin','📧 Link enviado! Verifique seu e-mail e clique no link para entrar.','ok');
-}
-
-// ── Cadastro ──────────────────────────────────────────────────────────────────
-async function fazerCadastro() {
-  if (!supabase) { alert('Configure o banco de dados primeiro.'); return; }
-  const nome  = document.getElementById('cadNome').value.trim();
-  const cargo = document.getElementById('cadCargo').value.trim();
-  const email = document.getElementById('cadEmail').value.trim();
-  const senha = document.getElementById('cadSenha').value;
-
-  if (!nome || !email || !senha) { showMsg('msgCadastro','Preencha todos os campos obrigatórios.','erro'); return; }
-  if (senha.length < 8) { showMsg('msgCadastro','A senha deve ter pelo menos 8 caracteres.','erro'); return; }
-
-  setLoading('btnCadastro', true);
-  const { error } = await supabase.auth.signUp({
-    email, password: senha,
-    options: { data: { nome, cargo } }
-  });
-  setLoading('btnCadastro', false);
-
-  if (error) showMsg('msgCadastro', error.message, 'erro');
-  else showMsg('msgCadastro','✅ Conta criada! Verifique seu e-mail para confirmar o cadastro.','ok');
-}
-
-// ── Redirecionar para o app ───────────────────────────────────────────────────
-function redirecionarParaApp() {
-  window.location.href = 'gmf_formulador_wizard.html';
-}
-
-// Handle magic link callback (hash contains access_token)
-if (location.hash.includes('access_token')) {
-  if (supabase) {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) redirecionarParaApp();
-    });
-  }
+if(location.hash.includes('access_token')){
+  sb.auth.getSession().then(({data})=>{ if(data.session) go(); });
 }
 </script>
 </body>
