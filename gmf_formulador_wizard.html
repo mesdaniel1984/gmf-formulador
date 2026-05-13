@@ -915,6 +915,22 @@ async function _initAuth() {
     return;
   }
   _currentUser = data.session.user;
+  // Verificar perfil do usuário no banco
+  try {
+    const { data: perfil } = await _sb.from('perfis').select('cargo,readonly').eq('user_id', _currentUser.id).single();
+    if (perfil) {
+      _currentUser.cargo = perfil.cargo;
+      _currentUser.readonly = perfil.readonly || false;
+    }
+  } catch(e) {}
+  // Modo somente leitura para usuário comercial
+  if (_currentUser.readonly) {
+    document.body.classList.add('modo-readonly');
+    // Ocultar botões de criação/edição
+    const style = document.createElement('style');
+    style.textContent = `.modo-readonly .btn-novo-produto, .modo-readonly .btn-salvar, .modo-readonly #btnSalvar, .modo-readonly #btnAdicionarIng, .modo-readonly .btn-acao-salvar { display:none !important; } .modo-readonly-banner { display:block !important; }`;
+    document.head.appendChild(style);
+  }
   // Exibir nome do usuário no cabeçalho
   const perfil = await _sb.from('perfis').select('nome,cargo').eq('id', _currentUser.id).single();
   if (perfil.data) {
@@ -1267,6 +1283,144 @@ function _destravarTipoProduto() {
 
 
 // ────────────────────────────────────────────────────────────────────────────
+// ── Aba Laudos ───────────────────────────────────────────────────────────────
+async function abrirAbaLaudos() {
+  let modal = document.getElementById('modalLaudos');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modalLaudos';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:16px;width:100%;max-width:1100px;padding:28px;margin:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <h2 style="font-size:20px;font-weight:800;color:#1e3a8a">&#128203; Laudos Técnicos Emitidos</h2>
+          <button onclick="document.getElementById('modalLaudos').remove()" style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer">&#10005; Fechar</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <input id="filtroLaudoProduto" placeholder="Filtrar por produto..." onkeyup="filtrarLaudos()" style="flex:1;min-width:160px;height:38px;border:1.5px solid #d1d5db;border-radius:8px;padding:0 12px;font-size:14px">
+          <input id="filtroLaudoLote" placeholder="Filtrar por lote..." onkeyup="filtrarLaudos()" style="flex:1;min-width:120px;height:38px;border:1.5px solid #d1d5db;border-radius:8px;padding:0 12px;font-size:14px">
+          <select id="filtroLaudoStatus" onchange="filtrarLaudos()" style="height:38px;border:1.5px solid #d1d5db;border-radius:8px;padding:0 10px;font-size:14px">
+            <option value="">Todos os status</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="reprovado">Reprovado</option>
+          </select>
+        </div>
+        <div id="listaLaudos" style="font-size:14px;color:#666;text-align:center;padding:30px">Carregando laudos...</div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+  modal.style.display = 'flex';
+  await carregarLaudos();
+}
+
+let _todosLaudos = [];
+
+async function carregarLaudos() {
+  const lista = document.getElementById('listaLaudos');
+  if (!lista) return;
+  try {
+    const { data, error } = await _sb.from('laudos').select('*').order('created_at', {ascending: false});
+    if (error) throw error;
+    _todosLaudos = data || [];
+  } catch(e) {
+    _todosLaudos = JSON.parse(localStorage.getItem('gmf_laudos_salvos') || '[]');
+  }
+  renderLaudosTabela(_todosLaudos);
+}
+
+function filtrarLaudos() {
+  const prod = (document.getElementById('filtroLaudoProduto')?.value || '').toLowerCase();
+  const lote = (document.getElementById('filtroLaudoLote')?.value || '').toLowerCase();
+  const status = document.getElementById('filtroLaudoStatus')?.value || '';
+  const filtrados = _todosLaudos.filter(l => {
+    const d = l.dados || l;
+    return (d.produto_nome||'').toLowerCase().includes(prod) &&
+           (d.lote||'').toLowerCase().includes(lote) &&
+           (status === '' || (d.status||'aprovado') === status);
+  });
+  renderLaudosTabela(filtrados);
+}
+
+function renderLaudosTabela(laudos) {
+  const lista = document.getElementById('listaLaudos');
+  if (!lista) return;
+  if (!laudos.length) {
+    lista.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af">Nenhum laudo encontrado.</div>';
+    return;
+  }
+  lista.innerHTML = `<table style="width:100%;border-collapse:collapse">
+    <thead><tr style="background:#f3f4f6">
+      <th style="padding:10px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">N&#186; LAUDO</th>
+      <th style="padding:10px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">PRODUTO</th>
+      <th style="padding:10px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">LOTE</th>
+      <th style="padding:10px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">FABRICAÇÃO</th>
+      <th style="padding:10px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">VALIDADE</th>
+      <th style="padding:10px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">STATUS</th>
+      <th style="padding:10px 12px;text-align:left;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">EMITIDO POR</th>
+      <th style="padding:10px 12px;text-align:center;font-size:12px;color:#6b7280;border-bottom:2px solid #e5e7eb">VER</th>
+    </tr></thead>
+    <tbody>${laudos.map((l,i) => {
+      const d = l.dados || l;
+      const st = d.status || 'aprovado';
+      const badge = st === 'aprovado'
+        ? '<span style="background:#dcfce7;color:#166534;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700">APROVADO</span>'
+        : '<span style="background:#fef2f2;color:#dc2626;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700">REPROVADO</span>';
+      const dt = l.created_at ? new Date(l.created_at).toLocaleDateString('pt-BR') : (d.data_emissao||'—');
+      return `<tr style="border-bottom:1px solid #f3f4f6;${i%2?'background:#fafafa':''}">
+        <td style="padding:10px 12px;font-weight:700;color:#1e3a8a">${d.num_laudo||'—'}</td>
+        <td style="padding:10px 12px;font-weight:600">${d.produto_nome||'—'}</td>
+        <td style="padding:10px 12px">${d.lote||'—'}</td>
+        <td style="padding:10px 12px">${d.data_fab||'—'}</td>
+        <td style="padding:10px 12px">${d.data_val||'—'}</td>
+        <td style="padding:10px 12px">${badge}</td>
+        <td style="padding:10px 12px">${d.elaborado||l.user_email||'—'}</td>
+        <td style="padding:10px 12px;text-align:center">
+          <button onclick="verLaudo(${i})" style="background:#1e3a8a;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer">Ver</button>
+        </td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function verLaudo(idx) {
+  const l = _todosLaudos[idx];
+  const d = l.dados || l;
+  const st = d.status || 'aprovado';
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Laudo ${d.num_laudo||''}</title>
+  <style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;padding:24px;font-size:12px;color:#111}h2{color:#1e3a8a;margin:0 0 4px}h3{color:#1e3a8a;margin:16px 0 8px}table{width:100%;border-collapse:collapse;margin-bottom:16px}td,th{border:1px solid #d1d5db;padding:7px 10px;text-align:left}th{background:#f3f4f6;font-weight:700;color:#374151}.ok{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-weight:700}.nok{background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:10px;font-weight:700}.status-box{padding:14px;border-radius:8px;font-weight:700;font-size:14px;text-align:center;margin:16px 0}@media print{.no-print{display:none}}</style>
+  </head><body>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div><h2>LAUDO TÉCNICO — SOMENTE LEITURA</h2><p style="color:#6b7280;font-size:11px">Documento imutável emitido pelo GMF Formulador Nutricional</p></div>
+    <button class="no-print" onclick="window.print()" style="background:#1e3a8a;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">Imprimir PDF</button>
+  </div>
+  <table>
+    <tr><th>N&#186; Laudo</th><td>${d.num_laudo||'—'}</td><th>Data Emissão</th><td>${d.data_emissao||'—'}</td></tr>
+    <tr><th>Produto</th><td colspan="3">${d.produto_nome||'—'}</td></tr>
+    <tr><th>Lote</th><td>${d.lote||'—'}</td><th>Qtd. Produzida</th><td>${d.qtd_prod||'—'}</td></tr>
+    <tr><th>Data Fabricação</th><td>${d.data_fab||'—'}</td><th>Data Validade</th><td>${d.data_val||'—'}</td></tr>
+    <tr><th>N&#186; Registro / SIF</th><td colspan="3">${d.registro_sif||'SIF 5460'}</td></tr>
+  </table>
+  <h3>Análise Sensorial</h3>
+  <table>
+    <tr><th>Parâmetro</th><th>Referência</th><th>Observação</th><th>Status</th></tr>
+    ${(d.analises||[]).map(a=>`<tr><td>${a.param||'—'}</td><td>${a.ref||'—'}</td><td>${a.obs||'—'}</td><td><span class="${a.status==='conforme'?'ok':'nok'}">${a.status==='conforme'?'Conforme':'Não conforme'}</span></td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:#9ca3af">Sem dados registrados</td></tr>'}
+  </table>
+  <div class="status-box" style="${st==='aprovado'?'background:#dcfce7;color:#166534;border:2px solid #86efac':'background:#fef2f2;color:#dc2626;border:2px solid #fca5a5'}">
+    ${st==='aprovado'?'PRODUTO APROVADO PARA LIBERAÇÃO':'PRODUTO NAO CONFORME — RETIDO PARA ANALISE'}
+  </div>
+  ${d.outras_info?`<p><strong>Outras informações:</strong> ${d.outras_info}</p>`:''}
+  <table>
+    <tr><th>Elaborado por</th><td>${d.elaborado||'—'}</td><th>Cargo</th><td>${d.cargo_resp||'—'}</td></tr>
+    <tr><th>Telefone Qualidade</th><td>qualidade@mfparis.com.br</td><th>E-mail</th><td>pd@mfparis.com.br</td></tr>
+  </table>
+  <p style="margin-top:24px;font-size:10px;color:#9ca3af;text-align:center;border-top:1px solid #e5e7eb;padding-top:10px">
+    Documento gerado automaticamente · GMF Formulador Nutricional · Grupo MF Paris Alimentos · SIF 5460<br>
+    Emitido em: ${new Date().toLocaleString('pt-BR')} — Este documento é imutável após emissão.
+  </p>
+  </body></html>`);
+  w.document.close();
+}
+
 async function renderProdutos() {
   // Mostrar loading
   const cont = document.getElementById('prodContainer');
