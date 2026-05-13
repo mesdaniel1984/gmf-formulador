@@ -2380,6 +2380,21 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
   // Denominação legal
   const den = document.getElementById('p_denominacao');
   if (den) {
+    // Denominação baseada no TIPO selecionado, não no subtipo de embalagem
+    const tipoParaDen = {
+      'leite-integral':'Leite em Pó Integral',
+      'leite-desnatado':'Leite em Pó Desnatado',
+      'leite-instantaneo':'Leite em Pó Integral Instantâneo',
+      'composto-com':'Composto Lácteo com Adição',
+      'composto-sem':'Composto Lácteo sem Adição',
+      'mistura':'Mistura Láctea',
+      'po-preparo':'Pó para Preparo de Bebida/Alimento',
+      'achocolatado':'Achocolatado em Pó',
+      'cacau':'Cacau em Pó',
+      'cafe-torrado-moido':'Café Torrado e Moído',
+      'cafe-torrado':'Café Torrado (grão)'
+    };
+    if (tipoParaDen[tipoSel] && den) { den.value = tipoParaDen[tipoSel]; return; }
     const denMap = {
       'st-25kg':'Leite em Pó Integral','st-1kg':'Leite em Pó Integral',
       'st-800g':'Leite em Pó Integral','st-400g':'Leite em Pó Integral','st-200g':'Leite em Pó Integral',
