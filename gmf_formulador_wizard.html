@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GMF — Formulador & Ficha Técnica</title>
 <style>
@@ -129,7 +130,24 @@ tr:last-child td{border-bottom:none}
 .ftp-sign{text-align:center;flex:1}
 .ftp-sign-line{height:22px;border-bottom:1px solid #000;margin-bottom:2px}
 
-/* ── NAVIGATION ── */
+/* ── PRODUCT CARDS ── */
+.prod-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;transition:border-color .15s}
+.prod-card:hover{border-color:#93c5fd}
+.prod-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.prod-nome{font-size:14px;font-weight:700;flex:1}
+.prod-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.prod-meta{display:flex;gap:14px;font-size:12px;color:var(--text2);flex-wrap:wrap;margin-bottom:8px}
+.prod-nutri{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-bottom:8px}
+.prod-nut-item{background:#f8f7f5;border-radius:4px;padding:4px 8px;text-align:center}
+.prod-nut-val{font-size:14px;font-weight:700}
+.prod-nut-lbl{font-size:9px;color:var(--text2)}
+.prod-actions{display:flex;gap:6px;flex-wrap:wrap}
+.chip-alert{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+.empty-state .icon{font-size:48px;margin-bottom:10px}
+
 .nav-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#fff;border-top:1px solid var(--border);position:sticky;bottom:0;max-width:960px;margin:0 auto}
 .step-indicator{font-size:12px;color:var(--text2)}
 
@@ -138,6 +156,128 @@ tr:last-child td{border-bottom:none}
 
 /* ── BARCODE VISUAL ── */
 .barcode-viz{font-family:'Courier New',monospace;font-size:22px;letter-spacing:4px;line-height:1;background:#fff;padding:3px 6px;color:#000}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE — max-width: 768px
+   ═══════════════════════════════════════════════════ */
+@media(max-width:768px){
+
+  /* Header compacto */
+  .app-header{padding:8px 12px;gap:8px}
+  .app-header img{height:36px;width:36px}
+  .app-header h1{font-size:14px}
+  .app-header p{display:none}
+  #userInfo{display:none!important}
+
+  /* Steps — scroll horizontal */
+  .wizard-steps{padding:0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .wizard-steps::-webkit-scrollbar{display:none}
+  .step-btn{padding:10px 10px;font-size:11px;gap:4px;flex-shrink:0}
+  .step-num{width:18px;height:18px;font-size:10px}
+
+  /* Panel */
+  .panel{padding:12px 10px}
+
+  /* Cards */
+  .card{padding:12px;margin-bottom:10px}
+  .card-title{font-size:13px;margin-bottom:10px}
+
+  /* Grids — tudo 1 coluna no mobile */
+  .grid2,.grid3,.grid4{grid-template-columns:1fr!important}
+
+  /* Botões de tipo — 2 colunas */
+  .class-btns{grid-template-columns:1fr 1fr!important;gap:6px}
+  .cbtn{padding:8px 10px}
+  .cbtn-icon{font-size:18px;margin-bottom:2px}
+  .cbtn-title{font-size:11px}
+  .cbtn-sub{font-size:9px}
+
+  /* Botões de subtipo/embalagem — wrap menor */
+  #subtipoOpts,#embalagemOpts{gap:5px}
+  #subtipoOpts button,#embalagemOpts button{font-size:11px;height:34px;padding:0 10px}
+
+  /* Add ingredient row — 2 linhas */
+  .add-row{flex-wrap:wrap;gap:6px}
+  .add-row select{flex:1 1 100%}
+  .add-row input{flex:1;min-width:80px}
+  .add-row .btn{flex:1}
+
+  /* Tabela de receita — scroll horizontal */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:480px}
+
+  /* Métricas — 3 colunas no mobile */
+  .metrics{grid-template-columns:repeat(3,1fr)!important}
+  .metric-val{font-size:16px}
+
+  /* Nutri box — full width */
+  .nutri-box{max-width:100%}
+
+  /* Produto cards */
+  .prod-header{gap:6px}
+  .prod-nome{font-size:13px}
+  .prod-nutri{grid-template-columns:repeat(3,1fr)!important}
+  .prod-nut-val{font-size:13px}
+  .prod-actions{gap:5px}
+  .prod-actions .btn{font-size:11px;height:32px;padding:0 8px;flex:1}
+
+  /* Nav bar */
+  .nav-bar{padding:10px 12px;gap:8px;flex-wrap:wrap}
+  .step-indicator{font-size:11px;order:3;width:100%;text-align:center}
+  #btnBack,#btnNext{flex:1;height:40px;font-size:13px}
+
+  /* Modais */
+  .modal-inner,[style*="max-width:440px"],[style*="max-width:420px"]{
+    max-width:calc(100vw - 32px)!important;
+    padding:20px 16px!important;
+  }
+
+  /* Banner edição */
+  #bannerEdicao [style*="flex"]{flex-wrap:wrap}
+
+  /* Trava tipo */
+  #avisoTipoTravado [style*="flex"]{flex-wrap:wrap}
+  #avisoTipoTravado button{width:100%;margin-top:6px}
+
+  /* FTP e Laudo — prévia */
+  .ftp-doc{font-size:8px}
+  .ftp-hdr{flex-wrap:wrap;gap:4px;padding:6px 8px}
+  .ftp-hdr-title{font-size:11px}
+  .ftp-hdr-meta{font-size:7px}
+  .ftp-row{flex-direction:column}
+  .ftp-cell{border-right:none;border-bottom:1px solid #eee;min-width:unset}
+  .ftp-cell:last-child{border-bottom:none}
+  .ftp-nutri{margin:4px}
+
+  /* Canvas assinatura — menor no mobile */
+  #ltAssinaturaCanvas{width:100%!important;height:80px!important}
+
+  /* Botões de ação de FTP/Laudo */
+  [onclick*="imprimirFTP"],[onclick*="imprimirLaudo"]{
+    width:100%;justify-content:center;font-size:13px
+  }
+
+  /* Passo 0 — busca/filtro */
+  #step0 > div:first-child{flex-direction:column!important;gap:8px}
+  #step0 select{width:100%}
+
+  /* Step 5 — Laudo — grid3 → 1 col */
+  #step5 .grid3{grid-template-columns:1fr!important}
+
+  /* Buttons inside laudoDoc and ftpDoc */
+  .btn-lg{height:42px;font-size:13px}
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE PEQUENO — max-width: 380px
+   ═══════════════════════════════════════════════════ */
+@media(max-width:380px){
+  .class-btns{grid-template-columns:1fr!important}
+  .prod-nutri{grid-template-columns:repeat(2,1fr)!important}
+  .metrics{grid-template-columns:repeat(2,1fr)!important}
+  .step-btn{padding:8px 8px;font-size:10px}
+  .app-header h1{font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -153,11 +293,14 @@ tr:last-child td{border-bottom:none}
 
 <!-- WIZARD STEPS -->
 <div class="wizard-steps">
+  <button class="step-btn" id="s0btn" onclick="goStep(0)">
+    <span class="step-num">📦</span> Produtos
+  </button>
   <button class="step-btn active" id="s1btn" onclick="goStep(1)">
-    <span class="step-num">1</span> Configurar Produto
+    <span class="step-num">1</span> Configurar
   </button>
   <button class="step-btn" id="s2btn" onclick="goStep(2)">
-    <span class="step-num">2</span> Montar Receita
+    <span class="step-num">2</span> Receita
   </button>
   <button class="step-btn" id="s3btn" onclick="goStep(3)">
     <span class="step-num">3</span> Tabela Nutricional
@@ -165,6 +308,54 @@ tr:last-child td{border-bottom:none}
   <button class="step-btn" id="s4btn" onclick="goStep(4)">
     <span class="step-num">4</span> Ficha Técnica
   </button>
+  <button class="step-btn" id="s5btn" onclick="goStep(5)">
+    <span class="step-num">5</span> Laudo Técnico
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PASSO 0 — PRODUTOS CADASTRADOS
+     ═══════════════════════════════════════════════════ -->
+<div class="panel" id="step0">
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        Produtos Cadastrados
+        <span id="prodCount" style="font-size:11px;color:var(--text2);font-weight:400"></span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="document.getElementById('importJsonInput').click()" title="Importar histórico .json">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Importar .json
+        </button>
+        <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="importarJSON(event)">
+        <button class="btn" onclick="exportarJSON()" title="Exportar histórico .json">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar .json
+        </button>
+        <div id="userInfo" style="display:flex;align-items:center;gap:8px;margin-right:8px"></div>
+      <button class="btn btn-primary" onclick="novoProduto()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo produto
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtro / busca -->
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input type="text" id="prodBusca" placeholder="🔍  Buscar por nome…" oninput="renderProdutos()" style="flex:1;min-width:200px">
+      <select id="prodFiltroClasse" onchange="renderProdutos()" style="width:220px">
+        <option value="">Todas as categorias</option>
+        <option value="composto-sem">Composto Lácteo sem Adição</option>
+        <option value="composto-com">Composto Lácteo com Adição</option>
+        <option value="mistura">Mistura Láctea</option>
+        <option value="po-preparo">Pó para Preparo</option>
+      </select>
+    </div>
+
+    <div id="prodLista"></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════
@@ -188,37 +379,98 @@ tr:last-child td{border-bottom:none}
       <div class="field"><label>Medida caseira</label><input id="p_medida" type="text" value="2 colheres de sopa"></div>
       <div class="field"><label>Peso total embalagem (g)</label><input id="p_peso" type="number" value="1000" min="1"></div>
       <div class="field"><label>Validade</label><input id="p_validade" type="text" value="12 meses"></div>
-      <div class="field"><label>Código EAN</label><input id="p_ean" type="text" placeholder="Ex: 7891234567890"></div>
+
     </div>
 
     <div class="divider"></div>
     <div class="card-title" style="margin-bottom:10px">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
-      Classificação do produto
+      Tipo e Classificação do Produto
+      <span style="font-size:11px;color:var(--text2);font-weight:400;margin-left:6px">— selecione para preencher automaticamente</span>
     </div>
-    <div class="class-btns" id="classBtns">
-      <div class="cbtn" id="cb-composto-com" onclick="selClasse('composto-com')">
-        <div class="cbtn-icon">🥛</div>
-        <div class="cbtn-title">Composto Lácteo<br><small style="font-weight:400">com Adição</small></div>
-        <div class="cbtn-sub">Lácteos > 50% · PTN ≥ 9g/100g</div>
-      </div>
-      <div class="cbtn" id="cb-composto-sem" onclick="selClasse('composto-sem')">
-        <div class="cbtn-icon">🥛</div>
-        <div class="cbtn-title">Composto Lácteo<br><small style="font-weight:400">sem Adição</small></div>
-        <div class="cbtn-sub">100% lácteos · PTN ≥ 13g/100g</div>
-      </div>
-      <div class="cbtn" id="cb-mistura" onclick="selClasse('mistura')">
-        <div class="cbtn-icon">🧪</div>
-        <div class="cbtn-title">Mistura Láctea</div>
-        <div class="cbtn-sub">Lácteos ≤ 50% · RIISPOA Art.366</div>
-      </div>
-      <div class="cbtn" id="cb-po-preparo" onclick="selClasse('po-preparo')">
-        <div class="cbtn-icon">🥤</div>
-        <div class="cbtn-title">Pó para Preparo<br><small style="font-weight:400">de bebida/alimento</small></div>
-        <div class="cbtn-sub">Regulado ANVISA</div>
+
+    <!-- SELETOR DE TIPO DE PRODUTO -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:8px">1. Tipo de produto</label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:7px" id="tipoBtns">
+
+        <div class="cbtn sel" id="tb-composto-com" onclick="selTipo('composto-com')">
+          <div class="cbtn-icon">🥛</div>
+          <div class="cbtn-title">Composto Lácteo<br><small>com Adição</small></div>
+          <div class="cbtn-sub">Portaria MAPA 1.170/2024</div>
+        </div>
+        <div class="cbtn" id="tb-composto-sem" onclick="selTipo('composto-sem')">
+          <div class="cbtn-icon">🥛</div>
+          <div class="cbtn-title">Composto Lácteo<br><small>sem Adição</small></div>
+          <div class="cbtn-sub">Portaria MAPA 1.170/2024</div>
+        </div>
+        <div class="cbtn" id="tb-mistura" onclick="selTipo('mistura')">
+          <div class="cbtn-icon">🧪</div>
+          <div class="cbtn-title">Mistura Láctea</div>
+          <div class="cbtn-sub">RIISPOA Art. 366</div>
+        </div>
+        <div class="cbtn" id="tb-po-preparo" onclick="selTipo('po-preparo')">
+          <div class="cbtn-icon">🥤</div>
+          <div class="cbtn-title">Pó para Preparo<br><small>de Bebida/Alimento</small></div>
+          <div class="cbtn-sub">ANVISA RDC 724/2022</div>
+        </div>
+        <div class="cbtn" id="tb-leite-integral" onclick="selTipo('leite-integral')">
+          <div class="cbtn-icon">🐄</div>
+          <div class="cbtn-title">Leite em Pó Integral</div>
+          <div class="cbtn-sub">IN MAPA 28/2007 · G.tot ≥ 26%</div>
+        </div>
+        <div class="cbtn" id="tb-leite-instantaneo" onclick="selTipo('leite-instantaneo')">
+          <div class="cbtn-icon">⚡</div>
+          <div class="cbtn-title">Leite em Pó Instantâneo</div>
+          <div class="cbtn-sub">IN MAPA 28/2007 · Lecitinado</div>
+        </div>
+        <div class="cbtn" id="tb-leite-desnatado" onclick="selTipo('leite-desnatado')">
+          <div class="cbtn-icon">🫙</div>
+          <div class="cbtn-title">Leite em Pó Desnatado</div>
+          <div class="cbtn-sub">IN MAPA 28/2007 · G.tot ≤ 1,5%</div>
+        </div>
+        <div class="cbtn" id="tb-achocolatado" onclick="selTipo('achocolatado')">
+          <div class="cbtn-icon">🍫</div>
+          <div class="cbtn-title">Achocolatado em Pó</div>
+          <div class="cbtn-sub">RDC ANVISA 264/2005</div>
+        </div>
+        <div class="cbtn" id="tb-cacau" onclick="selTipo('cacau')">
+          <div class="cbtn-icon">🌱</div>
+          <div class="cbtn-title">Cacau em Pó</div>
+          <div class="cbtn-sub">RDC ANVISA 264/2005</div>
+        </div>
+        <div class="cbtn" id="tb-cafe-torrado-moido" onclick="selTipo('cafe-torrado-moido')">
+          <div class="cbtn-icon">☕</div>
+          <div class="cbtn-title">Café Torrado e Moído</div>
+          <div class="cbtn-sub">RDC ANVISA 277/2005 · IN 16/2010</div>
+        </div>
+        <div class="cbtn" id="tb-cafe-torrado" onclick="selTipo('cafe-torrado')">
+          <div class="cbtn-icon">🫘</div>
+          <div class="cbtn-title">Café Torrado (grão)</div>
+          <div class="cbtn-sub">RDC ANVISA 277/2005 · IN 16/2010</div>
+        </div>
+
       </div>
     </div>
-    <div id="classeLegal" style="margin-top:10px;font-size:11px;color:var(--text2);padding:7px 10px;background:#f8f7f5;border-radius:var(--radius-sm);border:1px solid var(--border)"></div>
+
+    <!-- SUBTIPO (aparece para tipos com variações) -->
+    <div id="subtipoBox" style="display:none;margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:var(--radius-sm);border:1px solid var(--border)">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">2. Especificação / subtipo</label>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px">Clique para selecionar — pode marcar <strong>uma ou mais opções</strong></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="subtipoOpts"></div>
+      <div id="subtipoResumo" style="margin-top:8px;font-size:11px;color:var(--text2);min-height:16px"></div>
+    </div>
+
+    <!-- EMBALAGEM SECUNDÁRIA (para tipos com subtipo de identidade como achocolatado/cacau) -->
+    <div id="embalagemBox" style="display:none;margin-bottom:12px;padding:12px 14px;background:#e8f0fe;border-radius:var(--radius-sm);border:1px solid #93c5fd">
+      <label style="font-size:12px;font-weight:600;color:#1e3a8a;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">3. Embalagem / apresentação</label>
+      <div style="font-size:10px;color:#4b7cba;margin-bottom:8px">Clique para selecionar — pode marcar <strong>uma ou mais opções</strong></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="embalagemOpts"></div>
+      <div id="embalagemResumo" style="margin-top:8px;font-size:11px;color:#1e3a8a;min-height:16px"></div>
+    </div>
+
+    <!-- PAINEL DE REQUISITOS LEGAIS -->
+    <div id="classeLegal" style="margin-top:4px;padding:10px 14px;background:var(--blue-light);border-radius:var(--radius-sm);border:1px solid #93c5fd;font-size:11.5px;line-height:1.7"></div>
   </div>
 
   <div class="card">
@@ -237,6 +489,17 @@ tr:last-child td{border-bottom:none}
     <div class="grid2">
       <div class="field"><label>Armazenamento</label><textarea id="p_armazenamento" rows="2" style="height:56px">Armazenar em local seco, fresco e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.</textarea></div>
       <div class="field"><label>Informações obrigatórias no rótulo</label><textarea id="p_obs" rows="2" style="height:56px">ESTE PRODUTO NÃO É LEITE EM PÓ. CONTÉM SORO DE LEITE.</textarea></div>
+      <div class="field" style="grid-column:1/-1"><label>Modo de preparo</label><textarea id="p_preparo_txt" rows="3" style="height:68px">Para preparar 200 ml de bebida: adicione 30 g (2 colheres de sopa) em meio copo de água filtrada ou fervida. Mexa bem até dissolver e complete com água.</textarea></div>
+      <div class="field" style="grid-column:1/-1">
+        <label style="display:flex;align-items:center;justify-content:space-between">
+          <span>Lista de ingredientes para o rótulo <span style="font-size:10px;color:var(--text3);font-weight:400">(RDC 429/2020 — ordem decrescente de quantidade)</span></span>
+          <button type="button" class="btn" style="height:26px;font-size:11px;padding:0 10px" onclick="autoPreencherIngredientes()" title="Preencher automaticamente com os ingredientes da receita (Passo 2)">
+            🔄 Preencher da receita
+          </button>
+        </label>
+        <textarea id="p_ingredientes_txt" rows="3" style="height:68px;margin-top:4px" placeholder="Será gerado automaticamente da receita ao gerar a Ficha Técnica. Edite aqui para personalizar a declaração do rótulo."></textarea>
+        <div style="font-size:10px;color:var(--text3);margin-top:3px">💡 Ingredientes compostos (ex: Composto Lácteo) são automaticamente expandidos com sua lista de subingredientes conforme legislação.</div>
+      </div>
     </div>
   </div>
 
@@ -283,6 +546,12 @@ tr:last-child td{border-bottom:none}
           <td>Total</td><td id="ft_q">—</td><td>100%</td><td id="ft_k">—</td><td id="ft_p">—</td><td id="ft_c">—</td><td id="ft_g">—</td><td id="ft_n">—</td><td></td><td></td>
         </tr></tfoot>
       </table>
+      <div style="margin-top:12px;display:flex;justify-content:flex-end">
+        <button class="btn btn-success" onclick="salvarProdutoAtual()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          💾 Salvar no cadastro de produtos
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -344,11 +613,169 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════
+     PASSO 5 — LAUDO TÉCNICO
+     ═══════════════════════════════════════════════════ -->
+<div class="panel" id="step5">
+  <div id="s5empty" style="text-align:center;padding:40px;color:var(--text3)">
+    <div style="font-size:48px;margin-bottom:10px">🔬</div>
+    <p>Complete os passos 1 e 2 para emitir o Laudo Técnico.</p>
+  </div>
+  <div id="s5content" style="display:none">
+
+    <!-- Campos específicos do Laudo -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+        Dados do Laudo Técnico
+      </div>
+      <div class="grid3" style="margin-bottom:12px">
+        <div class="field"><label>Nº do Laudo</label><input id="lt_numero" type="text" placeholder="Ex: LT-2026-001"></div>
+        <div class="field"><label>Data de emissão</label><input id="lt_emissao" type="text"></div>
+        <div class="field"><label>Nº do Lote</label><input id="lt_lote" type="text" placeholder="Ex: 050326"></div>
+        <div class="field"><label>Data de fabricação</label><input id="lt_fabricacao" type="text" placeholder="DD/MM/AAAA" oninput="this.value=this.value.replace(/[^0-9/]/g,'').replace(/(\d{2})(\d)/,'$1/$2').replace(/(\d{2}\/\d{2})(\d)/,'$1/$2').slice(0,10)"></div>
+        <div class="field"><label>Data de validade</label><input id="lt_validade" type="text" placeholder="DD/MM/AAAA" oninput="this.value=this.value.replace(/[^0-9/]/g,'').replace(/(\d{2})(\d)/,'$1/$2').replace(/(\d{2}\/\d{2})(\d)/,'$1/$2').slice(0,10)"></div>
+        <div class="field"><label>Quantidade produzida</label><input id="lt_quantidade" type="text" placeholder="Ex: 1.000 kg · 40 sacos 25kg"></div>
+        <div class="field"><label>Nº da Ordem de Produção</label><input id="lt_op" type="text" placeholder="Ex: OP-2026-042"></div>
+        <div class="field"><label>Linha / Equipamento</label><input id="lt_linha" type="text" placeholder="Ex: Linha 1 — Misturador 500L"></div>
+        <div class="field"><label>Destino / Cliente</label><input id="lt_destino" type="text" placeholder="Ex: Uso interno / Nome do cliente"></div>
+        <div class="field" style="grid-column:1/-1"><label>Outras informações <span style="font-size:10px;color:var(--text3);font-weight:400">(campo livre — aparece abaixo do status de aprovação)</span></label><textarea id="lt_outras" rows="2" style="height:52px" placeholder="Ex: Produto destinado a uso industrial. Não abrir sem EPI."></textarea></div>
+        <div class="field"><label>Telefone da Qualidade <span style="font-size:10px;color:var(--text3);font-weight:400">(aparece na seção de contato)</span></label><input id="lt_telefone" type="text" placeholder="Ex: (31) 3333-4444"></div>
+        <div class="field">
+          <label>EAN-13 <span style="font-size:10px;color:var(--text3);font-weight:400">(código de barras unitário — 13 dígitos)</span></label>
+          <input id="lt_ean" type="text" placeholder="Ex: 7891234567890" maxlength="13" style="font-family:monospace">
+        </div>
+        <div class="field">
+          <label>DUN-14 <span style="font-size:10px;color:var(--text3);font-weight:400">(código de barras caixa/fardo — 14 dígitos)</span></label>
+          <input id="lt_dun" type="text" placeholder="Ex: 17891234567897" maxlength="14" style="font-family:monospace">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="card-title" style="margin-bottom:10px;font-size:13px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Análise Sensorial — Padrão de referência
+      </div>
+      <div class="grid2" style="margin-bottom:10px">
+        <div class="field">
+          <label>Aspecto / Textura</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="lt_aspecto_res" style="width:120px;flex-shrink:0">
+              <option value="Conforme">✅ Conforme</option>
+              <option value="Não conforme">❌ Não conforme</option>
+              <option value="Analisar">⚠️ Analisar</option>
+            </select>
+            <input id="lt_aspecto_obs" type="text" placeholder="Observação (ex: Pó uniforme, sem grumos)" style="flex:1">
+          </div>
+        </div>
+        <div class="field">
+          <label>Cor</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="lt_cor_res" style="width:120px;flex-shrink:0">
+              <option value="Conforme">✅ Conforme</option>
+              <option value="Não conforme">❌ Não conforme</option>
+              <option value="Analisar">⚠️ Analisar</option>
+            </select>
+            <input id="lt_cor_obs" type="text" placeholder="Observação (ex: Branco a creme suave)" style="flex:1">
+          </div>
+        </div>
+        <div class="field">
+          <label>Odor / Aroma</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="lt_odor_res" style="width:120px;flex-shrink:0">
+              <option value="Conforme">✅ Conforme</option>
+              <option value="Não conforme">❌ Não conforme</option>
+              <option value="Analisar">⚠️ Analisar</option>
+            </select>
+            <input id="lt_odor_obs" type="text" placeholder="Observação (ex: Característico, não rançoso)" style="flex:1">
+          </div>
+        </div>
+        <div class="field">
+          <label>Sabor</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="lt_sabor_res" style="width:120px;flex-shrink:0">
+              <option value="Conforme">✅ Conforme</option>
+              <option value="Não conforme">❌ Não conforme</option>
+              <option value="Analisar">⚠️ Analisar</option>
+            </select>
+            <input id="lt_sabor_obs" type="text" placeholder="Observação (ex: Característico, suave)" style="flex:1">
+          </div>
+        </div>
+        <div class="field">
+          <label>Solubilidade / Dissolução</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="lt_solub_res" style="width:120px;flex-shrink:0">
+              <option value="Conforme">✅ Conforme</option>
+              <option value="Não conforme">❌ Não conforme</option>
+              <option value="Analisar">⚠️ Analisar</option>
+            </select>
+            <input id="lt_solub_obs" type="text" placeholder="Observação (ex: Boa dissolução em água morna)" style="flex:1">
+          </div>
+        </div>
+        <div class="field">
+          <label>Partículas estranhas / Matérias macro</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="lt_part_res" style="width:120px;flex-shrink:0">
+              <option value="Ausente">✅ Ausente</option>
+              <option value="Presente">❌ Presente</option>
+              <option value="Analisar">⚠️ Analisar</option>
+            </select>
+            <input id="lt_part_obs" type="text" placeholder="Observação" style="flex:1">
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:12px">
+        <label>Observações gerais / Não conformidades</label>
+        <textarea id="lt_obs_gerais" rows="2" style="height:52px" placeholder="Registre desvios, ações corretivas tomadas ou informações adicionais relevantes para o lote."></textarea>
+      </div>
+
+      <div class="divider"></div>
+      <div class="card-title" style="margin-bottom:10px;font-size:13px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Responsável técnico pela análise
+      </div>
+      <div class="grid3" style="margin-bottom:10px">
+        <div class="field"><label>Nome completo</label><input id="lt_resp_nome" type="text" placeholder="Nome do responsável"></div>
+        <div class="field"><label>Cargo / Função</label><input id="lt_resp_cargo" type="text" placeholder="Ex: Analista de Qualidade"></div>
+        <div class="field"><label>Registro profissional</label><input id="lt_resp_registro" type="text" placeholder="Ex: CRN-MG 12345 / CRQ 00000"></div>
+      </div>
+
+      <!-- Assinatura digital -->
+      <div style="background:#f8f7f5;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:4px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">✍️ Assinatura digital</div>
+        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+          <canvas id="ltAssinaturaCanvas" width="360" height="100"
+            style="border:1px solid #d1cdc6;border-radius:6px;background:#fff;cursor:crosshair;touch-action:none;flex-shrink:0"
+            title="Assine aqui com o mouse ou dedo"></canvas>
+          <div style="display:flex;flex-direction:column;gap:6px;justify-content:center">
+            <div style="font-size:11px;color:var(--text2)">Assine dentro do campo ao lado<br>usando o mouse ou o dedo (touch).</div>
+            <button class="btn" style="height:30px;font-size:11px" onclick="ltLimparAssinatura()">🗑️ Limpar assinatura</button>
+            <button class="btn" style="height:30px;font-size:11px" onclick="ltGerarLaudo()">🔄 Atualizar prévia</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn btn-success btn-lg" onclick="imprimirLaudo()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          🖨️ Imprimir Laudo / PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Prévia do Laudo -->
+    <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px">📋 Prévia do Laudo Técnico</div>
+    <div id="laudoDoc"></div>
+
+  </div>
+</div>
+
 <!-- ── NAVIGATION BAR ── -->
 <div class="nav-bar">
   <button class="btn" id="btnBack" onclick="goStep(currentStep-1)" style="display:none">← Voltar</button>
-  <span class="step-indicator" id="stepInd">Passo 1 de 4</span>
-  <button class="btn btn-primary btn-lg" id="btnNext" onclick="nextStep()">Próximo →</button>
+  <span class="step-indicator" id="stepInd">Produtos cadastrados</span>
+  <button class="btn btn-primary btn-lg" id="btnNext" onclick="nextStep()">+ Novo produto</button>
 </div>
 
 <script>
@@ -435,12 +862,12 @@ const DB=[
 // ── PURELAC PRO 4050 ─────────────────────────────────────────────────────────
 {n:"Purelac Pro 4050 — Composto Lácteo c/ Maltodextrina",ref:"Tangará Foods (FT rev.000)",src:"FT",kcal:458,cho:57,act:43,acad:7.3,ptn:11,gt:21,gs:13,tr:0,fi:0,na:467},
 
-{g:"📂 Matérias-primas (arquivo Nov/2025 — 180 itens — valores por 100g)"},{n:"Maltodextrina (Manimalto 20)",ref:"Indemil",src:"Usuário",kcal:385.0,cho:96.0,act:6.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:30.0},{n:"Maltodextrina (Manimalto 10)",ref:"Indemil",src:"Usuário",kcal:385.0,cho:96.0,act:3.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:30.0},{n:"Maltodextrina (Manicandy Dry 30)",ref:"Indemil",src:"Usuário",kcal:385.0,cho:94.5,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:167.0},{n:"Soro",ref:"Da vaca",src:"Usuário",kcal:392.0,cho:85.0,act:85.0,acad:0.0,ptn:13.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:450.0},{n:"Açúcar Cristal moída",ref:"Da Cana",src:"Usuário",kcal:400.0,cho:100.0,act:100.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"LPD",ref:"Noal",src:"Usuário",kcal:350.0,cho:53.0,act:53.0,acad:0.0,ptn:33.0,gt:1.2,gs:0.5,tr:0.0,fi:0.0,na:475.0},{n:"LPI",ref:"Noal",src:"Usuário",kcal:492.0,cho:39.2,act:39.2,acad:0.0,ptn:26.0,gt:26.0,gs:17.6,tr:1.6,fi:0.0,na:344.0},{n:"Permeado",ref:"Sooro",src:"Usuário",kcal:374.0,cho:91.0,act:89.0,acad:0.0,ptn:2.27,gt:0.16,gs:0.1,tr:0.0,fi:0.0,na:447.0},{n:"CMC 2604A",ref:"Denver",src:"Usuário",kcal:0.0,cho:0.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:3.0,na:8.0},{n:"Dióxido de Titânio Anatase (INS 171)",ref:"Daxia (ET-489-REV-04)",src:"FT",kcal:0.0,cho:0.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Sal",ref:"-",src:"Usuário",kcal:0.0,cho:0.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:39000.0},{n:"Aroma de leite",ref:"Duas Rodas",src:"Usuário",kcal:375.0,cho:92.0,act:1.8,acad:1.8,ptn:0.0,gt:0.9,gs:0.9,tr:0.0,fi:1.3,na:182.0},{n:"WPC34",ref:"Sucesso",src:"Usuário",kcal:376.0,cho:52.0,act:50.0,acad:0.0,ptn:34.0,gt:3.5,gs:1.9,tr:0.1,fi:0.0,na:603.0},{n:"Mistura Láctea Select 25Kg",ref:"Leitino",src:"Usuário",kcal:502.0,cho:59.0,act:49.0,acad:2.0,ptn:8.0,gt:26.0,gs:13.0,tr:0.0,fi:0.6,na:678.0},{n:"Cacau em pó natural 8%",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Chocolate em pó 50%",ref:"Fralia",src:"Usuário",kcal:407.0,cho:82.0,act:58.0,acad:57.0,ptn:7.7,gt:5.4,gs:3.2,tr:0.0,fi:15.0,na:160.0},{n:"Cacau em pó Alcalino Red Solúvel",ref:"Fralia",src:"Usuário",kcal:438.0,cho:82.0,act:58.0,acad:57.0,ptn:7.7,gt:5.4,gs:3.2,tr:0.0,fi:15.0,na:160.0},{n:"Cacau em pó Alcalino Red Imperial",ref:"Fralia",src:"Usuário",kcal:228.0,cho:58.0,act:58.0,acad:57.0,ptn:7.7,gt:5.4,gs:3.2,tr:0.0,fi:15.0,na:160.0},{n:"Chocolate em pó 32%",ref:"Fralia",src:"Usuário",kcal:398.0,cho:87.0,act:72.0,acad:71.0,ptn:4.8,gt:3.4,gs:2.0,tr:0.0,fi:9.1,na:175.0},{n:"Cacau em pó alcalino solúvel 100%",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Cacau em pó alcalino gold",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Cacau em pó natural 8%",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Pó à base de óleo de canola",ref:"Alibra",src:"Usuário",kcal:741.0,cho:18.0,act:4.1,acad:4.1,ptn:7.6,gt:71.0,gs:6.0,tr:0.0,fi:0.0,na:278.0},{n:"Pó à base de óleo de Girassol",ref:"Alibra",src:"Usuário",kcal:739.0,cho:18.0,act:4.1,acad:4.1,ptn:7.0,gt:71.0,gs:7.5,tr:0.0,fi:0.0,na:308.0},{n:"Pó à base de óleo de Soja",ref:"Alibra",src:"Usuário",kcal:739.0,cho:18.0,act:4.1,acad:4.1,ptn:7.0,gt:71.0,gs:12.0,tr:0.0,fi:0.0,na:308.0},{n:"Pó à base de óleo de Palma",ref:"Alibra",src:"Usuário",kcal:755.0,cho:18.0,act:3.2,acad:3.2,ptn:4.2,gt:74.0,gs:37.0,tr:0.4,fi:0.0,na:318.0},{n:"Composto Lacteo com LM267",ref:"Alibra",src:"Usuário",kcal:496.0,cho:56.0,act:43.0,acad:4.6,ptn:9.4,gt:26.0,gs:14.0,tr:0.5,fi:0.0,na:493.0},{n:"Caseinato de Cálcio",ref:"Alibra",src:"Usuário",kcal:367.0,cho:0.6,act:0.0,acad:0.0,ptn:89.0,gt:1.0,gs:0.6,tr:0.0,fi:0.0,na:70.0},{n:"Polidextrose (Fibra)",ref:"Adicel",src:"Usuário",kcal:204.0,cho:98.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:86.4,na:0.0},{n:"Aroma de Chocolate branco em pó Natural",ref:"Adicel",src:"Usuário",kcal:355.0,cho:77.0,act:2.32,acad:2.32,ptn:0.0,gt:0.14,gs:13.43,tr:0.0,fi:0.49,na:39.72},{n:"Banana Liofilizada em pó",ref:"Liomeal",src:"Usuário",kcal:368.0,cho:88.0,act:81.0,acad:0.0,ptn:5.3,gt:0.8,gs:0.3,tr:0.0,fi:6.9,na:0.0},{n:"Maçã em pó",ref:"Ingredientes ONLINE",src:"Usuário",kcal:296.0,cho:74.0,act:66.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:21.0,na:0.0},{n:"Aveia em pó",ref:"Cerealsita Express",src:"Usuário",kcal:342.0,cho:54.0,act:0.0,acad:0.0,ptn:15.2,gt:7.0,gs:0.0,tr:0.0,fi:9.8,na:18.0},{n:"Cenoura crua",ref:"Tucunduva",src:"Usuário",kcal:43.0,cho:10.1,act:1.0,acad:1.0,ptn:1.04,gt:0.19,gs:0.03,tr:0.0,fi:2.6,na:35.0},{n:"Chocolate em pó",ref:"Nestlé",src:"Usuário",kcal:350.0,cho:60.0,act:5.0,acad:5.0,ptn:11.5,gt:7.5,gs:4.5,tr:0.0,fi:14.5,na:0.0},{n:"Chocolate em pó",ref:"Mavalério",src:"Usuário",kcal:335.0,cho:75.0,act:5.0,acad:5.0,ptn:7.5,gt:3.5,gs:2.0,tr:0.0,fi:10.0,na:15.0},{n:"Choco Power Ball",ref:"Mavalério",src:"Usuário",kcal:488.0,cho:60.3333,act:3.3333,acad:3.3333,ptn:6.6667,gt:24.3333,gs:22.6667,tr:0.0,fi:2.0,na:63.3333},{n:"Clara de ovo de galinha",ref:"Tucunduva",src:"Usuário",kcal:50.0,cho:1.04,act:1.0,acad:1.0,ptn:10.5,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:164.0},{n:"Cobertura sabor chocolate branco (barra)",ref:"Garoto",src:"Usuário",kcal:540.0,cho:58.0,act:4.0,acad:4.0,ptn:6.4,gt:32.8,gs:20.4,tr:0.0,fi:0.0,na:100.4},{n:"Cobertura sabor chocolate 1/2 amargo (barra)",ref:"Garoto",src:"Usuário",kcal:496.0,cho:61.6,act:4.0,acad:4.0,ptn:4.4,gt:31.6,gs:19.2,tr:0.0,fi:7.6,na:0.0},{n:"Cobertura sabor chocolate branco (barra)",ref:"Harald",src:"Usuário",kcal:576.0,cho:64.0,act:4.0,acad:4.0,ptn:1.6,gt:35.6,gs:18.4,tr:10.4,fi:0.0,na:38.0},{n:"Cobertura sabor chocolate 1/2 amargo (barra)",ref:"Harald",src:"Usuário",kcal:568.0,cho:60.0,act:4.0,acad:4.0,ptn:2.4,gt:35.2,gs:12.4,tr:13.2,fi:3.6,na:0.0},{n:"Coco ralado desidratado fino",ref:"Extra Coco",src:"Usuário",kcal:616.6667,cho:22.5,act:8.3333,acad:8.3333,ptn:6.6667,gt:55.0,gs:48.3333,tr:0.0,fi:10.0,na:0.0},{n:"Coco ralado fresco",ref:"FrutCoco",src:"Usuário",kcal:366.6667,cho:0.0,act:8.3333,acad:8.3333,ptn:0.0,gt:38.3333,gs:36.6667,tr:0.0,fi:10.0,na:0.0},{n:"Coco ralado fresco (T)",ref:"Tucunduva",src:"Usuário",kcal:354.0,cho:15.2,act:1.0,acad:1.0,ptn:3.34,gt:33.5,gs:29.7,tr:0.0,fi:9.4,na:20.0},{n:"Contra File",ref:"TACO",src:"Usuário",kcal:239.0,cho:0.0,act:1.0,acad:1.0,ptn:35.1,gt:10.0,gs:4.63,tr:0.0,fi:0.0,na:82.8},{n:"Couscous Marroquino",ref:"-",src:"Usuário",kcal:349.0,cho:69.9,act:1.0,acad:1.0,ptn:12.0,gt:1.6,gs:0.0,tr:0.0,fi:3.9,na:0.2},{n:"Couve Flor",ref:"TACO",src:"Usuário",kcal:18.0,cho:2.5714,act:1.4286,acad:1.4286,ptn:1.8571,gt:0.1429,gs:0.0,tr:0.0,fi:2.2857,na:24.0},{n:"Couve",ref:"TACO",src:"Usuário",kcal:27.0,cho:4.3,act:1.0,acad:1.0,ptn:2.9,gt:0.5,gs:0.0,tr:0.0,fi:3.1,na:6.0},{n:"Coxão Mole",ref:"TACO",src:"Usuário",kcal:146.0,cho:0.0,act:1.0,acad:1.0,ptn:21.0,gt:6.1,gs:2.0,tr:0.0,fi:0.0,na:132.0},{n:"Cream cheese light",ref:"Polenghi",src:"Usuário",kcal:193.3333,cho:2.3333,act:3.3333,acad:3.3333,ptn:4.3333,gt:18.3333,gs:11.3333,tr:0.0,fi:0.0,na:186.6667},{n:"Creme de avelã com cacau",ref:"Sweet company",src:"Usuário",kcal:520.0,cho:55.0,act:5.0,acad:5.0,ptn:55.0,gt:30.0,gs:10.0,tr:0.0,fi:4.0,na:32.5},{n:"Creme de ricota",ref:"Polenghi",src:"Usuário",kcal:206.6667,cho:2.3333,act:3.3333,acad:3.3333,ptn:9.3333,gt:17.6667,gs:11.0,tr:0.0,fi:0.0,na:346.6667},{n:"Creme de ricota light",ref:"Polenghi",src:"Usuário",kcal:146.6667,cho:4.0,act:3.3333,acad:3.3333,ptn:12.3333,gt:9.0,gs:5.6667,tr:0.0,fi:0.0,na:346.6667},{n:"Cremfil Classic Baunilha (cobertura pronta)",ref:"Puratos",src:"Usuário",kcal:270.0,cho:60.0,act:5.0,acad:5.0,ptn:0.0,gt:3.5,gs:1.5,tr:0.0,fi:0.0,na:115.0},{n:"Cremfil Classic Chocolate (cobertura pronta)",ref:"Puratos",src:"Usuário",kcal:255.0,cho:60.0,act:5.0,acad:5.0,ptn:0.0,gt:1.0,gs:0.0,tr:0.0,fi:0.0,na:105.0},{n:"Creme de leite",ref:"Nestlé",src:"Usuário",kcal:253.3333,cho:0.0,act:6.6667,acad:6.6667,ptn:0.0,gt:25.3333,gs:22.6667,tr:0.0,fi:0.0,na:40.0},{n:"Creme culinário",ref:"Vigor",src:"Usuário",kcal:253.3333,cho:4.0,act:6.6667,acad:6.6667,ptn:2.6667,gt:25.3333,gs:7.3333,tr:8.0,fi:0.0,na:53.3333},{n:"Champignon",ref:"-",src:"Usuário",kcal:18.0,cho:1.8,act:2.0,acad:2.0,ptn:2.2,gt:0.0,gs:0.0,tr:0.0,fi:2.6,na:696.0},{n:"Doce de leite",ref:"Provincia",src:"Usuário",kcal:325.0,cho:65.0,act:5.0,acad:5.0,ptn:0.0,gt:5.5,gs:4.0,tr:0.0,fi:0.0,na:50.0},{n:"Ervilha em conserva",ref:"Quero",src:"Usuário",kcal:74.0,cho:13.4,act:1.0,acad:1.0,ptn:4.6,gt:0.4,gs:0.1,tr:0.0,fi:5.1,na:372.0},{n:"Espagueti",ref:"Barilla",src:"Usuário",kcal:350.0,cho:72.5,act:1.25,acad:1.25,ptn:11.5,gt:1.5,gs:0.25,tr:0.0,fi:3.0,na:0.0},{n:"Espinafre cru",ref:"TACO",src:"Usuário",kcal:16.0,cho:3.0,act:1.0,acad:1.0,ptn:2.0,gt:0.0,gs:0.0,tr:0.0,fi:2.1,na:6.0},{n:"Extrato de Tomate",ref:"Knor",src:"Usuário",kcal:66.6667,cho:14.0,act:3.3333,acad:3.3333,ptn:3.0,gt:0.0,gs:0.0,tr:0.0,fi:3.0,na:433.3333},{n:"Farinha de trigo",ref:"-",src:"Usuário",kcal:350.0,cho:72.0,act:2.0,acad:2.0,ptn:10.0,gt:1.4,gs:0.0,tr:0.0,fi:2.8,na:0.0},{n:"Farinha de trigo integral",ref:"Dona Benta",src:"Usuário",kcal:338.0,cho:68.0,act:2.0,acad:2.0,ptn:12.0,gt:2.0,gs:0.0,tr:0.0,fi:12.0,na:0.0},{n:"Feijão Preto",ref:"-",src:"Usuário",kcal:266.6667,cho:43.3333,act:3.3333,acad:3.3333,ptn:16.6667,gt:0.0,gs:0.0,tr:0.0,fi:20.0,na:0.0},{n:"Feijão",ref:"Broto Legal",src:"Usuário",kcal:266.6667,cho:43.3333,act:3.3333,acad:3.3333,ptn:16.6667,gt:0.0,gs:0.0,tr:0.0,fi:16.6667,na:0.0},{n:"Fermento em pó químico",ref:"Fleischmann",src:"Usuário",kcal:127.0,cho:31.0,act:1.0,acad:1.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:15500.0},{n:"Fermento biológico fresco",ref:"Fleischmann",src:"Usuário",kcal:104.0,cho:8.0,act:1.0,acad:1.0,ptn:14.5,gt:1.5,gs:0.3,tr:0.0,fi:4.5,na:17.0},{n:"Filé mignon",ref:"TACO",src:"Usuário",kcal:143.0,cho:0.0,act:1.0,acad:1.0,ptn:21.6,gt:5.6,gs:2.9,tr:0.0,fi:0.0,na:49.0},{n:"Frutas cristalizadas",ref:"Gianoni e Cia",src:"Usuário",kcal:293.3333,cho:73.3333,act:3.3333,acad:3.3333,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:126.6667},{n:"Farinha de Milho",ref:"Solar",src:"Usuário",kcal:358.0,cho:79.0,act:0.0,acad:0.0,ptn:7.2,gt:1.5,gs:0.4,tr:0.0,fi:5.5,na:45.0},{n:"Funghi Secci",ref:"2 imãos",src:"Usuário",kcal:300.0,cho:75.0,act:10.0,acad:10.0,ptn:10.0,gt:0.0,gs:0.0,tr:0.0,fi:12.0,na:0.0},{n:"Gelatina sem sabor",ref:"Oetker",src:"Usuário",kcal:344.8276,cho:0.0,act:34.4828,acad:34.4828,ptn:82.7586,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Geléia de brilho chocolate (Harmony Cold)",ref:"Puratos",src:"Usuário",kcal:282.0,cho:60.0,act:1.0,acad:1.0,ptn:1.3,gt:0.6,gs:0.4,tr:0.0,fi:1.7,na:39.0},{n:"Geléia de brilho neutra (Harmony Cold)",ref:"Puratos",src:"Usuário",kcal:286.0,cho:63.0,act:1.0,acad:1.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:34.0},{n:"Gema de ovo de galinha",ref:"Tucunduva",src:"Usuário",kcal:358.0,cho:1.79,act:1.0,acad:1.0,ptn:16.8,gt:30.9,gs:9.55,tr:0.0,fi:0.0,na:43.0},{n:"Gema de ovo pasteurizada",ref:"Fleischmann",src:"Usuário",kcal:303.0,cho:1.1,act:1.0,acad:1.0,ptn:15.5,gt:25.6,gs:7.8,tr:0.0,fi:0.0,na:67.0},{n:"Glutamato monossódico",ref:"Ajinomoto",src:"Usuário",kcal:0.0,cho:0.0,act:100.0,acad:100.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:12300.0},{n:"Goiabada",ref:"Predilecta",src:"Usuário",kcal:337.5,cho:80.0,act:2.5,acad:2.5,ptn:0.0,gt:2.0,gs:0.75,tr:0.0,fi:4.0,na:25.0},{n:"Gordura Vegetal Hidrogenada Mesa",ref:"Mesa",src:"Usuário",kcal:100.0,cho:3.5556,act:0.1111,acad:0.1111,ptn:0.0,gt:11.1111,gs:2.4444,tr:2.7778,fi:0.0,na:0.0},{n:"Gotas de chocolate branco",ref:"Arcor",src:"Usuário",kcal:543.0,cho:57.0,act:1.0,acad:1.0,ptn:9.0,gt:31.0,gs:18.0,tr:0.2,fi:0.0,na:131.0},{n:"Gotas de chocolate ao leite",ref:"Arcor",src:"Usuário",kcal:492.0,cho:68.0,act:4.0,acad:4.0,ptn:2.0,gt:27.6,gs:16.4,tr:0.0,fi:0.0,na:0.0},{n:"Gradina Panetone",ref:"Gradina",src:"Usuário",kcal:430.0,cho:66.6667,act:3.3333,acad:3.3333,ptn:5.6667,gt:16.0,gs:6.6667,tr:0.0,fi:2.3333,na:486.6667},{n:"Granulado",ref:"Mavalério",src:"Usuário",kcal:476.0,cho:78.0,act:4.0,acad:4.0,ptn:0.8,gt:18.0,gs:6.0,tr:6.8,fi:1.6,na:19.2},{n:"Iogurte Natural",ref:"Batavo",src:"Usuário",kcal:74.1176,cho:5.3529,act:0.5882,acad:0.5882,ptn:4.0,gt:4.1176,gs:2.5882,tr:0.0,fi:0.0,na:57.0588},{n:"Kamix",ref:"-",src:"Usuário",kcal:266.0,cho:0.99,act:1.0,acad:1.0,ptn:0.0,gt:22.0,gs:4.0,tr:0.0,fi:0.0,na:1.6},{n:"Leite Desnatado",ref:"TACO",src:"Usuário",kcal:30.5,cho:4.65,act:0.5,acad:0.5,ptn:3.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:65.0},{n:"Leite em pó",ref:"Serra Branca",src:"Usuário",kcal:411.5385,cho:73.0769,act:3.8462,acad:3.8462,ptn:5.7692,gt:15.3846,gs:5.7692,tr:5.0,fi:0.0,na:365.3846},{n:"Leite de coco",ref:"Sergipe",src:"Usuário",kcal:12.0,cho:0.1,act:0.5,acad:0.5,ptn:0.0,gt:1.25,gs:1.0,tr:0.0,fi:0.0,na:0.0},{n:"Leite Condensado Da Provincia",ref:"Provincia",src:"Usuário",kcal:325.0,cho:55.0,act:5.0,acad:5.0,ptn:8.0,gt:9.5,gs:5.5,tr:0.0,fi:0.0,na:100.0},{n:"Leite Condensado",ref:"TACO",src:"Usuário",kcal:313.0,cho:57.0,act:1.0,acad:1.0,ptn:7.7,gt:6.7,gs:4.2,tr:0.0,fi:0.0,na:94.0},{n:"Leite Condensado Ligth Moça",ref:"Nestlé",src:"Usuário",kcal:275.0,cho:60.0,act:5.0,acad:5.0,ptn:9.5,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:170.0},{n:"Leite desnatado",ref:"Long",src:"Usuário",kcal:31.5,cho:4.7,act:0.5,acad:0.5,ptn:3.15,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:71.5},{n:"Leite integral",ref:"Long",src:"Usuário",kcal:58.0,cho:4.7,act:0.5,acad:0.5,ptn:2.95,gt:3.05,gs:1.6,tr:0.0,fi:0.0,na:72.5},{n:"Leite pasteurizado integral Top Batavo",ref:"Batavo",src:"Usuário",kcal:62.5,cho:4.8,act:0.5,acad:0.5,ptn:3.25,gt:3.35,gs:2.2,tr:0.0,fi:0.0,na:41.0},{n:"Leite semi desnatado",ref:"Elege",src:"Usuário",kcal:39.0,cho:4.5,act:0.5,acad:0.5,ptn:3.0,gt:1.0,gs:0.6,tr:0.0,fi:0.0,na:65.0},{n:"Leite pasteurizado tipo C",ref:"Paulista",src:"Usuário",kcal:60.5,cho:4.95,act:0.5,acad:0.5,ptn:3.25,gt:3.1,gs:2.0,tr:0.0,fi:0.0,na:44.0},{n:"Lentilha",ref:"Yoki",src:"Usuário",kcal:348.3333,cho:58.3333,act:1.6667,acad:1.6667,ptn:28.3333,gt:1.0,gs:0.0,tr:0.0,fi:3.0,na:170.0},{n:"Limão (suco)",ref:"Tucunduva",src:"Usuário",kcal:25.0,cho:8.64,act:1.0,acad:1.0,ptn:0.38,gt:0.13,gs:0.04,tr:0.0,fi:0.4,na:1.0},{n:"Linhaça",ref:"-",src:"Usuário",kcal:500.0,cho:28.6667,act:6.6667,acad:6.6667,ptn:19.3333,gt:34.0,gs:0.0,tr:0.0,fi:28.0,na:0.0},{n:"Lingüiça calabresa",ref:"Sadia",src:"Usuário",kcal:308.0,cho:0.0,act:2.0,acad:2.0,ptn:14.0,gt:28.0,gs:7.0,tr:0.0,fi:0.0,na:1200.0},{n:"Lombo salgado",ref:"-",src:"Usuário",kcal:137.7778,cho:0.0,act:1.1111,acad:1.1111,ptn:21.1111,gt:5.5556,gs:2.0,tr:0.0,fi:0.0,na:3993.3333},{n:"Macarrão penne com ovos",ref:"-",src:"Usuário",kcal:347.5,cho:72.5,act:1.25,acad:1.25,ptn:11.25,gt:1.375,gs:0.625,tr:0.0,fi:25.0,na:2.75},{n:"Macarrão de arroz Urbano",ref:"Urbano",src:"Usuário",kcal:363.75,cho:80.0,act:1.25,acad:1.25,ptn:7.0,gt:1.75,gs:0.625,tr:0.0,fi:0.875,na:0.0},{n:"Mandioquinha crua",ref:"TACO",src:"Usuário",kcal:102.0,cho:24.0,act:2.0,acad:2.0,ptn:1.8,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Maracujá",ref:"TACO",src:"Usuário",kcal:68.0,cho:13.3,act:1.0,acad:1.0,ptn:2.0,gt:2.1,gs:0.0,tr:0.0,fi:1.1,na:2.0},{n:"Maionese",ref:"Soya",src:"Usuário",kcal:170.0,cho:8.8,act:1.0,acad:1.0,ptn:0.0,gt:15.0,gs:2.6,tr:0.0,fi:0.0,na:877.0},{n:"Manteiga sem sal",ref:"Tirolez",src:"Usuário",kcal:810.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:90.0,gs:50.0,tr:3.0,fi:0.0,na:400.0},{n:"Margarina bolo",ref:"Gradina",src:"Usuário",kcal:730.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:43.0,tr:0.0,fi:0.0,na:320.0},{n:"Margarina para folhados",ref:"Bunge",src:"Usuário",kcal:730.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:30.0,tr:7.0,fi:0.0,na:750.0},{n:"Margarina uso geral",ref:"Amélia",src:"Usuário",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:18.0,tr:20.0,fi:0.0,na:0.0},{n:"Margarina Qualy sem sal",ref:"Qualy",src:"Usuário",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:23.0,tr:0.0,fi:0.0,na:0.0},{n:"Margarina Qualy COM sal",ref:"Qualy",src:"Usuário",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:23.0,tr:0.0,fi:0.0,na:600.0},{n:"Massa verde de lasanha",ref:"Familia",src:"Usuário",kcal:125.0,cho:25.0,act:1.0,acad:1.0,ptn:4.0,gt:1.0,gs:0.0,tr:0.0,fi:1.0,na:10.0},{n:"Milho verde cru",ref:"TACO",src:"Usuário",kcal:138.0,cho:28.6,act:1.0,acad:1.0,ptn:6.6,gt:0.6,gs:0.0,tr:0.0,fi:3.9,na:1.0},{n:"Milho verde",ref:"Quero",src:"Usuário",kcal:99.2308,cho:19.2308,act:0.7692,acad:0.7692,ptn:3.2308,gt:1.1538,gs:0.0,tr:0.0,fi:2.0769,na:466.1538},{n:"Mussarela Light",ref:"Tirolez",src:"Usuário",kcal:290.0,cho:0.0,act:3.3333,acad:3.3333,ptn:28.0,gt:19.0,gs:12.0,tr:0.0,fi:0.0,na:520.0},{n:"Mussarela  Tirolez",ref:"Tirolez",src:"Usuário",kcal:353.3333,cho:0.0,act:3.3333,acad:3.3333,ptn:25.0,gt:28.0,gs:17.3333,tr:0.0,fi:0.0,na:566.6667},{n:"Mistura para bolos e muffins de chocolate",ref:"Puratos",src:"Usuário",kcal:378.125,cho:71.875,act:3.125,acad:3.125,ptn:6.875,gt:6.875,gs:0.625,tr:0.0,fi:4.0625,na:625.0},{n:"Mistura para creme de confeiteiro",ref:"Puratos",src:"Usuário",kcal:385.0,cho:95.0,act:5.0,acad:5.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Morango",ref:"TACO",src:"Usuário",kcal:30.0,cho:6.8,act:1.0,acad:1.0,ptn:0.9,gt:0.3,gs:0.0,tr:0.0,fi:1.7,na:0.0},{n:"Mostarda",ref:"Hellmans",src:"Usuário",kcal:225.0,cho:12.5,act:8.3333,acad:8.3333,ptn:0.0,gt:0.0,gs:3.3333,tr:0.0,fi:8.3333,na:625.0},{n:"Mostarda Folha",ref:"TACO",src:"Usuário",kcal:18.0,cho:3.2,act:1.0,acad:1.0,ptn:2.1,gt:0.2,gs:0.0,tr:0.0,fi:1.9,na:3.0},{n:"Molho de tomate",ref:"-",src:"Usuário",kcal:50.0,cho:9.6667,act:1.6667,acad:1.6667,ptn:1.0,gt:0.0,gs:0.0,tr:0.0,fi:1.1667,na:518.3333},{n:"Molho Ingles",ref:"Kenji",src:"Usuário",kcal:36.3636,cho:10.0,act:9.0909,acad:9.0909,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:2490.9091},{n:"Nozes",ref:"TACO",src:"Usuário",kcal:620.0,cho:18.4,act:1.0,acad:1.0,ptn:14.0,gt:59.4,gs:0.0,tr:0.0,fi:7.2,na:5.0},{n:"Oleo de soja",ref:"SOYA",src:"Usuário",kcal:830.7692,cho:0.0,act:7.6923,acad:7.6923,ptn:0.0,gt:92.3077,gs:16.1538,tr:0.0,fi:0.0,na:0.0},{n:"Orégano",ref:"Lince",src:"Usuário",kcal:400.0,cho:60.0,act:100.0,acad:100.0,ptn:10.0,gt:10.0,gs:0.0,tr:0.0,fi:40.0,na:20.0},{n:"Ovo",ref:"Tucunduva",src:"Usuário",kcal:149.0,cho:1.23,act:1.0,acad:1.0,ptn:12.5,gt:10.0,gs:3.1,tr:0.0,fi:0.0,na:126.0},{n:"Ovo pasteurizado",ref:"Fleischmann",src:"Usuário",kcal:148.0,cho:1.05,act:1.0,acad:1.0,ptn:11.95,gt:10.2,gs:3.15,tr:0.0,fi:0.0,na:133.0},{n:"Palmito",ref:"-",src:"Usuário",kcal:30.0,cho:3.8,act:2.0,acad:2.0,ptn:2.8,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:750.0},{n:"Pamix (pré mistura para panetone)",ref:"Puratos",src:"Usuário",kcal:616.0,cho:53.0,act:1.0,acad:1.0,ptn:0.8,gt:43.0,gs:14.0,tr:13.0,fi:0.5,na:154.0},{n:"Pão Sírio",ref:"Pita Bread",src:"Usuário",kcal:278.0,cho:58.0,act:2.0,acad:2.0,ptn:9.0,gt:1.4,gs:0.0,tr:0.0,fi:2.6,na:440.0},{n:"Patinho bovino",ref:"TACO",src:"Usuário",kcal:150.0,cho:0.0,act:1.0,acad:1.0,ptn:21.0,gt:6.0,gs:2.0,tr:0.0,fi:0.0,na:130.0},{n:"Peito de peru light",ref:"Perdigão",src:"Usuário",kcal:120.0,cho:2.0,act:2.0,acad:2.0,ptn:22.0,gt:2.0,gs:0.0,tr:0.0,fi:2.0,na:720.0},{n:"Peito de frango",ref:"TACO",src:"Usuário",kcal:101.0,cho:0.0,act:1.0,acad:1.0,ptn:23.0,gt:1.0,gs:0.0,tr:0.0,fi:0.0,na:56.0},{n:"Pimentão verde",ref:"Tucunduva",src:"Usuário",kcal:27.0,cho:6.44,act:1.0,acad:1.0,ptn:0.89,gt:0.19,gs:0.03,tr:0.0,fi:1.73,na:2.0},{n:"Polvilho azedo",ref:"Yoki",src:"Usuário",kcal:345.0,cho:85.0,act:5.0,acad:5.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:28.0},{n:"Presunto cozido s/ capa",ref:"Sadia",src:"Usuário",kcal:92.5,cho:0.0,act:2.5,acad:2.5,ptn:15.0,gt:3.25,gs:1.0,tr:0.0,fi:0.0,na:1037.5},{n:"Pré mistura para bolo capuccino",ref:"Festpan",src:"Usuário",kcal:424.0,cho:76.0,act:4.0,acad:4.0,ptn:3.2,gt:12.0,gs:3.2,tr:3.6,fi:0.0,na:80.0},{n:"Pré mistura para bolo pé de moleque",ref:"Festpan",src:"Usuário",kcal:456.0,cho:68.0,act:4.0,acad:4.0,ptn:4.4,gt:19.2,gs:4.4,tr:4.4,fi:2.0,na:92.0},{n:"Pré mistura para bolo de coco",ref:"Festpan",src:"Usuário",kcal:416.0,cho:88.0,act:4.0,acad:4.0,ptn:3.2,gt:11.2,gs:3.2,tr:3.2,fi:0.0,na:76.0},{n:"Pré mistura para brownie",ref:"Festpan",src:"Usuário",kcal:440.0,cho:72.0,act:4.0,acad:4.0,ptn:4.0,gt:16.0,gs:4.4,tr:4.4,fi:2.4,na:88.0},{n:"Pré mistura para brioche",ref:"Emulzint",src:"Usuário",kcal:381.0,cho:73.0,act:1.0,acad:1.0,ptn:8.6,gt:6.0,gs:0.0,tr:0.0,fi:2.3,na:599.0},{n:"Pré mistura para panetone Tegral Soft´r",ref:"Puratos",src:"Usuário",kcal:441.0,cho:68.0,act:1.0,acad:1.0,ptn:7.3,gt:15.0,gs:3.8,tr:3.6,fi:1.7,na:344.0},{n:"Pré mistura para pão de fibras",ref:"Puratos",src:"Usuário",kcal:330.0,cho:64.0,act:1.0,acad:1.0,ptn:14.0,gt:1.5,gs:0.0,tr:0.0,fi:8.0,na:790.0},{n:"Pré mistura para pão macio de chocolate",ref:"Puratos",src:"Usuário",kcal:396.0,cho:74.0,act:2.0,acad:2.0,ptn:9.2,gt:5.8,gs:1.2,tr:0.0,fi:2.8,na:400.0},{n:"Pré mistura para pão de batata",ref:"Bonasse",src:"Usuário",kcal:340.0,cho:72.0,act:1.0,acad:1.0,ptn:8.0,gt:6.1,gs:1.6,tr:1.6,fi:2.0,na:590.0},{n:"Pré mistura para pão vitaminado",ref:"Puratos",src:"Usuário",kcal:375.0,cho:69.0,act:1.0,acad:1.0,ptn:7.9,gt:7.5,gs:3.5,tr:0.0,fi:2.3,na:0.0},{n:"Pré mistura Tegral pão macio",ref:"Puratos",src:"Usuário",kcal:388.0,cho:73.0,act:1.0,acad:1.0,ptn:8.8,gt:6.0,gs:1.3,tr:1.5,fi:2.3,na:575.0},{n:"Proteina de soja",ref:"-",src:"Usuário",kcal:288.0,cho:20.0,act:2.0,acad:2.0,ptn:52.0,gt:0.0,gs:0.0,tr:0.0,fi:14.0,na:15.0},{n:"Queijo cremoso",ref:"Alouette",src:"Usuário",kcal:330.0,cho:9.0,act:3.3333,acad:3.3333,ptn:6.6667,gt:29.6667,gs:18.6667,tr:1.3333,fi:0.0,na:350.0},{n:"Queijo minas frescal",ref:"Balks",src:"Usuário",kcal:250.0,cho:2.6667,act:3.3333,acad:3.3333,ptn:17.0,gt:19.0,gs:12.0,tr:0.0,fi:0.0,na:266.6667},{n:"Queijo mussarela",ref:"Tirolez",src:"Usuário",kcal:316.6667,cho:0.0,act:3.3333,acad:3.3333,ptn:23.3333,gt:26.6667,gs:13.3333,tr:0.0,fi:0.0,na:536.6667},{n:"Queijo parmesão",ref:"Três Marias",src:"Usuário",kcal:373.3333,cho:0.0,act:3.3333,acad:3.3333,ptn:31.6667,gt:27.0,gs:16.6667,tr:0.0,fi:3.3333,na:653.3333},{n:"Queijo prato Scala",ref:"Tirolez",src:"Usuário",kcal:333.3333,cho:0.0,act:3.3333,acad:3.3333,ptn:24.0,gt:28.0,gs:17.0,tr:1.0,fi:0.0,na:793.3333},{n:"Queijo provolone",ref:"Tirolez",src:"Usuário",kcal:346.6667,cho:0.0,act:3.3333,acad:3.3333,ptn:26.6667,gt:26.6667,gs:20.0,tr:0.0,fi:0.0,na:870.0},{n:"Requeijão cremoso",ref:"Elege",src:"Usuário",kcal:260.0,cho:3.3333,act:3.3333,acad:3.3333,ptn:10.0,gt:23.0,gs:16.3333,tr:0.0,fi:0.0,na:366.6667},{n:"Ricota",ref:"TACO",src:"Usuário",kcal:140.0,cho:3.8,act:1.0,acad:1.0,ptn:12.6,gt:8.1,gs:4.9,tr:0.0,fi:0.0,na:283.0},{n:"Ponta de agulha",ref:"Wikipedia",src:"Usuário",kcal:218.7,cho:1.15,act:1.0,acad:1.0,ptn:21.43,gt:14.26,gs:6.28,tr:0.0,fi:0.0,na:63.12},{n:"Sal Lebre",ref:"Lebre",src:"Usuário",kcal:0.0,cho:0.0,act:100.0,acad:100.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:39000.0},{n:"Salmão cru",ref:"Tucunduva",src:"Usuário",kcal:116.0,cho:0.0,act:1.0,acad:1.0,ptn:19.9,gt:3.46,gs:0.56,tr:0.0,fi:0.0,na:67.0},{n:"Salsinha",ref:"Tucunduva",src:"Usuário",kcal:36.0,cho:6.34,act:1.0,acad:1.0,ptn:2.98,gt:0.79,gs:0.13,tr:0.0,fi:4.1,na:56.0},{n:"Satin creme cake neutro",ref:"Puratos",src:"Usuário",kcal:380.0,cho:44.0,act:2.0,acad:2.0,ptn:6.0,gt:20.0,gs:3.0,tr:0.0,fi:2.0,na:280.0},{n:"Semente de girassol",ref:"Jasmine",src:"Usuário",kcal:667.5,cho:20.0,act:2.5,acad:2.5,ptn:17.0,gt:57.5,gs:6.0,tr:0.0,fi:11.25,na:395.0},{n:"Shimeji",ref:"2 imãos",src:"Usuário",kcal:26.0,cho:3.4,act:2.0,acad:2.0,ptn:5.0,gt:0.0,gs:0.0,tr:0.0,fi:2.4,na:26.0},{n:"Shitake",ref:"2 imãos",src:"Usuário",kcal:38.0,cho:5.6,act:2.0,acad:2.0,ptn:3.6,gt:0.0,gs:0.0,tr:0.0,fi:0.4,na:36.0},{n:"Shoyu Sakura tradicional",ref:"Sakura",src:"Usuário",kcal:60.0,cho:12.0,act:6.6667,acad:6.6667,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:5700.0},{n:"Sobrecoxa de frango",ref:"TACO",src:"Usuário",kcal:194.0,cho:0.0,act:1.0,acad:1.0,ptn:17.0,gt:14.0,gs:3.5,tr:0.0,fi:0.0,na:82.0},{n:"Suco concentrado de goiaba",ref:"Qualitá",src:"Usuário",kcal:24.0,cho:5.0,act:2.0,acad:2.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:2.6,na:0.0},{n:"Suco concentrado de maracujá",ref:"Qualitá",src:"Usuário",kcal:68.1818,cho:13.6364,act:4.5455,acad:4.5455,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Suco de laranja sem açúcar",ref:"Tucunduva",src:"Usuário",kcal:45.0,cho:10.41,act:1.0,acad:1.0,ptn:0.7,gt:0.2,gs:0.02,tr:0.0,fi:0.2,na:1.0},{n:"Suco de limão",ref:"TACO",src:"Usuário",kcal:35.0,cho:5.4,act:1.0,acad:1.0,ptn:0.35,gt:0.1,gs:0.02,tr:0.0,fi:0.1,na:0.5},{n:"Tomate salada",ref:"Tucunduva",src:"Usuário",kcal:21.0,cho:5.1,act:1.0,acad:1.0,ptn:0.8,gt:0.0,gs:0.0,tr:0.0,fi:2.3,na:5.0},{n:"Tomate seco",ref:"Arco Bello",src:"Usuário",kcal:145.0,cho:19.75,act:2.5,acad:2.5,ptn:6.5,gt:4.5,gs:0.0,tr:0.0,fi:5.25,na:500.0},{n:"Trigo em grão",ref:"-",src:"Usuário",kcal:331.1111,cho:71.1111,act:2.2222,acad:2.2222,ptn:15.5556,gt:1.7778,gs:0.0,tr:0.0,fi:8.6667,na:93.3333},{n:"Uva Passa",ref:"Prume",src:"Usuário",kcal:300.0,cho:80.0,act:3.3333,acad:3.3333,ptn:3.3333,gt:0.0,gs:0.0,tr:0.0,fi:4.0,na:0.0},{n:"Vagem",ref:"TACO",src:"Usuário",kcal:25.0,cho:5.2,act:1.0,acad:1.0,ptn:1.8,gt:0.2,gs:0.0,tr:0.0,fi:2.4,na:0.0},{n:"Xerém de caju",ref:"Lince",src:"Usuário",kcal:580.0,cho:0.0,act:10.0,acad:10.0,ptn:20.0,gt:20.0,gs:0.0,tr:0.0,fi:0.0,na:0.0}
+{g:"📂 Matérias-primas (arquivo Nov/2025 — 180 itens — valores por 100g)"},{n:"Maltodextrina (Manimalto 20)",ref:"Indemil",src:"Usuário",kcal:385.0,cho:96.0,act:6.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:30.0},{n:"Maltodextrina (Manimalto 10)",ref:"Indemil",src:"Usuário",kcal:385.0,cho:96.0,act:3.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:30.0},{n:"Maltodextrina (Manicandy Dry 30)",ref:"Indemil",src:"Usuário",kcal:385.0,cho:94.5,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:167.0},{n:"Soro",ref:"Da vaca",src:"Usuário",kcal:392.0,cho:85.0,act:85.0,acad:0.0,ptn:13.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:450.0},{n:"Açúcar Cristal moída",ref:"Da Cana",src:"Usuário",kcal:400.0,cho:100.0,act:100.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"LPD",ref:"Noal",src:"Usuário",rotulo:"Leite em Pó Desnatado",kcal:350.0,cho:53.0,act:53.0,acad:0.0,ptn:33.0,gt:1.2,gs:0.5,tr:0.0,fi:0.0,na:475.0},{n:"LPI",ref:"Noal",src:"Usuário",rotulo:"Leite em Pó Integral",kcal:492.0,cho:39.2,act:39.2,acad:0.0,ptn:26.0,gt:26.0,gs:17.6,tr:1.6,fi:0.0,na:344.0},{n:"Leite em Pó Integral — Marca ALIMENTA (Lotes 050326/060326)",ref:"García Hermanos Agroindustrial (CoA 2026-082)",src:"FT",rotulo:"Leite em Pó Integral",kcal:499.0,cho:38.9,act:38.9,acad:0.0,ptn:25.6,gt:26.85,gs:16.9,tr:0.0,fi:0.0,na:370.0},{n:"Leite em Pó Desnatado — Marca Ramolac (Lote 994)",ref:"Lácteos Ramolac S.A. (BPM 03.2 FT rev.04 · SENASA S-I-05334)",src:"FT",rotulo:"Leite em Pó Desnatado",kcal:358.0,cho:52.0,act:0.0,acad:0.0,ptn:34.0,gt:1.5,gs:0.1,tr:0.0,fi:0.0,na:360.0},{n:"Permeado",ref:"Sooro",src:"Usuário",kcal:374.0,cho:91.0,act:89.0,acad:0.0,ptn:2.27,gt:0.16,gs:0.1,tr:0.0,fi:0.0,na:447.0},{n:"CMC 2604A",ref:"Denver",src:"Usuário",kcal:0.0,cho:0.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:3.0,na:8.0},{n:"Dióxido de Titânio Anatase (INS 171)",ref:"Daxia (ET-489-REV-04)",src:"FT",kcal:0.0,cho:0.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Sal",ref:"-",src:"Usuário",kcal:0.0,cho:0.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:39000.0},{n:"Aroma de leite",ref:"Duas Rodas",src:"Usuário",kcal:375.0,cho:92.0,act:1.8,acad:1.8,ptn:0.0,gt:0.9,gs:0.9,tr:0.0,fi:1.3,na:182.0},{n:"WPC34",ref:"Sucesso",src:"Usuário",kcal:376.0,cho:52.0,act:50.0,acad:0.0,ptn:34.0,gt:3.5,gs:1.9,tr:0.1,fi:0.0,na:603.0},{n:"Mistura Láctea Select 25Kg",ref:"Leitino",src:"Usuário",kcal:502.0,cho:59.0,act:49.0,acad:2.0,ptn:8.0,gt:26.0,gs:13.0,tr:0.0,fi:0.6,na:678.0},{n:"Cacau em pó natural 8%",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Chocolate em pó 50%",ref:"Fralia",src:"Usuário",kcal:407.0,cho:82.0,act:58.0,acad:57.0,ptn:7.7,gt:5.4,gs:3.2,tr:0.0,fi:15.0,na:160.0},{n:"Cacau em pó Alcalino Red Solúvel",ref:"Fralia",src:"Usuário",kcal:438.0,cho:82.0,act:58.0,acad:57.0,ptn:7.7,gt:5.4,gs:3.2,tr:0.0,fi:15.0,na:160.0},{n:"Cacau em pó Alcalino Red Imperial",ref:"Fralia",src:"Usuário",kcal:228.0,cho:58.0,act:58.0,acad:57.0,ptn:7.7,gt:5.4,gs:3.2,tr:0.0,fi:15.0,na:160.0},{n:"Chocolate em pó 32%",ref:"Fralia",src:"Usuário",kcal:398.0,cho:87.0,act:72.0,acad:71.0,ptn:4.8,gt:3.4,gs:2.0,tr:0.0,fi:9.1,na:175.0},{n:"Cacau em pó alcalino solúvel 100%",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Cacau em pó alcalino gold",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Cacau em pó natural 8%",ref:"Fralia",src:"Usuário",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0},{n:"Pó à base de óleo de canola",ref:"Alibra",src:"Usuário",kcal:741.0,cho:18.0,act:4.1,acad:4.1,ptn:7.6,gt:71.0,gs:6.0,tr:0.0,fi:0.0,na:278.0},{n:"Pó à base de óleo de Girassol",ref:"Alibra",src:"Usuário",kcal:739.0,cho:18.0,act:4.1,acad:4.1,ptn:7.0,gt:71.0,gs:7.5,tr:0.0,fi:0.0,na:308.0},{n:"Pó à base de óleo de Soja",ref:"Alibra",src:"Usuário",kcal:739.0,cho:18.0,act:4.1,acad:4.1,ptn:7.0,gt:71.0,gs:12.0,tr:0.0,fi:0.0,na:308.0},{n:"Pó à base de óleo de Palma",ref:"Alibra",src:"Usuário",kcal:755.0,cho:18.0,act:3.2,acad:3.2,ptn:4.2,gt:74.0,gs:37.0,tr:0.4,fi:0.0,na:318.0},{n:"Composto Lacteo com LM267",ref:"Alibra",src:"Usuário",rotulo:"Composto Lácteo com Gordura Vegetal (soro de leite concentrado, gordura vegetal, xarope de glicose, massa coalhada de soro de leite, concentrado proteico de soro de leite em pó, açúcar, leite em pó integral, estabilizante hidrogenofosfato de di-sódio, emulsificante mono e diglicerídeos de ácidos graxos, regulador de acidez hidróxido de cálcio e aromatizante)",kcal:496.0,cho:56.0,act:43.0,acad:4.6,ptn:9.4,gt:26.0,gs:14.0,tr:0.5,fi:0.0,na:493.0},{n:"Caseinato de Cálcio",ref:"Alibra",src:"Usuário",kcal:367.0,cho:0.6,act:0.0,acad:0.0,ptn:89.0,gt:1.0,gs:0.6,tr:0.0,fi:0.0,na:70.0},{n:"Polidextrose — Fibra Solúvel (ADC 1119/1097)",ref:"Adicel (ET rev.01 21/07/2023)",src:"FT",kcal:204.0,cho:98.0,act:0.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:86.4,na:0.0},{n:"Aroma ID Natural Chocolate Branco (ADC 1784/1810)",ref:"Adicel (ET rev.01 04/02/2025)",src:"FT",kcal:355.0,cho:77.0,act:2.32,acad:2.32,ptn:0.0,gt:0.14,gs:0.09,tr:0.0,fi:0.49,na:39.72},{n:"Banana Liofilizada em pó",ref:"Liomeal",src:"Usuário",kcal:368.0,cho:88.0,act:81.0,acad:0.0,ptn:5.3,gt:0.8,gs:0.3,tr:0.0,fi:6.9,na:0.0},{n:"Maçã em pó",ref:"Ingredientes ONLINE",src:"Usuário",kcal:296.0,cho:74.0,act:66.0,acad:0.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:21.0,na:0.0},{n:"Aveia em pó",ref:"Cerealsita Express",src:"Usuário",kcal:342.0,cho:54.0,act:0.0,acad:0.0,ptn:15.2,gt:7.0,gs:0.0,tr:0.0,fi:9.8,na:18.0},{n:"Cenoura crua",ref:"Tucunduva",src:"Usuário",kcal:43.0,cho:10.1,act:1.0,acad:1.0,ptn:1.04,gt:0.19,gs:0.03,tr:0.0,fi:2.6,na:35.0},{n:"Chocolate em pó",ref:"Nestlé",src:"Usuário",kcal:350.0,cho:60.0,act:5.0,acad:5.0,ptn:11.5,gt:7.5,gs:4.5,tr:0.0,fi:14.5,na:0.0},{n:"Chocolate em pó",ref:"Mavalério",src:"Usuário",kcal:335.0,cho:75.0,act:5.0,acad:5.0,ptn:7.5,gt:3.5,gs:2.0,tr:0.0,fi:10.0,na:15.0},{n:"Choco Power Ball",ref:"Mavalério",src:"Usuário",kcal:488.0,cho:60.3333,act:3.3333,acad:3.3333,ptn:6.6667,gt:24.3333,gs:22.6667,tr:0.0,fi:2.0,na:63.3333},{n:"Clara de ovo de galinha",ref:"Tucunduva",src:"Usuário",kcal:50.0,cho:1.04,act:1.0,acad:1.0,ptn:10.5,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:164.0},{n:"Cobertura sabor chocolate branco (barra)",ref:"Garoto",src:"Usuário",kcal:540.0,cho:58.0,act:4.0,acad:4.0,ptn:6.4,gt:32.8,gs:20.4,tr:0.0,fi:0.0,na:100.4},{n:"Cobertura sabor chocolate 1/2 amargo (barra)",ref:"Garoto",src:"Usuário",kcal:496.0,cho:61.6,act:4.0,acad:4.0,ptn:4.4,gt:31.6,gs:19.2,tr:0.0,fi:7.6,na:0.0},{n:"Cobertura sabor chocolate branco (barra)",ref:"Harald",src:"Usuário",kcal:576.0,cho:64.0,act:4.0,acad:4.0,ptn:1.6,gt:35.6,gs:18.4,tr:10.4,fi:0.0,na:38.0},{n:"Cobertura sabor chocolate 1/2 amargo (barra)",ref:"Harald",src:"Usuário",kcal:568.0,cho:60.0,act:4.0,acad:4.0,ptn:2.4,gt:35.2,gs:12.4,tr:13.2,fi:3.6,na:0.0},{n:"Coco ralado desidratado fino",ref:"Extra Coco",src:"Usuário",kcal:616.6667,cho:22.5,act:8.3333,acad:8.3333,ptn:6.6667,gt:55.0,gs:48.3333,tr:0.0,fi:10.0,na:0.0},{n:"Coco ralado fresco",ref:"FrutCoco",src:"Usuário",kcal:366.6667,cho:0.0,act:8.3333,acad:8.3333,ptn:0.0,gt:38.3333,gs:36.6667,tr:0.0,fi:10.0,na:0.0},{n:"Coco ralado fresco (T)",ref:"Tucunduva",src:"Usuário",kcal:354.0,cho:15.2,act:1.0,acad:1.0,ptn:3.34,gt:33.5,gs:29.7,tr:0.0,fi:9.4,na:20.0},{n:"Contra File",ref:"TACO",src:"Usuário",kcal:239.0,cho:0.0,act:1.0,acad:1.0,ptn:35.1,gt:10.0,gs:4.63,tr:0.0,fi:0.0,na:82.8},{n:"Couscous Marroquino",ref:"-",src:"Usuário",kcal:349.0,cho:69.9,act:1.0,acad:1.0,ptn:12.0,gt:1.6,gs:0.0,tr:0.0,fi:3.9,na:0.2},{n:"Couve Flor",ref:"TACO",src:"Usuário",kcal:18.0,cho:2.5714,act:1.4286,acad:1.4286,ptn:1.8571,gt:0.1429,gs:0.0,tr:0.0,fi:2.2857,na:24.0},{n:"Couve",ref:"TACO",src:"Usuário",kcal:27.0,cho:4.3,act:1.0,acad:1.0,ptn:2.9,gt:0.5,gs:0.0,tr:0.0,fi:3.1,na:6.0},{n:"Coxão Mole",ref:"TACO",src:"Usuário",kcal:146.0,cho:0.0,act:1.0,acad:1.0,ptn:21.0,gt:6.1,gs:2.0,tr:0.0,fi:0.0,na:132.0},{n:"Cream cheese light",ref:"Polenghi",src:"Usuário",kcal:193.3333,cho:2.3333,act:3.3333,acad:3.3333,ptn:4.3333,gt:18.3333,gs:11.3333,tr:0.0,fi:0.0,na:186.6667},{n:"Creme de avelã com cacau",ref:"Sweet company",src:"Usuário",kcal:520.0,cho:55.0,act:5.0,acad:5.0,ptn:55.0,gt:30.0,gs:10.0,tr:0.0,fi:4.0,na:32.5},{n:"Creme de ricota",ref:"Polenghi",src:"Usuário",kcal:206.6667,cho:2.3333,act:3.3333,acad:3.3333,ptn:9.3333,gt:17.6667,gs:11.0,tr:0.0,fi:0.0,na:346.6667},{n:"Creme de ricota light",ref:"Polenghi",src:"Usuário",kcal:146.6667,cho:4.0,act:3.3333,acad:3.3333,ptn:12.3333,gt:9.0,gs:5.6667,tr:0.0,fi:0.0,na:346.6667},{n:"Cremfil Classic Baunilha (cobertura pronta)",ref:"Puratos",src:"Usuário",kcal:270.0,cho:60.0,act:5.0,acad:5.0,ptn:0.0,gt:3.5,gs:1.5,tr:0.0,fi:0.0,na:115.0},{n:"Cremfil Classic Chocolate (cobertura pronta)",ref:"Puratos",src:"Usuário",kcal:255.0,cho:60.0,act:5.0,acad:5.0,ptn:0.0,gt:1.0,gs:0.0,tr:0.0,fi:0.0,na:105.0},{n:"Creme de leite",ref:"Nestlé",src:"Usuário",kcal:253.3333,cho:0.0,act:6.6667,acad:6.6667,ptn:0.0,gt:25.3333,gs:22.6667,tr:0.0,fi:0.0,na:40.0},{n:"Creme culinário",ref:"Vigor",src:"Usuário",kcal:253.3333,cho:4.0,act:6.6667,acad:6.6667,ptn:2.6667,gt:25.3333,gs:7.3333,tr:8.0,fi:0.0,na:53.3333},{n:"Champignon",ref:"-",src:"Usuário",kcal:18.0,cho:1.8,act:2.0,acad:2.0,ptn:2.2,gt:0.0,gs:0.0,tr:0.0,fi:2.6,na:696.0},{n:"Doce de leite",ref:"Provincia",src:"Usuário",kcal:325.0,cho:65.0,act:5.0,acad:5.0,ptn:0.0,gt:5.5,gs:4.0,tr:0.0,fi:0.0,na:50.0},{n:"Ervilha em conserva",ref:"Quero",src:"Usuário",kcal:74.0,cho:13.4,act:1.0,acad:1.0,ptn:4.6,gt:0.4,gs:0.1,tr:0.0,fi:5.1,na:372.0},{n:"Espagueti",ref:"Barilla",src:"Usuário",kcal:350.0,cho:72.5,act:1.25,acad:1.25,ptn:11.5,gt:1.5,gs:0.25,tr:0.0,fi:3.0,na:0.0},{n:"Espinafre cru",ref:"TACO",src:"Usuário",kcal:16.0,cho:3.0,act:1.0,acad:1.0,ptn:2.0,gt:0.0,gs:0.0,tr:0.0,fi:2.1,na:6.0},{n:"Extrato de Tomate",ref:"Knor",src:"Usuário",kcal:66.6667,cho:14.0,act:3.3333,acad:3.3333,ptn:3.0,gt:0.0,gs:0.0,tr:0.0,fi:3.0,na:433.3333},{n:"Farinha de trigo",ref:"-",src:"Usuário",kcal:350.0,cho:72.0,act:2.0,acad:2.0,ptn:10.0,gt:1.4,gs:0.0,tr:0.0,fi:2.8,na:0.0},{n:"Farinha de trigo integral",ref:"Dona Benta",src:"Usuário",kcal:338.0,cho:68.0,act:2.0,acad:2.0,ptn:12.0,gt:2.0,gs:0.0,tr:0.0,fi:12.0,na:0.0},{n:"Feijão Preto",ref:"-",src:"Usuário",kcal:266.6667,cho:43.3333,act:3.3333,acad:3.3333,ptn:16.6667,gt:0.0,gs:0.0,tr:0.0,fi:20.0,na:0.0},{n:"Feijão",ref:"Broto Legal",src:"Usuário",kcal:266.6667,cho:43.3333,act:3.3333,acad:3.3333,ptn:16.6667,gt:0.0,gs:0.0,tr:0.0,fi:16.6667,na:0.0},{n:"Fermento em pó químico",ref:"Fleischmann",src:"Usuário",kcal:127.0,cho:31.0,act:1.0,acad:1.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:15500.0},{n:"Fermento biológico fresco",ref:"Fleischmann",src:"Usuário",kcal:104.0,cho:8.0,act:1.0,acad:1.0,ptn:14.5,gt:1.5,gs:0.3,tr:0.0,fi:4.5,na:17.0},{n:"Filé mignon",ref:"TACO",src:"Usuário",kcal:143.0,cho:0.0,act:1.0,acad:1.0,ptn:21.6,gt:5.6,gs:2.9,tr:0.0,fi:0.0,na:49.0},{n:"Frutas cristalizadas",ref:"Gianoni e Cia",src:"Usuário",kcal:293.3333,cho:73.3333,act:3.3333,acad:3.3333,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:126.6667},{n:"Farinha de Milho",ref:"Solar",src:"Usuário",kcal:358.0,cho:79.0,act:0.0,acad:0.0,ptn:7.2,gt:1.5,gs:0.4,tr:0.0,fi:5.5,na:45.0},{n:"Funghi Secci",ref:"2 imãos",src:"Usuário",kcal:300.0,cho:75.0,act:10.0,acad:10.0,ptn:10.0,gt:0.0,gs:0.0,tr:0.0,fi:12.0,na:0.0},{n:"Gelatina sem sabor",ref:"Oetker",src:"Usuário",kcal:344.8276,cho:0.0,act:34.4828,acad:34.4828,ptn:82.7586,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Geléia de brilho chocolate (Harmony Cold)",ref:"Puratos",src:"Usuário",kcal:282.0,cho:60.0,act:1.0,acad:1.0,ptn:1.3,gt:0.6,gs:0.4,tr:0.0,fi:1.7,na:39.0},{n:"Geléia de brilho neutra (Harmony Cold)",ref:"Puratos",src:"Usuário",kcal:286.0,cho:63.0,act:1.0,acad:1.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:34.0},{n:"Gema de ovo de galinha",ref:"Tucunduva",src:"Usuário",kcal:358.0,cho:1.79,act:1.0,acad:1.0,ptn:16.8,gt:30.9,gs:9.55,tr:0.0,fi:0.0,na:43.0},{n:"Gema de ovo pasteurizada",ref:"Fleischmann",src:"Usuário",kcal:303.0,cho:1.1,act:1.0,acad:1.0,ptn:15.5,gt:25.6,gs:7.8,tr:0.0,fi:0.0,na:67.0},{n:"Glutamato monossódico",ref:"Ajinomoto",src:"Usuário",kcal:0.0,cho:0.0,act:100.0,acad:100.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:12300.0},{n:"Goiabada",ref:"Predilecta",src:"Usuário",kcal:337.5,cho:80.0,act:2.5,acad:2.5,ptn:0.0,gt:2.0,gs:0.75,tr:0.0,fi:4.0,na:25.0},{n:"Gordura Vegetal Hidrogenada Mesa",ref:"Mesa",src:"Usuário",kcal:100.0,cho:3.5556,act:0.1111,acad:0.1111,ptn:0.0,gt:11.1111,gs:2.4444,tr:2.7778,fi:0.0,na:0.0},{n:"Gotas de chocolate branco",ref:"Arcor",src:"Usuário",kcal:543.0,cho:57.0,act:1.0,acad:1.0,ptn:9.0,gt:31.0,gs:18.0,tr:0.2,fi:0.0,na:131.0},{n:"Gotas de chocolate ao leite",ref:"Arcor",src:"Usuário",kcal:492.0,cho:68.0,act:4.0,acad:4.0,ptn:2.0,gt:27.6,gs:16.4,tr:0.0,fi:0.0,na:0.0},{n:"Gradina Panetone",ref:"Gradina",src:"Usuário",kcal:430.0,cho:66.6667,act:3.3333,acad:3.3333,ptn:5.6667,gt:16.0,gs:6.6667,tr:0.0,fi:2.3333,na:486.6667},{n:"Granulado",ref:"Mavalério",src:"Usuário",kcal:476.0,cho:78.0,act:4.0,acad:4.0,ptn:0.8,gt:18.0,gs:6.0,tr:6.8,fi:1.6,na:19.2},{n:"Iogurte Natural",ref:"Batavo",src:"Usuário",kcal:74.1176,cho:5.3529,act:0.5882,acad:0.5882,ptn:4.0,gt:4.1176,gs:2.5882,tr:0.0,fi:0.0,na:57.0588},{n:"Kamix",ref:"-",src:"Usuário",kcal:266.0,cho:0.99,act:1.0,acad:1.0,ptn:0.0,gt:22.0,gs:4.0,tr:0.0,fi:0.0,na:1.6},{n:"Leite Desnatado",ref:"TACO",src:"Usuário",kcal:30.5,cho:4.65,act:0.5,acad:0.5,ptn:3.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:65.0},{n:"Leite em pó",ref:"Serra Branca",src:"Usuário",kcal:411.5385,cho:73.0769,act:3.8462,acad:3.8462,ptn:5.7692,gt:15.3846,gs:5.7692,tr:5.0,fi:0.0,na:365.3846},{n:"Leite de coco",ref:"Sergipe",src:"Usuário",kcal:12.0,cho:0.1,act:0.5,acad:0.5,ptn:0.0,gt:1.25,gs:1.0,tr:0.0,fi:0.0,na:0.0},{n:"Leite Condensado Da Provincia",ref:"Provincia",src:"Usuário",kcal:325.0,cho:55.0,act:5.0,acad:5.0,ptn:8.0,gt:9.5,gs:5.5,tr:0.0,fi:0.0,na:100.0},{n:"Leite Condensado",ref:"TACO",src:"Usuário",kcal:313.0,cho:57.0,act:1.0,acad:1.0,ptn:7.7,gt:6.7,gs:4.2,tr:0.0,fi:0.0,na:94.0},{n:"Leite Condensado Ligth Moça",ref:"Nestlé",src:"Usuário",kcal:275.0,cho:60.0,act:5.0,acad:5.0,ptn:9.5,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:170.0},{n:"Leite desnatado",ref:"Long",src:"Usuário",kcal:31.5,cho:4.7,act:0.5,acad:0.5,ptn:3.15,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:71.5},{n:"Leite integral",ref:"Long",src:"Usuário",kcal:58.0,cho:4.7,act:0.5,acad:0.5,ptn:2.95,gt:3.05,gs:1.6,tr:0.0,fi:0.0,na:72.5},{n:"Leite pasteurizado integral Top Batavo",ref:"Batavo",src:"Usuário",kcal:62.5,cho:4.8,act:0.5,acad:0.5,ptn:3.25,gt:3.35,gs:2.2,tr:0.0,fi:0.0,na:41.0},{n:"Leite semi desnatado",ref:"Elege",src:"Usuário",kcal:39.0,cho:4.5,act:0.5,acad:0.5,ptn:3.0,gt:1.0,gs:0.6,tr:0.0,fi:0.0,na:65.0},{n:"Leite pasteurizado tipo C",ref:"Paulista",src:"Usuário",kcal:60.5,cho:4.95,act:0.5,acad:0.5,ptn:3.25,gt:3.1,gs:2.0,tr:0.0,fi:0.0,na:44.0},{n:"Lentilha",ref:"Yoki",src:"Usuário",kcal:348.3333,cho:58.3333,act:1.6667,acad:1.6667,ptn:28.3333,gt:1.0,gs:0.0,tr:0.0,fi:3.0,na:170.0},{n:"Limão (suco)",ref:"Tucunduva",src:"Usuário",kcal:25.0,cho:8.64,act:1.0,acad:1.0,ptn:0.38,gt:0.13,gs:0.04,tr:0.0,fi:0.4,na:1.0},{n:"Linhaça",ref:"-",src:"Usuário",kcal:500.0,cho:28.6667,act:6.6667,acad:6.6667,ptn:19.3333,gt:34.0,gs:0.0,tr:0.0,fi:28.0,na:0.0},{n:"Lingüiça calabresa",ref:"Sadia",src:"Usuário",kcal:308.0,cho:0.0,act:2.0,acad:2.0,ptn:14.0,gt:28.0,gs:7.0,tr:0.0,fi:0.0,na:1200.0},{n:"Lombo salgado",ref:"-",src:"Usuário",kcal:137.7778,cho:0.0,act:1.1111,acad:1.1111,ptn:21.1111,gt:5.5556,gs:2.0,tr:0.0,fi:0.0,na:3993.3333},{n:"Macarrão penne com ovos",ref:"-",src:"Usuário",kcal:347.5,cho:72.5,act:1.25,acad:1.25,ptn:11.25,gt:1.375,gs:0.625,tr:0.0,fi:25.0,na:2.75},{n:"Macarrão de arroz Urbano",ref:"Urbano",src:"Usuário",kcal:363.75,cho:80.0,act:1.25,acad:1.25,ptn:7.0,gt:1.75,gs:0.625,tr:0.0,fi:0.875,na:0.0},{n:"Mandioquinha crua",ref:"TACO",src:"Usuário",kcal:102.0,cho:24.0,act:2.0,acad:2.0,ptn:1.8,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Maracujá",ref:"TACO",src:"Usuário",kcal:68.0,cho:13.3,act:1.0,acad:1.0,ptn:2.0,gt:2.1,gs:0.0,tr:0.0,fi:1.1,na:2.0},{n:"Maionese",ref:"Soya",src:"Usuário",kcal:170.0,cho:8.8,act:1.0,acad:1.0,ptn:0.0,gt:15.0,gs:2.6,tr:0.0,fi:0.0,na:877.0},{n:"Manteiga sem sal",ref:"Tirolez",src:"Usuário",kcal:810.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:90.0,gs:50.0,tr:3.0,fi:0.0,na:400.0},{n:"Margarina bolo",ref:"Gradina",src:"Usuário",kcal:730.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:43.0,tr:0.0,fi:0.0,na:320.0},{n:"Margarina para folhados",ref:"Bunge",src:"Usuário",kcal:730.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:30.0,tr:7.0,fi:0.0,na:750.0},{n:"Margarina uso geral",ref:"Amélia",src:"Usuário",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:18.0,tr:20.0,fi:0.0,na:0.0},{n:"Margarina Qualy sem sal",ref:"Qualy",src:"Usuário",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:23.0,tr:0.0,fi:0.0,na:0.0},{n:"Margarina Qualy COM sal",ref:"Qualy",src:"Usuário",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:23.0,tr:0.0,fi:0.0,na:600.0},{n:"Massa verde de lasanha",ref:"Familia",src:"Usuário",kcal:125.0,cho:25.0,act:1.0,acad:1.0,ptn:4.0,gt:1.0,gs:0.0,tr:0.0,fi:1.0,na:10.0},{n:"Milho verde cru",ref:"TACO",src:"Usuário",kcal:138.0,cho:28.6,act:1.0,acad:1.0,ptn:6.6,gt:0.6,gs:0.0,tr:0.0,fi:3.9,na:1.0},{n:"Milho verde",ref:"Quero",src:"Usuário",kcal:99.2308,cho:19.2308,act:0.7692,acad:0.7692,ptn:3.2308,gt:1.1538,gs:0.0,tr:0.0,fi:2.0769,na:466.1538},{n:"Mussarela Light",ref:"Tirolez",src:"Usuário",kcal:290.0,cho:0.0,act:3.3333,acad:3.3333,ptn:28.0,gt:19.0,gs:12.0,tr:0.0,fi:0.0,na:520.0},{n:"Mussarela  Tirolez",ref:"Tirolez",src:"Usuário",kcal:353.3333,cho:0.0,act:3.3333,acad:3.3333,ptn:25.0,gt:28.0,gs:17.3333,tr:0.0,fi:0.0,na:566.6667},{n:"Mistura para bolos e muffins de chocolate",ref:"Puratos",src:"Usuário",kcal:378.125,cho:71.875,act:3.125,acad:3.125,ptn:6.875,gt:6.875,gs:0.625,tr:0.0,fi:4.0625,na:625.0},{n:"Mistura para creme de confeiteiro",ref:"Puratos",src:"Usuário",kcal:385.0,cho:95.0,act:5.0,acad:5.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Morango",ref:"TACO",src:"Usuário",kcal:30.0,cho:6.8,act:1.0,acad:1.0,ptn:0.9,gt:0.3,gs:0.0,tr:0.0,fi:1.7,na:0.0},{n:"Mostarda",ref:"Hellmans",src:"Usuário",kcal:225.0,cho:12.5,act:8.3333,acad:8.3333,ptn:0.0,gt:0.0,gs:3.3333,tr:0.0,fi:8.3333,na:625.0},{n:"Mostarda Folha",ref:"TACO",src:"Usuário",kcal:18.0,cho:3.2,act:1.0,acad:1.0,ptn:2.1,gt:0.2,gs:0.0,tr:0.0,fi:1.9,na:3.0},{n:"Molho de tomate",ref:"-",src:"Usuário",kcal:50.0,cho:9.6667,act:1.6667,acad:1.6667,ptn:1.0,gt:0.0,gs:0.0,tr:0.0,fi:1.1667,na:518.3333},{n:"Molho Ingles",ref:"Kenji",src:"Usuário",kcal:36.3636,cho:10.0,act:9.0909,acad:9.0909,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:2490.9091},{n:"Nozes",ref:"TACO",src:"Usuário",kcal:620.0,cho:18.4,act:1.0,acad:1.0,ptn:14.0,gt:59.4,gs:0.0,tr:0.0,fi:7.2,na:5.0},{n:"Oleo de soja",ref:"SOYA",src:"Usuário",kcal:830.7692,cho:0.0,act:7.6923,acad:7.6923,ptn:0.0,gt:92.3077,gs:16.1538,tr:0.0,fi:0.0,na:0.0},{n:"Orégano",ref:"Lince",src:"Usuário",kcal:400.0,cho:60.0,act:100.0,acad:100.0,ptn:10.0,gt:10.0,gs:0.0,tr:0.0,fi:40.0,na:20.0},{n:"Ovo",ref:"Tucunduva",src:"Usuário",kcal:149.0,cho:1.23,act:1.0,acad:1.0,ptn:12.5,gt:10.0,gs:3.1,tr:0.0,fi:0.0,na:126.0},{n:"Ovo pasteurizado",ref:"Fleischmann",src:"Usuário",kcal:148.0,cho:1.05,act:1.0,acad:1.0,ptn:11.95,gt:10.2,gs:3.15,tr:0.0,fi:0.0,na:133.0},{n:"Palmito",ref:"-",src:"Usuário",kcal:30.0,cho:3.8,act:2.0,acad:2.0,ptn:2.8,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:750.0},{n:"Pamix (pré mistura para panetone)",ref:"Puratos",src:"Usuário",kcal:616.0,cho:53.0,act:1.0,acad:1.0,ptn:0.8,gt:43.0,gs:14.0,tr:13.0,fi:0.5,na:154.0},{n:"Pão Sírio",ref:"Pita Bread",src:"Usuário",kcal:278.0,cho:58.0,act:2.0,acad:2.0,ptn:9.0,gt:1.4,gs:0.0,tr:0.0,fi:2.6,na:440.0},{n:"Patinho bovino",ref:"TACO",src:"Usuário",kcal:150.0,cho:0.0,act:1.0,acad:1.0,ptn:21.0,gt:6.0,gs:2.0,tr:0.0,fi:0.0,na:130.0},{n:"Peito de peru light",ref:"Perdigão",src:"Usuário",kcal:120.0,cho:2.0,act:2.0,acad:2.0,ptn:22.0,gt:2.0,gs:0.0,tr:0.0,fi:2.0,na:720.0},{n:"Peito de frango",ref:"TACO",src:"Usuário",kcal:101.0,cho:0.0,act:1.0,acad:1.0,ptn:23.0,gt:1.0,gs:0.0,tr:0.0,fi:0.0,na:56.0},{n:"Pimentão verde",ref:"Tucunduva",src:"Usuário",kcal:27.0,cho:6.44,act:1.0,acad:1.0,ptn:0.89,gt:0.19,gs:0.03,tr:0.0,fi:1.73,na:2.0},{n:"Polvilho azedo",ref:"Yoki",src:"Usuário",kcal:345.0,cho:85.0,act:5.0,acad:5.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:28.0},{n:"Presunto cozido s/ capa",ref:"Sadia",src:"Usuário",kcal:92.5,cho:0.0,act:2.5,acad:2.5,ptn:15.0,gt:3.25,gs:1.0,tr:0.0,fi:0.0,na:1037.5},{n:"Pré mistura para bolo capuccino",ref:"Festpan",src:"Usuário",kcal:424.0,cho:76.0,act:4.0,acad:4.0,ptn:3.2,gt:12.0,gs:3.2,tr:3.6,fi:0.0,na:80.0},{n:"Pré mistura para bolo pé de moleque",ref:"Festpan",src:"Usuário",kcal:456.0,cho:68.0,act:4.0,acad:4.0,ptn:4.4,gt:19.2,gs:4.4,tr:4.4,fi:2.0,na:92.0},{n:"Pré mistura para bolo de coco",ref:"Festpan",src:"Usuário",kcal:416.0,cho:88.0,act:4.0,acad:4.0,ptn:3.2,gt:11.2,gs:3.2,tr:3.2,fi:0.0,na:76.0},{n:"Pré mistura para brownie",ref:"Festpan",src:"Usuário",kcal:440.0,cho:72.0,act:4.0,acad:4.0,ptn:4.0,gt:16.0,gs:4.4,tr:4.4,fi:2.4,na:88.0},{n:"Pré mistura para brioche",ref:"Emulzint",src:"Usuário",kcal:381.0,cho:73.0,act:1.0,acad:1.0,ptn:8.6,gt:6.0,gs:0.0,tr:0.0,fi:2.3,na:599.0},{n:"Pré mistura para panetone Tegral Soft´r",ref:"Puratos",src:"Usuário",kcal:441.0,cho:68.0,act:1.0,acad:1.0,ptn:7.3,gt:15.0,gs:3.8,tr:3.6,fi:1.7,na:344.0},{n:"Pré mistura para pão de fibras",ref:"Puratos",src:"Usuário",kcal:330.0,cho:64.0,act:1.0,acad:1.0,ptn:14.0,gt:1.5,gs:0.0,tr:0.0,fi:8.0,na:790.0},{n:"Pré mistura para pão macio de chocolate",ref:"Puratos",src:"Usuário",kcal:396.0,cho:74.0,act:2.0,acad:2.0,ptn:9.2,gt:5.8,gs:1.2,tr:0.0,fi:2.8,na:400.0},{n:"Pré mistura para pão de batata",ref:"Bonasse",src:"Usuário",kcal:340.0,cho:72.0,act:1.0,acad:1.0,ptn:8.0,gt:6.1,gs:1.6,tr:1.6,fi:2.0,na:590.0},{n:"Pré mistura para pão vitaminado",ref:"Puratos",src:"Usuário",kcal:375.0,cho:69.0,act:1.0,acad:1.0,ptn:7.9,gt:7.5,gs:3.5,tr:0.0,fi:2.3,na:0.0},{n:"Pré mistura Tegral pão macio",ref:"Puratos",src:"Usuário",kcal:388.0,cho:73.0,act:1.0,acad:1.0,ptn:8.8,gt:6.0,gs:1.3,tr:1.5,fi:2.3,na:575.0},{n:"Proteina de soja",ref:"-",src:"Usuário",kcal:288.0,cho:20.0,act:2.0,acad:2.0,ptn:52.0,gt:0.0,gs:0.0,tr:0.0,fi:14.0,na:15.0},{n:"Queijo cremoso",ref:"Alouette",src:"Usuário",kcal:330.0,cho:9.0,act:3.3333,acad:3.3333,ptn:6.6667,gt:29.6667,gs:18.6667,tr:1.3333,fi:0.0,na:350.0},{n:"Queijo minas frescal",ref:"Balks",src:"Usuário",kcal:250.0,cho:2.6667,act:3.3333,acad:3.3333,ptn:17.0,gt:19.0,gs:12.0,tr:0.0,fi:0.0,na:266.6667},{n:"Queijo mussarela",ref:"Tirolez",src:"Usuário",kcal:316.6667,cho:0.0,act:3.3333,acad:3.3333,ptn:23.3333,gt:26.6667,gs:13.3333,tr:0.0,fi:0.0,na:536.6667},{n:"Queijo parmesão",ref:"Três Marias",src:"Usuário",kcal:373.3333,cho:0.0,act:3.3333,acad:3.3333,ptn:31.6667,gt:27.0,gs:16.6667,tr:0.0,fi:3.3333,na:653.3333},{n:"Queijo prato Scala",ref:"Tirolez",src:"Usuário",kcal:333.3333,cho:0.0,act:3.3333,acad:3.3333,ptn:24.0,gt:28.0,gs:17.0,tr:1.0,fi:0.0,na:793.3333},{n:"Queijo provolone",ref:"Tirolez",src:"Usuário",kcal:346.6667,cho:0.0,act:3.3333,acad:3.3333,ptn:26.6667,gt:26.6667,gs:20.0,tr:0.0,fi:0.0,na:870.0},{n:"Requeijão cremoso",ref:"Elege",src:"Usuário",kcal:260.0,cho:3.3333,act:3.3333,acad:3.3333,ptn:10.0,gt:23.0,gs:16.3333,tr:0.0,fi:0.0,na:366.6667},{n:"Ricota",ref:"TACO",src:"Usuário",kcal:140.0,cho:3.8,act:1.0,acad:1.0,ptn:12.6,gt:8.1,gs:4.9,tr:0.0,fi:0.0,na:283.0},{n:"Ponta de agulha",ref:"Wikipedia",src:"Usuário",kcal:218.7,cho:1.15,act:1.0,acad:1.0,ptn:21.43,gt:14.26,gs:6.28,tr:0.0,fi:0.0,na:63.12},{n:"Sal Lebre",ref:"Lebre",src:"Usuário",kcal:0.0,cho:0.0,act:100.0,acad:100.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:39000.0},{n:"Salmão cru",ref:"Tucunduva",src:"Usuário",kcal:116.0,cho:0.0,act:1.0,acad:1.0,ptn:19.9,gt:3.46,gs:0.56,tr:0.0,fi:0.0,na:67.0},{n:"Salsinha",ref:"Tucunduva",src:"Usuário",kcal:36.0,cho:6.34,act:1.0,acad:1.0,ptn:2.98,gt:0.79,gs:0.13,tr:0.0,fi:4.1,na:56.0},{n:"Satin creme cake neutro",ref:"Puratos",src:"Usuário",kcal:380.0,cho:44.0,act:2.0,acad:2.0,ptn:6.0,gt:20.0,gs:3.0,tr:0.0,fi:2.0,na:280.0},{n:"Semente de girassol",ref:"Jasmine",src:"Usuário",kcal:667.5,cho:20.0,act:2.5,acad:2.5,ptn:17.0,gt:57.5,gs:6.0,tr:0.0,fi:11.25,na:395.0},{n:"Shimeji",ref:"2 imãos",src:"Usuário",kcal:26.0,cho:3.4,act:2.0,acad:2.0,ptn:5.0,gt:0.0,gs:0.0,tr:0.0,fi:2.4,na:26.0},{n:"Shitake",ref:"2 imãos",src:"Usuário",kcal:38.0,cho:5.6,act:2.0,acad:2.0,ptn:3.6,gt:0.0,gs:0.0,tr:0.0,fi:0.4,na:36.0},{n:"Shoyu Sakura tradicional",ref:"Sakura",src:"Usuário",kcal:60.0,cho:12.0,act:6.6667,acad:6.6667,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:5700.0},{n:"Sobrecoxa de frango",ref:"TACO",src:"Usuário",kcal:194.0,cho:0.0,act:1.0,acad:1.0,ptn:17.0,gt:14.0,gs:3.5,tr:0.0,fi:0.0,na:82.0},{n:"Suco concentrado de goiaba",ref:"Qualitá",src:"Usuário",kcal:24.0,cho:5.0,act:2.0,acad:2.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:2.6,na:0.0},{n:"Suco concentrado de maracujá",ref:"Qualitá",src:"Usuário",kcal:68.1818,cho:13.6364,act:4.5455,acad:4.5455,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0},{n:"Suco de laranja sem açúcar",ref:"Tucunduva",src:"Usuário",kcal:45.0,cho:10.41,act:1.0,acad:1.0,ptn:0.7,gt:0.2,gs:0.02,tr:0.0,fi:0.2,na:1.0},{n:"Suco de limão",ref:"TACO",src:"Usuário",kcal:35.0,cho:5.4,act:1.0,acad:1.0,ptn:0.35,gt:0.1,gs:0.02,tr:0.0,fi:0.1,na:0.5},{n:"Tomate salada",ref:"Tucunduva",src:"Usuário",kcal:21.0,cho:5.1,act:1.0,acad:1.0,ptn:0.8,gt:0.0,gs:0.0,tr:0.0,fi:2.3,na:5.0},{n:"Tomate seco",ref:"Arco Bello",src:"Usuário",kcal:145.0,cho:19.75,act:2.5,acad:2.5,ptn:6.5,gt:4.5,gs:0.0,tr:0.0,fi:5.25,na:500.0},{n:"Trigo em grão",ref:"-",src:"Usuário",kcal:331.1111,cho:71.1111,act:2.2222,acad:2.2222,ptn:15.5556,gt:1.7778,gs:0.0,tr:0.0,fi:8.6667,na:93.3333},{n:"Uva Passa",ref:"Prume",src:"Usuário",kcal:300.0,cho:80.0,act:3.3333,acad:3.3333,ptn:3.3333,gt:0.0,gs:0.0,tr:0.0,fi:4.0,na:0.0},{n:"Vagem",ref:"TACO",src:"Usuário",kcal:25.0,cho:5.2,act:1.0,acad:1.0,ptn:1.8,gt:0.2,gs:0.0,tr:0.0,fi:2.4,na:0.0},{n:"Xerém de caju",ref:"Lince",src:"Usuário",kcal:580.0,cho:0.0,act:10.0,acad:10.0,ptn:20.0,gt:20.0,gs:0.0,tr:0.0,fi:0.0,na:0.0}
 
 ];
 
 // ────────────────────────────────────────────────────────────────────────────
-// STATE
+// STATE & STORAGE
 // ────────────────────────────────────────────────────────────────────────────
 let receita = [];
 let currentStep = 1;
@@ -455,30 +882,682 @@ function vdp(v,d){return Math.round(v/d*100);}
 // ────────────────────────────────────────────────────────────────────────────
 // WIZARD NAVIGATION
 // ────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
+// PRODUTOS — STORAGE
+// ────────────────────────────────────────────────────────────────────────────
+// ── CONFIGURAÇÃO SUPABASE ─────────────────────────────────────────────────────
+const CFG_KEY = 'gmf_supabase_config';
+function _getSupabaseCfg() {
+  try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch(e) { return {}; }
+}
+const _cfg = _getSupabaseCfg();
+const _sb = (_cfg.url && _cfg.key)
+  ? window.supabase.createClient(_cfg.url, _cfg.key)
+  : null;
+
+// ── AUTH: verificar sessão ao carregar ────────────────────────────────────────
+let _currentUser = null;
+async function _initAuth() {
+  if (!_sb) {
+    // Sem Supabase configurado: modo offline (localStorage)
+    console.warn('GMF: Supabase não configurado — usando localStorage.');
+    return;
+  }
+  const { data } = await _sb.auth.getSession();
+  if (!data.session) {
+    // Não autenticado — redirecionar para login
+    window.location.href = 'gmf_login.html';
+    return;
+  }
+  _currentUser = data.session.user;
+  // Exibir nome do usuário no cabeçalho
+  const perfil = await _sb.from('perfis').select('nome,cargo').eq('id', _currentUser.id).single();
+  if (perfil.data) {
+    const el = document.getElementById('userInfo');
+    if (el) el.innerHTML = `<span style="font-size:12px;color:var(--text2)">👤 ${perfil.data.nome}</span>
+      <button class="btn" style="height:28px;font-size:11px;padding:0 10px" onclick="_logout()">Sair</button>`;
+  }
+}
+
+async function _logout() {
+  if (_sb) await _sb.auth.signOut();
+  window.location.href = 'gmf_login.html';
+}
+
+// ── CACHE LOCAL (evita requisições repetidas) ─────────────────────────────────
+const PROD_KEY = 'gmf_produtos_v1_cache'; // agora é só cache, fonte da verdade é Supabase
+let _produtosCache = null;
+let _loadingProdutos = false;
+
+// ── STORAGE: ler do Supabase (ou localStorage se offline) ─────────────────────
+async function carregarProdutosAsync() {
+  if (!_sb) return carregarProdutosLocal();
+  try {
+    const { data, error } = await _sb
+      .from('produtos')
+      .select('id, nome, classificacao, dados')
+      .order('criado_em', { ascending: false });
+    if (error) throw error;
+    // Converter formato Supabase → formato app
+    const lista = data.map(row => ({ ...row.dados, id: row.id, nome: row.nome, classificacao: row.classificacao }));
+    // Garantir seeds
+    const ids = new Set(lista.map(p=>p.id));
+    SEED_PRODUTOS.forEach(s => { if(!ids.has(s.id)) lista.push(s); });
+    _produtosCache = lista;
+    return lista;
+  } catch(e) {
+    console.error('Supabase erro ao carregar:', e);
+    return carregarProdutosLocal();
+  }
+}
+
+function carregarProdutosLocal() {
+  if (_produtosCache) return _produtosCache;
+  try {
+    const stored = localStorage.getItem(PROD_KEY);
+    if (stored) { _produtosCache = JSON.parse(stored); return _produtosCache; }
+  } catch(e) {}
+  _produtosCache = [...SEED_PRODUTOS];
+  return _produtosCache;
+}
+
+async function salvarProdutosAsync(lista) {
+  _produtosCache = lista;
+  // Salvar em cache local sempre
+  try { localStorage.setItem(PROD_KEY, JSON.stringify(lista)); } catch(e) {}
+  if (!_sb || !_currentUser) return;
+  // Não salvar os seeds no Supabase
+  const seedIds = new Set(SEED_PRODUTOS.map(s=>s.id));
+  const paraSync = lista.filter(p => !seedIds.has(p.id));
+  for (const prod of paraSync) {
+    try {
+      await _sb.from('produtos').upsert({
+        id: prod.id,
+        nome: prod.nome,
+        classificacao: prod.classificacao || '',
+        dados: prod,
+        criado_por: _currentUser.id,
+      }, { onConflict: 'id' });
+    } catch(e) { console.error('Erro ao salvar produto:', prod.nome, e); }
+  }
+}
+
+async function deletarProdutoAsync(id) {
+  _produtosCache = (_produtosCache || []).filter(p => p.id !== id);
+  try {
+    const stored = localStorage.getItem(PROD_KEY);
+    if (stored) {
+      const lista = JSON.parse(stored).filter(p => p.id !== id);
+      localStorage.setItem(PROD_KEY, JSON.stringify(lista));
+    }
+  } catch(e) {}
+  if (_sb) {
+    try { await _sb.from('produtos').delete().eq('id', id); } catch(e) {}
+  }
+}
+
+// ── WRAPPERS SÍNCRONOS (compatibilidade com código existente) ──────────────────
+function getProdutos() {
+  return _produtosCache || carregarProdutosLocal();
+}
+
+function salvarProdutos(lista) {
+  salvarProdutosAsync(lista); // fire-and-forget
+}
+
+const CLASSE_META = {
+  'composto-sem':      { label:'Composto Lácteo sem Adição',    cor:'#1d5238', bg:'#e8f3ed', icone:'🥛' },
+  'composto-com':      { label:'Composto Lácteo com Adição',    cor:'#1d4e7a', bg:'#e8f0fe', icone:'🥛' },
+  'mistura':           { label:'Mistura Láctea',                cor:'#6d28d9', bg:'#f5f0ff', icone:'🧪' },
+  'po-preparo':        { label:'Pó para Preparo',               cor:'#92400e', bg:'#fef3c7', icone:'🥤' },
+  'leite-integral':    { label:'Leite em Pó Integral',          cor:'#1d5238', bg:'#e8f3ed', icone:'🐄' },
+  'leite-instantaneo': { label:'Leite em Pó Instantâneo',       cor:'#1d4e7a', bg:'#e8f0fe', icone:'⚡' },
+  'leite-desnatado':   { label:'Leite em Pó Desnatado',         cor:'#374151', bg:'#f3f4f6', icone:'🫙' },
+  'achocolatado':      { label:'Achocolatado em Pó',            cor:'#6b2c0a', bg:'#fdf0e8', icone:'🍫' },
+  'cacau':             { label:'Cacau em Pó',                   cor:'#3d1a08', bg:'#fdf0e8', icone:'🌱' },
+  'cafe-torrado-moido':{ label:'Café Torrado e Moído',          cor:'#3b1f0a', bg:'#fdf5e8', icone:'☕' },
+  'cafe-torrado':      { label:'Café Torrado (grão)',            cor:'#3b1f0a', bg:'#fdf5e8', icone:'🫘' },
+};
+
+// Seed — 6 fórmulas já registradas (do JSON exportado)
+const SEED_PRODUTOS = [
+  {id:1778591007102,nome:"PO PARA PREPARO SABOR LEITE PADRÃO MONTENEGRO - SORO",data:"12/05/2026, 10:03",pesoTotal:1000,pesoPorcao:30,medida:"2 colheres de sopa",nPorcoes:33,tQ:1000,classificacao:"po-preparo",
+   ingredientes:[{nome:"Açúcar Cristal moída",ref:"Da Cana",qtde:258},{nome:"Composto Lacteo com LM267",ref:"Alibra",qtde:100},{nome:"Dióxido de Titânio Anatase (INS 171)",ref:"Daxia",qtde:10},{nome:"Aroma de leite",ref:"Duas Rodas",qtde:5},{nome:"CMC 2604A",ref:"Denver",qtde:2},{nome:"Soro",ref:"Da vaca",qtde:625}],
+   nutri100g:{kcal:399.7,cho:85.0,act:83.2,acad:0.5,ptn:9.1,gt:2.6,gs:1.4,tr:0.05,fi:0.01,na:331.5},nutriPorcao:{kcal:119.9,cho:25.5,act:24.97,acad:0.14,ptn:2.72,gt:0.78,gs:0.42,tr:0.015,fi:0.004,na:99.4}},
+  {id:1778590965523,nome:"PO PARA PREPARO SABOR LEITE PADRÃO MONTENEGRO - PERMEADO",data:"12/05/2026, 10:02",pesoTotal:1000,pesoPorcao:30,medida:"2 colheres de sopa",nPorcoes:33,tQ:1000,classificacao:"po-preparo",
+   ingredientes:[{nome:"Permeado",ref:"Sooro",qtde:500},{nome:"Soro",ref:"Da vaca",qtde:125},{nome:"Açúcar Cristal moída",ref:"Da Cana",qtde:258},{nome:"Composto Lacteo com LM267",ref:"Alibra",qtde:100},{nome:"Dióxido de Titânio Anatase (INS 171)",ref:"Daxia",qtde:10},{nome:"Aroma de leite",ref:"Duas Rodas",qtde:5},{nome:"CMC 2604A",ref:"Denver",qtde:2}],
+   nutri100g:{kcal:390.7,cho:88.0,act:85.2,acad:0.5,ptn:3.7,gt:2.68,gs:1.45,tr:0.05,fi:0.01,na:330.0},nutriPorcao:{kcal:117.2,cho:26.4,act:25.57,acad:0.14,ptn:1.11,gt:0.81,gs:0.44,tr:0.015,fi:0.004,na:99.0}},
+  {id:1747000001,nome:"OKEY LAC 100",data:"11/05/2026, 15:37",pesoTotal:1000,pesoPorcao:30,medida:"2 colheres de sopa",nPorcoes:33,tQ:1000,classificacao:"composto-com",
+   ingredientes:[{nome:"Composto Lacteo com LM267",ref:"Alibra",qtde:700},{nome:"Soro",ref:"Da vaca",qtde:294},{nome:"Aroma de leite",ref:"Duas Rodas",qtde:6}],
+   nutri100g:{kcal:465,cho:64.7,act:55.1,acad:3.2,ptn:10.4,gt:18.2,gs:9.8,tr:0.4,fi:0,na:478},nutriPorcao:{kcal:139,cho:19.4,act:16.5,acad:1,ptn:3.1,gt:5.5,gs:2.9,tr:0.1,fi:0,na:144}},
+  {id:1747000002,nome:"OKEY LAC 200",data:"11/05/2026, 15:36",pesoTotal:1000,pesoPorcao:30,medida:"2 colheres de sopa",nPorcoes:33,tQ:1000,classificacao:"mistura",
+   ingredientes:[{nome:"Purelac Pro Mix — Mistura Láctea p/ Sorvetes (FT 2018)",ref:"Tangará Foods",qtde:700},{nome:"Soro",ref:"Da vaca",qtde:294},{nome:"Aroma de leite",ref:"Duas Rodas",qtde:6}],
+   nutri100g:{kcal:465,cho:67.5,act:56.5,acad:0,ptn:7.3,gt:18.2,gs:14.5,tr:0,fi:0,na:390},nutriPorcao:{kcal:140,cho:20.3,act:17,acad:0,ptn:2.2,gt:5.5,gs:4.3,tr:0,fi:0,na:117}},
+  {id:1747000003,nome:"OKEY LAC 300",data:"11/05/2026, 15:36",pesoTotal:1000,pesoPorcao:30,medida:"2 colheres de sopa",nPorcoes:33,tQ:1000,classificacao:"composto-com",
+   ingredientes:[{nome:"Mistura Láctea Select 25Kg",ref:"Leitino",qtde:700},{nome:"Soro",ref:"Da vaca",qtde:294},{nome:"Aroma de leite",ref:"Duas Rodas",qtde:6}],
+   nutri100g:{kcal:469,cho:66.8,act:59.3,acad:1.4,ptn:9.4,gt:18.2,gs:9.1,tr:0,fi:0.4,na:608},nutriPorcao:{kcal:141,cho:20.1,act:17.8,acad:0.4,ptn:2.8,gt:5.5,gs:2.7,tr:0,fi:0.1,na:182}},
+  {id:1747000004,nome:"OKEY LAC 2010",data:"11/05/2026, 15:37",pesoTotal:1000,pesoPorcao:30,medida:"2 colheres de sopa",nPorcoes:33,tQ:1000,classificacao:"mistura",
+   ingredientes:[{nome:"Composto Lacteo com LM267",ref:"Alibra",qtde:700},{nome:"Permeado",ref:"Sooro",qtde:294},{nome:"Aroma de leite",ref:"Duas Rodas",qtde:6}],
+   nutri100g:{kcal:459,cho:66.5,act:56.3,acad:3.2,ptn:7.2,gt:18.3,gs:9.8,tr:0.4,fi:0,na:478},nutriPorcao:{kcal:138,cho:20,act:16.9,acad:1,ptn:2.2,gt:5.5,gs:3,tr:0.1,fi:0,na:143}},
+];
+
+function carregarProdutos() {
+  try {
+    const stored = localStorage.getItem(PROD_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch(e){}
+  // fallback: retorna seed (memória)
+  return [...SEED_PRODUTOS];
+}
+
+function salvarProdutos(lista) {
+  try { localStorage.setItem(PROD_KEY, JSON.stringify(lista)); } catch(e){}
+}
+
+function getProdutos() {
+  let lista = carregarProdutos();
+  // Garantir que os seeds sempre existem (por ID)
+  const ids = new Set(lista.map(p=>p.id));
+  SEED_PRODUTOS.forEach(s => { if(!ids.has(s.id)) lista.unshift(s); });
+  return lista;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// WIZARD NAVIGATION (step 0 = produtos)
+// ────────────────────────────────────────────────────────────────────────────
 function goStep(n) {
-  if (n<1||n>4) return;
-  if (n>1 && receita.length===0 && n>=2) {
-    if (n>2) { alert('Adicione ingredientes na receita antes de avançar.'); return; }
+  if (n < 0 || n > 5) return;
+  if (n > 1 && receita.length === 0) {
+    if (n > 2) { alert('Adicione ingredientes na receita antes de avançar.'); return; }
   }
   currentStep = n;
-  [1,2,3,4].forEach(i => {
-    document.getElementById('step'+i).classList.toggle('active', i===n);
+
+  [0,1,2,3,4,5].forEach(i => {
+    const panel = document.getElementById('step'+i);
+    if (panel) panel.classList.toggle('active', i===n);
     const btn = document.getElementById('s'+i+'btn');
+    if (!btn) return;
     btn.classList.remove('active','done');
     if (i===n) btn.classList.add('active');
-    else if (i<n) btn.classList.add('done');
+    else if (i > 0 && i < n) btn.classList.add('done');
   });
-  document.getElementById('stepInd').textContent = `Passo ${n} de 4`;
-  document.getElementById('btnBack').style.display = n>1 ? '' : 'none';
-  document.getElementById('btnNext').textContent = n===4 ? '✅ Concluído' : (n===3 ? 'Gerar Ficha Técnica →' : 'Próximo →');
-  document.getElementById('btnNext').style.display = n===4 ? 'none' : '';
 
-  if (n===3) renderStep3();
-  if (n===4) renderStep4();
+  const back = document.getElementById('btnBack');
+  const next = document.getElementById('btnNext');
+  const ind  = document.getElementById('stepInd');
+
+  if (n === 0) {
+    back.style.display = 'none';
+    next.textContent = '+ Novo produto';
+    next.onclick = novoProduto;
+    next.style.display = '';
+    ind.textContent = 'Produtos cadastrados';
+    renderProdutos();
+  } else {
+    back.style.display = '';
+    back.onclick = () => goStep(n-1);
+    next.onclick = nextStep;
+    if (n === 4 || n === 5) {
+      next.style.display = 'none';
+      ind.textContent = n === 4
+        ? 'Ficha Técnica — imprimir ou salvar PDF'
+        : 'Laudo Técnico — preencher e imprimir';
+    } else {
+      next.style.display = '';
+      next.textContent = n === 3 ? 'Gerar Ficha Técnica →' : 'Próximo →';
+      ind.textContent = `Passo ${n} de 4`;
+    }
+  }
+
+  if (n === 3) renderStep3();
+  if (n === 4) renderStep4();
+  if (n === 5) iniciarLaudo();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function nextStep() { goStep(currentStep+1); }
+function nextStep() { goStep(currentStep + 1); }
+
+// ── ESTADO DE EDIÇÃO ─────────────────────────────────────────────────────────
+let _prodOrigem = null;      // produto original carregado — nunca sobrescrito
+let _prodOrigemHash = null;  // snapshot para detectar qualquer mudança
+
+function _hashReceitaAtual() {
+  return JSON.stringify({
+    nome: (document.getElementById('p_nome').value||'').trim(),
+    porcao: document.getElementById('p_porcao').value,
+    peso: document.getElementById('p_peso').value,
+    medida: document.getElementById('p_medida').value,
+    tipo: tipoSel,   // inclui tipo para detectar mudança de classificação
+    classe: classeSel,
+    ings: receita.map(r=>({n:_nomeExibicao(r.d), q:r.qtde}))
+  });
+}
+
+function _receitaFoiAlterada() {
+  if (!_prodOrigem) return false;
+  return _hashReceitaAtual() !== _prodOrigemHash;
+}
+
+function _atualizarBannerEdicao() {
+  let banner = document.getElementById('bannerEdicao');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'bannerEdicao';
+    const step1 = document.getElementById('step1');
+    step1.insertBefore(banner, step1.firstChild);
+  }
+  if (!_prodOrigem) {
+    banner.style.display = 'none';
+    banner.innerHTML = '';
+    return;
+  }
+  banner.style.display = '';
+  banner.innerHTML = `
+    <div style="background:#fef3c7;border:1.5px solid #f0d080;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:12px;font-weight:700;color:#92400e">Modo consulta — produto salvo: <em>${_prodOrigem.nome}</em></div>
+        <div style="font-size:11px;color:#b45309;margin-top:2px">Este produto está <strong>protegido contra sobrescrita</strong>. Qualquer modificação criará automaticamente um novo item, preservando o original intacto.</div>
+      </div>
+      <button class="btn" style="font-size:11px;height:28px;padding:0 10px;background:#fff;border-color:#f0d080;color:#92400e;flex-shrink:0" onclick="novoProduto()">
+        + Criar do zero
+      </button>
+    </div>`;
+}
+
+function _mostrarModalSalvo(nome, nomeOriginal, foiDerivado) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:10px;padding:24px 28px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25)">
+      <div style="font-size:36px;text-align:center;margin-bottom:8px">${foiDerivado?'🔀':'✅'}</div>
+      <div style="font-size:15px;font-weight:700;text-align:center;margin-bottom:10px;color:#1e3a8a">${foiDerivado?'Nova versão criada!':'Produto salvo com sucesso!'}</div>
+      ${foiDerivado
+        ? `<p style="font-size:12px;color:#555;text-align:center;line-height:1.6;margin-bottom:16px">
+            <strong>"${nomeOriginal}"</strong> permanece <strong>intacto</strong> no cadastro.<br>
+            A versão modificada foi salva separadamente como<br><strong>"${nome}"</strong>.
+           </p>`
+        : `<p style="font-size:12px;color:#555;text-align:center;margin-bottom:16px">
+            <strong>"${nome}"</strong> foi adicionado ao cadastro de produtos.
+           </p>`}
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="this.closest('[style*=fixed]').remove();goStep(0)" style="height:36px">📦 Ver cadastro</button>
+        <button class="btn" onclick="this.closest('[style*=fixed]').remove();goStep(3)" style="height:36px">🧪 Tabela nutricional</button>
+        <button class="btn" onclick="this.closest('[style*=fixed]').remove();goStep(4)" style="height:36px">📄 Ficha técnica</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function novoProduto() {
+  _prodOrigem = null;
+  _prodOrigemHash = null;
+  receita = [];
+  ['p_nome','p_codigo','p_denominacao'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('p_revisao').value='00';
+  renderReceita();
+  _destravarTipoProduto(); // Liberar botões de tipo
+  selTipo('composto-com');
+  _atualizarBannerEdicao();
+  goStep(1);
+}
+
+// ── TRAVA DE TIPO DE PRODUTO ──────────────────────────────────────────────────
+// Quando um produto salvo é carregado para consulta/visualização,
+// os botões de tipo são bloqueados para evitar que a classificação
+// seja alterada acidentalmente — o que causaria FTP e Laudo incorretos.
+
+function _travarTipoProduto(tipo) {
+  const tpl = TEMPLATES[tipo];
+  const label = tpl ? tpl.label : tipo;
+
+  // Desabilitar todos os botões de tipo visualmente
+  document.querySelectorAll('[id^="tb-"]').forEach(btn => {
+    btn.style.opacity = '0.4';
+    btn.style.pointerEvents = 'none';
+    btn.title = `Classificação travada: ${label}`;
+  });
+
+  // Manter o botão correto visível e destacado
+  const tbEl = document.getElementById('tb-'+tipo);
+  if (tbEl) {
+    tbEl.style.opacity = '1';
+    tbEl.style.pointerEvents = 'none'; // ainda travado mas visível
+    tbEl.title = `Classificação: ${label} (travada — produto salvo)`;
+  }
+
+  // Mostrar aviso acima dos botões
+  let avisoTipo = document.getElementById('avisoTipoTravado');
+  if (!avisoTipo) {
+    avisoTipo = document.createElement('div');
+    avisoTipo.id = 'avisoTipoTravado';
+    const tipoBtns = document.getElementById('tipoBtns');
+    if (tipoBtns) tipoBtns.parentNode.insertBefore(avisoTipo, tipoBtns);
+  }
+  avisoTipo.style.display = '';
+  avisoTipo.innerHTML = `
+    <div style="background:#fef3c7;border:1.5px solid #f0d080;border-radius:6px;padding:7px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:11px">
+      <span style="font-size:16px">🔒</span>
+      <div>
+        <strong style="color:#92400e">Classificação travada: ${label}</strong>
+        <div style="color:#b45309;font-size:10px;margin-top:1px">Para criar outro tipo de produto, clique em <strong>+ Novo produto</strong>. Para derivar deste, use <strong>📋 Duplicar</strong>.</div>
+      </div>
+    </div>`;
+}
+
+function _destravarTipoProduto() {
+  // Reabilitar todos os botões de tipo
+  document.querySelectorAll('[id^="tb-"]').forEach(btn => {
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
+    btn.title = '';
+  });
+  // Ocultar aviso
+  const aviso = document.getElementById('avisoTipoTravado');
+  if (aviso) aviso.style.display = 'none';
+}
+
+
+// ────────────────────────────────────────────────────────────────────────────
+async function renderProdutos() {
+  // Mostrar loading
+  const cont = document.getElementById('prodContainer');
+  if (cont) cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)"><div style="font-size:32px;margin-bottom:8px">⏳</div><div>Carregando produtos...</div></div>';
+  // Buscar do Supabase
+  await carregarProdutosAsync();
+  const busca = (document.getElementById('prodBusca')?.value||'').toLowerCase();
+  const filtroClasse = document.getElementById('prodFiltroClasse')?.value||'';
+  const lista = getProdutos().filter(p => {
+    if (filtroClasse && p.classificacao !== filtroClasse) return false;
+    if (busca && !p.nome.toLowerCase().includes(busca)) return false;
+    return true;
+  });
+
+  const count = document.getElementById('prodCount');
+  const allProd = getProdutos();
+  if (count) count.textContent = `${allProd.length} produto${allProd.length!==1?'s':''} cadastrado${allProd.length!==1?'s':''}`;
+
+  const div = document.getElementById('prodLista');
+  if (!lista.length) {
+    div.innerHTML = `<div class="empty-state"><div class="icon">📦</div><p>Nenhum produto encontrado.</p></div>`;
+    return;
+  }
+
+  div.innerHTML = lista.map((p, i) => {
+    const cm = CLASSE_META[p.classificacao] || {label:'—',cor:'#666',bg:'#eee',icone:'📄'};
+    const n100 = p.nutri100g || {};
+    const chips = [];
+    if ((n100.acad||0)>=15) chips.push(`<span class="chip-alert" style="background:#fdeaea;color:#9b2626">🔍 Açúcar</span>`);
+    if ((n100.gs||0)>=6)   chips.push(`<span class="chip-alert" style="background:#fef3d7;color:#92610a">🔍 G.Sat</span>`);
+    if ((n100.na||0)>=600) chips.push(`<span class="chip-alert" style="background:#fdeaea;color:#9b2626">🔍 Sódio</span>`);
+    if ((n100.tr||0)>=0.2) chips.push(`<span class="chip-alert" style="background:#fef3d7;color:#92610a">⚠️ Trans</span>`);
+
+    return `
+    <div class="prod-card">
+      <div class="prod-header">
+        <div style="font-size:20px">${cm.icone}</div>
+        <div class="prod-nome">${p.nome}</div>
+        <span class="prod-badge" style="background:${cm.bg};color:${cm.cor}">${cm.label}</span>
+        <div style="font-size:11px;color:var(--text3)">${p.data}</div>
+      </div>
+      ${chips.length ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">${chips.join('')}</div>` : ''}
+      <div class="prod-nutri">
+        <div class="prod-nut-item"><div class="prod-nut-val">${Math.round(n100.kcal||0)}</div><div class="prod-nut-lbl">kcal/100g</div></div>
+        <div class="prod-nut-item"><div class="prod-nut-val">${+(n100.ptn||0).toFixed(1)}</div><div class="prod-nut-lbl">PTN g</div></div>
+        <div class="prod-nut-item"><div class="prod-nut-val">${+(n100.cho||0).toFixed(1)}</div><div class="prod-nut-lbl">CHO g</div></div>
+        <div class="prod-nut-item"><div class="prod-nut-val">${+(n100.gt||0).toFixed(1)}</div><div class="prod-nut-lbl">G.tot g</div></div>
+        <div class="prod-nut-item"><div class="prod-nut-val">${+(n100.gs||0).toFixed(1)}</div><div class="prod-nut-lbl">G.sat g</div></div>
+        <div class="prod-nut-item"><div class="prod-nut-val">${Math.round(n100.na||0)}</div><div class="prod-nut-lbl">Na mg</div></div>
+        <div class="prod-nut-item"><div class="prod-nut-val">${p.pesoPorcao||30}g</div><div class="prod-nut-lbl">porção</div></div>
+        <div class="prod-nut-item"><div class="prod-nut-val">${p.nPorcoes||'—'}</div><div class="prod-nut-lbl">porções</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">
+        <strong>Ingredientes:</strong> ${(p.ingredientes||[]).map(i=>{const dbEntry=DB.find(d=>d.n===i.nome);return`${dbEntry?_nomeExibicao(dbEntry):(i.nomeExib||i.nome)} (${i.qtde}g)`;}).join(' · ')}
+      </div>
+      <div class="prod-actions">
+        <button class="btn" style="font-size:12px;height:30px;padding:0 12px" onclick="editarProduto(${p.id})">
+          ✏️ Editar / Carregar
+        </button>
+        <button class="btn" style="font-size:12px;height:30px;padding:0 12px;background:#1e3a8a;color:#fff;border-color:#1e3a8a" onclick="ftpDoProduto(${p.id})">
+          📄 Ficha Técnica
+        </button>
+        <button class="btn" style="font-size:12px;height:30px;padding:0 12px" onclick="dupProduto(${p.id})">
+          📋 Duplicar
+        </button>
+        <button class="btn" style="font-size:12px;height:30px;padding:0 12px;color:var(--danger);border-color:#f5c6c6" onclick="deletarProduto(${p.id})">
+          🗑️ Excluir
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editarProduto(id) {
+  const prod = getProdutos().find(p=>p.id===id);
+  if (!prod) return;
+  _prodOrigem = prod;
+  receita = [];
+
+  // Restaurar campos básicos
+  document.getElementById('p_nome').value = prod.nome;
+  document.getElementById('p_gramatura').value = prod.pesoTotal+'g';
+  document.getElementById('p_porcao').value = prod.pesoPorcao;
+  document.getElementById('p_medida').value = prod.medida;
+  document.getElementById('p_peso').value = prod.pesoTotal;
+
+  // Restaurar campos do produto salvos (embalagem, validade, armazenamento, etc.)
+  const _resto = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== '') el.value = val; };
+  _resto('p_validade',      prod.validade);
+  _resto('p_emb1',          prod.emb1);
+  _resto('p_emb2',          prod.emb2);
+  _resto('p_armazenamento', prod.armazenamento);
+  _resto('p_preparo_txt',   prod.preparo);
+  _resto('p_obs',           prod.obs);
+  _resto('p_aspecto',       prod.aspecto);
+  _resto('p_sabor',         prod.sabor);
+  _resto('p_alergenicos',   prod.alergenicos);
+  _resto('p_glutenlactose', prod.glutenlactose);
+  _resto('p_ingredientes_txt', prod.ingredientes_txt);
+
+  // Restaurar tipo/classificação SEM sobrescrever denominação e campos já salvos
+  const tipo = prod.classificacao || 'composto-com';
+  tipoSel = tipo;
+  classeSel = tipo;
+
+  // Apenas atualizar highlight dos botões e painel legal — sem _aplicarTemplate
+  document.querySelectorAll('[id^="tb-"]').forEach(b => b.classList.remove('sel'));
+  const tbEl = document.getElementById('tb-'+tipo);
+  if (tbEl) tbEl.classList.add('sel');
+  const tpl = TEMPLATES[tipo];
+  if (tpl) {
+    document.getElementById('classeLegal').innerHTML =
+      `<strong style="color:var(--blue)">${tpl.label}</strong><br>${tpl.legal}`;
+    // Ocultar painel de subtipo ao editar produto salvo (já está fixo)
+    const subBox = document.getElementById('subtipoBox');
+    if (subBox) subBox.style.display = 'none';
+  }
+
+  // Restaurar denominação exatamente como salva (não deixar selTipo sobrescrever)
+  if (prod.denominacao) {
+    document.getElementById('p_denominacao').value = prod.denominacao;
+  } else if (tpl) {
+    document.getElementById('p_denominacao').value = tpl.label;
+  }
+
+  // Carregar ingredientes
+  let naoEnc = [];
+  (prod.ingredientes||[]).forEach(ing => {
+    const found = DB.find(d=>d.n===ing.nome);
+    if (found) receita.push({d:found, qtde:ing.qtde});
+    else naoEnc.push(ing.nome);
+  });
+  renderReceita();
+
+  // Snapshot após carregar tudo
+  _prodOrigemHash = _hashReceitaAtual();
+  _atualizarBannerEdicao();
+  _travarTipoProduto(tipo); // Travar botões de tipo
+  goStep(1);
+  if (naoEnc.length) setTimeout(()=>alert(`ℹ️ Ingrediente(s) não encontrado(s) no banco:\n${naoEnc.join('\n')}`),400);
+}
+
+function ftpDoProduto(id) {
+  const prod = getProdutos().find(p=>p.id===id);
+  if (!prod) return;
+  // Carregar tudo e ir direto para step 4
+  editarProduto(id);
+  setTimeout(()=>goStep(4), 100);
+}
+
+function dupProduto(id) {
+  const lista = getProdutos();
+  const prod = lista.find(p=>p.id===id);
+  if (!prod) return;
+  const copia = JSON.parse(JSON.stringify(prod));
+  copia.id = Date.now();
+  copia.nome = copia.nome + ' (cópia)';
+  copia.data = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  delete copia._origemId; // cópia começa sem vínculo com original
+  lista.unshift(copia);
+  salvarProdutos(lista);
+  renderProdutos();
+  if (confirm(`📋 "${copia.nome}" criado com sucesso!\n\nDeseja abri-lo no wizard para editar livremente?`)) {
+    // Duplicata é um novo produto — destrava tipo para edição livre
+    editarProduto(copia.id);
+    // Após carregar, destrava tipo pois é cópia livre
+    setTimeout(_destravarTipoProduto, 100);
+  }
+}
+
+async function deletarProduto(id) {
+  const prod = getProdutos().find(p=>p.id===id);
+  if (!prod) return;
+  if (!confirm(`Excluir "${prod.nome}"?\nEsta ação não pode ser desfeita.`)) return;
+  await deletarProdutoAsync(id);
+  renderProdutos();
+}
+
+function salvarProdutoAtual() {
+  if (!receita.length) { alert('Adicione ingredientes antes de salvar.'); return; }
+
+  const T = calcT();
+  const P100 = parseFloat(document.getElementById('p_porcao').value)||30;
+  const P = {}; Object.keys(T).forEach(k=>P[k]=T[k]*P100/100);
+  const nomeDigitado = (document.getElementById('p_nome').value||'').trim() || 'Produto sem nome';
+  const alterado = _receitaFoiAlterada();
+
+  // ── Construir objeto produto ──────────────────────────────────────────────
+  const prod = {
+    id: Date.now(),
+    nome: nomeDigitado,
+    data: new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+    pesoTotal: parseFloat(document.getElementById('p_peso').value)||1000,
+    pesoPorcao: P100,
+    medida: document.getElementById('p_medida').value||'2 colheres de sopa',
+    nPorcoes: Math.round(parseFloat(document.getElementById('p_peso').value)/P100),
+    tQ: receita.reduce((s,r)=>s+r.qtde,0),
+    classificacao: tipoSel,
+    denominacao: document.getElementById('p_denominacao').value || '',
+    // ── Campos do produto (seções 1 e 5 da FTP) — salvos explicitamente ──────
+    aspecto:       document.getElementById('p_aspecto')?.value || '',
+    sabor:         document.getElementById('p_sabor')?.value || '',
+    alergenicos:   document.getElementById('p_alergenicos')?.value || '',
+    glutenlactose: document.getElementById('p_glutenlactose')?.value || '',
+    emb1:          document.getElementById('p_emb1')?.value || '',
+    emb2:          document.getElementById('p_emb2')?.value || '',
+    validade:      document.getElementById('p_validade')?.value || '',
+    armazenamento: document.getElementById('p_armazenamento')?.value || '',
+    preparo:       document.getElementById('p_preparo_txt')?.value || '',
+    obs:           document.getElementById('p_obs')?.value || '',
+    ingredientes_txt: document.getElementById('p_ingredientes_txt')?.value || '',
+    // ── Dados nutricionais ────────────────────────────────────────────────────
+    ingredientes: receita.map(r=>({nome:r.d.n, nomeExib:_nomeExibicao(r.d), ref:r.d.ref, qtde:r.qtde})),
+    nutri100g: {...T},
+    nutriPorcao: {...P},
+    _origemId: _prodOrigem ? _prodOrigem.id : null,
+  };
+
+  // ── CASO 1: produto original, SEM alteração ───────────────────────────────
+  if (_prodOrigem && !alterado) {
+    alert(`ℹ️ Nenhuma alteração detectada.\n\n"${_prodOrigem.nome}" já está salvo no cadastro e não foi modificado.\n\nSe quiser criar uma variação, altere a receita ou o nome e salve novamente.`);
+    return;
+  }
+
+  // ── CASO 2: produto original, COM alteração → novo item obrigatório ───────
+  if (_prodOrigem && alterado) {
+    const nomeOriginal = _prodOrigem.nome;
+    const mesmoNome = nomeDigitado === nomeOriginal;
+    if (mesmoNome) {
+      const conf = confirm(
+        `⚠️ Receita alterada — nome igual ao original\n\n` +
+        `Você modificou "${nomeOriginal}" mas manteve o mesmo nome.\n\n` +
+        `O original será PRESERVADO e esta versão será salva como novo item.\n\n` +
+        `OK → Salvar como "${nomeOriginal} (v2)"\n` +
+        `Cancelar → Voltar e renomear manualmente`
+      );
+      if (!conf) return;
+      prod.nome = nomeOriginal + ' (v2)';
+      document.getElementById('p_nome').value = prod.nome;
+    }
+    const lista = getProdutos();
+    lista.unshift(prod);
+    salvarProdutos(lista);
+    _prodOrigem = prod;
+    _prodOrigemHash = _hashReceitaAtual();
+    _atualizarBannerEdicao();
+    _mostrarModalSalvo(prod.nome, nomeOriginal, true);
+    return;
+  }
+
+  // ── CASO 3: novo produto (sem origem) ─────────────────────────────────────
+  const lista = getProdutos();
+  const jaExiste = lista.find(p => p.nome.trim() === nomeDigitado);
+  if (jaExiste) {
+    const conf = confirm(`⚠️ Já existe um produto chamado "${nomeDigitado}".\n\nDeseja salvar mesmo assim como um novo item separado?`);
+    if (!conf) return;
+  }
+  lista.unshift(prod);
+  salvarProdutos(lista);
+  _prodOrigem = prod;
+  _prodOrigemHash = _hashReceitaAtual();
+  _atualizarBannerEdicao();
+  _mostrarModalSalvo(prod.nome, null, false);
+}
+
+function exportarJSON() {
+  const lista = getProdutos();
+  const blob = new Blob([JSON.stringify({versao:1,exportado:new Date().toISOString(),formulas:lista},null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `produtos_gmf_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json`;
+  a.click();
+}
+
+function importarJSON(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const obj = JSON.parse(ev.target.result);
+      const formulas = obj.formulas || (Array.isArray(obj)?obj:null);
+      if (!formulas) throw new Error('Formato inválido');
+      const atual = getProdutos();
+      const ids = new Set(atual.map(p=>p.id));
+      const novas = formulas.filter(f=>!ids.has(f.id));
+      const merged = [...novas,...atual].sort((a,b)=>(b.id||0)-(a.id||0));
+      salvarProdutos(merged);
+      renderProdutos();
+      alert(`✅ ${novas.length} produto(s) importado(s)!\n${formulas.length-novas.length} já existiam.`);
+    } catch(err) { alert('❌ Erro ao importar: '+err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+
 
 // ────────────────────────────────────────────────────────────────────────────
 // STEP 1 — CLASSIFICAÇÃO
@@ -490,26 +1569,672 @@ const CLASSES = {
   'po-preparo':  { label:'Pó para Preparo de Bebida/Alimento', legal:'ANVISA — RDC 724/2022 + IN 161/2022 (categoria 9.j)' },
 };
 
-selClasse('composto-com');
+// ────────────────────────────────────────────────────────────────────────────
+// TEMPLATES DE PRODUTO — preenche campos automaticamente por tipo + legislação
+// ────────────────────────────────────────────────────────────────────────────
 
-function selClasse(t) {
-  classeSel = t;
-  document.querySelectorAll('.cbtn').forEach(b => b.classList.remove('sel'));
-  const el = document.getElementById('cb-'+t);
-  if (el) el.classList.add('sel');
-  const cl = document.getElementById('classeLegal');
-  if (cl) cl.innerHTML = `<strong>${CLASSES[t].label}</strong> · ${CLASSES[t].legal}`;
-  // Auto-fill denominação if empty
+const TEMPLATES = {
+
+  // ── COMPOSTOS LÁCTEOS (Portaria SDA/MAPA 1.170/2024) ─────────────────────
+  'composto-com': {
+    label: 'Composto Lácteo com Adição',
+    classe: 'composto-com',
+    legal: `<strong>Portaria SDA/MAPA nº 1.170/2024</strong> — Art. 3º §2º<br>
+      • PTN mínima: <strong>≥ 9g/100g</strong> (se semelhante ao LP: ≥ 13g/100g — Art. 9º §1º)<br>
+      • Reconstituído (130g/L): ≥ 1,3g/100ml de PTN láctea (se semelhante ao LP: ≥ 1,9g/100ml)<br>
+      • Ingredientes lácteos > 50% m/m · Sem RTIQ próprio do MAPA para G.tot ou CHO<br>
+      • <strong>Rótulo obrigatório:</strong> "COMPOSTO LÁCTEO NÃO É LEITE EM PÓ" (Art. 14)`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme, sem grumos, coloração branco a creme',
+      sabor: 'Característico de leite, não rançoso, livre de sabores e odores estranhos',
+      alergenicos: 'CONTÉM DERIVADOS DE LEITE. PODE CONTER SOJA.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Saco plástico atóxico (polietileno), fechado hermeticamente',
+      emb2: 'Fardo de papel kraft multifolhado 25 kg',
+      armazenamento: 'Armazenar em local seco, fresco e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.',
+      obs: 'ESTE PRODUTO NÃO É LEITE EM PÓ. CONTÉM SORO DE LEITE.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      validade: '12 meses',
+      preparo: 'Para preparar 200 ml de bebida: adicione 30 g (2 colheres de sopa) em meio copo de água filtrada ou fervida. Mexa bem até dissolver e complete com água.\nApós aberto, consumir em até 30 dias.',
+    }
+  },
+
+  'composto-sem': {
+    label: 'Composto Lácteo sem Adição',
+    classe: 'composto-sem',
+    legal: `<strong>Portaria SDA/MAPA nº 1.170/2024</strong> — Art. 3º §1º<br>
+      • PTN mínima: <strong>≥ 13g/100g</strong> exclusivamente de origem láctea (Art. 9º I)<br>
+      • Reconstituído (130g/L): <strong>≥ 1,9g/100ml</strong> de PTN láctea (Art. 9º §2º)<br>
+      • Apenas ingredientes lácteos + aditivos e coadjuvantes de tecnologia<br>
+      • <strong>Rótulo obrigatório:</strong> "COMPOSTO LÁCTEO NÃO É LEITE EM PÓ" (Art. 14)`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme, sem grumos, coloração branco a creme',
+      sabor: 'Característico de leite, não rançoso, livre de sabores e odores estranhos',
+      alergenicos: 'CONTÉM DERIVADOS DE LEITE.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Saco plástico atóxico (polietileno), fechado hermeticamente',
+      emb2: 'Fardo de papel kraft multifolhado 25 kg',
+      armazenamento: 'Armazenar em local seco, fresco e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.',
+      obs: 'ESTE PRODUTO NÃO É LEITE EM PÓ. CONTÉM SORO DE LEITE.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      validade: '12 meses',
+      preparo: 'Para preparar 200 ml de bebida: adicione 30 g em meio copo de água filtrada ou fervida. Mexa bem até dissolver e complete com água.\nApós aberto, consumir em até 30 dias.',
+    }
+  },
+
+  'mistura': {
+    label: 'Mistura Láctea',
+    classe: 'mistura',
+    legal: `<strong>RIISPOA — Decreto nº 9.013/2017</strong> — Art. 366<br>
+      • Ingredientes lácteos ≤ 50% m/m · Sem RTIQ específico do MAPA<br>
+      • Sem mínimo de PTN estabelecido pelo MAPA para esta categoria<br>
+      • Gordura vegetal utilizada como ingrediente estrutural (não apenas enriquecimento)<br>
+      • Denominação: "Mistura Láctea de [descrição dos ingredientes adicionados]"<br>
+      • Regulamentação microbiológica: IN MAPA 28/2007 (se aplicável) + IN ANVISA 161/2022`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme, sem grumos, coloração branco a amarelado',
+      sabor: 'Característico, não rançoso, livre de sabores e odores estranhos',
+      alergenicos: 'CONTÉM DERIVADOS DE LEITE E SOJA. PODE CONTER TRIGO.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Saco plástico atóxico (polietileno), fechado hermeticamente',
+      emb2: 'Fardo de papel kraft multifolhado 25 kg',
+      armazenamento: 'Armazenar em local seco, fresco e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.',
+      obs: 'CONTÉM GORDURA VEGETAL. NÃO É LEITE EM PÓ. CONTÉM SORO DE LEITE.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      validade: '12 meses',
+      preparo: 'Para preparar 200 ml de bebida: adicione 30 g (2 colheres de sopa) em meio copo de água filtrada ou fervida. Mexa bem até dissolver e complete com água.',
+    }
+  },
+
+  'po-preparo': {
+    label: 'Pó para Preparo de Bebida/Alimento',
+    classe: 'po-preparo',
+    legal: `<strong>ANVISA — RDC nº 724, de 01/09/2022</strong> + <strong>IN nº 161, de 01/09/2022</strong> (categoria 9.j)<br>
+      • Sem padrão de identidade e qualidade MAPA · Regulado exclusivamente pela ANVISA<br>
+      • Sem mínimo de PTN ou G.tot estabelecido · Denominação conforme composição real<br>
+      • Parâmetros microbiológicos: IN 161/2022 ANVISA, categoria 9.j<br>
+      • Rotulagem: conforme RDC 429/2020 + IN 75/2020 (alertas frontais, se aplicável)`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme, sem grumos, coloração branco a creme',
+      sabor: 'Característico, não rançoso, livre de sabores e odores estranhos',
+      alergenicos: 'CONTÉM DERIVADOS DE LEITE. PODE CONTER SOJA.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Saco plástico atóxico (polietileno), fechado hermeticamente',
+      emb2: 'Fardo de papel kraft multifolhado contendo 25 kg',
+      armazenamento: 'Armazenar em local seco, fresco e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.',
+      obs: 'ESTE PRODUTO NÃO É LEITE EM PÓ. CONTÉM SORO DE LEITE.',
+      validade: '12 meses',
+      preparo: 'Para preparar 200 ml de bebida: adicione 30 g (2 colheres de sopa) em meio copo de água filtrada ou fervida. Mexa bem até dissolver e complete com água.\nApós aberto, consumir em até 30 dias.',
+    }
+  },
+
+  // ── LEITE EM PÓ INTEGRAL (IN MAPA 28/2007) ───────────────────────────────
+  'leite-integral': {
+    label: 'Leite em Pó Integral',
+    classe: 'leite-integral',
+    legal: `<strong>IN MAPA nº 28, de 12/06/2007</strong> — Leite em Pó Integral<br>
+      • G.tot: <strong>≥ 26,0%</strong> m/m na matéria seca<br>
+      • Umidade: <strong>≤ 3,5%</strong> m/m (spray) · Índice de insolubilidade: ≤ 1,0 mL (instantâneo) ou ≤ 15 mL (roller)<br>
+      • PTN: ≥ 34% m/m nos sólidos lácteos não-gordurosos (SLNG)<br>
+      • Acidez titulável (ácido láctico): ≤ 18 mL NaOH 0,1N / 10g SLNG<br>
+      • <strong>Proibido:</strong> adição de qualquer ingrediente não lácteo`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',    label:'🏭 Fardo 25 kg (Industrial)',  default: true },
+        { id:'st-1kg',     label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',    label:'📦 Embalagem 800 g' },
+        { id:'st-400g',    label:'📦 Embalagem 400 g' },
+        { id:'st-200g',    label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme, cor branca a creme suave, sem grumos, aspecto homogêneo',
+      sabor: 'Sabor e odor característicos de leite em pó, suave, não rançoso, sem sabores ou odores estranhos',
+      alergenicos: 'CONTÉM LEITE.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Saco plástico atóxico (polietileno de alta densidade), hermeticamente fechado',
+      emb2: 'Fardo de papel kraft multifolhado com revestimento interno de polietileno — 25 kg',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes. Após aberto, manter em recipiente limpo, seco e fechado.',
+      obs: 'ESTE PRODUTO NÃO DEVE SER USADO PARA ALIMENTAR CRIANÇAS MENORES DE 1 (UM) ANO DE IDADE.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.\nO ALEITAMENTO MATERNO EVITA INFECÇÕES E ALERGIAS E É RECOMENDADO ATÉ 2 (DOIS) ANOS DE IDADE OU MAIS.',
+      validade: '24 meses (embalagem fechada) · Após aberto: consumir em até 30 dias',
+      preparo: 'Para preparar 200 ml de leite: dissolva 26 g (3 colheres de sopa rasas) em um pouco de água filtrada ou fervida (50°C), misture bem e complete até 200 ml.\nPara preparar 1 litro: dissolva 130 g em 200 ml de água e complete até 1 litro.',
+    }
+  },
+
+  // ── LEITE EM PÓ INSTANTÂNEO (IN MAPA 28/2007) ────────────────────────────
+  'leite-instantaneo': {
+    label: 'Leite em Pó Instantâneo',
+    classe: 'leite-instantaneo',
+    legal: `<strong>IN MAPA nº 28, de 12/06/2007</strong> — Leite em Pó Instantâneo<br>
+      • Processo: aglomeração por spray dryer + lecitinação (lecitina de soja ou girassol)<br>
+      • G.tot: <strong>≥ 26,0%</strong> m/m na matéria seca (integral) ou <strong>≤ 1,5%</strong> (desnatado instantâneo)<br>
+      • Índice de insolubilidade: <strong>≤ 1,0 mL</strong> (instantaneidade obrigatória)<br>
+      • Umidade: ≤ 3,5% m/m · PTN: ≥ 34% nos SLNG<br>
+      • Adição de lecitina: ≤ 0,5% m/m no produto final (MAPA 28/2007 Art. 4º §2º)`,
+    subtipo: {
+      label: 'Tipo de gordura:',
+      opcoes: [
+        { id:'st-inst-integral', label:'Integral (G.tot ≥ 26%)', default: true },
+        { id:'st-inst-desnatado', label:'Desnatado instantâneo (G.tot ≤ 1,5%)' },
+      ]
+    },
+    campos: {
+      aspecto: 'Grânulos aglomerados de coloração branca a creme, de fácil dissolução em água, sem grumos após agitação suave',
+      sabor: 'Sabor e odor característicos de leite, suaves, não rançosos, livres de sabores e odores estranhos',
+      alergenicos: 'CONTÉM LEITE E DERIVADOS DE SOJA (lecitina). NÃO CONTÉM GLÚTEN.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Embalagem aluminizada hermeticamente fechada (papel/polietileno/alumínio/polietileno) com atmosfera de nitrogênio',
+      emb2: 'Caixa de papelão com filme plástico ou fardo de papel kraft — múltiplas unidades',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade. Após aberto, fechar bem a embalagem e consumir em até 30 dias.',
+      obs: 'LEITE EM PÓ INSTANTÂNEO — DISSOLVE FACILMENTE EM ÁGUA FRIA.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.\nEste produto contém lecitina de soja como agente de instantaneização.',
+      validade: '24 meses (embalagem fechada) · Após aberto: consumir em até 30 dias',
+      preparo: 'Dissolva 26 g (3 colheres de sopa rasas) em 200 ml de água fria, morna ou quente. Misture suavemente.\nPara 1 litro: dissolva 130 g em 1 litro de água. O produto dissolve instantaneamente sem necessidade de agitação intensa.',
+    }
+  },
+
+  // ── LEITE EM PÓ DESNATADO (IN MAPA 28/2007) ──────────────────────────────
+  'leite-desnatado': {
+    label: 'Leite em Pó Desnatado',
+    classe: 'leite-desnatado',
+    legal: `<strong>IN MAPA nº 28, de 12/06/2007</strong> — Leite em Pó Desnatado<br>
+      • G.tot: <strong>≤ 1,5%</strong> m/m na matéria seca (máximo absoluto)<br>
+      • Umidade: ≤ 3,5% m/m (spray dryer) · Índice de insolubilidade: ≤ 1,0 mL<br>
+      • PTN: ≥ 34% m/m nos sólidos lácteos não-gordurosos (SLNG)<br>
+      • Acidez: ≤ 18 mL NaOH 0,1N / 10g SLNG · pH reconstituído: 6,3–6,8<br>
+      • <strong>Proibido:</strong> adição de qualquer ingrediente não-lácteo · Destinado a usos dietéticos e culinária`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme de coloração branca a levemente creme, aspecto homogêneo, sem grumos',
+      sabor: 'Sabor e odor característicos de leite desnatado, suaves, não rançosos, livres de sabores e odores estranhos',
+      alergenicos: 'CONTÉM LEITE.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Saco plástico atóxico (polietileno), hermeticamente fechado, com proteção contra umidade',
+      emb2: 'Fardo de papel kraft multifolhado com revestimento interno de polietileno — 25 kg',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes. Após aberto, manter em recipiente limpo, seco e fechado.',
+      obs: 'LEITE EM PÓ DESNATADO — BAIXO TEOR DE GORDURA.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      validade: '24 meses (embalagem fechada) · Após aberto: consumir em até 30 dias',
+      preparo: 'Para preparar 200 ml de leite desnatado: dissolva 20 g (2 colheres de sopa rasas) em água filtrada ou fervida (50°C) e complete até 200 ml.\nPara 1 litro: dissolva 100 g em 1 litro de água.',
+    }
+  },
+
+  // ── ACHOCOLATADO EM PÓ (RDC ANVISA 264/2005 + RDC 286/2005) ─────────────
+  'achocolatado': {
+    label: 'Achocolatado em Pó',
+    classe: 'achocolatado',
+    legal: `<strong>RDC ANVISA nº 264, de 22/09/2005</strong> — Achocolatado e Similares<br>
+      • Denominação: "Achocolatado" → teor mínimo de <strong>32% m/m de cacau em pó</strong> no produto (calculado base seca)<br>
+      • Abaixo de 32%: denominação "Bebida em pó sabor chocolate" (não pode se chamar achocolatado)<br>
+      • Sacarose: máximo <strong>65% m/m</strong> · G.tot: mínimo <strong>5% m/m</strong><br>
+      • Umidade: ≤ 3,0% m/m (pó) · Alcalinizantes permitidos (carbonato de potássio/sódio)<br>
+      • Parâmetros micro: RDC ANVISA 724/2022 + IN 161/2022 · Alertas: IN 75/2020`,
+    subtipo: {
+      label: 'Teor de cacau (define denominação legal):',
+      opcoes: [
+        { id:'st-acho-32', label:'≥ 32% cacau → "Achocolatado"', default: true },
+        { id:'st-acho-lt32', label:'< 32% cacau → "Bebida em pó sabor chocolate"' },
+        { id:'st-acho-diet', label:'Diet / Zero Açúcar (adoçado)' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme de coloração marrom característica, sem grumos, aspecto homogêneo',
+      sabor: 'Sabor e aroma intensos e característicos de chocolate, doce equilibrado, livre de sabores e odores estranhos',
+      alergenicos: 'CONTÉM LEITE E DERIVADOS. CONTÉM CACAU. PODE CONTER AMENDOIM E CASTANHAS.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE. CONTÉM CAFEÍNA (presente naturalmente no cacau).',
+      emb1: 'Embalagem plástica metalizada (PET/AL/PE) hermeticamente fechada, resistente à umidade',
+      emb2: 'Caixa de papelão ou fardo de papel kraft multifolhado',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo de luz, calor e umidade. Após aberto, fechar bem a embalagem e consumir em até 30 dias.',
+      obs: 'CONTÉM CACAU — PRODUTO PODE CAUSAR REAÇÕES EM PESSOAS SENSÍVEIS À CAFEÍNA OU TEOBROMINA.\nALERTA: verificar percentual de cacau para definir denominação correta conforme RDC 264/2005.',
+      validade: '18 meses',
+      preparo: 'Achocolatado quente: adicione 3 colheres de sopa (30 g) em 200 ml de leite quente. Misture bem até dissolver completamente.\nFrio: dissolva em um pouco de leite frio e complete até 200 ml. Agitar bem.',
+    }
+  },
+
+  // ── CACAU EM PÓ (RDC ANVISA 264/2005) ────────────────────────────────────
+  'cacau': {
+    label: 'Cacau em Pó',
+    classe: 'cacau',
+    legal: `<strong>RDC ANVISA nº 264, de 22/09/2005</strong> — Cacau e Produtos de Cacau<br>
+      • <strong>Cacau em pó comum:</strong> G.tot ≥ 10% e < 22% m/m na matéria seca<br>
+      • <strong>Cacau em pó gordo:</strong> G.tot ≥ 22% m/m na matéria seca<br>
+      • <strong>Cacau em pó magro/desgordado:</strong> G.tot < 10% m/m na matéria seca<br>
+      • Umidade: ≤ 9,0% m/m · pH: 4,5–8,0 (natural) ou até 8,5 (alcalinizado)<br>
+      • Alcalinizantes permitidos: carbonato de K, Na, Mg; bicarbonato de Na<br>
+      • Origem: <em>Theobroma cacao</em> L. — Pureza mínima de cacau: identificação botânica`,
+    subtipo: {
+      label: 'Tipo por teor de gordura (manteiga de cacau):',
+      opcoes: [
+        { id:'st-cacau-comum',    label:'Comum — G.tot ≥ 10% e < 22%', default: true },
+        { id:'st-cacau-gordo',    label:'Gordo / Alto teor — G.tot ≥ 22%' },
+        { id:'st-cacau-magro',    label:'Magro / Desgordado — G.tot < 10%' },
+        { id:'st-cacau-alcalin',  label:'Alcalinizado (Dutch process — cor escura)' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó fino, cor marrom média a escura, característica do cacau, sem grumos, aspecto uniforme',
+      sabor: 'Sabor e aroma intensos e amargos característicos de cacau, sem sabores estranhos, ranço ou mofo',
+      alergenicos: 'PODE CONTER LEITE, AMENDOIM E CASTANHAS.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. PODE CONTER TRAÇOS DE LACTOSE (contaminação cruzada).',
+      emb1: 'Embalagem plástica multilaminada (PET/AL/PE) hermeticamente selada, protetora contra umidade e odores externos',
+      emb2: 'Caixa de papelão ou saco de papel kraft revestido, com quantidade declarada no rótulo',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 20°C), arejado e livre de odores fortes que possam ser absorvidos pelo produto. Proteger rigorosamente da umidade.',
+      obs: 'CACAU EM PÓ — verificar classificação por G.tot conforme RDC ANVISA 264/2005.\nO percentual de manteiga de cacau define a denominação legal obrigatória no rótulo.\nCONTÉM CAFEÍNA E TEOBROMINA — presentes naturalmente no cacau.',
+      validade: '24 meses',
+      preparo: 'Para uso culinário: incorporar diretamente à receita sem diluição prévia, ou misturar com açúcar antes de adicionar ingredientes líquidos. Para bebida: dissolver 10 g (1 colher de sopa) em água ou leite quente.',
+    }
+  },
+
+  // ── CAFÉ TORRADO E MOÍDO ────────────────────────────────────────────────────
+  'cafe-torrado-moido': {
+    label: 'Café Torrado e Moído',
+    classe: 'cafe-torrado-moido',
+    legal: `<strong>RDC ANVISA nº 277, de 22/09/2005</strong> + <strong>IN MAPA nº 16, de 24/05/2010</strong><br>
+      • Umidade: <strong>≤ 5,0%</strong> m/m · Extrato aquoso: <strong>≥ 25% e ≤ 35%</strong> m/m base seca<br>
+      • Cafeína: <strong>≥ 0,7%</strong> m/m na matéria seca (autenticidade obrigatória)<br>
+      • Proibida adição de qualquer outra substância · Produto puro torrado e moído<br>
+      • Denominação: "Café Torrado e Moído" · Blend deve declarar origens/variedades<br>
+      • Classificação Specialty (≥ 80 pts SCA) é opcional · <strong>Micro:</strong> IN 161/2022 cat. 10.a`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-cafe-250g',  label:'📦 Embalagem 250 g', default: true },
+        { id:'st-cafe-500g',  label:'📦 Embalagem 500 g' },
+        { id:'st-cafe-5kg',   label:'🏭 Saco 5 kg' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó fino e uniforme de coloração marrom característica, aspecto homogêneo sem grumos',
+      sabor: 'Sabor e aroma típicos de café torrado, intensos, característicos, livres de odores estranhos, ranço ou mofo',
+      alergenicos: 'NÃO CONTÉM ALERGÊNICOS declarados. PODE CONTER traços de outros grãos processados na mesma linha.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. NÃO CONTÉM LACTOSE.',
+      emb1: 'Embalagem aluminizada com válvula desgasificadora, hermeticamente selada com atmosfera de nitrogênio',
+      emb2: 'Fardo de papel kraft multifolhado — 25 kg (industrial) · Caixa de papelão para varejo',
+      armazenamento: 'Armazenar em local seco, fresco (≤ 25°C) e arejado, ao abrigo de luz, calor, umidade e odores externos. Após aberto, fechar bem e consumir em até 30 dias.',
+      obs: 'CONTÉM CAFEÍNA — presença natural do café. Não recomendado para crianças e gestantes.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      validade: '12 meses (embalagem lacrada) · Após aberto: consumir em até 30 dias',
+      preparo: 'Café coado: 10 g (1 colher de sopa) para 100 ml de água filtrada quente (90–95°C).\nEspresso: 7–10 g / 30 ml. Adaptar conforme equipamento.',
+    }
+  },
+
+  // ── CAFÉ TORRADO EM GRÃO ───────────────────────────────────────────────────
+  'cafe-torrado': {
+    label: 'Café Torrado (grão)',
+    classe: 'cafe-torrado',
+    legal: `<strong>RDC ANVISA nº 277, de 22/09/2005</strong> + <strong>IN MAPA nº 16, de 24/05/2010</strong><br>
+      • Umidade: <strong>≤ 5,0%</strong> m/m · Extrato aquoso: <strong>≥ 25% e ≤ 35%</strong> m/m base seca<br>
+      • Cafeína: <strong>≥ 0,7%</strong> m/m na matéria seca<br>
+      • Apresentação: grão inteiro torrado, não moído · Proibida adição de qualquer substância<br>
+      • Classificação por tipo 1–8 (defeitos físicos) conforme IN MAPA 16/2010<br>
+      • Specialty Coffee ≥ 80 pts SCA (opcional) · <strong>Micro:</strong> IN 161/2022 cat. 10.a`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-cafe-250g',  label:'📦 Embalagem 250 g', default: true },
+        { id:'st-cafe-500g',  label:'📦 Embalagem 500 g' },
+        { id:'st-cafe-5kg',   label:'🏭 Saco 5 kg' },
+      ]
+    },
+    campos: {
+      aspecto: 'Grãos inteiros, uniformes, coloração marrom característica conforme grau de torra, sem excesso de grãos defeituosos',
+      sabor: 'Sabor e aroma típicos de café torrado, característicos da torra e origem, livres de odores estranhos, ranço ou mofo',
+      alergenicos: 'NÃO CONTÉM ALERGÊNICOS declarados. PODE CONTER traços de outros grãos processados na mesma linha.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. NÃO CONTÉM LACTOSE.',
+      emb1: 'Embalagem aluminizada com válvula desgasificadora, hermeticamente selada com atmosfera de nitrogênio',
+      emb2: 'Saco de ráfia ou papel kraft reforçado — 25 kg (industrial) · Caixa de papelão para varejo',
+      armazenamento: 'Armazenar em local seco, fresco (≤ 25°C) e arejado, ao abrigo de luz, calor, umidade e odores externos. Após aberto, armazenar em recipiente hermético. Não refrigerar.',
+      obs: 'CAFÉ EM GRÃO — Moer imediatamente antes do preparo para preservar aroma e sabor.\nCONTÉM CAFEÍNA — presença natural do café.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      validade: '12 meses (embalagem lacrada) · Após aberto: consumir em até 60 dias',
+      preparo: 'Moa os grãos imediatamente antes do preparo.\nCafé coado: 10 g para 100 ml de água filtrada quente (90–95°C). Espresso: 7–10 g / 30 ml.',
+    }
+  },
+
+};
+
+// Mapa de subtipo para ajuste de campos específicos
+const SUBTIPO_AJUSTES = {
+  'st-25kg':  { emb1:'Saco plástico atóxico (polietileno), hermeticamente fechado', emb2:'Fardo de papel kraft multifolhado — 25 kg (Industrial / granel)', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
+  'st-1kg':   { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'1 kg' },
+  'st-800g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 800 g', emb2:'Caixa de papelão com 15 unidades de 800 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'800 g' },
+  'st-400g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 400 g', emb2:'Caixa de papelão com 24 unidades de 400 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'400 g' },
+  'st-200g':  { emb1:'Embalagem aluminizada (sachê) hermeticamente selada — 200 g', emb2:'Caixa de papelão com 48 sachês de 200 g', validade:'24 meses (fechada) · Uso único após abertura', gramatura:'200 g' },
+  'st-cafe-250g': { emb1:'Embalagem aluminizada com válvula desgasificadora hermeticamente selada — 250 g', emb2:'Caixa de papelão com 24 unidades de 250 g', validade:'12 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'250 g' },
+  'st-cafe-500g': { emb1:'Embalagem aluminizada com válvula desgasificadora hermeticamente selada — 500 g', emb2:'Caixa de papelão com 12 unidades de 500 g', validade:'12 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'500 g' },
+  'st-cafe-5kg':  { emb1:'Saco aluminizado com válvula desgasificadora hermeticamente selado — 5 kg', emb2:'Saco de papel kraft reforçado ou caixa de papelão', validade:'12 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'5 kg' },
+  'st-inst-integral': { aspecto:'Grânulos aglomerados de coloração branca a creme, dissolução instantânea em água fria, sem grumos após agitação suave' },
+  'st-inst-desnatado':{ aspecto:'Grânulos aglomerados de coloração branca, dissolução instantânea em água fria, baixíssimo teor de gordura', emb1:'Embalagem aluminizada hermética', obs:'LEITE EM PÓ DESNATADO INSTANTÂNEO — DISSOLVE EM ÁGUA FRIA. G.tot ≤ 1,5% m/m.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.' },
+  'st-acho-32':       { obs:'ACHOCOLATADO EM PÓ — Teor de cacau ≥ 32% m/m (conforme RDC ANVISA 264/2005).\nDENOMINAÇÃO LEGAL: "ACHOCOLATADO EM PÓ".\nCONTÉM CAFEÍNA E TEOBROMINA — presentes naturalmente no cacau.' },
+  'st-acho-lt32':     { obs:'BEBIDA EM PÓ SABOR CHOCOLATE — Teor de cacau < 32% (não pode ser denominado "Achocolatado").\nConforme RDC ANVISA 264/2005, a denominação obrigatória é "BEBIDA EM PÓ SABOR CHOCOLATE".', aspecto:'Pó uniforme de coloração marrom clara a média, sem grumos' },
+  'st-acho-diet':     { obs:'ACHOCOLATADO/BEBIDA EM PÓ DIET — zero ou baixo teor de açúcar. Verificar legislação de alegação "diet/zero".\nOs adoçantes utilizados devem estar listados e aprovados pela ANVISA.' },
+  'st-cacau-comum':   { obs:'CACAU EM PÓ — Teor de manteiga de cacau: ≥ 10% e < 22% m/m (base seca).\nDENOMINAÇÃO: "Cacau em pó" conforme RDC ANVISA 264/2005.' },
+  'st-cacau-gordo':   { obs:'CACAU EM PÓ ALTO TEOR DE GORDURA — Teor de manteiga de cacau: ≥ 22% m/m (base seca).\nDENOMINAÇÃO: "Cacau em pó gordo" conforme RDC ANVISA 264/2005.\nSabor e aroma mais intensos; ideal para confeitaria premium.', aspecto:'Pó fino e sério, cor marrom intensa, alto teor de manteiga de cacau, textura levemente oleosa ao toque' },
+  'st-cacau-magro':   { obs:'CACAU EM PÓ DESGORDADO — Teor de manteiga de cacau: < 10% m/m (base seca).\nDENOMINAÇÃO: "Cacau em pó magro" ou "cacau em pó desgordado" conforme RDC ANVISA 264/2005.', aspecto:'Pó fino, cor marrom clara, baixíssimo teor de gordura, textura seca e pulverulenta' },
+  'st-cacau-alcalin': { obs:'CACAU EM PÓ ALCALINIZADO (Dutch process) — tratado com agente alcalinizante para redução de acidez e escurecimento.\nDENOMINAÇÃO: incluir "alcalinizado" na denominação conforme RDC ANVISA 264/2005.\nO processo altera cor, sabor e pH: produto tipicamente com pH 7,0–8,5.', aspecto:'Pó fino de coloração marrom escura a quase negra, característica do processo Dutch, sabor suave e menos amargo' },
+};
+
+let tipoSel = 'composto-com';
+let subtipoSel = null;
+
+function selTipo(tipo) {
+  tipoSel = tipo;
+  subtipoSel = null;
+
+  // Atualizar botões de tipo
+  document.querySelectorAll('[id^="tb-"]').forEach(b => b.classList.remove('sel'));
+  const tbEl = document.getElementById('tb-'+tipo);
+  if (tbEl) tbEl.classList.add('sel');
+
+  const tpl = TEMPLATES[tipo];
+  if (!tpl) return;
+
+  // classeSel usa o próprio 'tipo' como identificador de classificação
+  // (preserva identidade correta: 'leite-integral', 'achocolatado', etc.)
+  classeSel = tipo;
+
+  // Tipos com subtipo de IDENTIDADE (cacau, achocolatado, leite instantâneo)
+  // também precisam de seletor de embalagem secundário
+  const TIPOS_COM_EMBALAGEM_SECUNDARIA = ['achocolatado','cacau','leite-instantaneo'];
+
+  // Mostrar painel de subtipo se aplicável
+  const subBox = document.getElementById('subtipoBox');
+  const subOpts = document.getElementById('subtipoOpts');
+  const embBox = document.getElementById('embalagemBox');
+  const embOpts = document.getElementById('embalagemOpts');
+
+  if (tpl.subtipo) {
+    subBox.style.display = '';
+    subBox.querySelector('label').textContent = tpl.subtipo.label;
+    // Renderizar botões de múltipla seleção (toggle)
+    subOpts.innerHTML = tpl.subtipo.opcoes.map(o =>
+      `<button class="btn${o.default?' btn-primary':''}" id="${o.id}"
+        onclick="toggleSubtipo('${tipo}','${o.id}')"
+        style="font-size:12px;height:32px;user-select:none"
+        title="Clique para marcar/desmarcar">${o.label}</button>`
+    ).join('');
+    // Aplicar campos base ANTES de selecionar subtipo
+    _aplicarTemplate(tpl.campos);
+    // Auto-selecionar o default
+    const def = tpl.subtipo.opcoes.find(o=>o.default);
+    if (def) {
+      subtipoSel = def.id;
+      _toggleBtn(def.id, true);
+      _aplicarSubtipoOuEmb(tipo, def.id);
+    }
+    _atualizarResumoSubtipo(tipo);
+
+    // Mostrar seletor de embalagem secundário para tipos de identidade
+    if (TIPOS_COM_EMBALAGEM_SECUNDARIA.includes(tipo)) {
+      embBox.style.display = '';
+      const embOpcoes = [
+        {id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', def:true},
+        {id:'st-1kg',  label:'📦 Embalagem 1 kg'},
+        {id:'st-800g', label:'📦 Embalagem 800 g'},
+        {id:'st-400g', label:'📦 Embalagem 400 g'},
+        {id:'st-200g', label:'📦 Embalagem 200 g'},
+      ];
+      embOpts.innerHTML = embOpcoes.map(o=>
+        `<button class="btn${o.def?' btn-primary':''}" id="emb-${o.id}"
+          onclick="toggleEmbalagem('${tipo}','${o.id}')"
+          style="font-size:12px;height:32px;user-select:none"
+          title="Clique para marcar/desmarcar">${o.label}</button>`
+      ).join('');
+      // Auto-selecionar fardo 25kg
+      _aplicarSubtipoOuEmb(tipo, 'st-25kg');
+      _atualizarResumoEmbalagem(tipo);
+    } else {
+      embBox.style.display = 'none';
+    }
+  } else {
+    subBox.style.display = 'none';
+    subOpts.innerHTML = '';
+    embBox.style.display = 'none';
+    _aplicarTemplate(tpl.campos);
+    const den = document.getElementById('p_denominacao');
+    if (den) den.value = tpl.label;
+  }
+
+  // Atualizar painel legal
+  document.getElementById('classeLegal').innerHTML =
+    `<strong style="color:var(--blue)">${tpl.label}</strong><br>${tpl.legal}`;
+}
+
+// ── UTILITÁRIOS MULTI-SELECT ─────────────────────────────────────────────────
+
+function _toggleBtn(id, force) {
+  const el = document.getElementById(id) || document.getElementById('emb-'+id.replace('emb-',''));
+  if (!el) return;
+  const isOn = force !== undefined ? force : !el.classList.contains('btn-primary');
+  el.classList.toggle('btn-primary', isOn);
+  el.classList.toggle('btn', !isOn);
+}
+
+function _getBtnSelecionados(containerId) {
+  return [...document.querySelectorAll(`#${containerId} button.btn-primary`)]
+    .map(b => b.id.replace('emb-',''));
+}
+
+function _atualizarResumoSubtipo(tipo) {
+  const sel = _getBtnSelecionados('subtipoOpts');
+  const resumo = document.getElementById('subtipoResumo');
+  if (!resumo) return;
+  if (!sel.length) { resumo.textContent = '⚠️ Selecione ao menos uma opção.'; return; }
+  const tpl = TEMPLATES[tipo];
+  const labels = sel.map(id => {
+    const op = tpl?.subtipo?.opcoes?.find(o=>o.id===id);
+    return op ? op.label : id;
+  });
+  resumo.innerHTML = `✅ Selecionado${sel.length>1?'s':''}: <strong>${labels.map(l=>l.replace(/^[^a-zA-ZÀ-ú]/,'').trim()).join(' · ')}</strong>`;
+}
+
+function _atualizarResumoEmbalagem(tipo) {
+  const sel = _getBtnSelecionados('embalagemOpts');
+  const resumo = document.getElementById('embalagemResumo');
+  if (!resumo) return;
+  if (!sel.length) { resumo.textContent = '⚠️ Selecione ao menos uma embalagem.'; return; }
+  const allOpts = [
+    {id:'st-25kg',label:'Fardo 25 kg'},{id:'st-1kg',label:'1 kg'},
+    {id:'st-800g',label:'800 g'},{id:'st-400g',label:'400 g'},{id:'st-200g',label:'200 g'},
+  ];
+  const labels = sel.map(id => {
+    const op = allOpts.find(o=>o.id===id);
+    return op ? op.label : id;
+  });
+  resumo.innerHTML = `✅ Selecionado${sel.length>1?'s':''}: <strong>${labels.join(' · ')}</strong>`;
+}
+
+// Toggle para subtipo (múltipla seleção)
+function toggleSubtipo(tipo, stId) {
+  const btn = document.getElementById(stId);
+  if (!btn) return;
+  const jaAtivo = btn.classList.contains('btn-primary');
+  // Toggle visual
+  btn.classList.toggle('btn-primary', !jaAtivo);
+  btn.classList.toggle('btn', jaAtivo);
+  // Aplicar campos se ativando; se desativando, manter estado atual
+  if (!jaAtivo) {
+    subtipoSel = stId;
+    _aplicarSubtipoOuEmb(tipo, stId);
+  }
+  _atualizarResumoSubtipo(tipo);
+}
+
+// Toggle para embalagem secundária (múltipla seleção)
+function toggleEmbalagem(tipo, stId) {
+  const btn = document.getElementById('emb-'+stId);
+  if (!btn) return;
+  const jaAtivo = btn.classList.contains('btn-primary');
+  btn.classList.toggle('btn-primary', !jaAtivo);
+  btn.classList.toggle('btn', jaAtivo);
+  if (!jaAtivo) _aplicarSubtipoOuEmb(tipo, stId);
+  _atualizarResumoEmbalagem(tipo);
+}
+
+// Aplica campos de um subtipo/embalagem (lógica unificada)
+function _aplicarSubtipoOuEmb(tipo, stId) {
+  const tpl = TEMPLATES[tipo];
+  const ajuste = SUBTIPO_AJUSTES[stId] || {};
+  const SUBTIPO_SOMENTE_EMBALAGEM = ['st-25kg','st-1kg','st-800g','st-400g','st-200g','st-cafe-250g','st-cafe-500g','st-cafe-5kg'];
+
+  if (SUBTIPO_SOMENTE_EMBALAGEM.includes(stId)) {
+    _aplicarTemplate(ajuste);
+    const pesoMap = {
+      'st-25kg':25000,'st-1kg':1000,'st-800g':800,'st-400g':400,'st-200g':200,
+      'st-cafe-250g':250,'st-cafe-500g':500,'st-cafe-5kg':5000,
+    };
+    const pesoEl = document.getElementById('p_peso');
+    if (pesoEl && pesoMap[stId]) pesoEl.value = pesoMap[stId];
+  } else {
+    _aplicarTemplate({...tpl.campos, ...ajuste});
+  }
+
+  // Denominação legal
   const den = document.getElementById('p_denominacao');
-  if (den && !den.value) den.value = CLASSES[t].label;
+  if (den) {
+    const denMap = {
+      'st-25kg':'Leite em Pó Integral','st-1kg':'Leite em Pó Integral',
+      'st-800g':'Leite em Pó Integral','st-400g':'Leite em Pó Integral','st-200g':'Leite em Pó Integral',
+      'st-inst-integral':'Leite em Pó Integral Instantâneo',
+      'st-inst-desnatado':'Leite em Pó Desnatado Instantâneo',
+      'st-acho-32':'Achocolatado em Pó','st-acho-lt32':'Bebida em Pó Sabor Chocolate',
+      'st-acho-diet':'Achocolatado em Pó Diet',
+      'st-cacau-comum':'Cacau em Pó','st-cacau-gordo':'Cacau em Pó Gordo',
+      'st-cacau-magro':'Cacau em Pó Magro','st-cacau-alcalin':'Cacau em Pó Alcalinizado',
+      'st-cafe-250g':'Café Torrado e Moído','st-cafe-500g':'Café Torrado e Moído','st-cafe-5kg':'Café Torrado e Moído',
+    };
+    den.value = denMap[stId] || (tpl ? tpl.label : '');
+  }
+
+  // Painel legal com subtipo
+  const legalExtra = ajuste.obs
+    ? `<br><div style="margin-top:6px;padding:6px 8px;background:rgba(30,58,138,0.07);border-radius:4px;font-size:11px"><strong>Subtipo selecionado:</strong> ${ajuste.obs.split('\n')[0]}</div>`
+    : '';
+  const classeLegalEl = document.getElementById('classeLegal');
+  if (tpl && classeLegalEl) {
+    classeLegalEl.innerHTML = `<strong style="color:var(--blue)">${tpl.label}</strong><br>${tpl.legal}${legalExtra}`;
+  }
+}
+
+// Compatibilidade: selSubtipo agora chama toggleSubtipo
+function selSubtipo(tipo, stId) { toggleSubtipo(tipo, stId); }
+
+// Compatibilidade: selEmbalagem agora chama toggleEmbalagem
+function selEmbalagem(tipo, stId) { toggleEmbalagem(tipo, stId); }
+
+// Retorna array de todas as embalagens selecionadas (subtipo + embalagem secundária)
+function getEmbalagensSelecionadas() {
+  const sub = _getBtnSelecionados('subtipoOpts');
+  const emb = _getBtnSelecionados('embalagemOpts');
+  return [...new Set([...sub, ...emb])];
+}
+
+
+
+function _aplicarTemplate(campos) {
+  const mapa = {
+    denominacao:'p_denominacao',
+    gramatura:'p_gramatura',
+    aspecto:'p_aspecto', sabor:'p_sabor', alergenicos:'p_alergenicos',
+    glutenlactose:'p_glutenlactose', emb1:'p_emb1', emb2:'p_emb2',
+    armazenamento:'p_armazenamento', obs:'p_obs', validade:'p_validade',
+    preparo:'p_preparo_txt'
+  };
+  Object.entries(mapa).forEach(([campo, id]) => {
+    const el = document.getElementById(id);
+    if (el && campos[campo] !== undefined) el.value = campos[campo];
+  });
+}
+
+// Manter compatibilidade: selClasse ainda usável externamente
+function selClasse(c) {
+  // Todos os tipos são mapeados diretamente — o tipoSel agora é a própria classificação
+  const tiposValidos = ['composto-com','composto-sem','mistura','po-preparo',
+                        'leite-integral','leite-instantaneo','leite-desnatado',
+                        'achocolatado','cacau','cafe-torrado-moido','cafe-torrado'];
+  if (tiposValidos.includes(c)) selTipo(c);
+  else classeSel = c;
 }
 
 function syncNome() {
   // nothing needed — nome is read directly
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// STEP 2 — RECEITA
+// ── NOME DE EXIBIÇÃO DO INGREDIENTE ──────────────────────────────────────────
+// Quando o ingrediente tem campo `rotulo`, usa apenas a parte ANTES dos parênteses
+// como nome de exibição nas tabelas e composição da receita.
+// Ex: "Composto Lácteo com Gordura Vegetal (soro de leite...)" → "Composto Lácteo com Gordura Vegetal"
+function _nomeExibicao(d) {
+  if (!d.rotulo) return d.n;
+  // Pega tudo antes do primeiro "(" e remove espaços extras
+  return d.rotulo.split('(')[0].trim();
+}
+
+// ── LISTA DE INGREDIENTES PARA RÓTULO ────────────────────────────────────────
+// Constrói a lista em ordem decrescente de quantidade (RDC 429/2020, Art. 19)
+// Ingredientes com campo `rotulo` no DB são expandidos com seus subingredientes
+function _buildIngredientesList() {
+  if (!receita.length) return '';
+  return receita
+    .slice()
+    .sort((a,b) => b.qtde - a.qtde)
+    .map(r => r.d.rotulo || r.d.n)
+    .join(', ');
+}
+
+function autoPreencherIngredientes() {
+  if (!receita.length) {
+    alert('Adicione ingredientes no Passo 2 antes de preencher a lista.');
+    return;
+  }
+  const lista = _buildIngredientesList();
+  document.getElementById('p_ingredientes_txt').value = lista;
+}
+
+
 // ────────────────────────────────────────────────────────────────────────────
 function populaSel() {
   const sel = document.getElementById('selIng');
@@ -562,7 +2287,7 @@ function renderReceita(){
   receita.forEach((r,i)=>{
     const f=r.qtde/100;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${r.d.n}</td><td>${r.qtde}</td><td style="color:var(--text2)">${f2(r.qtde/tQ*100)}%</td>
+    tr.innerHTML=`<td>${_nomeExibicao(r.d)}</td><td>${r.qtde}</td><td style="color:var(--text2)">${f2(r.qtde/tQ*100)}%</td>
       <td>${f2((r.d.kcal||0)*f)}</td><td>${f2((r.d.ptn||0)*f)}</td><td>${f2((r.d.cho||0)*f)}</td>
       <td>${f2((r.d.gt||0)*f)}</td><td>${f0((r.d.na||0)*f)}</td>
       <td><span class="src-chip ${r.d.src||''}">${r.d.src||'—'}</span></td>
@@ -680,7 +2405,7 @@ function exportCSV(){
   csv+=`Porção (g);${P100}\nMedida caseira;${mc}\nPorções/embalagem;${nP}\n\n`;
   csv+='COMPOSIÇÃO\nIngrediente;Referência;Qtde(g);%;Kcal;PTN;CHO;Gtot;Gsat;Trans;Fibra;Na\n';
   receita.forEach(r=>{const f=r.qtde/100;
-    csv+=`${r.d.n};${r.d.ref};${r.qtde};${f2(r.qtde/tQ*100)}%;${f2((r.d.kcal||0)*f)};${f2((r.d.ptn||0)*f)};${f2((r.d.cho||0)*f)};${f2((r.d.gt||0)*f)};${f2((r.d.gs||0)*f)};${f2((r.d.tr||0)*f)};${f2((r.d.fi||0)*f)};${f0((r.d.na||0)*f)}\n`;});
+    csv+=`${_nomeExibicao(r.d)};${r.d.ref};${r.qtde};${f2(r.qtde/tQ*100)}%;${f2((r.d.kcal||0)*f)};${f2((r.d.ptn||0)*f)};${f2((r.d.cho||0)*f)};${f2((r.d.gt||0)*f)};${f2((r.d.gs||0)*f)};${f2((r.d.tr||0)*f)};${f2((r.d.fi||0)*f)};${f0((r.d.na||0)*f)}\n`;});
   csv+='\nINFORMAÇÃO NUTRICIONAL\nNutriente;100g;'+P100+'g;%VD\n';
   csv+=`Energia (kcal);${f0(T.kcal)};${f0(P.kcal)};${vdp(P.kcal,VD.kcal)}%\n`;
   csv+=`Carboidratos (g);${f2(T.cho)};${f2(P.cho)};${vdp(P.cho,VD.cho)}%\n`;
@@ -743,17 +2468,26 @@ function renderStep4(){
   if((T.gs||0)>=6)alertas.push('ALTO EM GORDURA SATURADA');
   if((T.na||0)>=600)alertas.push('ALTO EM SÓDIO');
 
-  const classeNomes={'composto-sem':'Composto Lácteo sem Adição · Portaria SDA/MAPA 1.170/2024',
-    'composto-com':'Composto Lácteo com Adição · Portaria SDA/MAPA 1.170/2024',
-    'mistura':'Mistura Láctea · RIISPOA Decreto 9.013/2017 Art. 366',
-    'po-preparo':'Pó para Preparo de Bebida/Alimento · ANVISA RDC 724/2022'};
+  const classeNomes={
+    'composto-sem':      'Composto Lácteo sem Adição · Portaria SDA/MAPA 1.170/2024',
+    'composto-com':      'Composto Lácteo com Adição · Portaria SDA/MAPA 1.170/2024',
+    'mistura':           'Mistura Láctea · RIISPOA Decreto 9.013/2017 Art. 366',
+    'po-preparo':        'Pó para Preparo de Bebida/Alimento · ANVISA RDC 724/2022',
+    'leite-integral':    'Leite em Pó Integral · IN MAPA nº 28/2007',
+    'leite-instantaneo': 'Leite em Pó Instantâneo · IN MAPA nº 28/2007',
+    'leite-desnatado':   'Leite em Pó Desnatado · IN MAPA nº 28/2007',
+    'achocolatado':      'Achocolatado em Pó · RDC ANVISA 264/2005',
+    'cacau':             'Cacau em Pó · RDC ANVISA 264/2005',
+    'cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005 · IN MAPA 16/2010',
+    'cafe-torrado':      'Café Torrado (grão) · RDC ANVISA 277/2005 · IN MAPA 16/2010',
+  };
 
-  const ean=gv('p_ean');
-  const barcodeViz=ean
-    ?`<div class="barcode-viz">${'|'.repeat(3)}${ean.split('').map((_,i)=>i%3===0?'||':'|').join('')}${'|'.repeat(3)}</div><div style="font-size:8px;letter-spacing:1px;text-align:center;margin-top:1px">${ean}</div>`
-    :'<div style="font-size:8px;color:#999">EAN não informado</div>';
 
-  const ingList=gv('p_ingredientes_txt')||receita.map(r=>r.d.n).join(', ');
+
+  // Lista de ingredientes para rótulo:
+  // usa campo `rotulo` do DB quando disponível (ingredientes compostos com subingredientes)
+  // Ordem decrescente de quantidade (legislação RDC 429/2020, Art. 19)
+  const ingList = gv('p_ingredientes_txt') || _buildIngredientesList();
 
   function nr(lbl,v1,v2,vd,bold=false,indent=false){
     return `<tr${bold?' class="nb"':''}${indent&&!bold?' class="ni"':''}>
@@ -807,9 +2541,9 @@ function renderStep4(){
       <div style="padding:5px 10px;font-size:9.5px;line-height:1.6">${ingList}</div>
     </div>
 
-    <!-- 3. INFORMAÇÃO NUTRICIONAL + ALERTAS + SIF + EAN -->
+    <!-- 3. INFORMAÇÃO NUTRICIONAL + ALERTAS + SIF -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">3. Informação nutricional · Alertas frontais · Registro SIF</div>
+      <div class="ftp-sec-t">3. Informação nutricional · Alertas frontais · Registro SIF · Códigos de Barras</div>
       <div style="display:flex;align-items:flex-start;flex-wrap:wrap">
 
         <!-- Tabela nutricional -->
@@ -838,7 +2572,7 @@ function renderStep4(){
           <div style="font-size:7px;padding:2px 5px;color:#555">(*) %VD com base em 2.000 kcal — ANVISA RDC 429/2020</div>
         </div>
 
-        <!-- Alertas + SIF + EAN + Composição -->
+        <!-- Alertas + SIF + Composição -->
         <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:6px;padding:6px 8px">
 
           <!-- Alertas IN 75/2020 -->
@@ -866,18 +2600,13 @@ function renderStep4(){
             <div style="font-size:8.5px"><div style="font-weight:700">Grupo MF Paris Alimentos</div><div style="color:#555">SIF nº 5460 · MAPA/Brasil</div></div>
           </div>
 
-          <!-- EAN / Código de barras -->
-          <div style="border:1px solid #ccc;border-radius:4px;background:#fff;padding:5px 8px">
-            <div style="font-size:7px;font-weight:700;color:#666;margin-bottom:3px;text-transform:uppercase">Código EAN / Interno</div>
-            ${barcodeViz}
-          </div>
 
           <!-- Composição resumo -->
           <div style="border:1px solid #ccc;border-radius:4px;background:#fff;padding:5px 8px">
             <div style="font-size:7px;font-weight:700;color:#666;margin-bottom:3px;text-transform:uppercase">Composição da receita</div>
-            ${receita.map(r=>`<div style="display:flex;justify-content:space-between;font-size:8px;border-bottom:.5px solid #f0f0f0;padding:1px 0">
-              <span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:120px">${r.d.n}</span>
-              <span style="color:#666;white-space:nowrap;margin-left:4px">${r.qtde}g · ${f2(r.qtde/totalQ*100)}%</span>
+            ${receita.map(r=>`<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:8px;border-bottom:.5px solid #f0f0f0;padding:2px 0">
+              <span style="font-size:8px;line-height:1.4;word-break:break-word;flex:1">${_nomeExibicao(r.d)}</span>
+              <span style="color:#666;white-space:nowrap;flex-shrink:0">${r.qtde}g · ${f2(r.qtde/totalQ*100)}%</span>
             </div>`).join('')}
           </div>
         </div>
@@ -902,11 +2631,11 @@ function renderStep4(){
       <div class="ftp-row">
         <div class="ftp-cell"><div class="ftp-lbl">Embalagem primária</div><div class="ftp-val">${gv('p_emb1')}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Embalagem secundária</div><div class="ftp-val">${gv('p_emb2')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Validade · Após abertura</div><div class="ftp-val">${gv('p_validade','12 meses')} · consumir em 30 dias</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','—')}</div></div>
       </div>
       <div class="ftp-row">
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Armazenamento e transporte</div><div class="ftp-val">${gv('p_armazenamento')} Transportar em veículo limpo, fechado, protegido de umidade e calor.</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Modo de preparo</div><div class="ftp-val">Para preparar 200 ml de bebida: adicione ${P100} g (${mc}) em meio copo de água filtrada ou fervida. Mexa bem até dissolver e complete com água.</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Armazenamento e transporte</div><div class="ftp-val" style="white-space:pre-line">${gv('p_armazenamento')}</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Modo de preparo</div><div class="ftp-val" style="white-space:pre-line;font-size:9px">${gv('p_preparo_txt','—')}</div></div>
       </div>
     </div>
 
@@ -983,10 +2712,393 @@ function imprimirFTP(){
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// INIT
 // ────────────────────────────────────────────────────────────────────────────
+// PASSO 5 — LAUDO TÉCNICO
+// ────────────────────────────────────────────────────────────────────────────
+
+// Canvas de assinatura digital
+let _ltDesenhando = false;
+let _ltCanvas = null;
+let _ltCtx = null;
+
+function _ltIniciarCanvas() {
+  _ltCanvas = document.getElementById('ltAssinaturaCanvas');
+  if (!_ltCanvas) return;
+  _ltCtx = _ltCanvas.getContext('2d');
+  _ltCtx.strokeStyle = '#1e3a8a';
+  _ltCtx.lineWidth = 2;
+  _ltCtx.lineCap = 'round';
+  _ltCtx.lineJoin = 'round';
+
+  const pos = (e) => {
+    const r = _ltCanvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  };
+
+  _ltCanvas.onmousedown  = (e) => { _ltDesenhando=true; const p=pos(e); _ltCtx.beginPath(); _ltCtx.moveTo(p.x,p.y); };
+  _ltCanvas.onmousemove  = (e) => { if(!_ltDesenhando) return; const p=pos(e); _ltCtx.lineTo(p.x,p.y); _ltCtx.stroke(); };
+  _ltCanvas.onmouseup    = () => { _ltDesenhando=false; };
+  _ltCanvas.onmouseleave = () => { _ltDesenhando=false; };
+  _ltCanvas.ontouchstart = (e) => { e.preventDefault(); _ltDesenhando=true; const p=pos(e); _ltCtx.beginPath(); _ltCtx.moveTo(p.x,p.y); };
+  _ltCanvas.ontouchmove  = (e) => { e.preventDefault(); if(!_ltDesenhando) return; const p=pos(e); _ltCtx.lineTo(p.x,p.y); _ltCtx.stroke(); };
+  _ltCanvas.ontouchend   = () => { _ltDesenhando=false; };
+}
+
+function ltLimparAssinatura() {
+  if (!_ltCtx) return;
+  _ltCtx.clearRect(0, 0, _ltCanvas.width, _ltCanvas.height);
+}
+
+function _ltAssinaturaBase64() {
+  if (!_ltCanvas) return null;
+  // Verifica se há algo desenhado (não é canvas completamente branco)
+  const data = _ltCtx.getImageData(0, 0, _ltCanvas.width, _ltCanvas.height).data;
+  const temDesenho = data.some((v, i) => i % 4 === 3 && v > 0);
+  return temDesenho ? _ltCanvas.toDataURL('image/png') : null;
+}
+
+function glt(id, def='') {
+  const el = document.getElementById(id);
+  return el ? (el.value || def) : def;
+}
+
+function _ltResultadoBadge(val) {
+  const map = {
+    'Conforme':     '<span style="color:#1d5238;font-weight:700;font-size:9px">✅ CONFORME</span>',
+    'Não conforme': '<span style="color:#9b2626;font-weight:700;font-size:9px">❌ NÃO CONFORME</span>',
+    'Ausente':      '<span style="color:#1d5238;font-weight:700;font-size:9px">✅ AUSENTE</span>',
+    'Presente':     '<span style="color:#9b2626;font-weight:700;font-size:9px">❌ PRESENTE</span>',
+    'Analisar':     '<span style="color:#92400e;font-weight:700;font-size:9px">⚠️ ANALISAR</span>',
+  };
+  return map[val] || val;
+}
+
+function iniciarLaudo() {
+  const empty = document.getElementById('s5empty');
+  const content = document.getElementById('s5content');
+  if (!receita.length) { empty.style.display=''; content.style.display='none'; return; }
+  empty.style.display = 'none';
+  content.style.display = '';
+
+  // Pré-preencher campos automáticos
+  if (!glt('lt_numero')) document.getElementById('lt_numero').value = 'LT-' + Date.now().toString().slice(-5);
+  if (!glt('lt_emissao')) document.getElementById('lt_emissao').value = new Date().toLocaleDateString('pt-BR');
+
+  // Pré-preencher análise sensorial com referência do produto
+  const asp = gv('p_aspecto','Pó uniforme, sem grumos');
+  const sab = gv('p_sabor','Característico, não rançoso');
+  if (!glt('lt_aspecto_obs')) document.getElementById('lt_aspecto_obs').value = asp;
+  if (!glt('lt_cor_obs')) document.getElementById('lt_cor_obs').value = asp.includes('creme') ? 'Branco a creme' : 'Branco';
+  if (!glt('lt_odor_obs')) document.getElementById('lt_odor_obs').value = sab;
+  if (!glt('lt_sabor_obs')) document.getElementById('lt_sabor_obs').value = sab;
+  if (!glt('lt_solub_obs')) document.getElementById('lt_solub_obs').value = 'Boa dissolução em água filtrada ou fervida';
+  if (!glt('lt_resp_cargo')) document.getElementById('lt_resp_cargo').value = 'Analista de Qualidade';
+
+  _ltIniciarCanvas();
+  ltGerarLaudo();
+
+  // Atualizar prévia em tempo real ao editar
+  document.getElementById('s5content').querySelectorAll('input, select, textarea').forEach(el => {
+    el.oninput = el.onchange = ltGerarLaudo;
+  });
+}
+
+// Formata entrada livre como DD/MM/AAAA — aceita vários formatos de entrada
+function _ltFmtData(val) {
+  if (!val || val === '—') return '—';
+  // Remove tudo que não for dígito
+  const d = val.replace(/\D/g, '');
+  if (d.length === 8) {
+    // DDMMAAAA → DD/MM/AAAA
+    return `${d.slice(0,2)}/${d.slice(2,4)}/${d.slice(4,8)}`;
+  }
+  // Já formatado ou formato livre — retornar como está
+  return val;
+}
+
+function ltGerarLaudo() {
+  const T = calcT();
+  const P100 = parseFloat(document.getElementById('p_porcao').value) || 30;
+  const pesoTotal = parseFloat(document.getElementById('p_peso').value) || 1000;
+  const nP = Math.round(pesoTotal / P100);
+  const mc = gv('p_medida','—');
+  const P = {}; Object.keys(T).forEach(k => P[k] = T[k] * P100 / 100);
+  const totalQ = receita.reduce((s,r)=>s+r.qtde,0);
+  const nome = gv('p_nome','Produto');
+  const logoSrc = document.querySelector('.app-header img')?.src || '';
+  const assSrc = _ltAssinaturaBase64();
+  const VD2 = {kcal:2000,cho:300,acat:50,ptn:50,gtot:65,gsat:20,fibra:25,na:2400};
+
+  // Verificação geral: se todas as análises são conformes
+  const resultados = [
+    glt('lt_aspecto_res','Conforme'), glt('lt_cor_res','Conforme'),
+    glt('lt_odor_res','Conforme'), glt('lt_sabor_res','Conforme'),
+    glt('lt_solub_res','Conforme'), glt('lt_part_res','Ausente'),
+  ];
+  const temNaoConf = resultados.some(r => r.includes('conforme') || r === 'Presente');
+  const statusGeral = temNaoConf
+    ? `<span style="background:#fdeaea;color:#9b2626;padding:3px 12px;border-radius:20px;font-weight:800;font-size:11px">❌ PRODUTO NÃO CONFORME — RETIDO PARA ANÁLISE</span>`
+    : `<span style="background:#e8f3ed;color:#1d5238;padding:3px 12px;border-radius:20px;font-weight:800;font-size:11px">✅ PRODUTO APROVADO PARA LIBERAÇÃO</span>`;
+
+  const sensCols = [
+    ['Aspecto / Textura',           glt('lt_aspecto_res','Conforme'), glt('lt_aspecto_obs')],
+    ['Cor',                         glt('lt_cor_res','Conforme'),     glt('lt_cor_obs')],
+    ['Odor / Aroma',                glt('lt_odor_res','Conforme'),    glt('lt_odor_obs')],
+    ['Sabor',                       glt('lt_sabor_res','Conforme'),   glt('lt_sabor_obs')],
+    ['Solubilidade / Dissolução',   glt('lt_solub_res','Conforme'),   glt('lt_solub_obs')],
+    ['Partículas estranhas / Macro',glt('lt_part_res','Ausente'),     glt('lt_part_obs')],
+  ];
+
+  function nr(lbl,v1,v2,vd,bold=false,indent=false){
+    return `<tr${bold?' class="nb"':''}${indent&&!bold?' class="ni"':''}>
+      <td>${lbl}</td>
+      <td style="text-align:right;width:36px">${v1}</td>
+      <td style="text-align:right;width:36px">${v2}</td>
+      <td style="text-align:right;width:28px">${vd}</td></tr>`;
+  }
+
+  document.getElementById('laudoDoc').innerHTML = `
+  <div class="ftp-doc" id="laudoDocInner">
+
+    <!-- CABEÇALHO -->
+    <div class="ftp-hdr">
+      <img src="${logoSrc}" class="ftp-hdr-logo" alt="GMF">
+      <div class="ftp-hdr-title">
+        LAUDO TÉCNICO DE PRODUTO<br>
+        <span style="font-size:14px;letter-spacing:1px">${nome.toUpperCase()}</span>
+      </div>
+      <div class="ftp-hdr-meta">
+        Nº Laudo: <strong>${glt('lt_numero','—')}</strong><br>
+        Emissão: <strong>${glt('lt_emissao','—')}</strong><br>
+        Lote: <strong>${glt('lt_lote','—')}</strong><br>
+        Pág.: <strong>1/1</strong>
+      </div>
+    </div>
+
+    <!-- 1. IDENTIFICAÇÃO DO LOTE -->
+    <div class="ftp-sec">
+      <div class="ftp-sec-t">1. Identificação do produto e lote</div>
+      <div class="ftp-row">
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Produto</div><div class="ftp-val"><strong>${gv('p_denominacao',nome)}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${gv('p_marca','Grupo MF Paris')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Nº Registro / SIF</div><div class="ftp-val"><strong>${gv('p_registro','SIF 5460')}</strong></div></div>
+      </div>
+      <div class="ftp-row">
+        <div class="ftp-cell"><div class="ftp-lbl">Lote</div><div class="ftp-val"><strong>${glt('lt_lote','—')}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Data de fabricação</div><div class="ftp-val"><strong>${_ltFmtData(glt('lt_fabricacao','—'))}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Data de validade</div><div class="ftp-val"><strong>${_ltFmtData(glt('lt_validade','—'))}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Qtde produzida</div><div class="ftp-val">${glt('lt_quantidade','—')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Ordem de Produção</div><div class="ftp-val">${glt('lt_op','—')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Linha / Equipamento</div><div class="ftp-val">${glt('lt_linha','—')}</div></div>
+      </div>
+      <div class="ftp-row">
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Composição da receita</div><div class="ftp-val" style="font-size:8.5px">${receita.slice().sort((a,b)=>b.qtde-a.qtde).map(r=>`${_nomeExibicao(r.d)} (${r.qtde}g · ${f2(r.qtde/totalQ*100)}%)`).join(' · ')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">EAN-13</div><div class="ftp-val" style="font-family:monospace;font-size:9px">${glt('lt_ean','—')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">DUN-14</div><div class="ftp-val" style="font-family:monospace;font-size:9px">${glt('lt_dun','—')}</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Destino / Cliente</div><div class="ftp-val">${glt('lt_destino','Uso interno')}</div></div>
+      </div>
+    </div>
+
+    <!-- 2. STATUS GERAL + OUTRAS INFORMAÇÕES + CONTATO -->
+    <div class="ftp-sec" style="padding:0">
+      <!-- Status -->
+      <div style="padding:8px 12px;text-align:center;border-bottom:1px solid #e5e5e5">
+        ${statusGeral}
+      </div>
+      <!-- Outras informações (campo livre) -->
+      ${glt('lt_outras') ? `
+      <div style="padding:6px 12px;border-bottom:1px solid #e5e5e5;background:#fffdf5">
+        <span style="font-size:7.5px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.4px">Outras informações: </span>
+        <span style="font-size:8.5px;color:#444">${glt('lt_outras')}</span>
+      </div>` : ''}
+      <!-- Contato Qualidade -->
+      <div style="padding:5px 12px;background:#f8f7f5;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <span style="font-size:7.5px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.4px">Contato — Depto. Qualidade:</span>
+        ${glt('lt_telefone') ? `<span style="font-size:8.5px;color:#333">📞 ${glt('lt_telefone')}</span>` : ''}
+        <span style="font-size:8.5px;color:#1e3a8a">✉ qualidade@mfparis.com.br</span>
+        <span style="font-size:8.5px;color:#1e3a8a">✉ pd@mfparis.com.br</span>
+      </div>
+    </div>
+
+    <!-- 3. ANÁLISE SENSORIAL -->
+    <div class="ftp-sec">
+      <div class="ftp-sec-t">2. Análise sensorial — Padrão de referência</div>
+      <table style="width:100%;border-collapse:collapse;font-size:8.5px">
+        <thead><tr style="background:#f0f0f0">
+          <th style="padding:3px 8px;text-align:left;border-bottom:1px solid #ccc;width:30%">Parâmetro</th>
+          <th style="padding:3px 8px;text-align:center;border-bottom:1px solid #ccc;width:18%">Resultado</th>
+          <th style="padding:3px 8px;text-align:left;border-bottom:1px solid #ccc">Observação / Referência</th>
+        </tr></thead>
+        <tbody>
+          ${sensCols.map(([param,res,obs])=>`<tr style="border-bottom:0.5px solid #eee">
+            <td style="padding:3px 8px;font-weight:600">${param}</td>
+            <td style="padding:3px 8px;text-align:center">${_ltResultadoBadge(res)}</td>
+            <td style="padding:3px 8px;color:#444">${obs||'—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      ${glt('lt_obs_gerais') ? `<div style="padding:5px 10px;font-size:8.5px;color:#555;border-top:1px solid #eee"><strong>Obs. gerais:</strong> ${glt('lt_obs_gerais')}</div>` : ''}
+    </div>
+
+    <!-- 4. INFORMAÇÃO NUTRICIONAL -->
+    <div class="ftp-sec">
+      <div class="ftp-sec-t">3. Informação nutricional calculada (ANVISA RDC 429/2020)</div>
+      <div style="display:flex;align-items:flex-start;flex-wrap:wrap">
+        <div class="ftp-nutri" style="flex:1;min-width:220px;margin:6px">
+          <h5>INFORMAÇÃO NUTRICIONAL</h5>
+          <div style="font-size:8px;padding:2px 5px;border-bottom:1px solid #000">Porções por embalagem: Cerca de ${nP} · Porção: ${P100}g (${mc})</div>
+          <div style="display:flex;justify-content:flex-end;font-size:7.5px;color:#555;padding:1px 5px;border-bottom:1px solid #000">
+            <span style="width:36px;text-align:right">100g</span><span style="width:36px;text-align:right">${P100}g</span><span style="width:28px;text-align:right">%VD*</span>
+          </div>
+          <table>
+            ${nr('Valor energético (kcal)',f0(T.kcal),f0(P.kcal),Math.round(P.kcal/VD2.kcal*100)+'%',true)}
+            ${nr('Carboidratos (g)',f2(T.cho),f2(P.cho),Math.round(P.cho/VD2.cho*100)+'%')}
+            ${nr('Açúcares totais (g)',f2(T.act),f2(P.act),'—',false,true)}
+            ${nr('Açúcares adicionados (g)',f2(T.acad),f2(P.acad),Math.round(P.acad/VD2.acat*100)+'%',false,true)}
+            ${nr('Proteínas (g)',f2(T.ptn),f2(P.ptn),Math.round(P.ptn/VD2.ptn*100)+'%')}
+            ${nr('Gorduras totais (g)',f2(T.gt),f2(P.gt),Math.round(P.gt/VD2.gtot*100)+'%')}
+            ${nr('Gorduras saturadas (g)',f2(T.gs),f2(P.gs),Math.round(P.gs/VD2.gsat*100)+'%',false,true)}
+            ${nr('Gorduras trans (g)',f2(T.tr),f2(P.tr),'—',false,true)}
+            ${nr('Fibra alimentar (g)',f2(T.fi),f2(P.fi),Math.round(P.fi/VD2.fibra*100)+'%')}
+            ${nr('Sódio (mg)',f0(T.na),f0(P.na),Math.round(P.na/VD2.na*100)+'%',true)}
+          </table>
+          <div style="font-size:7px;padding:2px 5px;color:#555">(*) %VD com base em 2.000 kcal — RDC 429/2020</div>
+        </div>
+        <div style="flex:1;min-width:180px;padding:6px 8px;display:flex;flex-direction:column;gap:6px">
+          <!-- SIF -->
+          <div style="display:flex;align-items:center;gap:8px;border:1px solid #ccc;border-radius:4px;padding:5px 8px;background:#fff">
+            <svg viewBox="0 0 80 80" width="36" height="36" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+              <circle cx="40" cy="40" r="38" fill="none" stroke="#000" stroke-width="3"/>
+              <defs><path id="arcL" d="M 8 40 A 32 32 0 0 1 72 40"/></defs>
+              <text font-family="Arial" font-weight="900" fill="#000" font-size="10"><textPath href="#arcL" startOffset="50%" text-anchor="middle">MINISTÉRIO DA AGRICULTURA</textPath></text>
+              <text x="40" y="31" text-anchor="middle" font-family="Arial" font-weight="900" font-size="10" fill="#000">BRASIL</text>
+              <text x="40" y="42" text-anchor="middle" font-family="Arial" font-weight="700" font-size="7" fill="#000">INSPECIONADO</text>
+              <text x="40" y="54" text-anchor="middle" font-family="Arial" font-weight="900" font-size="12" fill="#000">5460</text>
+              <text x="40" y="64" text-anchor="middle" font-family="Arial" font-weight="700" font-size="8" fill="#000">S.I.F.</text>
+            </svg>
+            <div style="font-size:8.5px"><div style="font-weight:700">Grupo MF Paris Alimentos</div><div style="color:#555">SIF nº 5460 · MAPA/Brasil</div><div style="color:#555">Lote: <strong>${glt('lt_lote','—')}</strong></div><div style="color:#555">Val.: <strong>${_ltFmtData(glt('lt_validade','—'))}</strong></div></div>
+          </div>
+          <!-- Classificação legal -->
+          <div style="border:1px solid #ccc;border-radius:4px;padding:5px 8px;background:#fff">
+            <div style="font-size:7px;text-transform:uppercase;font-weight:700;color:#666;margin-bottom:3px">Classificação legal</div>
+            <div style="font-size:8.5px;color:#1e3a8a;font-weight:600">${{'composto-sem':'Composto Lácteo sem Adição · Port. MAPA 1.170/2024','composto-com':'Composto Lácteo com Adição · Port. MAPA 1.170/2024','mistura':'Mistura Láctea · RIISPOA Art. 366','po-preparo':'Pó para Preparo · ANVISA RDC 724/2022','leite-integral':'Leite em Pó Integral · IN MAPA 28/2007','leite-instantaneo':'Leite em Pó Instantâneo · IN MAPA 28/2007','leite-desnatado':'Leite em Pó Desnatado · IN MAPA 28/2007','achocolatado':'Achocolatado em Pó · RDC ANVISA 264/2005','cacau':'Cacau em Pó · RDC ANVISA 264/2005','cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005','cafe-torrado':'Café Torrado (grão) · RDC ANVISA 277/2005'}[classeSel]||'—'}</div>
+          </div>
+          <!-- Alertas IN 75 -->
+          ${(()=>{
+            const al=[];
+            if((T.acad||0)>=15)al.push('ALTO EM AÇÚCAR ADICIONADO');
+            if((T.gs||0)>=6)al.push('ALTO EM GORDURA SATURADA');
+            if((T.na||0)>=600)al.push('ALTO EM SÓDIO');
+            return al.length
+              ? `<div style="background:#111;color:#fff;border-radius:4px;padding:6px 8px;font-size:7.5px"><div style="font-weight:700;margin-bottom:4px;color:#aaa">ALERTAS IN 75/2020</div>${al.map(a=>`<div style="margin-bottom:2px">🔍 ${a}</div>`).join('')}</div>`
+              : `<div style="background:#e8f3ed;border:1px solid #2a6e4a;border-radius:4px;padding:5px 8px;font-size:8px;color:#1d5238;font-weight:600">✅ Sem alertas frontais obrigatórios</div>`;
+          })()}
+          <!-- Códigos de barras EAN-13 / DUN-14 -->
+          ${(()=>{
+            const ltEan = glt('lt_ean','');
+            const ltDun = glt('lt_dun','');
+            if (!ltEan && !ltDun) return '<div style="border:1px solid #ccc;border-radius:4px;background:#fff;padding:5px 8px"><div style="font-size:7px;font-weight:700;color:#666;text-transform:uppercase;margin-bottom:2px">Códigos de Barras</div><div style="font-size:8px;color:#bbb">EAN-13 / DUN-14 não informados</div></div>';
+            const barViz = (code, label) => `<div style="margin-bottom:4px">
+              <div style="font-size:6.5px;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px">${label}</div>
+              <div style="font-family:'Courier New',monospace;font-size:16px;letter-spacing:3px;line-height:1;color:#000">|||${code.split('').map((_,i)=>i%3===0?'||':'|').join('')}|||</div>
+              <div style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:1.5px;text-align:center;margin-top:1px">${code}</div>
+            </div>`;
+            return `<div style="border:1px solid #ccc;border-radius:4px;background:#fff;padding:5px 8px">
+              <div style="font-size:7px;font-weight:700;color:#666;text-transform:uppercase;margin-bottom:4px">Códigos de Barras</div>
+              ${ltEan ? barViz(ltEan,'EAN-13 — Unitário') : ''}
+              ${ltDun ? barViz(ltDun,'DUN-14 — Caixa / Fardo') : ''}
+            </div>`;
+          })()}
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. ASSINATURA -->
+    <div style="padding:10px 12px">
+      <div style="font-size:7px;color:#888;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eee;padding-bottom:3px;margin-bottom:10px">Responsável técnico pela análise e liberação do lote</div>
+      <div style="display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap">
+
+        <!-- Assinatura digital -->
+        <div style="flex:0 0 auto;text-align:center">
+          <div style="border:1px solid #ccc;border-radius:4px;background:#fff;padding:4px;width:200px;height:70px;display:flex;align-items:center;justify-content:center;margin-bottom:3px">
+            ${assSrc
+              ? `<img src="${assSrc}" style="max-width:192px;max-height:62px;object-fit:contain">`
+              : `<span style="font-size:8px;color:#bbb">[ Assinatura digital ]</span>`}
+          </div>
+          <div style="height:1px;background:#000;width:200px;margin-bottom:2px"></div>
+          <div style="font-size:8.5px;font-weight:600">${glt('lt_resp_nome','_______________________________')}</div>
+          <div style="font-size:8px;color:#555">${glt('lt_resp_cargo','Responsável')}</div>
+          <div style="font-size:7.5px;color:#777">${glt('lt_resp_registro','')}</div>
+        </div>
+
+        <!-- Dados da liberação -->
+        <div style="flex:1;min-width:200px">
+          <table style="border-collapse:collapse;font-size:8.5px;width:100%">
+            <tr><td style="padding:2px 6px;color:#666;font-size:7.5px;text-transform:uppercase">Data de emissão</td><td style="padding:2px 6px;font-weight:600">${glt('lt_emissao','—')}</td></tr>
+            <tr><td style="padding:2px 6px;color:#666;font-size:7.5px;text-transform:uppercase">Nº do Laudo</td><td style="padding:2px 6px;font-weight:600">${glt('lt_numero','—')}</td></tr>
+            <tr><td style="padding:2px 6px;color:#666;font-size:7.5px;text-transform:uppercase">Lote avaliado</td><td style="padding:2px 6px;font-weight:600">${glt('lt_lote','—')}</td></tr>
+            <tr><td style="padding:2px 6px;color:#666;font-size:7.5px;text-transform:uppercase">Fabricação / Validade</td><td style="padding:2px 6px;font-weight:600">${_ltFmtData(glt('lt_fabricacao','—'))} / ${_ltFmtData(glt('lt_validade','—'))}</td></tr>
+            <tr><td style="padding:2px 6px;color:#666;font-size:7.5px;text-transform:uppercase">Status do lote</td><td style="padding:2px 6px">${statusGeral}</td></tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RODAPÉ -->
+    <div style="background:#1e3a8a;color:#fff;padding:3px 12px;display:flex;justify-content:space-between;font-size:7.5px;align-items:center">
+      <span>Grupo MF Paris Alimentos · SIF 5460 · MAPA/Brasil</span>
+      <span style="font-weight:700">LAUDO TÉCNICO · CÓPIA NÃO CONTROLADA</span>
+      <span>Emitido em ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+    </div>
+
+  </div>`;
+}
+
+function imprimirLaudo() {
+  ltGerarLaudo(); // Atualiza com assinatura mais recente
+  const doc = document.getElementById('laudoDocInner');
+  if (!doc) { alert('Preencha os dados e gere o laudo antes de imprimir.'); return; }
+  const nome = gv('p_nome','Produto');
+  const lote = glt('lt_lote','lote');
+  const w = window.open('','_blank','width=960,height=720');
+  w.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8"><title>Laudo Técnico — ${nome} — Lote ${lote}</title>
+    <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff}
+    @page{size:A4 landscape;margin:7mm}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+    .ftp-doc{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;background:#fff;border:2px solid #1e3a8a;border-radius:4px;overflow:hidden}
+    .ftp-hdr{background:#1e3a8a;color:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+    .ftp-hdr-logo{height:40px;width:40px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;flex-shrink:0}
+    .ftp-hdr-title{font-size:13px;font-weight:900;letter-spacing:.5px;text-align:center;flex:1}
+    .ftp-hdr-meta{text-align:right;font-size:8.5px;line-height:1.7}
+    .ftp-sec{border-bottom:1px solid #ccc}
+    .ftp-sec-t{background:#1e3a8a;color:#fff;font-size:8.5px;font-weight:700;padding:3px 10px;text-transform:uppercase;letter-spacing:.5px}
+    .ftp-row{display:flex;flex-wrap:wrap}
+    .ftp-cell{padding:4px 8px;border-right:1px solid #ddd;flex:1;min-width:80px}
+    .ftp-cell:last-child{border-right:none}
+    .ftp-lbl{font-size:7.5px;color:#666;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
+    .ftp-val{font-size:9.5px;color:#000;line-height:1.4}
+    .ftp-nutri{border:2px solid #000;margin:6px;border-radius:2px}
+    .ftp-nutri h5{font-size:11px;font-weight:900;border-bottom:2px solid #000;padding:2px 5px;margin:0}
+    .ftp-nutri table{width:100%;border-collapse:collapse;font-size:8.5px}
+    .ftp-nutri td{padding:1.5px 5px;border-bottom:.5px solid #ddd}
+    .ftp-nutri .nb td{font-weight:900;border-bottom:1.5px solid #000}
+    .ftp-nutri .ni td:first-child{padding-left:12px}
+    </style>
+  </head><body>${doc.outerHTML}</body></html>`);
+  w.document.close();
+  setTimeout(()=>{ w.print(); }, 700);
+}
+
+
 populaSel();
 document.getElementById('qtdeIng').addEventListener('keydown',e=>{if(e.key==='Enter')addIng();});
+// Aplicar template padrão (Composto Lácteo com Adição)
+selTipo('composto-com');
+// Iniciar na tela de produtos
+_initAuth().then(() => { goStep(0); });
 </script>
 </body>
 </html>
