@@ -917,7 +917,7 @@ async function _initAuth() {
   _currentUser = data.session.user;
   // Verificar perfil do usuário no banco
   try {
-    const { data: perfil } = await _sb.from('perfis').select('cargo,readonly').eq('user_id', _currentUser.id).single();
+    const { data: perfil } = await _sb.from('perfis').select('cargo,readonly').eq('id', _currentUser.id).single();
     if (perfil) {
       _currentUser.cargo = perfil.cargo;
       _currentUser.readonly = perfil.readonly || false;
