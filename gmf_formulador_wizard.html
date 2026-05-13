@@ -899,14 +899,19 @@ const _sb = (_cfg.url && _cfg.key)
 let _currentUser = null;
 async function _initAuth() {
   if (!_sb) {
-    // Sem Supabase configurado: redirecionar para login
-    window.location.href = 'gmf_login.html';
+    window.location.href = 'login.html';
+    return;
+  }
+  // Forçar refresh da sessão no servidor
+  const { data: refreshData, error } = await _sb.auth.refreshSession();
+  if (error || !refreshData.session) {
+    await _sb.auth.signOut();
+    window.location.href = 'login.html';
     return;
   }
   const { data } = await _sb.auth.getSession();
   if (!data.session) {
-    // Não autenticado — redirecionar para login
-    window.location.href = 'gmf_login.html';
+    window.location.href = 'login.html';
     return;
   }
   _currentUser = data.session.user;
