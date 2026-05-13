@@ -3320,7 +3320,25 @@ document.getElementById('qtdeIng').addEventListener('keydown',e=>{if(e.key==='En
 // Aplicar template padrão (Composto Lácteo com Adição)
 selTipo('composto-com');
 // Iniciar na tela de produtos
-_initAuth().then(() => { goStep(0); });
+_initAuth().then(async () => {
+  // Carregar produtos do Supabase antes de exibir
+  if (_sb && _currentUser) {
+    try {
+      const { data, error } = await _sb.from('produtos')
+        .select('*')
+        .order('criado_em', { ascending: false });
+      if (!error && data && data.length > 0) {
+        const produtosRemoto = data.map(r => r.dados || r);
+        // Mesclar com seeds locais
+        const seedIds = new Set(SEED_PRODUTOS.map(s => s.id));
+        const local = carregarProdutosLocal().filter(p => seedIds.has(p.id));
+        _produtosCache = [...produtosRemoto, ...local.filter(s => !produtosRemoto.find(r => r.id === s.id))];
+        try { localStorage.setItem(PROD_KEY, JSON.stringify(_produtosCache)); } catch(e) {}
+      }
+    } catch(e) { console.warn('Erro ao carregar produtos do Supabase:', e); }
+  }
+  goStep(0);
+});
 </script>
 </body>
 </html>
