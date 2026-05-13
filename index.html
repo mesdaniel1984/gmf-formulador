@@ -232,28 +232,10 @@
 </div>
 
 <script>
-// ── Configuração Supabase ─────────────────────────────────────────────────────
-const CFG_KEY = 'gmf_supabase_config';
-
-function getConfig() {
-  try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch(e) { return {}; }
-}
-
-function salvarConfig() {
-  const url = document.getElementById('cfgUrl').value.trim();
-  const key = document.getElementById('cfgKey').value.trim();
-  if (!url || !key) { alert('Preencha URL e Chave antes de salvar.'); return; }
-  localStorage.setItem(CFG_KEY, JSON.stringify({ url, key }));
-  alert('✅ Configuração salva! Recarregando...');
-  location.reload();
-}
-
-// Preencher campos se já configurado
-const cfg = getConfig();
-document.getElementById('cfgUrl').value = cfg.url || 'https://ailzblgrxtdakpkchstl.supabase.co';
-document.getElementById('cfgKey').value = cfg.key || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
-if (cfg.url && cfg.key) document.getElementById('configPanel').removeAttribute('open');
-else document.getElementById('configPanel').setAttribute('open', '');
+// ── Supabase ──────────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://ailzblgrxtdakpkchstl.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
+localStorage.setItem('gmf_supabase_config', JSON.stringify({url:SUPA_URL,key:SUPA_KEY}));
 
 // ── Inicializar Supabase ──────────────────────────────────────────────────────
 // Inicializar sempre com as chaves embutidas
