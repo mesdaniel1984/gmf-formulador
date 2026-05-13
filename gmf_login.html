@@ -256,14 +256,14 @@ if (cfg.url && cfg.key) document.getElementById('configPanel').removeAttribute('
 else document.getElementById('configPanel').setAttribute('open', '');
 
 // ── Inicializar Supabase ──────────────────────────────────────────────────────
-let supabase = null;
-if (cfg.url && cfg.key) {
-  supabase = window.supabase.createClient(cfg.url, cfg.key);
-  // Verificar se já está logado
-  supabase.auth.getSession().then(({ data }) => {
-    if (data.session) redirecionarParaApp();
-  });
-}
+// Inicializar sempre com as chaves embutidas
+const SUPA_URL = 'https://ailzblgrxtdakpkchstl.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
+localStorage.setItem('gmf_supabase_config', JSON.stringify({url:SUPA_URL,key:SUPA_KEY}));
+let supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+supabase.auth.getSession().then(({ data }) => {
+  if (data.session) redirecionarParaApp();
+});
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
 function mostrarTab(tab) {
