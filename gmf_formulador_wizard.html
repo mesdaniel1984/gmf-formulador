@@ -976,7 +976,9 @@ async function salvarLaudoNoBanco(dadosLaudo) {
 
 async function salvarEVerLaudos() {
   await ltGerarLaudo();
-  setTimeout(() => abrirAbaLaudos(), 500);
+  // Aguardar salvamento no banco antes de abrir lista
+  await new Promise(r => setTimeout(r, 1200));
+  await abrirAbaLaudos();
 }
 
 async function _logout() {
