@@ -250,8 +250,9 @@ function salvarConfig() {
 
 // Preencher campos se já configurado
 const cfg = getConfig();
-if (cfg.url) document.getElementById('cfgUrl').value = cfg.url;
-if (cfg.key) document.getElementById('cfgKey').value = cfg.key;
+document.getElementById('cfgUrl').value = 'https://ailzblgrxtdakpkchstl.supabase.co';
+document.getElementById('cfgKey').value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
+localStorage.setItem('gmf_supabase_config', JSON.stringify({url: document.getElementById('cfgUrl').value, key: document.getElementById('cfgKey').value}));
 if (cfg.url && cfg.key) document.getElementById('configPanel').removeAttribute('open');
 else document.getElementById('configPanel').setAttribute('open', '');
 
