@@ -2311,7 +2311,7 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
   const SUBTIPO_SOMENTE_EMBALAGEM = ['st-25kg','st-1kg','st-800g','st-400g','st-200g','st-cafe-250g','st-cafe-500g','st-cafe-5kg'];
 
   if (SUBTIPO_SOMENTE_EMBALAGEM.includes(stId)) {
-    _aplicarTemplate(ajuste);
+    _aplicarTemplate(ajuste, true);
     const pesoMap = {
       'st-25kg':25000,'st-1kg':1000,'st-800g':800,'st-400g':400,'st-200g':200,
       'st-cafe-250g':250,'st-cafe-500g':500,'st-cafe-5kg':5000,
@@ -2364,7 +2364,7 @@ function getEmbalagensSelecionadas() {
 
 
 
-function _aplicarTemplate(campos) {
+function _aplicarTemplate(campos, preservarDenominacao) {
   const mapa = {
     denominacao:'p_denominacao',
     gramatura:'p_gramatura',
@@ -2374,6 +2374,7 @@ function _aplicarTemplate(campos) {
     preparo:'p_preparo_txt'
   };
   Object.entries(mapa).forEach(([campo, id]) => {
+    if (preservarDenominacao && campo === 'denominacao') return;
     const el = document.getElementById(id);
     if (el && campos[campo] !== undefined) el.value = campos[campo];
   });
