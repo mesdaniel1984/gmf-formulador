@@ -975,7 +975,7 @@ async function salvarLaudoNoBanco(dadosLaudo) {
 }
 
 async function salvarEVerLaudos() {
-  await ltGerarLaudo();
+  await ltGerarLaudo(true);
   // Aguardar salvamento no banco antes de abrir lista
   await new Promise(r => setTimeout(r, 1200));
   await abrirAbaLaudos();
@@ -3078,8 +3078,8 @@ function _ltFmtData(val) {
   return val;
 }
 
-async function ltGerarLaudo() {
-  // Salvar automaticamente antes de gerar
+async function ltGerarLaudo(salvarNoBanco = false) {
+  // Salvar apenas quando explicitamente solicitado
   const dadosLaudo = {
     num_laudo: document.getElementById('lt_num')?.value || '',
     produto_nome: gv('p_nome') || '',
@@ -3104,7 +3104,7 @@ async function ltGerarLaudo() {
       obs: row.querySelector('.lt-obs')?.value || ''
     }))
   };
-  await salvarLaudoNoBanco(dadosLaudo);
+  if (salvarNoBanco) await salvarLaudoNoBanco(dadosLaudo);
   // Continuar gerando o laudo normalmente
   _ltGerarLaudoOriginal();
 }
