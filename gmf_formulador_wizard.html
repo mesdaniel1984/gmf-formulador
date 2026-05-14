@@ -974,11 +974,20 @@ async function salvarLaudoNoBanco(dadosLaudo) {
   localStorage.setItem('gmf_laudos_salvos', JSON.stringify(local.slice(0, 200)));
 }
 
+let _salvandoLaudo = false;
 async function salvarEVerLaudos() {
-  await ltGerarLaudo(true);
-  // Aguardar salvamento no banco antes de abrir lista
-  await new Promise(r => setTimeout(r, 1200));
-  await abrirAbaLaudos();
+  if (_salvandoLaudo) { alert('Aguarde, salvando...'); return; }
+  _salvandoLaudo = true;
+  const btn = document.querySelector('[onclick="salvarEVerLaudos()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
+  try {
+    await ltGerarLaudo(true);
+    await new Promise(r => setTimeout(r, 1500));
+    await abrirAbaLaudos();
+  } finally {
+    _salvandoLaudo = false;
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#128190; Salvar e ver Laudos'; }
+  }
 }
 
 async function _logout() {
