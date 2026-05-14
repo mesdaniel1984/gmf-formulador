@@ -968,10 +968,7 @@ async function salvarLaudoNoBanco(dadosLaudo) {
       await _sb.from('laudos').insert([registro]);
     }
   } catch(e) {}
-  // Sempre salvar também no localStorage como backup
-  const local = JSON.parse(localStorage.getItem('gmf_laudos_salvos') || '[]');
-  local.unshift(registro);
-  localStorage.setItem('gmf_laudos_salvos', JSON.stringify(local.slice(0, 200)));
+  // Não usar localStorage para laudos — apenas Supabase
 }
 
 let _salvandoLaudo = false;
@@ -1368,12 +1365,14 @@ let _todosLaudos = [];
 async function carregarLaudos() {
   const lista = document.getElementById('listaLaudos');
   if (!lista) return;
+  // Limpar localStorage de laudos para evitar dados antigos
+  localStorage.removeItem('gmf_laudos_salvos');
   try {
     const { data, error } = await _sb.from('laudos').select('*').order('created_at', {ascending: false});
     if (error) throw error;
     _todosLaudos = data || [];
   } catch(e) {
-    _todosLaudos = JSON.parse(localStorage.getItem('gmf_laudos_salvos') || '[]');
+    _todosLaudos = [];
   }
   renderLaudosTabela(_todosLaudos);
 }
