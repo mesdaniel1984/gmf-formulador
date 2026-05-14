@@ -3046,7 +3046,7 @@ async function ltGerarLaudo(salvarNoBanco = false) {
   // Salvar apenas quando explicitamente solicitado
   const dadosLaudo = {
     num_laudo: document.getElementById('lt_num')?.value || '',
-    produto_nome: gv('p_nome') || '',
+    produto_nome: gv('p_nome') || document.getElementById('p_nome')?.value || (_prodOrigem?.nome) || '',
     lote: document.getElementById('lt_lote')?.value || '',
     data_fab: document.getElementById('lt_fab')?.value || '',
     data_val: document.getElementById('lt_val')?.value || '',
