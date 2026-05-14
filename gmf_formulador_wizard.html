@@ -1409,11 +1409,11 @@ function renderLaudosTabela(laudos) {
         : '<span style="background:#fef2f2;color:#dc2626;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700">REPROVADO</span>';
       const dt = l.created_at ? new Date(l.created_at).toLocaleDateString('pt-BR') : (d.data_emissao||'—');
       return `<tr style="border-bottom:1px solid #f3f4f6;${i%2?'background:#fafafa':''}">
-        <td style="padding:10px 12px;font-weight:700;color:#1e3a8a">${d.num_laudo||'—'}</td>
+        <td style="padding:10px 12px;font-weight:700;color:#1e3a8a">${d.num_laudo||l.num_laudo||'—'}</td>
         <td style="padding:10px 12px;font-weight:600">${d.produto_nome||'—'}</td>
         <td style="padding:10px 12px">${d.lote||'—'}</td>
-        <td style="padding:10px 12px">${d.data_fab||'—'}</td>
-        <td style="padding:10px 12px">${d.data_val||'—'}</td>
+        <td style="padding:10px 12px">${d.data_fab||l.data_fab||'—'}</td>
+        <td style="padding:10px 12px">${d.data_val||l.data_val||'—'}</td>
         <td style="padding:10px 12px">${badge}</td>
         <td style="padding:10px 12px">${d.elaborado||l.user_email||'—'}</td>
         <td style="padding:10px 12px;text-align:center">
@@ -1427,7 +1427,28 @@ function renderLaudosTabela(laudos) {
 }
 
 function verLaudo(idx) {
-  baixarLaudoPDF(idx);
+  const l = _todosLaudos[idx];
+  const d = l.dados || l;
+  // Preencher campos do laudo e ir para passo 5
+  document.getElementById('modalLaudos')?.remove();
+  const campos = {
+    'lt_num': d.num_laudo || l.num_laudo,
+    'lt_lote': d.lote || l.lote,
+    'lt_fab': d.data_fab || l.data_fab,
+    'lt_val': d.data_val || l.data_val,
+    'lt_qtd': d.qtd_prod,
+    'lt_outras': d.outras_info,
+    'lt_elab_nome': d.elaborado,
+    'lt_elab_cargo': d.cargo_resp,
+    'lt_telefone': d.telefone,
+    'lt_emissao': d.data_emissao
+  };
+  Object.entries(campos).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el && val) el.value = val;
+  });
+  goStep(5);
+  setTimeout(() => ltGerarLaudo(false), 400);
 }
 
 function baixarLaudoPDF(idx) {
