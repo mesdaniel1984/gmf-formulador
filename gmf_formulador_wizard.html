@@ -2657,7 +2657,11 @@ function renderStep3(){
       Reconstituído (~130g/L): <strong>${f2(ptn100*0.13)}g/100ml</strong>
     </div>`;
   } else {
-    confHtml=`<div class="alert alert-ok">ℹ️ PTN: ${f2(ptn100)}g/100g · Sem mínimo MAPA para esta categoria</div>`;
+    confHtml=`<div class="alert alert-ok">ℹ️ PTN: ${f2(ptn100)}g/100g · ${
+  tipoSel === 'mistura' ? 'Mistura Láctea — sem mínimo proteico obrigatório (RIISPOA Art. 366)' :
+  tipoSel === 'po-preparo' ? 'Pó para Preparo — regulado pela ANVISA, sem mínimo proteico MAPA' :
+  'Sem mínimo proteico para esta categoria'
+}</div>`;
   }
   document.getElementById('ptnConf').innerHTML=confHtml;
 }
