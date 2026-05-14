@@ -2524,6 +2524,22 @@ function populaSel() {
 }
 
 function addIng(){
+  // Verificar quantidade máxima para ingredientes com qtde_max_pct
+  const selEl = document.getElementById('ingSelect');
+  const qtdeEl = document.getElementById('ingQtde');
+  if (selEl && qtdeEl) {
+    const idx = parseInt(selEl.value);
+    const d = isNaN(idx) ? null : DB[idx];
+    const qtde = parseFloat(qtdeEl.value) || 0;
+    if (d && d.qtde_max_pct && qtde > 0) {
+      const pesoTotal = parseFloat(document.getElementById('p_peso')?.value) || 1000;
+      const qtdeMax = pesoTotal * d.qtde_max_pct / 100;
+      if (qtde > qtdeMax) {
+        alert('⚠️ Quantidade máxima para "' + d.n + '" é ' + qtdeMax.toFixed(2) + 'g para ' + pesoTotal + 'g de produto.\nBase: 1kg de premix para 240kg de produto (IN 75/2020).\nQuantidade informada: ' + qtde + 'g — excede o limite.');
+        return;
+      }
+    }
+  }
   const sel=document.getElementById('selIng');
   const qtde=parseFloat(document.getElementById('qtdeIng').value);
   const idx=sel.value;
@@ -2571,6 +2587,27 @@ function renderReceita(){
   document.getElementById('ft_c').textContent=f2(T.cho*tQ/100);
   document.getElementById('ft_g').textContent=f2(T.gt*tQ/100);
   document.getElementById('ft_n').textContent=f0(T.na*tQ/100);
+}
+
+function calcVitaminas(porcaoG) {
+  const vit = {};
+  receita.forEach(r => {
+    if (r.d && r.d.vitaminas) {
+      const fator = r.qtde / 1000;
+      Object.entries(r.d.vitaminas).forEach(([k,v]) => {
+        vit[k] = (vit[k] || 0) + v * fator;
+      });
+    }
+  });
+  // Ajustar para porção
+  if (porcaoG) {
+    const total = receita.reduce((s,r) => s + r.qtde, 0) || 1000;
+    const fatPorcao = porcaoG / total;
+    const vitPorcao = {};
+    Object.entries(vit).forEach(([k,v]) => vitPorcao[k] = v * fatPorcao);
+    return vitPorcao;
+  }
+  return vit;
 }
 
 function recalc(){
@@ -2631,6 +2668,18 @@ function renderStep3(){
       ${nrow('Gorduras trans (g)',f2(T.tr),f2(P.tr),'—',false,true)}
       ${nrow('Fibra alimentar (g)',f2(T.fi),f2(P.fi),vdp(P.fi,VD.fibra)+'%')}
       ${nrow('Sódio (mg)',f0(T.na),f0(P.na),vdp(P.na,VD.na)+'%',true)}
+    </table>
+    ${(()=>{
+      const vit = calcVitaminas(P100);
+      const VD_VIT = {vit_a:{nome:'Vitamina A',un:'mcg RE',vd:600},vit_b1:{nome:'Vitamina B1',un:'mg',vd:1.4},vit_b2:{nome:'Vitamina B2',un:'mg',vd:1.6},vit_b3:{nome:'Vitamina B3 (Niacina)',un:'mg',vd:18},vit_b5:{nome:'Vitamina B5',un:'mg',vd:6},vit_b6:{nome:'Vitamina B6',un:'mg',vd:1.7},biotina:{nome:'Biotina',un:'mcg',vd:40},vit_b12:{nome:'Vitamina B12',un:'mcg',vd:2.4},vit_c:{nome:'Vitamina C',un:'mg',vd:45},vit_d3:{nome:'Vitamina D',un:'mcg',vd:20},vit_e:{nome:'Vitamina E',un:'mg',vd:10},ferro:{nome:'Ferro',un:'mg',vd:14},zinco:{nome:'Zinco',un:'mg',vd:7}};
+      if (!Object.keys(vit).length) return '';
+      const rows = Object.entries(VD_VIT).filter(([k])=>vit[k]>0).map(([k,info])=>{
+        const val = vit[k];
+        const pct = Math.round(val/info.vd*100);
+        return '<tr><td style="padding:2px 4px;font-size:9px">'+info.nome+'</td><td style="padding:2px 4px;font-size:9px;text-align:right">'+val.toFixed(2)+' '+info.un+'</td><td style="padding:2px 4px;font-size:9px;text-align:right">'+pct+'%</td></tr>';
+      }).join('');
+      return rows ? '<tr><td colspan="3" style="padding:3px 4px;font-size:9px;font-weight:700;background:#f0f4ff;border-top:1px solid #ccc">Vitaminas e Minerais (por porção)</td></tr>'+rows : '';
+    })()}
     </table>
     <p style="font-size:8.5px;color:#555;margin-top:5px">(*) % VD com base em dieta de 2.000 kcal — ANVISA RDC 429/2020</p>`;
 
