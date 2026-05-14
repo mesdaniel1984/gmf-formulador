@@ -3051,11 +3051,11 @@ function iniciarLaudo() {
   if (!glt('lt_resp_cargo')) document.getElementById('lt_resp_cargo').value = 'Analista de Qualidade';
 
   _ltIniciarCanvas();
-  ltGerarLaudo();
+  ltGerarLaudo(false);
 
   // Atualizar prévia em tempo real ao editar
   document.getElementById('s5content').querySelectorAll('input, select, textarea').forEach(el => {
-    el.oninput = el.onchange = ltGerarLaudo;
+    el.oninput = el.onchange = () => ltGerarLaudo(false);
   });
 }
 
