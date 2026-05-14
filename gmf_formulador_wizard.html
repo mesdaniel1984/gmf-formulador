@@ -1427,56 +1427,7 @@ function renderLaudosTabela(laudos) {
 }
 
 function verLaudo(idx) {
-  // Carregar o laudo completo nos campos do passo 5 e ir para lá
-  const l = _todosLaudos[idx];
-  const d = l.dados || l;
-  document.getElementById('modalLaudos').remove();
-  // Restaurar campos do laudo
-  if (d.num_laudo) { const el = document.getElementById('lt_num'); if(el) el.value = d.num_laudo; }
-  if (d.lote) { const el = document.getElementById('lt_lote'); if(el) el.value = d.lote; }
-  if (d.data_fab) { const el = document.getElementById('lt_fab'); if(el) el.value = d.data_fab; }
-  if (d.data_val) { const el = document.getElementById('lt_val'); if(el) el.value = d.data_val; }
-  if (d.qtd_prod) { const el = document.getElementById('lt_qtd'); if(el) el.value = d.qtd_prod; }
-  if (d.outras_info) { const el = document.getElementById('lt_outras'); if(el) el.value = d.outras_info; }
-  if (d.elaborado) { const el = document.getElementById('lt_elab_nome'); if(el) el.value = d.elaborado; }
-  if (d.cargo_resp) { const el = document.getElementById('lt_elab_cargo'); if(el) el.value = d.cargo_resp; }
-  goStep(5);
-  setTimeout(() => ltGerarLaudo(false), 300);
-  return;
-  const w = window.open('','_blank','width=900,height=700');
-  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Laudo ${d.num_laudo||''}</title>
-  <style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;padding:24px;font-size:12px;color:#111}h2{color:#1e3a8a;margin:0 0 4px}h3{color:#1e3a8a;margin:16px 0 8px}table{width:100%;border-collapse:collapse;margin-bottom:16px}td,th{border:1px solid #d1d5db;padding:7px 10px;text-align:left}th{background:#f3f4f6;font-weight:700;color:#374151}.ok{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-weight:700}.nok{background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:10px;font-weight:700}.status-box{padding:14px;border-radius:8px;font-weight:700;font-size:14px;text-align:center;margin:16px 0}@media print{.no-print{display:none}}</style>
-  </head><body>
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
-    <div><h2>LAUDO TÉCNICO — SOMENTE LEITURA</h2><p style="color:#6b7280;font-size:11px">Documento imutável emitido pelo GMF Formulador Nutricional</p></div>
-    <button class="no-print" onclick="window.print()" style="background:#1e3a8a;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">Imprimir PDF</button>
-  </div>
-  <table>
-    <tr><th>N&#186; Laudo</th><td>${d.num_laudo||'—'}</td><th>Data Emissão</th><td>${d.data_emissao||'—'}</td></tr>
-    <tr><th>Produto</th><td colspan="3">${d.produto_nome||'—'}</td></tr>
-    <tr><th>Lote</th><td>${d.lote||'—'}</td><th>Qtd. Produzida</th><td>${d.qtd_prod||'—'}</td></tr>
-    <tr><th>Data Fabricação</th><td>${d.data_fab||'—'}</td><th>Data Validade</th><td>${d.data_val||'—'}</td></tr>
-    <tr><th>N&#186; Registro / SIF</th><td colspan="3">${d.registro_sif||'SIF 5460'}</td></tr>
-  </table>
-  <h3>Análise Sensorial</h3>
-  <table>
-    <tr><th>Parâmetro</th><th>Referência</th><th>Observação</th><th>Status</th></tr>
-    ${(d.analises||[]).map(a=>`<tr><td>${a.param||'—'}</td><td>${a.ref||'—'}</td><td>${a.obs||'—'}</td><td><span class="${a.status==='conforme'?'ok':'nok'}">${a.status==='conforme'?'Conforme':'Não conforme'}</span></td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:#9ca3af">Sem dados registrados</td></tr>'}
-  </table>
-  <div class="status-box" style="${st==='aprovado'?'background:#dcfce7;color:#166534;border:2px solid #86efac':'background:#fef2f2;color:#dc2626;border:2px solid #fca5a5'}">
-    ${st==='aprovado'?'PRODUTO APROVADO PARA LIBERAÇÃO':'PRODUTO NAO CONFORME — RETIDO PARA ANALISE'}
-  </div>
-  ${d.outras_info?`<p><strong>Outras informações:</strong> ${d.outras_info}</p>`:''}
-  <table>
-    <tr><th>Elaborado por</th><td>${d.elaborado||'—'}</td><th>Cargo</th><td>${d.cargo_resp||'—'}</td></tr>
-    <tr><th>Telefone Qualidade</th><td>qualidade@mfparis.com.br</td><th>E-mail</th><td>pd@mfparis.com.br</td></tr>
-  </table>
-  <p style="margin-top:24px;font-size:10px;color:#9ca3af;text-align:center;border-top:1px solid #e5e7eb;padding-top:10px">
-    Documento gerado automaticamente · GMF Formulador Nutricional · Grupo MF Paris Alimentos · SIF 5460<br>
-    Emitido em: ${new Date().toLocaleString('pt-BR')} — Este documento é imutável após emissão.
-  </p>
-  </body></html>`);
-  w.document.close();
+  baixarLaudoPDF(idx);
 }
 
 function baixarLaudoPDF(idx) {
