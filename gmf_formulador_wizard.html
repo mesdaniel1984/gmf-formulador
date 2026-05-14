@@ -1438,26 +1438,41 @@ function renderLaudosTabela(laudos) {
 function verLaudo(idx) {
   const l = _todosLaudos[idx];
   const d = l.dados || l;
-  // Preencher campos do laudo e ir para passo 5
   document.getElementById('modalLaudos')?.remove();
-  const campos = {
-    'lt_num': d.num_laudo || l.num_laudo,
-    'lt_lote': d.lote || l.lote,
-    'lt_fab': d.data_fab || l.data_fab,
-    'lt_val': d.data_val || l.data_val,
-    'lt_qtd': d.qtd_prod,
-    'lt_outras': d.outras_info,
-    'lt_elab_nome': d.elaborado,
-    'lt_elab_cargo': d.cargo_resp,
-    'lt_telefone': d.telefone,
-    'lt_emissao': d.data_emissao
+  
+  // Tentar carregar o produto correto
+  const nomeProduto = d.produto_nome || l.produto_nome || '';
+  const produtos = getProdutos();
+  const produtoEncontrado = produtos.find(p => 
+    p.nome.toUpperCase() === nomeProduto.toUpperCase()
+  );
+  
+  const _preencherCamposLaudo = () => {
+    const campos = {
+      'lt_num': d.num_laudo || l.num_laudo || '',
+      'lt_lote': d.lote || l.lote || '',
+      'lt_fab': d.data_fab || l.data_fab || '',
+      'lt_val': d.data_val || l.data_val || '',
+      'lt_qtd': d.qtd_prod || '',
+      'lt_outras': d.outras_info || '',
+      'lt_elab_nome': d.elaborado || '',
+      'lt_elab_cargo': d.cargo_resp || '',
+      'lt_emissao': d.data_emissao || ''
+    };
+    Object.entries(campos).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el && val) el.value = val;
+    });
+    ltGerarLaudo(false);
   };
-  Object.entries(campos).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (el && val) el.value = val;
-  });
-  goStep(5);
-  setTimeout(() => ltGerarLaudo(false), 400);
+
+  if (produtoEncontrado) {
+    editarProduto(produtoEncontrado.id);
+    setTimeout(() => { goStep(5); setTimeout(_preencherCamposLaudo, 400); }, 300);
+  } else {
+    goStep(5);
+    setTimeout(_preencherCamposLaudo, 400);
+  }
 }
 
 function baixarLaudoPDF(idx) {
