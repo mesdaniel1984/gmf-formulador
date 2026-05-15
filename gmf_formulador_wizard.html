@@ -896,14 +896,11 @@ function vdp(v,d){return Math.round(v/d*100);}
 // PRODUTOS — STORAGE
 // ────────────────────────────────────────────────────────────────────────────
 // ── CONFIGURAÇÃO SUPABASE ─────────────────────────────────────────────────────
-const CFG_KEY = 'gmf_supabase_config';
-function _getSupabaseCfg() {
-  try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch(e) { return {}; }
-}
-const _cfg = _getSupabaseCfg();
-const _sb = (_cfg.url && _cfg.key)
-  ? window.supabase.createClient(_cfg.url, _cfg.key)
-  : null;
+// Chaves Supabase embutidas diretamente
+const _SUPA_URL = 'https://ailzblgrxtdakpkchstl.supabase.co';
+const _SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
+localStorage.setItem('gmf_supabase_config', JSON.stringify({url:_SUPA_URL,key:_SUPA_KEY}));
+const _sb = window.supabase.createClient(_SUPA_URL, _SUPA_KEY);
 
 // ── AUTH: verificar sessão ao carregar ────────────────────────────────────────
 let _currentUser = null;
