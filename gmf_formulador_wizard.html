@@ -886,21 +886,17 @@ function vdp(v,d){return Math.round(v/d*100);}
 // PRODUTOS — STORAGE
 // ────────────────────────────────────────────────────────────────────────────
 // ── CONFIGURAÇÃO SUPABASE ─────────────────────────────────────────────────────
-const CFG_KEY = 'gmf_supabase_config';
-function _getSupabaseCfg() {
-  try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch(e) { return {}; }
-}
-const _cfg = _getSupabaseCfg();
-const _sb = (_cfg.url && _cfg.key)
-  ? window.supabase.createClient(_cfg.url, _cfg.key)
-  : null;
+// Supabase — chaves embutidas, funciona sem configuração manual
+const _SUPA_URL = 'https://ailzblgrxtdakpkchstl.supabase.co';
+const _SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
+localStorage.setItem('gmf_supabase_config', JSON.stringify({url:_SUPA_URL,key:_SUPA_KEY}));
+const _sb = window.supabase.createClient(_SUPA_URL, _SUPA_KEY);
 
 // ── AUTH: verificar sessão ao carregar ────────────────────────────────────────
 let _currentUser = null;
 async function _initAuth() {
   if (!_sb) {
-    // Sem Supabase configurado: modo offline (localStorage)
-    console.warn('GMF: Supabase não configurado — usando localStorage.');
+    window.location.href = 'gmf_login.html';
     return;
   }
   const { data } = await _sb.auth.getSession();
@@ -966,10 +962,8 @@ async function salvarProdutosAsync(lista) {
   // Salvar em cache local sempre
   try { localStorage.setItem(PROD_KEY, JSON.stringify(lista)); } catch(e) {}
   if (!_sb || !_currentUser) return;
-  // Não salvar os seeds no Supabase
-  const seedIds = new Set(SEED_PRODUTOS.map(s=>s.id));
-  const paraSync = lista.filter(p => !seedIds.has(p.id));
-  for (const prod of paraSync) {
+  // Salvar todos os produtos (inclusive os que vieram como seed)
+  for (const prod of lista) {
     try {
       await _sb.from('produtos').upsert({
         id: prod.id,
@@ -1041,26 +1035,6 @@ const SEED_PRODUTOS = [
    nutri100g:{kcal:459,cho:66.5,act:56.3,acad:3.2,ptn:7.2,gt:18.3,gs:9.8,tr:0.4,fi:0,na:478},nutriPorcao:{kcal:138,cho:20,act:16.9,acad:1,ptn:2.2,gt:5.5,gs:3,tr:0.1,fi:0,na:143}},
 ];
 
-function carregarProdutos() {
-  try {
-    const stored = localStorage.getItem(PROD_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch(e){}
-  // fallback: retorna seed (memória)
-  return [...SEED_PRODUTOS];
-}
-
-function salvarProdutos(lista) {
-  try { localStorage.setItem(PROD_KEY, JSON.stringify(lista)); } catch(e){}
-}
-
-function getProdutos() {
-  let lista = carregarProdutos();
-  // Garantir que os seeds sempre existem (por ID)
-  const ids = new Set(lista.map(p=>p.id));
-  SEED_PRODUTOS.forEach(s => { if(!ids.has(s.id)) lista.unshift(s); });
-  return lista;
-}
 
 // ────────────────────────────────────────────────────────────────────────────
 // WIZARD NAVIGATION (step 0 = produtos)
@@ -3098,7 +3072,37 @@ document.getElementById('qtdeIng').addEventListener('keydown',e=>{if(e.key==='En
 // Aplicar template padrão (Composto Lácteo com Adição)
 selTipo('composto-com');
 // Iniciar na tela de produtos
-_initAuth().then(() => { goStep(0); });
+
+// ── SINCRONIZAR SEEDS NO SUPABASE (garante que todos os produtos padrão estão na nuvem) ──
+async function _sincronizarSeeds() {
+  if (!_sb || !_currentUser) return;
+  try {
+    // Buscar IDs que já existem
+    const { data: existing } = await _sb.from('produtos').select('id');
+    const existingIds = new Set((existing || []).map(r => r.id));
+    // Inserir apenas os que não existem
+    const paraInserir = SEED_PRODUTOS.filter(s => !existingIds.has(s.id));
+    if (paraInserir.length === 0) return;
+    for (const prod of paraInserir) {
+      await _sb.from('produtos').upsert({
+        id: prod.id,
+        nome: prod.nome,
+        classificacao: prod.classificacao || '',
+        dados: prod,
+        criado_por: _currentUser.id,
+      }, { onConflict: 'id' });
+    }
+    console.log(`GMF: ${paraInserir.length} produto(s) sincronizado(s) com Supabase`);
+  } catch(e) {
+    console.warn('GMF: Erro ao sincronizar seeds:', e);
+  }
+}
+
+_initAuth().then(async () => {
+  // Ao carregar: garantir que os seeds estão no Supabase
+  await _sincronizarSeeds();
+  goStep(0);
+});
 </script>
 </body>
 </html>
