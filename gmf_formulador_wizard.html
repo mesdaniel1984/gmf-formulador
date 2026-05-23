@@ -957,7 +957,6 @@ async function salvarProdutosAsync(lista) {
   // Salvar em cache local sempre
   try { localStorage.setItem(PROD_KEY, JSON.stringify(lista)); } catch(e) {}
   if (!_sb || !_currentUser) return;
-  // Salvar todos os produtos no Supabase
   for (const prod of lista) {
     try {
       await _sb.from('produtos').upsert({
@@ -3067,27 +3066,18 @@ document.getElementById('qtdeIng').addEventListener('keydown',e=>{if(e.key==='En
 // Aplicar template padrão (Composto Lácteo com Adição)
 selTipo('composto-com');
 // Iniciar na tela de produtos
-// Sincronizar seeds no Supabase na primeira vez
 async function _sincronizarSeeds() {
   if (!_sb || !_currentUser) return;
   try {
-    const { data: existing } = await _sb.from('produtos').select('id');
-    const existingIds = new Set((existing || []).map(r => String(r.id)));
-    const faltando = SEED_PRODUTOS.filter(s => !existingIds.has(String(s.id)));
-    for (const prod of faltando) {
-      await _sb.from('produtos').upsert({
-        id: prod.id, nome: prod.nome, classificacao: prod.classificacao || '',
-        dados: prod, criado_por: _currentUser.id,
-      }, { onConflict: 'id' });
+    const { data: ex } = await _sb.from('produtos').select('id');
+    const eids = new Set((ex||[]).map(r=>String(r.id)));
+    for (const p of SEED_PRODUTOS) {
+      if (!eids.has(String(p.id)))
+        await _sb.from('produtos').upsert({id:p.id,nome:p.nome,classificacao:p.classificacao||'',dados:p,criado_por:_currentUser.id},{onConflict:'id'});
     }
-    if (faltando.length) console.log('GMF: ' + faltando.length + ' seed(s) sincronizado(s)');
-  } catch(e) { console.warn('GMF sync seeds:', e); }
+  } catch(e){console.warn('sync:',e);}
 }
-
-_initAuth().then(async () => {
-  await _sincronizarSeeds();
-  goStep(0);
-});
+_initAuth().then(async()=>{ await _sincronizarSeeds(); goStep(0); });
 </script>
 </body>
 </html>
