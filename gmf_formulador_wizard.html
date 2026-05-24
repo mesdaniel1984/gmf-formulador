@@ -489,7 +489,6 @@ tr:last-child td{border-bottom:none}
     </div>
 
     <!-- PAINEL DE REQUISITOS LEGAIS -->
-    <div id="conformidadeWarning" style="display:none;background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px"></div>
     <div id="classeLegal" style="margin-top:4px;padding:10px 14px;background:var(--blue-light);border-radius:var(--radius-sm);border:1px solid #93c5fd;font-size:11.5px;line-height:1.7"></div>
   </div>
 
@@ -857,7 +856,7 @@ const DB=[
 // ─── ARQUIVO DO USUÁRIO (180 itens — normalizados para /100g) ───
 {g:"📋 Fichas Técnicas — Compostos Lácteos (FT oficial)"},
 // ── LEITINO ──────────────────────────────────────────────────────────────────
-{n:"Composto Lácteo Supreme 25kg",ref:"Leitino (FT rev.02 12/03/2025)",src:"FT",kcal:482,cho:50,act:43,acad:1.7,ptn:12,gt:26,gs:16,tr:0,fi:0.6,na:513,rotulo:"Composto lácteo com Gordura Vegetal",rotuloCompleto:"Composto lácteo com gordura vegetal (Soro de leite fluido, soro de leite concentrado e/ou soro de leite em pó reconstituído, leitelho em pó, gordura vegetal, maltodextrina*, açúcar, aroma de leite, glucose em pó*, leite em pó desnatado, mix de aditivos (maltodextrina, estabilizantes celuloses microcristalina INS 460i, carboximetilcelulose sódica INS 466, emulsificante mono e diglicerídeos de ácidos graxos INS 471), estabilizante fosfato trissódico INS 339iii e antiaglutinante fosfato tricálcico INS 341iii. *produzidas a partir de milho geneticamente modificado, espécies doadoras dos genes: Bacillus thuringiensis, Streptomyces viridochromogenes, Agrobacterium tumefaciens, Zea mays, Sphingobium herbicidorovans, S. maltophilia, Diabrotica firgifera, E. Coli, Dicossoma sp.)"},
+{n:"Composto Lácteo Supreme 25kg",ref:"Leitino (FT rev.02 12/03/2025)",src:"FT",kcal:482,cho:50,act:43,acad:1.7,ptn:12,gt:26,gs:16,tr:0,fi:0.6,na:513},
 // ── TANGARÁ / PURELAC ────────────────────────────────────────────────────────
 {n:"Purelac Pro Culinária Spray (FT-006 rev.020)",ref:"Tangará Foods (SIF 0498/899)",src:"FT",kcal:550,cho:53.3,act:43,acad:0,ptn:13.3,gt:30,gs:20,tr:0,fi:0,na:693},
 {n:"Purelac Culinária — Composto Lácteo c/ Gordura Vegetal (FT-006 rev.016)",ref:"Tangará Foods (SIF 0498/899)",src:"FT",kcal:477,cho:50,act:40,acad:0,ptn:10,gt:26.7,gs:20,tr:0,fi:0,na:290},
@@ -915,10 +914,12 @@ const _sb = window.supabase.createClient(_SUPA_URL, _SUPA_KEY);
 let _currentUser = null;
 async function _initAuth() {
   const { data } = await _sb.auth.getSession();
-  if (data.session) {
-    _currentUser = data.session.user;
+  if (!data.session) {
+    // Não autenticado — redirecionar para login
+    window.location.href = 'gmf_login.html';
+    return;
   }
-  // Modo publico - continua sem login
+  _currentUser = data.session.user;
   // Exibir nome do usuário no cabeçalho
   const perfil = await _sb.from('perfis').select('nome,cargo').eq('id', _currentUser.id).single();
   if (perfil.data) {
@@ -1108,50 +1109,7 @@ function goStep(n) {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function nextStep() {
-  // Validar conformidade legal ao sair do passo 1
-  if (currentStep === 1 && tipoSel) {
-    const ptnPor100g = _calcPtnAtual();
-    const aviso = _validarConformidadeLegal(tipoSel, ptnPor100g);
-    if (aviso) {
-      if (!confirm(aviso + '\n\nDeseja continuar mesmo assim?')) return;
-    }
-  }
-  goStep(currentStep + 1);
-}
-
-function _calcPtnAtual() {
-  // Calcula PTN/100g com base nos ingredientes da receita atual
-  if (!receita || receita.length === 0) return null;
-  const tQ = parseFloat(document.getElementById('p_peso')?.value) || 1000;
-  let ptnTotal = 0;
-  receita.forEach(item => {
-    const d = DB.find(x => x.n === item.nome);
-    if (d) ptnTotal += (d.ptn || 0) * item.qtde / 100;
-  });
-  return tQ > 0 ? (ptnTotal / tQ * 100) : null;
-}
-
-function _validarConformidadeLegal(tipo, ptn) {
-  if (ptn === null) return null; // sem receita ainda, não valida
-  
-  const avisos = [];
-  
-  if (tipo === 'composto-com') {
-    if (ptn < 9) avisos.push(`⚠️ ATENÇÃO — Não conformidade legal detectada:\n\nClassificação selecionada: Composto Lácteo com Adição\nTeor de proteína calculado: ${ptn.toFixed(1)}g/100g\nMínimo exigido: ≥ 9g/100g (Portaria SDA/MAPA 1.170/2024, Art. 9º II)\n\nCom este teor proteico, o produto deve ser classificado como MISTURA LÁCTEA.`);
-  }
-  if (tipo === 'composto-sem') {
-    if (ptn < 13) avisos.push(`⚠️ ATENÇÃO — Não conformidade legal detectada:\n\nClassificação selecionada: Composto Lácteo sem Adição\nTeor de proteína calculado: ${ptn.toFixed(1)}g/100g\nMínimo exigido: ≥ 13g/100g (Portaria SDA/MAPA 1.170/2024, Art. 9º I)\n\nCom este teor proteico, o produto não atende os requisitos de Composto Lácteo sem Adição.`);
-  }
-  if (tipo === 'leite-integral') {
-    if (ptn < 25) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Integral (IN MAPA 28/2007).`);
-  }
-  if (tipo === 'leite-desnatado') {
-    if (ptn < 30) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Desnatado (IN MAPA 28/2007).`);
-  }
-  
-  return avisos.length ? avisos.join('\n') : null;
-}
+function nextStep() { goStep(currentStep + 1); }
 
 // ── ESTADO DE EDIÇÃO ─────────────────────────────────────────────────────────
 let _prodOrigem = null;      // produto original carregado — nunca sobrescrito
@@ -1379,8 +1337,6 @@ function editarProduto(id) {
 
   // Restaurar campos básicos
   document.getElementById('p_nome').value = prod.nome;
-  const _cod = document.getElementById('p_codigo'); if (_cod) _cod.value = prod.codigo || '';
-  const _rev = document.getElementById('p_revisao'); if (_rev) _rev.value = prod.revisao || '00';
   document.getElementById('p_gramatura').value = prod.pesoTotal+'g';
   document.getElementById('p_porcao').value = prod.pesoPorcao;
   document.getElementById('p_medida').value = prod.medida;
@@ -1491,8 +1447,6 @@ function salvarProdutoAtual() {
   const prod = {
     id: Date.now(),
     nome: nomeDigitado,
-    codigo: (document.getElementById('p_codigo')?.value||'').trim(),
-    revisao: (document.getElementById('p_revisao')?.value||'00').trim(),
     data: new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),
     pesoTotal: parseFloat(document.getElementById('p_peso').value)||1000,
     pesoPorcao: P100,
@@ -1541,8 +1495,6 @@ function salvarProdutoAtual() {
       if (!conf) return;
       prod.nome = nomeOriginal + ' (v2)';
       document.getElementById('p_nome').value = prod.nome;
-  const _cod = document.getElementById('p_codigo'); if (_cod) _cod.value = prod.codigo || '';
-  const _rev = document.getElementById('p_revisao'); if (_rev) _rev.value = prod.revisao || '00';
     }
     const lista = getProdutos();
     lista.unshift(prod);
@@ -2132,21 +2084,6 @@ function selTipo(tipo) {
     if (den) den.value = tpl.denominacao || tpl.label;
   }
 
-  // Validar conformidade em tempo real
-  const ptnAtual = _calcPtnAtual();
-  if (ptnAtual !== null) {
-    const avisoLegal = _validarConformidadeLegal(tipoSel, ptnAtual);
-    const warningEl = document.getElementById('conformidadeWarning');
-    if (warningEl) {
-      if (avisoLegal) {
-        warningEl.style.display = '';
-        warningEl.innerHTML = `<strong>⚠️ Atenção — Não conformidade:</strong> PTN calculada ${ptnAtual.toFixed(1)}g/100g — ${avisoLegal.split('\n')[0]}`;
-      } else {
-        warningEl.style.display = 'none';
-      }
-    }
-  }
-
   // Atualizar painel legal
   document.getElementById('classeLegal').innerHTML =
     `<strong style="color:var(--blue)">${tpl.label}</strong><br>${tpl.legal}`;
@@ -2255,12 +2192,7 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
       'st-cacau-magro':'Cacau em Pó Magro','st-cacau-alcalin':'Cacau em Pó Alcalinizado',
       'st-cafe-250g':'Café Torrado e Moído','st-cafe-500g':'Café Torrado e Moído','st-cafe-5kg':'Café Torrado e Moído',
     };
-    const tiposLeite = ['leite-integral','leite-instantaneo','leite-desnatado'];
-    if (tiposLeite.includes(tipoSel) && denMap[stId]) {
-      den.value = denMap[stId];
-    } else {
-      den.value = tpl ? (tpl.denominacao || tpl.label) : '';
-    }
+    den.value = denMap[stId] || (tpl ? (tpl.denominacao || tpl.label) : '');
   }
 
   // Painel legal com subtipo
@@ -2335,7 +2267,7 @@ function _buildIngredientesList() {
   return receita
     .slice()
     .sort((a,b) => b.qtde - a.qtde)
-    .map(r => r.d.rotuloCompleto || r.d.rotulo || r.d.n)
+    .map(r => r.d.rotulo || r.d.n)
     .join(', ');
 }
 
@@ -2622,8 +2554,8 @@ function renderStep4(){
         <span style="font-size:15px;letter-spacing:1px">${nome.toUpperCase()}</span>
       </div>
       <div class="ftp-hdr-meta">
-        Código: <strong>${gv('p_codigo') || (_prodOrigem?.codigo) || '—'}</strong><br>
-        Revisão: <strong>${gv('p_revisao') || (_prodOrigem?.revisao) || '00'}</strong><br>
+        Código: <strong>${gv('p_codigo','—')}</strong><br>
+        Revisão: <strong>${gv('p_revisao','00')}</strong><br>
         Data: <strong>${data}</strong><br>
         Pág.: <strong>1/1</strong>
       </div>
