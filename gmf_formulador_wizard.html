@@ -915,12 +915,10 @@ const _sb = window.supabase.createClient(_SUPA_URL, _SUPA_KEY);
 let _currentUser = null;
 async function _initAuth() {
   const { data } = await _sb.auth.getSession();
-  if (!data.session) {
-    // Não autenticado — redirecionar para login
-    window.location.href = 'gmf_login.html';
-    return;
+  if (data.session) {
+    _currentUser = data.session.user;
   }
-  _currentUser = data.session.user;
+  // Modo publico - continua sem login
   // Exibir nome do usuário no cabeçalho
   const perfil = await _sb.from('perfis').select('nome,cargo').eq('id', _currentUser.id).single();
   if (perfil.data) {
