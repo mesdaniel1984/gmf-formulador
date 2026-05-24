@@ -1923,7 +1923,12 @@ const TEMPLATES = {
     classe: 'soro-derivados',
     legal: '<strong>IN MAPA nº 94/2020</strong>',
     denominacao: 'Soro de Leite em Pó',
-    subtipo: null,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+      ]
+    },
     campos: {
       aspecto: 'Pó uniforme, cor branca a levemente amarelada, sem grumos',
       sabor: 'Sabor e odor característicos de soro de leite',
@@ -1942,7 +1947,13 @@ const TEMPLATES = {
     classe: 'maltodextrina-glicose',
     legal: '<strong>RDC ANVISA nº 429/2020</strong>',
     denominacao: 'Maltodextrina',
-    subtipo: null,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',  label:'📦 Embalagem 1 kg' },
+      ]
+    },
     campos: {
       aspecto: 'Pó fino, branco a levemente amarelado, homogêneo',
       sabor: 'Sabor levemente adocicado, neutro',
