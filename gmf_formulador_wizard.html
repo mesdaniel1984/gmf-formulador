@@ -381,8 +381,8 @@ tr:last-child td{border-bottom:none}
       <div class="field"><label>Código interno / FT</label><input id="p_codigo" type="text" placeholder="Ex: FT-001"></div>
       <div class="field"><label>Revisão</label><input id="p_revisao" type="text" value="00"></div>
       <div class="field"><label>Denominação de venda</label><input id="p_denominacao" type="text" placeholder="Ex: Composto Lácteo com Adição"></div>
-      <div class="field"><label>Marca</label><input id="p_marca" type="text" value="Grupo MF Paris"></div>
-      <div class="field"><label>Registro / SIF</label><input id="p_registro" type="text" value="SIF 5460"></div>
+      <div class="field"><label>Marca</label><input id="p_marca" type="text" placeholder="Ex: Grupo MF Paris"></div>
+      <div class="field"><label>Registro / SIF</label><input id="p_registro" type="text" placeholder="Ex: SIF 5460"></div>
       <div class="field"><label>Gramatura / Embalagem</label><input id="p_gramatura" type="text" value="25 kg"></div>
       <div class="field"><label>Porção (g)</label><input id="p_porcao" type="number" value="30" min="1" oninput="recalc()"></div>
       <div class="field"><label>Medida caseira</label><input id="p_medida" type="text" value="2 colheres de sopa"></div>
@@ -2615,9 +2615,9 @@ function renderStep4(){
       <div class="ftp-sec-t">1. Identificação do produto</div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Denominação de venda</div><div class="ftp-val"><strong>${gv('p_denominacao','—')}</strong></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${gv('p_marca','—')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${gv('p_marca') || (_prodOrigem?.marca) || '—'}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Gramatura</div><div class="ftp-val">${gv('p_gramatura','—')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${gv('p_registro','SIF 5460')}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${gv('p_registro') || (_prodOrigem?.registro) || 'SIF 5460'}</strong></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
       </div>
       <div class="ftp-row">
@@ -2976,8 +2976,8 @@ function ltGerarLaudo() {
       <div class="ftp-sec-t">1. Identificação do produto e lote</div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Produto</div><div class="ftp-val"><strong>${gv('p_denominacao',nome)}</strong></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${gv('p_marca','Grupo MF Paris')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Nº Registro / SIF</div><div class="ftp-val"><strong>${gv('p_registro','SIF 5460')}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${gv('p_marca') || (_prodOrigem?.marca) || 'Grupo MF Paris'}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Nº Registro / SIF</div><div class="ftp-val"><strong>${gv('p_registro') || (_prodOrigem?.registro) || 'SIF 5460'}</strong></div></div>
       </div>
       <div class="ftp-row">
         <div class="ftp-cell"><div class="ftp-lbl">Lote</div><div class="ftp-val"><strong>${glt('lt_lote','—')}</strong></div></div>
