@@ -345,12 +345,21 @@ tr:last-child td{border-bottom:none}
     <!-- Filtro / busca -->
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <input type="text" id="prodBusca" placeholder="🔍  Buscar por nome…" oninput="renderProdutos()" style="flex:1;min-width:200px">
-      <select id="prodFiltroClasse" onchange="renderProdutos()" style="width:220px">
+      <select id="prodFiltroClasse" onchange="renderProdutos()" style="width:280px">
         <option value="">Todas as categorias</option>
         <option value="composto-sem">Composto Lácteo sem Adição</option>
         <option value="composto-com">Composto Lácteo com Adição</option>
         <option value="mistura">Mistura Láctea</option>
         <option value="po-preparo">Pó para Preparo</option>
+        <option value="leite-integral">Leite em Pó Integral</option>
+        <option value="leite-instantaneo">Leite em Pó Instantâneo</option>
+        <option value="leite-desnatado">Leite em Pó Desnatado</option>
+        <option value="achocolatado">Achocolatado em Pó</option>
+        <option value="cacau">Cacau em Pó</option>
+        <option value="cafe-torrado-moido">Café Torrado e Moído</option>
+        <option value="cafe-torrado">Café Torrado em Grão</option>
+        <option value="soro-derivados">Soro e Derivados Lácteos (Soro, Permeado, WPC)</option>
+        <option value="maltodextrina-glicose">Maltodextrina e Glicose em Pó</option>
       </select>
     </div>
 
@@ -1007,7 +1016,7 @@ const CLASSE_META = {
   'cafe-torrado':      { label:'Café Torrado (grão)',            cor:'#3b1f0a', bg:'#fdf5e8', icone:'🫘' },
 };
 
-// Seed — 6 fórmulas já registradas (do JSON exportado)
+// Seed — 23 produtos cadastrados (sincronizados automaticamente com Supabase)
 const SEED_PRODUTOS = [
   {"id":1779578828831,"nome":"LEITE EM PÓ INTEGRAL INSTANTÂNEO","data":"23/05/2026, 20:27","pesoTotal":1000,"pesoPorcao":30,"medida":"2 colheres de sopa","nPorcoes":33,"tQ":1000,"classificacao":"leite-instantaneo","denominacao":"Leite em Pó Integral Instantâneo","aspecto":"Grânulos aglomerados de coloração branca a creme, dissolução instantânea em água fria, sem grumos após agitação suave","sabor":"Sabor e odor característicos de leite, suaves, não rançosos, livres de sabores e odores estranhos","alergenicos":"CONTÉM LEITE E DERIVADOS DE SOJA (lecitina). NÃO CONTÉM GLÚTEN.","glutenlactose":"NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.","emb1":"Embalagem aluminizada hermética ou fardo plástico","emb2":"Saco de papel ou fardo plástico","validade":"Vide Embalagem · Após aberto: consumir em até 30 dias","armazenamento":"Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade. Após aberto, fechar bem a embalagem e consumir em até 30 dias.","preparo":"Dissolva 26 g (3 colheres de sopa rasas) em 200 ml de água fria, morna ou quente. Misture suavemente.\nPara 1 litro: dissolva 130 g em 1 litro de água. O produto dissolve instantaneamente sem necessidade de agitação intensa.","obs":"LEITE EM PÓ INSTANTÂNEO — DISSOLVE FACILMENTE EM ÁGUA FRIA.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.\nEste produto contém lecitina de soja como agente de instantaneização.","ingredientes_txt":"","ingredientes":[{"nome":"Leite integral em pó instantâneo (Ninho)","nomeExib":"Leite integral em pó instantâneo (Ninho)","ref":"Nestlé/ANVISA","qtde":1000}],"nutri100g":{"kcal":497,"cho":38,"act":38,"acad":0,"ptn":25.6,"gt":26.5,"gs":17.299999999999997,"tr":0.3,"fi":0,"na":330},"nutriPorcao":{"kcal":149.1,"cho":11.4,"act":11.4,"acad":0,"ptn":7.68,"gt":7.95,"gs":5.189999999999999,"tr":0.09,"fi":0,"na":99},"_origemId":null},
   {"id":1779578577374,"nome":"LEITE EM PÓ DESNATADO","data":"23/05/2026, 20:22","pesoTotal":1000,"pesoPorcao":30,"medida":"2 colheres de sopa","nPorcoes":33,"tQ":1000,"classificacao":"leite-desnatado","denominacao":"Leite em Pó Desnatado","aspecto":"Pó uniforme de coloração branca a levemente creme, aspecto homogêneo, sem grumos","sabor":"Sabor e odor característicos de leite desnatado, suaves, não rançosos, livres de sabores e odores estranhos","alergenicos":"CONTÉM LEITE.","glutenlactose":"NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.","emb1":"Embalagem aluminizada hermética — 25kg / 1 kg / 800g / 400g / 200g","emb2":"Fardo Plástico ou Fardo de papel craft","validade":"Vide Embalagem · Após aberto: consumir em até 30 dias","armazenamento":"Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes. Após aberto, manter em recipiente limpo, seco e fechado.","preparo":"Para preparar 200 ml de leite desnatado: dissolva 20 g (2 colheres de sopa rasas) em água filtrada ou fervida (50°C) e complete até 200 ml.\nPara 1 litro: dissolva 100 g em 1 litro de água.","obs":"LEITE EM PÓ DESNATADO — BAIXO TEOR DE GORDURA.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.","ingredientes_txt":"","ingredientes":[{"nome":"LPD","nomeExib":"Leite em Pó Desnatado","ref":"Noal","qtde":1000}],"nutri100g":{"kcal":350,"cho":53,"act":53,"acad":0,"ptn":33,"gt":1.2,"gs":0.5,"tr":0,"fi":0,"na":475},"nutriPorcao":{"kcal":105,"cho":15.9,"act":15.9,"acad":0,"ptn":9.9,"gt":0.36,"gs":0.15,"tr":0,"fi":0,"na":142.5},"_origemId":null},
@@ -1033,6 +1042,7 @@ const SEED_PRODUTOS = [
   {"id":1747000003,"nome":"OKEY LAC 300","data":"11/05/2026, 15:36","pesoTotal":1000,"pesoPorcao":30,"medida":"2 colheres de sopa","nPorcoes":33,"tQ":1000,"classificacao":"composto-com","ingredientes":[{"nome":"Mistura Láctea Select 25Kg","ref":"Leitino","qtde":700},{"nome":"Soro","ref":"Da vaca","qtde":294},{"nome":"Aroma de leite","ref":"Duas Rodas","qtde":6}],"nutri100g":{"kcal":469,"cho":66.8,"act":59.3,"acad":1.4,"ptn":9.4,"gt":18.2,"gs":9.1,"tr":0,"fi":0.4,"na":608},"nutriPorcao":{"kcal":141,"cho":20.1,"act":17.8,"acad":0.4,"ptn":2.8,"gt":5.5,"gs":2.7,"tr":0,"fi":0.1,"na":182}},
   {"id":1747000004,"nome":"OKEY LAC 2010","data":"11/05/2026, 15:37","pesoTotal":1000,"pesoPorcao":30,"medida":"2 colheres de sopa","nPorcoes":33,"tQ":1000,"classificacao":"mistura","ingredientes":[{"nome":"Composto Lacteo com LM267","ref":"Alibra","qtde":700},{"nome":"Permeado","ref":"Sooro","qtde":294},{"nome":"Aroma de leite","ref":"Duas Rodas","qtde":6}],"nutri100g":{"kcal":459,"cho":66.5,"act":56.3,"acad":3.2,"ptn":7.2,"gt":18.3,"gs":9.8,"tr":0.4,"fi":0,"na":478},"nutriPorcao":{"kcal":138,"cho":20,"act":16.9,"acad":1,"ptn":2.2,"gt":5.5,"gs":3,"tr":0.1,"fi":0,"na":143}}
 ];
+
 
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -1905,7 +1915,45 @@ const TEMPLATES = {
       validade: '12 meses (embalagem lacrada) · Após aberto: consumir em até 60 dias',
       preparo: 'Moa os grãos imediatamente antes do preparo.\nCafé coado: 10 g para 100 ml de água filtrada quente (90–95°C). Espresso: 7–10 g / 30 ml.',
     }
+  }
+  'soro-derivados': {
+    label: 'Soro e Derivados Lácteos',
+    classe: 'soro-derivados',
+    legal: '<strong>IN MAPA nº 94/2020</strong> — Regulamento Técnico de Identidade e Qualidade de Soro de Leite<br>Abrange: Soro de Leite em Pó · Permeado de Soro · WPC (Concentrado Proteico de Soro)',
+    denominacao: 'Soro de Leite em Pó',
+    subtipo: null,
+    campos: {
+      aspecto: 'Pó uniforme, cor branca a levemente amarelada, sem grumos, aspecto homogêneo',
+      sabor: 'Sabor e odor característicos de soro de leite, sem sabores ou odores estranhos',
+      alergenicos: 'CONTÉM LEITE.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+      emb1: 'Saco plástico (polietileno) hermeticamente fechado',
+      emb2: 'Fardo kraft multifolhado — 25 kg',
+      validade: '12 meses (embalagem fechada)',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.',
+      preparo: 'Produto para uso industrial.',
+      obs: 'ESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+    },
   },
+  'maltodextrina-glicose': {
+    label: 'Maltodextrina e Glicose em Pó',
+    classe: 'maltodextrina-glicose',
+    legal: '<strong>RDC ANVISA nº 429/2020</strong> — Rotulagem Nutricional<br>Carboidrato hidrolisado: as frações de monossacarídeos e dissacarídeos devem ser declaradas como açúcares adicionados.',
+    denominacao: 'Maltodextrina',
+    subtipo: null,
+    campos: {
+      aspecto: 'Pó fino, branco a levemente amarelado, homogêneo, sem grumos',
+      sabor: 'Sabor levemente adocicado, neutro, sem sabores ou odores estranhos',
+      alergenicos: 'VERIFICAR ORIGEM DO AMIDO (pode conter TRIGO).',
+      glutenlactose: 'VERIFICAR ESPECIFICAÇÃO DO FORNECEDOR. NÃO CONTÉM LACTOSE.',
+      emb1: 'Saco plástico (polietileno) hermeticamente fechado',
+      emb2: 'Fardo kraft multifolhado — 25 kg',
+      validade: '24 meses (embalagem fechada)',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade.',
+      preparo: 'Produto para uso industrial.',
+      obs: 'Carboidrato hidrolisado. As frações de monossacarídeos e dissacarídeos devem ser contabilizadas como açúcares adicionados conforme RDC ANVISA 429/2020.',
+    },
+  },,
 
 };
 
@@ -2008,7 +2056,7 @@ function selTipo(tipo) {
     embBox.style.display = 'none';
     _aplicarTemplate(tpl.campos);
     const den = document.getElementById('p_denominacao');
-    if (den) den.value = tpl.label;
+    if (den) den.value = tpl.denominacao || tpl.label;
   }
 
   // Atualizar painel legal
@@ -2118,6 +2166,8 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
       'st-cacau-comum':'Cacau em Pó','st-cacau-gordo':'Cacau em Pó Gordo',
       'st-cacau-magro':'Cacau em Pó Magro','st-cacau-alcalin':'Cacau em Pó Alcalinizado',
       'st-cafe-250g':'Café Torrado e Moído','st-cafe-500g':'Café Torrado e Moído','st-cafe-5kg':'Café Torrado e Moído',
+      'soro-derivados':'Soro de Leite em Pó',
+      'maltodextrina-glicose':'Maltodextrina',
     };
     den.value = denMap[stId] || (tpl ? tpl.label : '');
   }
