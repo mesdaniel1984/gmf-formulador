@@ -1405,6 +1405,10 @@ function editarProduto(id) {
     if (subBox) subBox.style.display = 'none';
   }
 
+  // Restaurar marca e registro
+  const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
+  const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
+
   // Restaurar denominação exatamente como salva (não deixar selTipo sobrescrever)
   if (prod.denominacao) {
     document.getElementById('p_denominacao').value = prod.denominacao;
@@ -1436,7 +1440,7 @@ function editarProduto(id) {
 function ftpDoProduto(id) {
   const prod = getProdutos().find(p=>p.id===id);
   if (!prod) return;
-  // Carregar tudo e ir direto para step 4
+  _prodOrigem = prod;
   editarProduto(id);
   setTimeout(()=>goStep(4), 100);
 }
@@ -2552,6 +2556,11 @@ Sódio: ${f0(T.na)}mg | ${f0(P.na)}mg | ${vdp(P.na,VD.na)}%
 function gv(id,def=''){const e=document.getElementById(id);return e?(e.value||def):def;}
 
 function renderStep4(){
+  const _ftpProd = _prodOrigem || {};
+  const _ftpMarca = _ftpProd.marca || gv('p_marca') || 'Grupo MF Paris';
+  const _ftpRegistro = _ftpProd.registro || gv('p_registro') || 'SIF 5460';
+  const _ftpCodigo = _ftpProd.codigo || gv('p_codigo') || '—';
+  const _ftpRevisao = _ftpProd.revisao || gv('p_revisao') || '00';
   const empty=document.getElementById('s4empty');
   const content=document.getElementById('s4content');
   if(!receita.length){empty.style.display='';content.style.display='none';return;}
@@ -2613,8 +2622,8 @@ function renderStep4(){
         <span style="font-size:15px;letter-spacing:1px">${nome.toUpperCase()}</span>
       </div>
       <div class="ftp-hdr-meta">
-        Código: <strong>${_prodOrigem?.codigo || gv('p_codigo') || '—'}</strong><br>
-        Revisão: <strong>${gv('p_revisao') || (_prodOrigem?.revisao) || '00'}</strong><br>
+        Código: <strong>${_ftpCodigo}</strong><br>
+        Revisão: <strong>${_ftpRevisao}</strong><br>
         Data: <strong>${data}</strong><br>
         Pág.: <strong>1/1</strong>
       </div>
@@ -2625,9 +2634,9 @@ function renderStep4(){
       <div class="ftp-sec-t">1. Identificação do produto</div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Denominação de venda</div><div class="ftp-val"><strong>${gv('p_denominacao','—')}</strong></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${_prodOrigem?.marca || gv('p_marca') || '—'}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${_ftpMarca}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Gramatura</div><div class="ftp-val">${gv('p_gramatura','—')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${_prodOrigem?.registro || gv('p_registro') || 'SIF 5460'}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${_ftpRegistro}</strong></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
       </div>
       <div class="ftp-row">
