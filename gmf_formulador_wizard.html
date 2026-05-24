@@ -921,7 +921,7 @@ async function _initAuth() {
   // Se não logado, mostrar botão de login mas continuar
   if (!_currentUser) {
     const ui = document.getElementById('userInfo');
-    if (ui) ui.innerHTML = '<a href="login.html" style="color:#fff;font-size:12px;background:#2563eb;padding:4px 10px;border-radius:6px;text-decoration:none">🔐 Entrar para salvar</a>';
+    if (ui) ui.innerHTML = '<a href="gmf_login.html" style="color:#fff;font-size:12px;background:#2563eb;padding:4px 10px;border-radius:6px;text-decoration:none">🔐 Entrar para salvar</a>';
     return;
   }
   // Mostrar botão Sair quando logado
@@ -1412,6 +1412,10 @@ function editarProduto(id) {
     document.getElementById('p_denominacao').value = tpl.label;
   }
 
+  // Restaurar marca e registro SEMPRE do produto
+  const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
+  const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
+
   // Carregar ingredientes
   let naoEnc = [];
   (prod.ingredientes||[]).forEach(ing => {
@@ -1432,12 +1436,7 @@ function editarProduto(id) {
 function ftpDoProduto(id) {
   const prod = getProdutos().find(p=>p.id===id);
   if (!prod) return;
-  _prodOrigem = prod;
-  // Preencher campos criticos antes de renderizar FTP
-  const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
-  const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
-  const _cEl = document.getElementById('p_codigo'); if (_cEl) _cEl.value = prod.codigo || '';
-  const _rvEl = document.getElementById('p_revisao'); if (_rvEl) _rvEl.value = prod.revisao || '00';
+  // Carregar tudo e ir direto para step 4
   editarProduto(id);
   setTimeout(()=>goStep(4), 100);
 }
@@ -2614,7 +2613,7 @@ function renderStep4(){
         <span style="font-size:15px;letter-spacing:1px">${nome.toUpperCase()}</span>
       </div>
       <div class="ftp-hdr-meta">
-        Código: <strong>${(_prodOrigem?.codigo) || gv('p_codigo') || '—'}</strong><br>
+        Código: <strong>${_prodOrigem?.codigo || gv('p_codigo') || '—'}</strong><br>
         Revisão: <strong>${gv('p_revisao') || (_prodOrigem?.revisao) || '00'}</strong><br>
         Data: <strong>${data}</strong><br>
         Pág.: <strong>1/1</strong>
@@ -2626,9 +2625,9 @@ function renderStep4(){
       <div class="ftp-sec-t">1. Identificação do produto</div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Denominação de venda</div><div class="ftp-val"><strong>${gv('p_denominacao','—')}</strong></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${(_prodOrigem?.marca) || gv('p_marca') || '—'}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${_prodOrigem?.marca || gv('p_marca') || '—'}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Gramatura</div><div class="ftp-val">${gv('p_gramatura','—')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${(_prodOrigem?.registro) || gv('p_registro') || 'SIF 5460'}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${_prodOrigem?.registro || gv('p_registro') || 'SIF 5460'}</strong></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
       </div>
       <div class="ftp-row">
@@ -2987,8 +2986,8 @@ function ltGerarLaudo() {
       <div class="ftp-sec-t">1. Identificação do produto e lote</div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Produto</div><div class="ftp-val"><strong>${gv('p_denominacao',nome)}</strong></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${(_prodOrigem?.marca) || gv('p_marca') || 'Grupo MF Paris'}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Nº Registro / SIF</div><div class="ftp-val"><strong>${(_prodOrigem?.registro) || gv('p_registro') || 'SIF 5460'}</strong></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${_prodOrigem?.marca || gv('p_marca') || 'Grupo MF Paris'}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Nº Registro / SIF</div><div class="ftp-val"><strong>${_prodOrigem?.registro || gv('p_registro') || 'SIF 5460'}</strong></div></div>
       </div>
       <div class="ftp-row">
         <div class="ftp-cell"><div class="ftp-lbl">Lote</div><div class="ftp-val"><strong>${glt('lt_lote','—')}</strong></div></div>
