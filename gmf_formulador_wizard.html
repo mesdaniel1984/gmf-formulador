@@ -2624,8 +2624,8 @@ function renderStep4(){
         <span style="font-size:15px;letter-spacing:1px">${nome.toUpperCase()}</span>
       </div>
       <div class="ftp-hdr-meta">
-        Código: <strong>${gv('p_codigo','—')}</strong><br>
-        Revisão: <strong>${gv('p_revisao','00')}</strong><br>
+        Código: <strong>${gv('p_codigo') || (_prodOrigem?.codigo) || '—'}</strong><br>
+        Revisão: <strong>${gv('p_revisao') || (_prodOrigem?.revisao) || '00'}</strong><br>
         Data: <strong>${data}</strong><br>
         Pág.: <strong>1/1</strong>
       </div>
