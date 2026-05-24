@@ -1915,7 +1915,7 @@ const TEMPLATES = {
       validade: '12 meses (embalagem lacrada) · Após aberto: consumir em até 60 dias',
       preparo: 'Moa os grãos imediatamente antes do preparo.\nCafé coado: 10 g para 100 ml de água filtrada quente (90–95°C). Espresso: 7–10 g / 30 ml.',
     }
-  },
+  }
   'soro-derivados': {
     label: 'Soro e Derivados Lácteos',
     classe: 'soro-derivados',
@@ -2052,7 +2052,7 @@ function selTipo(tipo) {
     embBox.style.display = 'none';
     _aplicarTemplate(tpl.campos);
     const den = document.getElementById('p_denominacao');
-    if (den) den.value = tpl.label;
+    if (den) den.value = tpl.denominacao || tpl.label;
   }
 
   // Atualizar painel legal
