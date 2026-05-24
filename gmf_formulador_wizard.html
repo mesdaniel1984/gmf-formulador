@@ -919,7 +919,8 @@ async function _initAuth() {
     _currentUser = data.session.user;
   }
   // Modo publico - continua sem login
-  // Exibir nome do usuário no cabeçalho
+  // Exibir nome do usuário no cabeçalho (só se logado)
+  if (!_currentUser) return;
   const perfil = await _sb.from('perfis').select('nome,cargo').eq('id', _currentUser.id).single();
   if (perfil.data) {
     const el = document.getElementById('userInfo');
