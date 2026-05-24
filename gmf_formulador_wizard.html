@@ -1921,18 +1921,23 @@ const TEMPLATES = {
   'soro-derivados': {
     label: 'Soro e Derivados Lácteos',
     classe: 'soro-derivados',
-    legal: '<strong>IN MAPA nº 94/2020</strong> — Soro de Leite · Soro em Pó · Permeado · WPC',
+    legal: '<strong>IN MAPA nº 94/2020</strong>',
     denominacao: 'Soro de Leite em Pó',
-    subtipo: null,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+      ]
+    },
     campos: {
       aspecto: 'Pó uniforme, cor branca a levemente amarelada, sem grumos',
-      sabor: 'Sabor e odor característicos de soro de leite, sem odores estranhos',
+      sabor: 'Sabor e odor característicos de soro de leite',
       alergenicos: 'CONTÉM LEITE.',
       glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
       emb1: 'Saco plástico hermeticamente fechado',
       emb2: 'Fardo kraft multifolhado 25 kg',
       validade: '12 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco (≤25°C), arejado, ao abrigo de calor e umidade.',
+      armazenamento: 'Local seco, fresco, arejado.',
       preparo: 'Produto para uso industrial.',
       obs: 'ESTABELECIMENTO INSPECIONADO PELO MAPA.',
     },
@@ -1940,20 +1945,26 @@ const TEMPLATES = {
   'maltodextrina-glicose': {
     label: 'Maltodextrina e Glicose em Pó',
     classe: 'maltodextrina-glicose',
-    legal: '<strong>RDC ANVISA nº 429/2020</strong> — Carboidrato hidrolisado',
+    legal: '<strong>RDC ANVISA nº 429/2020</strong>',
     denominacao: 'Maltodextrina',
-    subtipo: null,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',  label:'📦 Embalagem 1 kg' },
+      ]
+    },
     campos: {
-      aspecto: 'Pó fino, branco a levemente amarelado, homogêneo, sem grumos',
-      sabor: 'Sabor levemente adocicado, neutro, sem sabores estranhos',
-      alergenicos: 'VERIFICAR ORIGEM DO AMIDO (pode conter TRIGO).',
+      aspecto: 'Pó fino, branco a levemente amarelado, homogêneo',
+      sabor: 'Sabor levemente adocicado, neutro',
+      alergenicos: 'VERIFICAR ORIGEM DO AMIDO.',
       glutenlactose: 'NÃO CONTÉM LACTOSE.',
       emb1: 'Saco plástico hermeticamente fechado',
       emb2: 'Fardo kraft multifolhado 25 kg',
       validade: '24 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco (≤25°C), arejado, ao abrigo de calor e umidade.',
+      armazenamento: 'Local seco, fresco, arejado.',
       preparo: 'Produto para uso industrial.',
-      obs: 'Carboidrato hidrolisado. Frações de mono e dissacarídeos declaradas como açúcares adicionados (RDC 429/2020).',
+      obs: 'Carboidrato hidrolisado. RDC ANVISA 429/2020.',
     },
   },
 
