@@ -345,21 +345,12 @@ tr:last-child td{border-bottom:none}
     <!-- Filtro / busca -->
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <input type="text" id="prodBusca" placeholder="🔍  Buscar por nome…" oninput="renderProdutos()" style="flex:1;min-width:200px">
-      <select id="prodFiltroClasse" onchange="renderProdutos()" style="width:280px">
+      <select id="prodFiltroClasse" onchange="renderProdutos()" style="width:220px">
         <option value="">Todas as categorias</option>
         <option value="composto-sem">Composto Lácteo sem Adição</option>
         <option value="composto-com">Composto Lácteo com Adição</option>
         <option value="mistura">Mistura Láctea</option>
         <option value="po-preparo">Pó para Preparo</option>
-        <option value="leite-integral">Leite em Pó Integral</option>
-        <option value="leite-instantaneo">Leite em Pó Instantâneo</option>
-        <option value="leite-desnatado">Leite em Pó Desnatado</option>
-        <option value="achocolatado">Achocolatado em Pó</option>
-        <option value="cacau">Cacau em Pó</option>
-        <option value="cafe-torrado-moido">Café Torrado e Moído</option>
-        <option value="cafe-torrado">Café Torrado em Grão</option>
-        <option value="soro-derivados">Soro e Derivados Lácteos</option>
-        <option value="maltodextrina-glicose">Maltodextrina e Glicose em Pó</option>
       </select>
     </div>
 
@@ -1935,7 +1926,7 @@ const TEMPLATES = {
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
-        { id:'st-soro-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
       ]
     },
     campos: {
@@ -1946,7 +1937,7 @@ const TEMPLATES = {
       emb1: 'Saco plástico hermeticamente fechado',
       emb2: 'Fardo kraft multifolhado 25 kg',
       validade: '12 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco, arejado.',
+      armazenamento: 'Local seco, fresco, arejado, ao abrigo de calor e umidade.',
       preparo: 'Produto para uso industrial.',
       obs: 'ESTABELECIMENTO INSPECIONADO PELO MAPA.',
     },
@@ -1959,8 +1950,8 @@ const TEMPLATES = {
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
-        { id:'st-malto-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
-        { id:'st-malto-1kg',  label:'📦 Embalagem 1 kg' },
+        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',  label:'📦 Embalagem 1 kg' },
       ]
     },
     campos: {
@@ -1971,7 +1962,7 @@ const TEMPLATES = {
       emb1: 'Saco plástico hermeticamente fechado',
       emb2: 'Fardo kraft multifolhado 25 kg',
       validade: '24 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco, arejado.',
+      armazenamento: 'Local seco, fresco, arejado, ao abrigo de calor e umidade.',
       preparo: 'Produto para uso industrial.',
       obs: 'Carboidrato hidrolisado. RDC ANVISA 429/2020.',
     },
@@ -1981,9 +1972,6 @@ const TEMPLATES = {
 
 // Mapa de subtipo para ajuste de campos específicos
 const SUBTIPO_AJUSTES = {
-  'st-soro-25kg':  { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'12 meses (embalagem fechada)', gramatura:'25 kg' },
-  'st-malto-25kg': { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
-  'st-malto-1kg':  { emb1:'Embalagem plástica hermeticamente fechada 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (embalagem fechada)', gramatura:'1 kg' },
   'st-25kg':  { emb1:'Saco plástico atóxico (polietileno), hermeticamente fechado', emb2:'Fardo de papel kraft multifolhado — 25 kg (Industrial / granel)', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
   'st-1kg':   { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'1 kg' },
   'st-800g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 800 g', emb2:'Caixa de papelão com 15 unidades de 800 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'800 g' },
