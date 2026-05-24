@@ -2331,7 +2331,7 @@ function _buildIngredientesList() {
   return receita
     .slice()
     .sort((a,b) => b.qtde - a.qtde)
-    .map(r => r.d.rotulo || r.d.n)
+    .map(r => r.d.rotuloCompleto || r.d.rotulo || r.d.n)
     .join(', ');
 }
 
