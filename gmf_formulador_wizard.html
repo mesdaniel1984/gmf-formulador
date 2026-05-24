@@ -2084,7 +2084,7 @@ function selTipo(tipo) {
       `<button class="btn${o.default?' btn-primary':''}" id="${o.id}"
         onclick="toggleSubtipo('${tipo}','${o.id}')"
         style="font-size:12px;height:32px;user-select:none"
-        title="Clique para marcar/desmarcar">${o.label}</button>`
+        >${o.label}</button>`
     ).join('');
     // Aplicar campos base ANTES de selecionar subtipo
     _aplicarTemplate(tpl.campos);
@@ -2111,7 +2111,7 @@ function selTipo(tipo) {
         `<button class="btn${o.def?' btn-primary':''}" id="emb-${o.id}"
           onclick="toggleEmbalagem('${tipo}','${o.id}')"
           style="font-size:12px;height:32px;user-select:none"
-          title="Clique para marcar/desmarcar">${o.label}</button>`
+          >${o.label}</button>`
       ).join('');
       // Auto-selecionar fardo 25kg
       _aplicarSubtipoOuEmb(tipo, 'st-25kg');
@@ -2251,7 +2251,7 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
       'st-cacau-magro':'Cacau em Pó Magro','st-cacau-alcalin':'Cacau em Pó Alcalinizado',
       'st-cafe-250g':'Café Torrado e Moído','st-cafe-500g':'Café Torrado e Moído','st-cafe-5kg':'Café Torrado e Moído',
     };
-    den.value = denMap[stId] || (tpl ? tpl.label : '');
+    den.value = denMap[stId] || (tpl ? (tpl.denominacao || tpl.label) : '');
   }
 
   // Painel legal com subtipo
