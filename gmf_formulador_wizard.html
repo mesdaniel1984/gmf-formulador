@@ -1381,6 +1381,8 @@ function editarProduto(id) {
 
   // Restaurar campos básicos
   document.getElementById('p_nome').value = prod.nome;
+  const _cod = document.getElementById('p_codigo'); if (_cod) _cod.value = prod.codigo || '';
+  const _rev = document.getElementById('p_revisao'); if (_rev) _rev.value = prod.revisao || '00';
   document.getElementById('p_gramatura').value = prod.pesoTotal+'g';
   document.getElementById('p_porcao').value = prod.pesoPorcao;
   document.getElementById('p_medida').value = prod.medida;
@@ -1541,6 +1543,8 @@ function salvarProdutoAtual() {
       if (!conf) return;
       prod.nome = nomeOriginal + ' (v2)';
       document.getElementById('p_nome').value = prod.nome;
+  const _cod = document.getElementById('p_codigo'); if (_cod) _cod.value = prod.codigo || '';
+  const _rev = document.getElementById('p_revisao'); if (_rev) _rev.value = prod.revisao || '00';
     }
     const lista = getProdutos();
     lista.unshift(prod);
