@@ -2251,7 +2251,12 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
       'st-cacau-magro':'Cacau em Pó Magro','st-cacau-alcalin':'Cacau em Pó Alcalinizado',
       'st-cafe-250g':'Café Torrado e Moído','st-cafe-500g':'Café Torrado e Moído','st-cafe-5kg':'Café Torrado e Moído',
     };
-    den.value = denMap[stId] || (tpl ? (tpl.denominacao || tpl.label) : '');
+    const tiposLeite = ['leite-integral','leite-instantaneo','leite-desnatado'];
+    if (tiposLeite.includes(tipoSel) && denMap[stId]) {
+      den.value = denMap[stId];
+    } else {
+      den.value = tpl ? (tpl.denominacao || tpl.label) : '';
+    }
   }
 
   // Painel legal com subtipo
