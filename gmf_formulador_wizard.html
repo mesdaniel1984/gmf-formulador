@@ -1935,7 +1935,7 @@ const TEMPLATES = {
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
-        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-soro-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
       ]
     },
     campos: {
@@ -1959,8 +1959,8 @@ const TEMPLATES = {
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
-        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
-        { id:'st-1kg',  label:'📦 Embalagem 1 kg' },
+        { id:'st-malto-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-malto-1kg',  label:'📦 Embalagem 1 kg' },
       ]
     },
     campos: {
@@ -1981,6 +1981,9 @@ const TEMPLATES = {
 
 // Mapa de subtipo para ajuste de campos específicos
 const SUBTIPO_AJUSTES = {
+  'st-soro-25kg':  { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'12 meses (embalagem fechada)', gramatura:'25 kg' },
+  'st-malto-25kg': { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
+  'st-malto-1kg':  { emb1:'Embalagem plástica hermeticamente fechada 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (embalagem fechada)', gramatura:'1 kg' },
   'st-25kg':  { emb1:'Saco plástico atóxico (polietileno), hermeticamente fechado', emb2:'Fardo de papel kraft multifolhado — 25 kg (Industrial / granel)', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
   'st-1kg':   { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'1 kg' },
   'st-800g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 800 g', emb2:'Caixa de papelão com 15 unidades de 800 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'800 g' },
