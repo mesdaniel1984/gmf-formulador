@@ -921,7 +921,7 @@ async function _initAuth() {
   // Se não logado, mostrar botão de login mas continuar
   if (!_currentUser) {
     const ui = document.getElementById('userInfo');
-    if (ui) ui.innerHTML = '<a href="gmf_login.html" style="color:#fff;font-size:12px;background:#2563eb;padding:4px 10px;border-radius:6px;text-decoration:none">🔐 Entrar para salvar</a>';
+    if (ui) ui.innerHTML = '<a href="login.html" style="color:#fff;font-size:12px;background:#2563eb;padding:4px 10px;border-radius:6px;text-decoration:none">🔐 Entrar para salvar</a>';
     return;
   }
   // Mostrar botão Sair quando logado
