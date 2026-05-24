@@ -3223,7 +3223,7 @@ async function _sincronizarSeeds() {
     }
   } catch(e){console.warn('sync:',e);}
 }
-_initAuth().then(async()=>{ await _sincronizarSeeds(); goStep(0); });
+_initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console.warn('sync erro:',e); } goStep(0); carregarProdutosAsync().then(renderProdutos); });
 </script>
 </body>
 </html>
