@@ -1405,10 +1405,6 @@ function editarProduto(id) {
     if (subBox) subBox.style.display = 'none';
   }
 
-  // Restaurar marca e registro
-  const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
-  const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
-
   // Restaurar denominação exatamente como salva (não deixar selTipo sobrescrever)
   if (prod.denominacao) {
     document.getElementById('p_denominacao').value = prod.denominacao;
