@@ -449,16 +449,6 @@ tr:last-child td{border-bottom:none}
           <div class="cbtn-title">Café Torrado (grão)</div>
           <div class="cbtn-sub">RDC ANVISA 277/2005 · IN 16/2010</div>
         </div>
-        <div class="cbtn" id="tb-soro-derivados" onclick="selTipo('soro-derivados')">
-          <div class="cbtn-icon">🥛</div>
-          <div class="cbtn-title">Soro e Derivados</div>
-          <div class="cbtn-sub">Soro, Permeado, WPC · IN MAPA 94/2020</div>
-        </div>
-        <div class="cbtn" id="tb-maltodextrina-glicose" onclick="selTipo('maltodextrina-glicose')">
-          <div class="cbtn-icon">🌽</div>
-          <div class="cbtn-title">Maltodextrina e Glicose</div>
-          <div class="cbtn-sub">Carboidrato hidrolisado · RDC 429/2020</div>
-        </div>
 
       </div>
     </div>
@@ -1015,8 +1005,6 @@ const CLASSE_META = {
   'cacau':             { label:'Cacau em Pó',                   cor:'#3d1a08', bg:'#fdf0e8', icone:'🌱' },
   'cafe-torrado-moido':{ label:'Café Torrado e Moído',          cor:'#3b1f0a', bg:'#fdf5e8', icone:'☕' },
   'cafe-torrado':      { label:'Café Torrado (grão)',            cor:'#3b1f0a', bg:'#fdf5e8', icone:'🫘' },
-  'soro-derivados':    { label:'Soro e Derivados Lácteos',       cor:'#1d5238', bg:'#e8f3ed', icone:'🥛' },
-  'maltodextrina-glicose': { label:'Maltodextrina e Glicose em Pó', cor:'#92400e', bg:'#fef3c7', icone:'🌽' },
 };
 
 // Seed — 6 fórmulas já registradas (do JSON exportado)
@@ -1918,55 +1906,6 @@ const TEMPLATES = {
       preparo: 'Moa os grãos imediatamente antes do preparo.\nCafé coado: 10 g para 100 ml de água filtrada quente (90–95°C). Espresso: 7–10 g / 30 ml.',
     }
   },
-  'soro-derivados': {
-    label: 'Soro e Derivados Lácteos',
-    classe: 'soro-derivados',
-    legal: '<strong>IN MAPA nº 94/2020</strong>',
-    denominacao: 'Soro de Leite em Pó',
-    subtipo: {
-      label: 'Embalagem / apresentação:',
-      opcoes: [
-        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
-      ]
-    },
-    campos: {
-      aspecto: 'Pó uniforme, cor branca a levemente amarelada, sem grumos',
-      sabor: 'Sabor e odor característicos de soro de leite',
-      alergenicos: 'CONTÉM LEITE.',
-      glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
-      emb1: 'Saco plástico hermeticamente fechado',
-      emb2: 'Fardo kraft multifolhado 25 kg',
-      validade: '12 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco, arejado, ao abrigo de calor e umidade.',
-      preparo: 'Produto para uso industrial.',
-      obs: 'ESTABELECIMENTO INSPECIONADO PELO MAPA.',
-    },
-  },
-  'maltodextrina-glicose': {
-    label: 'Maltodextrina e Glicose em Pó',
-    classe: 'maltodextrina-glicose',
-    legal: '<strong>RDC ANVISA nº 429/2020</strong>',
-    denominacao: 'Maltodextrina',
-    subtipo: {
-      label: 'Embalagem / apresentação:',
-      opcoes: [
-        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
-        { id:'st-1kg',  label:'📦 Embalagem 1 kg' },
-      ]
-    },
-    campos: {
-      aspecto: 'Pó fino, branco a levemente amarelado, homogêneo',
-      sabor: 'Sabor levemente adocicado, neutro',
-      alergenicos: 'VERIFICAR ORIGEM DO AMIDO.',
-      glutenlactose: 'NÃO CONTÉM LACTOSE.',
-      emb1: 'Saco plástico hermeticamente fechado',
-      emb2: 'Fardo kraft multifolhado 25 kg',
-      validade: '24 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco, arejado, ao abrigo de calor e umidade.',
-      preparo: 'Produto para uso industrial.',
-      obs: 'Carboidrato hidrolisado. RDC ANVISA 429/2020.',
-    },
-  },
 
 };
 
@@ -2069,7 +2008,7 @@ function selTipo(tipo) {
     embBox.style.display = 'none';
     _aplicarTemplate(tpl.campos);
     const den = document.getElementById('p_denominacao');
-    if (den) den.value = tpl.denominacao || tpl.label;
+    if (den) den.value = tpl.label;
   }
 
   // Atualizar painel legal
