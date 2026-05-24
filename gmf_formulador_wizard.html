@@ -345,12 +345,21 @@ tr:last-child td{border-bottom:none}
     <!-- Filtro / busca -->
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <input type="text" id="prodBusca" placeholder="🔍  Buscar por nome…" oninput="renderProdutos()" style="flex:1;min-width:200px">
-      <select id="prodFiltroClasse" onchange="renderProdutos()" style="width:220px">
+      <select id="prodFiltroClasse" onchange="renderProdutos()" style="width:280px">
         <option value="">Todas as categorias</option>
         <option value="composto-sem">Composto Lácteo sem Adição</option>
         <option value="composto-com">Composto Lácteo com Adição</option>
         <option value="mistura">Mistura Láctea</option>
         <option value="po-preparo">Pó para Preparo</option>
+        <option value="leite-integral">Leite em Pó Integral</option>
+        <option value="leite-instantaneo">Leite em Pó Instantâneo</option>
+        <option value="leite-desnatado">Leite em Pó Desnatado</option>
+        <option value="achocolatado">Achocolatado em Pó</option>
+        <option value="cacau">Cacau em Pó</option>
+        <option value="cafe-torrado-moido">Café Torrado e Moído</option>
+        <option value="cafe-torrado">Café Torrado em Grão</option>
+        <option value="soro-derivados">Soro e Derivados Lácteos</option>
+        <option value="maltodextrina-glicose">Maltodextrina e Glicose em Pó</option>
       </select>
     </div>
 
@@ -480,6 +489,7 @@ tr:last-child td{border-bottom:none}
     </div>
 
     <!-- PAINEL DE REQUISITOS LEGAIS -->
+    <div id="conformidadeWarning" style="display:none;background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px"></div>
     <div id="classeLegal" style="margin-top:4px;padding:10px 14px;background:var(--blue-light);border-radius:var(--radius-sm);border:1px solid #93c5fd;font-size:11.5px;line-height:1.7"></div>
   </div>
 
@@ -1100,7 +1110,50 @@ function goStep(n) {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function nextStep() { goStep(currentStep + 1); }
+function nextStep() {
+  // Validar conformidade legal ao sair do passo 1
+  if (currentStep === 1 && tipoSel) {
+    const ptnPor100g = _calcPtnAtual();
+    const aviso = _validarConformidadeLegal(tipoSel, ptnPor100g);
+    if (aviso) {
+      if (!confirm(aviso + '\n\nDeseja continuar mesmo assim?')) return;
+    }
+  }
+  goStep(currentStep + 1);
+}
+
+function _calcPtnAtual() {
+  // Calcula PTN/100g com base nos ingredientes da receita atual
+  if (!receita || receita.length === 0) return null;
+  const tQ = parseFloat(document.getElementById('p_peso')?.value) || 1000;
+  let ptnTotal = 0;
+  receita.forEach(item => {
+    const d = DB.find(x => x.n === item.nome);
+    if (d) ptnTotal += (d.ptn || 0) * item.qtde / 100;
+  });
+  return tQ > 0 ? (ptnTotal / tQ * 100) : null;
+}
+
+function _validarConformidadeLegal(tipo, ptn) {
+  if (ptn === null) return null; // sem receita ainda, não valida
+  
+  const avisos = [];
+  
+  if (tipo === 'composto-com') {
+    if (ptn < 9) avisos.push(`⚠️ ATENÇÃO — Não conformidade legal detectada:\n\nClassificação selecionada: Composto Lácteo com Adição\nTeor de proteína calculado: ${ptn.toFixed(1)}g/100g\nMínimo exigido: ≥ 9g/100g (Portaria SDA/MAPA 1.170/2024, Art. 9º II)\n\nCom este teor proteico, o produto deve ser classificado como MISTURA LÁCTEA.`);
+  }
+  if (tipo === 'composto-sem') {
+    if (ptn < 13) avisos.push(`⚠️ ATENÇÃO — Não conformidade legal detectada:\n\nClassificação selecionada: Composto Lácteo sem Adição\nTeor de proteína calculado: ${ptn.toFixed(1)}g/100g\nMínimo exigido: ≥ 13g/100g (Portaria SDA/MAPA 1.170/2024, Art. 9º I)\n\nCom este teor proteico, o produto não atende os requisitos de Composto Lácteo sem Adição.`);
+  }
+  if (tipo === 'leite-integral') {
+    if (ptn < 25) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Integral (IN MAPA 28/2007).`);
+  }
+  if (tipo === 'leite-desnatado') {
+    if (ptn < 30) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Desnatado (IN MAPA 28/2007).`);
+  }
+  
+  return avisos.length ? avisos.join('\n') : null;
+}
 
 // ── ESTADO DE EDIÇÃO ─────────────────────────────────────────────────────────
 let _prodOrigem = null;      // produto original carregado — nunca sobrescrito
@@ -1926,7 +1979,7 @@ const TEMPLATES = {
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
-        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-soro-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
       ]
     },
     campos: {
@@ -1937,7 +1990,7 @@ const TEMPLATES = {
       emb1: 'Saco plástico hermeticamente fechado',
       emb2: 'Fardo kraft multifolhado 25 kg',
       validade: '12 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco, arejado, ao abrigo de calor e umidade.',
+      armazenamento: 'Local seco, fresco, arejado.',
       preparo: 'Produto para uso industrial.',
       obs: 'ESTABELECIMENTO INSPECIONADO PELO MAPA.',
     },
@@ -1950,8 +2003,8 @@ const TEMPLATES = {
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
-        { id:'st-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
-        { id:'st-1kg',  label:'📦 Embalagem 1 kg' },
+        { id:'st-malto-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-malto-1kg',  label:'📦 Embalagem 1 kg' },
       ]
     },
     campos: {
@@ -1962,7 +2015,7 @@ const TEMPLATES = {
       emb1: 'Saco plástico hermeticamente fechado',
       emb2: 'Fardo kraft multifolhado 25 kg',
       validade: '24 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco, arejado, ao abrigo de calor e umidade.',
+      armazenamento: 'Local seco, fresco, arejado.',
       preparo: 'Produto para uso industrial.',
       obs: 'Carboidrato hidrolisado. RDC ANVISA 429/2020.',
     },
@@ -1972,6 +2025,9 @@ const TEMPLATES = {
 
 // Mapa de subtipo para ajuste de campos específicos
 const SUBTIPO_AJUSTES = {
+  'st-soro-25kg':  { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'12 meses (embalagem fechada)', gramatura:'25 kg' },
+  'st-malto-25kg': { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
+  'st-malto-1kg':  { emb1:'Embalagem plástica hermeticamente fechada 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (embalagem fechada)', gramatura:'1 kg' },
   'st-25kg':  { emb1:'Saco plástico atóxico (polietileno), hermeticamente fechado', emb2:'Fardo de papel kraft multifolhado — 25 kg (Industrial / granel)', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
   'st-1kg':   { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'1 kg' },
   'st-800g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 800 g', emb2:'Caixa de papelão com 15 unidades de 800 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'800 g' },
@@ -2070,6 +2126,21 @@ function selTipo(tipo) {
     _aplicarTemplate(tpl.campos);
     const den = document.getElementById('p_denominacao');
     if (den) den.value = tpl.denominacao || tpl.label;
+  }
+
+  // Validar conformidade em tempo real
+  const ptnAtual = _calcPtnAtual();
+  if (ptnAtual !== null) {
+    const avisoLegal = _validarConformidadeLegal(tipoSel, ptnAtual);
+    const warningEl = document.getElementById('conformidadeWarning');
+    if (warningEl) {
+      if (avisoLegal) {
+        warningEl.style.display = '';
+        warningEl.innerHTML = `<strong>⚠️ Atenção — Não conformidade:</strong> PTN calculada ${ptnAtual.toFixed(1)}g/100g — ${avisoLegal.split('\n')[0]}`;
+      } else {
+        warningEl.style.display = 'none';
+      }
+    }
   }
 
   // Atualizar painel legal
