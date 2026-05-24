@@ -1014,6 +1014,8 @@ const CLASSE_META = {
   'cacau':             { label:'Cacau em Pó',                   cor:'#3d1a08', bg:'#fdf0e8', icone:'🌱' },
   'cafe-torrado-moido':{ label:'Café Torrado e Moído',          cor:'#3b1f0a', bg:'#fdf5e8', icone:'☕' },
   'cafe-torrado':      { label:'Café Torrado (grão)',            cor:'#3b1f0a', bg:'#fdf5e8', icone:'🫘' },
+  'soro-derivados':    { label:'Soro e Derivados Lácteos',       cor:'#1d5238', bg:'#e8f3ed', icone:'🥛' },
+  'maltodextrina-glicose': { label:'Maltodextrina e Glicose em Pó', cor:'#92400e', bg:'#fef3c7', icone:'🌽' },
 };
 
 // Seed — 23 produtos cadastrados (sincronizados automaticamente com Supabase)
@@ -1886,6 +1888,38 @@ const TEMPLATES = {
   },
 
   // ── CAFÉ TORRADO EM GRÃO ───────────────────────────────────────────────────
+  'soro-derivados': {
+    classe: 'soro-derivados',
+    denominacao: 'Soro de Leite em Pó',
+    aspecto: 'Pó uniforme, cor branca a levemente amarelada, sem grumos, aspecto homogêneo',
+    sabor: 'Sabor e odor característicos de soro de leite, sem sabores ou odores estranhos',
+    alergenicos: 'CONTÉM LEITE.',
+    glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
+    emb1: 'Saco plástico (polietileno) hermeticamente fechado',
+    emb2: 'Fardo kraft multifolhado — 25 kg',
+    validade: '12 meses (embalagem fechada)',
+    armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.',
+    preparo: 'Produto para uso industrial.',
+    obs: 'ESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+    legal: 'IN MAPA nº 94/2020 — Regulamento Técnico de Identidade e Qualidade de Soro de Leite',
+    subtipos: null,
+  },
+  'maltodextrina-glicose': {
+    classe: 'maltodextrina-glicose',
+    denominacao: 'Maltodextrina',
+    aspecto: 'Pó fino, branco a levemente amarelado, homogêneo, sem grumos',
+    sabor: 'Sabor levemente adocicado, neutro, sem sabores ou odores estranhos',
+    alergenicos: 'PODE CONTER TRAÇOS DE TRIGO (verificar origem do amido).',
+    glutenlactose: 'VERIFICAR ESPECIFICAÇÃO DO FORNECEDOR. NÃO CONTÉM LACTOSE.',
+    emb1: 'Saco plástico (polietileno) hermeticamente fechado',
+    emb2: 'Fardo kraft multifolhado — 25 kg',
+    validade: '24 meses (embalagem fechada)',
+    armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo do calor, luz solar e umidade.',
+    preparo: 'Produto para uso industrial.',
+    obs: 'Carboidrato hidrolisado. As frações de monossacarídeos e dissacarídeos devem ser contabilizadas como açúcares adicionados conforme RDC ANVISA 429/2020.',
+    legal: 'RDC ANVISA nº 429/2020 — Rotulagem Nutricional · RDC ANVISA nº 271/2005',
+    subtipos: null,
+  },
   'cafe-torrado': {
     label: 'Café Torrado (grão)',
     classe: 'cafe-torrado',
