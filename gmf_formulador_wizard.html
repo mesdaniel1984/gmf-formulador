@@ -1413,6 +1413,17 @@ function editarProduto(id) {
     document.getElementById('p_denominacao').value = tpl.label;
   }
 
+  // Restaurar embalagens selecionadas
+  if (prod.embalagensSel && prod.embalagensSel.length) {
+    document.querySelectorAll('#subtipoOpts .btn-primary, #embalagemOpts .btn-primary').forEach(b => {
+      b.classList.remove('btn-primary'); b.classList.add('btn');
+    });
+    prod.embalagensSel.forEach(stId => {
+      const btn = document.getElementById(stId);
+      if (btn) { btn.classList.add('btn-primary'); btn.classList.remove('btn'); }
+    });
+  }
+
   // Restaurar marca e registro SEMPRE do produto
   const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
   const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
@@ -1502,6 +1513,7 @@ function salvarProdutoAtual() {
     glutenlactose: document.getElementById('p_glutenlactose')?.value || '',
     emb1:          document.getElementById('p_emb1')?.value || '',
     emb2:          document.getElementById('p_emb2')?.value || '',
+    embalagensSel: getEmbalagensSelecionadas(),
     validade:      document.getElementById('p_validade')?.value || '',
     armazenamento: document.getElementById('p_armazenamento')?.value || '',
     preparo:       document.getElementById('p_preparo_txt')?.value || '',
@@ -2560,6 +2572,17 @@ function renderStep4(){
   const _ftpRegistro = _ftpProd.registro || gv('p_registro') || 'SIF 5460';
   const _ftpCodigo = _ftpProd.codigo || gv('p_codigo') || '—';
   const _ftpRevisao = _ftpProd.revisao || gv('p_revisao') || '00';
+  // Embalagens selecionadas
+  const _embSel = _ftpProd.embalagensSel || getEmbalagensSelecionadas() || [];
+  const _embLabels = _embSel.map(id => {
+    const aj = SUBTIPO_AJUSTES[id] || {};
+    return aj.gramatura || id.replace('st-','').replace('-','');
+  }).filter(Boolean);
+  const _ftpEmb1 = gv('p_emb1') || '';
+  const _ftpEmb2 = gv('p_emb2') || '';
+  const _ftpGramatura = _embLabels.length > 0
+    ? _embLabels.join(' · ')
+    : (gv('p_gramatura') || '—');
   const empty=document.getElementById('s4empty');
   const content=document.getElementById('s4content');
   if(!receita.length){empty.style.display='';content.style.display='none';return;}
@@ -2634,7 +2657,7 @@ function renderStep4(){
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Denominação de venda</div><div class="ftp-val"><strong>${gv('p_denominacao','—')}</strong></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${_ftpMarca}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Gramatura</div><div class="ftp-val">${gv('p_gramatura','—')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Gramatura</div><div class="ftp-val">${_ftpGramatura}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${_ftpRegistro}</strong></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
       </div>
@@ -2742,7 +2765,7 @@ function renderStep4(){
     <div class="ftp-sec">
       <div class="ftp-sec-t">5. Embalagem, armazenamento e modo de preparo</div>
       <div class="ftp-row">
-        <div class="ftp-cell"><div class="ftp-lbl">Embalagem primária</div><div class="ftp-val">${gv('p_emb1')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Embalagem primária</div><div class="ftp-val">${_ftpEmb1}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Embalagem secundária</div><div class="ftp-val">${gv('p_emb2')}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','—')}</div></div>
       </div>
