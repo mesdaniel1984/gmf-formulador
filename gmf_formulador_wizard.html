@@ -1424,6 +1424,12 @@ function editarProduto(id) {
     });
   }
 
+  // Restaurar embalagens
+  if (prod.embalagensSel && prod.embalagensSel.length) {
+    document.querySelectorAll('#subtipoOpts .btn-primary, #embalagemOpts .btn-primary').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn'); });
+    prod.embalagensSel.forEach(stId => { const btn = document.getElementById(stId); if (btn) { btn.classList.add('btn-primary'); btn.classList.remove('btn'); } });
+  }
+
   // Restaurar marca e registro SEMPRE do produto
   const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
   const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
@@ -1513,6 +1519,7 @@ function salvarProdutoAtual() {
     glutenlactose: document.getElementById('p_glutenlactose')?.value || '',
     emb1:          document.getElementById('p_emb1')?.value || '',
     emb2:          document.getElementById('p_emb2')?.value || '',
+    embalagensSel: getEmbalagensSelecionadas(),
     embalagensSel: getEmbalagensSelecionadas(),
     validade:      document.getElementById('p_validade')?.value || '',
     armazenamento: document.getElementById('p_armazenamento')?.value || '',
@@ -2572,6 +2579,9 @@ function renderStep4(){
   const _ftpRegistro = _ftpProd.registro || gv('p_registro') || 'SIF 5460';
   const _ftpCodigo = _ftpProd.codigo || gv('p_codigo') || '—';
   const _ftpRevisao = _ftpProd.revisao || gv('p_revisao') || '00';
+  const _embSel = _ftpProd.embalagensSel || getEmbalagensSelecionadas() || [];
+  const _embLabels = _embSel.map(id => { const aj = SUBTIPO_AJUSTES[id] || {}; return aj.gramatura || ''; }).filter(Boolean);
+  const _ftpGramatura = _embLabels.length > 0 ? _embLabels.join(' · ') : (gv('p_gramatura') || '—');
   // Embalagens selecionadas
   const _embSel = _ftpProd.embalagensSel || getEmbalagensSelecionadas() || [];
   const _embLabels = _embSel.map(id => {
