@@ -2580,10 +2580,6 @@ function renderStep4(){
   const _ftpCodigo = _ftpProd.codigo || gv('p_codigo') || '—';
   const _ftpRevisao = _ftpProd.revisao || gv('p_revisao') || '00';
   const _embSel = _ftpProd.embalagensSel || getEmbalagensSelecionadas() || [];
-  const _embLabels = _embSel.map(id => { const aj = SUBTIPO_AJUSTES[id] || {}; return aj.gramatura || ''; }).filter(Boolean);
-  const _ftpGramatura = _embLabels.length > 0 ? _embLabels.join(' · ') : (gv('p_gramatura') || '—');
-  // Embalagens selecionadas
-  const _embSel = _ftpProd.embalagensSel || getEmbalagensSelecionadas() || [];
   const _embLabels = _embSel.map(id => {
     const aj = SUBTIPO_AJUSTES[id] || {};
     return aj.gramatura || id.replace('st-','').replace('-','');
