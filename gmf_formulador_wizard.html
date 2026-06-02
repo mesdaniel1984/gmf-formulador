@@ -1096,9 +1096,12 @@ function goStep(n) {
   if (n === 3) renderStep3();
   if (n === 4) renderStep4();
   if (n === 5) iniciarLaudo();
-  // Mostrar/ocultar step6 manualmente pois esta fora do loop normal
+  // Mostrar/ocultar step6
   const s6 = document.getElementById('step6');
-  if (s6) s6.classList.toggle('active', n === 6);
+  if (s6) {
+    if (n === 6) { s6.classList.add('active'); }
+    else { s6.classList.remove('active'); }
+  }
   if (n === 6) { carregarListaIngredientes(); return; }
   window.scrollTo({top:0,behavior:'smooth'});
 }
