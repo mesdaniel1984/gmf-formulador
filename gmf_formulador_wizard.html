@@ -1046,13 +1046,13 @@ const SEED_PRODUTOS = [{"id":1779640887609,"tQ":1000,"obs":"ESTE PRODUTO NÃO É
 // WIZARD NAVIGATION (step 0 = produtos)
 // ────────────────────────────────────────────────────────────────────────────
 function goStep(n) {
-  if (n < 0 || n > 5) return;
+  if (n < 0 || n > 6) return;
   if (n > 1 && receita.length === 0) {
     if (n > 2) { alert('Adicione ingredientes na receita antes de avançar.'); return; }
   }
   currentStep = n;
 
-  [0,1,2,3,4,5].forEach(i => {
+  [0,1,2,3,4,5,6].forEach(i => {
     const panel = document.getElementById('step'+i);
     if (panel) panel.classList.toggle('active', i===n);
     const btn = document.getElementById('s'+i+'btn');
@@ -1066,7 +1066,11 @@ function goStep(n) {
   const next = document.getElementById('btnNext');
   const ind  = document.getElementById('stepInd');
 
-  if (n === 0) {
+  if (n === 6) {
+    back.style.display = 'none';
+    next.style.display = 'none';
+    if (ind) ind.textContent = 'Ingredientes';
+  } else if (n === 0) {
     back.style.display = 'none';
     next.textContent = '+ Novo produto';
     next.onclick = novoProduto;
