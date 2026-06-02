@@ -796,7 +796,7 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <!-- ── NAVIGATION BAR ── -->
-<div class="nav-bar">
+<div class="nav-bar" id="wizardNavBar">
   <button class="btn" id="btnBack" onclick="goStep(currentStep-1)" style="display:none">← Voltar</button>
   <span class="step-indicator" id="stepInd">Produtos cadastrados</span>
   <button class="btn btn-primary btn-lg" id="btnNext" onclick="nextStep()">+ Novo produto</button>
@@ -1153,8 +1153,8 @@ function irParaIngredientes() {
   // Esconder navegação wizard completa
   const wizNav = document.getElementById('wizardNav');
   if (wizNav) wizNav.style.display = 'none';
-  const wizFooter = document.getElementById('wizardFooter');
-  if (wizFooter) wizFooter.style.display = 'none';
+  const wizNavBar = document.getElementById('wizardNavBar');
+  if (wizNavBar) wizNavBar.style.display = 'none';
   // Carregar lista
   carregarListaIngredientes();
 }
@@ -1163,8 +1163,8 @@ function irParaFormuladorDosIngredientes() {
   // Restaurar navegação wizard
   const wizNav = document.getElementById('wizardNav');
   if (wizNav) wizNav.style.display = '';
-  const wizFooter = document.getElementById('wizardFooter');
-  if (wizFooter) wizFooter.style.display = '';
+  const wizNavBar = document.getElementById('wizardNavBar');
+  if (wizNavBar) wizNavBar.style.display = '';
   // Ocultar step6
   const s6 = document.getElementById('step6');
   if (s6) s6.classList.remove('active');
