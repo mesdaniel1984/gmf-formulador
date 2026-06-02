@@ -1124,6 +1124,10 @@ function mostrarMenuInicial() {
   } else { overlay.style.display='flex'; }
 }
 function fecharMenu() { const m=document.getElementById('menuInicial'); if(m) m.style.display='none'; }
+async function fazerLogout() {
+  await _sb.auth.signOut();
+  window.location.href = 'login.html';
+}
 function irParaFormulador() { fecharMenu(); goStep(0); renderProdutos(); }
 function irParaIngredientes() { fecharMenu(); goStep(6); }
 
