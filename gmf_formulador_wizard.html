@@ -1047,7 +1047,8 @@ const SEED_PRODUTOS = [{"id":1779640887609,"tQ":1000,"obs":"ESTE PRODUTO NÃO É
 // ────────────────────────────────────────────────────────────────────────────
 function goStep(n) {
   if (n < 0 || n > 6) return;
-  if (n > 1 && receita.length === 0) {
+  if (n === 6) { currentStep = 6; }
+  else if (n > 1 && receita.length === 0) {
     if (n > 2) { alert('Adicione ingredientes na receita antes de avançar.'); return; }
   }
   currentStep = n;
