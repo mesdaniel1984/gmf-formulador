@@ -1140,7 +1140,26 @@ async function fazerLogout() {
   window.location.href = 'login.html';
 }
 function irParaFormulador() { fecharMenu(); goStep(0); renderProdutos(); }
-function irParaIngredientes() { fecharMenu(); goStep(6); }
+function irParaIngredientes() {
+  fecharMenu();
+  // Ocultar todos os outros painéis
+  [0,1,2,3,4,5].forEach(i => {
+    const p = document.getElementById('step'+i);
+    if (p) p.classList.remove('active');
+  });
+  // Mostrar step6
+  const s6 = document.getElementById('step6');
+  if (s6) s6.classList.add('active');
+  // Esconder botões de navegação
+  const back = document.getElementById('btnBack');
+  const next = document.getElementById('btnNext');
+  const ind = document.getElementById('stepInd');
+  if (back) back.style.display = 'none';
+  if (next) next.style.display = 'none';
+  if (ind) ind.textContent = 'Ingredientes';
+  // Carregar lista
+  carregarListaIngredientes();
+}
 
 async function salvarIngrediente() {
   if (!_currentUser) { alert('Faça login para salvar ingredientes.'); return; }
