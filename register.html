@@ -27,7 +27,6 @@ input:focus{border-color:#1e3a8a}
 <div class="card">
   <h1>GMF Formulador</h1>
   <p>Criar nova conta · Grupo MF Paris Alimentos</p>
-  <div class="field"><label>Nome completo</label><input id="nome" type="text" placeholder="Seu nome completo"></div>
   <div class="field"><label>Email</label><input id="email" type="email" placeholder="seu@email.com"></div>
   <div class="field"><label>Senha (mín. 6 caracteres)</label><input id="senha" type="password" placeholder="••••••"></div>
   <div class="field"><label>Confirmar senha</label><input id="senha2" type="password" placeholder="••••••"></div>
@@ -39,17 +38,15 @@ input:focus{border-color:#1e3a8a}
 const sb = window.supabase.createClient('https://ailzblgrxtdakpkchstl.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw');
 function showMsg(txt,tipo){const el=document.getElementById('msg');el.className='msg '+tipo;el.textContent=txt;}
 async function registrar(){
-  const nome=document.getElementById('nome').value.trim();
   const email=document.getElementById('email').value.trim();
   const senha=document.getElementById('senha').value;
   const senha2=document.getElementById('senha2').value;
   const btn=document.getElementById('btn');
-  if(!nome){showMsg('Informe seu nome.','err');return;}
   if(!email){showMsg('Informe seu email.','err');return;}
   if(senha.length<6){showMsg('Senha deve ter pelo menos 6 caracteres.','err');return;}
   if(senha!==senha2){showMsg('As senhas não coincidem.','err');return;}
   btn.disabled=true;btn.textContent='Criando conta...';
-  const {data,error}=await sb.auth.signUp({email,password:senha,options:{data:{nome}}});
+  const {data,error}=await sb.auth.signUp({email,password:senha});
   if(error){showMsg('❌ '+error.message,'err');btn.disabled=false;btn.textContent='Criar conta';return;}
   showMsg('✅ Conta criada! Verifique seu email para confirmar.','ok');
   btn.textContent='Conta criada!';
