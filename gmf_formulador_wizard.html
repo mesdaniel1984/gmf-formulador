@@ -1216,7 +1216,7 @@ async function carregarListaIngredientes() {
   // Combinar DB fixo + custom
   const customNomes = new Set(customData.map(r=>r.dados.n));
   const todosIng = [
-    ...DB.map(d => ({dados:d, custom:false})),
+    ...DB.filter(d=>d && d.n).map(d => ({dados:d, custom:false})),
     ...customData.filter(r=>!DB.find(d=>d.n===r.dados.n)).map(r=>({dados:r.dados,custom:true}))
   ].sort((a,b)=>(a.dados?.n||'').localeCompare(b.dados?.n||''));
 
