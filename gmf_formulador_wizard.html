@@ -311,6 +311,9 @@ tr:last-child td{border-bottom:none}
   <button class="step-btn" id="s5btn" onclick="goStep(5)">
     <span class="step-num">5</span> Laudo Técnico
   </button>
+  <button class="step-btn" id="s7btn" onclick="abrirListaLaudos()">
+    <span class="step-num">6</span> Lista de Laudos
+  </button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════
@@ -335,7 +338,6 @@ tr:last-child td{border-bottom:none}
           Exportar .json
         </button>
         <button onclick="mostrarMenuInicial()" style="background:rgba(30,58,138,0.1);border:1px solid #e5e7eb;color:#1e3a8a;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-weight:600">☰ Menu</button>
-        <button onclick="document.getElementById('laudosPanel').style.display='block';carregarListaLaudos()" style="background:rgba(30,58,138,0.1);border:1px solid #e5e7eb;color:#1e3a8a;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-weight:600">📋 Laudos</button>
         <div id="userInfo" style="display:flex;align-items:center;gap:8px;margin-right:8px"></div>
       <button class="btn btn-primary" onclick="novoProduto()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -3407,6 +3409,11 @@ function imprimirLaudo() {
   salvarLaudoNoBanco();
 }
 
+
+function abrirListaLaudos() {
+  document.getElementById('laudosPanel').style.display = 'block';
+  carregarListaLaudos();
+}
 
 async function salvarLaudoNoBanco() {
   if (!_sb || !_currentUser) return;
