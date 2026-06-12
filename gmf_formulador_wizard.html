@@ -2917,16 +2917,31 @@ function renderStep4(){
           </div>
 
 
-          <!-- Composição resumo -->
-          <div style="border:1px solid #ccc;border-radius:4px;background:#fff;padding:5px 8px">
-            <div style="font-size:7px;font-weight:700;color:#666;margin-bottom:3px;text-transform:uppercase">Composição da receita</div>
-            ${receita.map(r=>`<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:8px;border-bottom:.5px solid #f0f0f0;padding:2px 0">
-              <span style="font-size:8px;line-height:1.4;word-break:break-word;flex:1">${_nomeExibicao(r.d)}</span>
-              <span style="color:#666;white-space:nowrap;flex-shrink:0">${r.qtde}g · ${f2(r.qtde/totalQ*100)}%</span>
-            </div>`).join('')}
-          </div>
         </div>
       </div>
+    </div>
+
+    <!-- COMPOSIÇÃO DA RECEITA -->
+    <div class="ftp-sec">
+      <div class="ftp-sec-t">3b. Composição da Receita (por kg de produto)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:9px">
+        <tr style="background:#1e3a8a;color:#fff">
+          <th style="padding:5px 8px;text-align:left;font-weight:700">Ingrediente</th>
+          <th style="padding:5px 8px;text-align:center;font-weight:700;width:100px">Quantidade (g)</th>
+          <th style="padding:5px 8px;text-align:center;font-weight:700;width:80px">%</th>
+        </tr>
+        \${receita.slice().sort((a,b)=>b.qtde-a.qtde).map((r,i)=>`
+        <tr style="background:\${i%2===0?'#fff':'#f8fafc'};border-bottom:.5px solid #e5e7eb">
+          <td style="padding:5px 8px">\${_nomeExibicao(r.d)}</td>
+          <td style="padding:5px 8px;text-align:center">\${r.qtde.toFixed(1)}</td>
+          <td style="padding:5px 8px;text-align:center">\${f2(r.qtde/totalQ*100)}%</td>
+        </tr>`).join('')}
+        <tr style="background:#f0f4ff;font-weight:700;border-top:1.5px solid #1e3a8a">
+          <td style="padding:5px 8px">Total</td>
+          <td style="padding:5px 8px;text-align:center">\${totalQ.toFixed(1)}</td>
+          <td style="padding:5px 8px;text-align:center">100%</td>
+        </tr>
+      </table>
     </div>
 
     <!-- 4. CARACTERÍSTICAS FÍSICO-QUÍMICAS -->
