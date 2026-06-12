@@ -1486,7 +1486,7 @@ async function renderProdutos() {
 
   div.innerHTML = lista.map((p, i) => {
     const cm = CLASSE_META[p.classificacao] || {label:'—',cor:'#666',bg:'#eee',icone:'📄'};
-    const n100 = p.nutri100g || {kcal:p.kcal,ptn:p.ptn,cho:p.cho,gt:p.gt,gs:p.gs,tr:p.tr,fi:p.fi,na:p.na,act:p.act,acad:p.acad};
+    const n100 = p.nutri100g || {};
     const chips = [];
     if ((n100.acad||0)>=15) chips.push(`<span class="chip-alert" style="background:#fdeaea;color:#9b2626">🔍 Açúcar</span>`);
     if ((n100.gs||0)>=6)   chips.push(`<span class="chip-alert" style="background:#fef3d7;color:#92610a">🔍 G.Sat</span>`);
@@ -1543,14 +1543,13 @@ function editarProduto(id) {
   document.getElementById('p_nome').value = prod.nome;
   const _cod = document.getElementById('p_codigo'); if (_cod) _cod.value = prod.codigo || '';
   const _rev = document.getElementById('p_revisao'); if (_rev) _rev.value = prod.revisao || '00';
-  document.getElementById('p_gramatura').value = prod.gramatura || (prod.pesoTotal ? prod.pesoTotal+'g' : '');
-  document.getElementById('p_porcao').value = prod.porcao || prod.pesoPorcao || 30;
-  document.getElementById('p_medida').value = prod.medida || prod.medidaCaseira || '2 colheres de sopa';
-  document.getElementById('p_peso').value = prod.peso || prod.pesoTotal || '';
+  document.getElementById('p_gramatura').value = prod.pesoTotal+'g';
+  document.getElementById('p_porcao').value = prod.pesoPorcao;
+  document.getElementById('p_medida').value = prod.medida;
+  document.getElementById('p_peso').value = prod.pesoTotal;
 
   // Restaurar campos do produto salvos (embalagem, validade, armazenamento, etc.)
   const _resto = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== '') el.value = val; };
-  _resto('p_denominacao',   prod.denominacao);
   _resto('p_validade',      prod.validade);
   _resto('p_emb1',          prod.emb1);
   _resto('p_emb2',          prod.emb2);
@@ -1609,10 +1608,9 @@ function editarProduto(id) {
   const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
   const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
 
-  // Carregar ingredientes (suporta formato antigo prod.ingredientes e novo prod.receita)
+  // Carregar ingredientes
   let naoEnc = [];
-  const ingList = prod.receita ? prod.receita.map(r=>({nome:r.d,qtde:r.qtde})) : (prod.ingredientes||[]);
-  ingList.forEach(ing => {
+  (prod.ingredientes||[]).forEach(ing => {
     const found = DB.find(d=>d.n===ing.nome);
     if (found) receita.push({d:found, qtde:ing.qtde});
     else naoEnc.push(ing.nome);
@@ -2808,92 +2806,100 @@ function renderStep4(){
   const ingList = gv('p_ingredientes_txt') || _buildIngredientesList();
 
   function nr(lbl,v1,v2,vd,bold=false,indent=false){
-    return `<tr${bold?' class="nb"':''}${indent&&!bold?' class="ni"':''}>
-      <td>${lbl}</td>
-      <td style="text-align:right;width:36px">${v1}</td>
-      <td style="text-align:right;width:36px">${v2}</td>
-      <td style="text-align:right;width:28px">${vd}</td></tr>`;
-  }
-
-  document.getElementById('ftpDoc').innerHTML = `
-  <div class="ftp-doc" id="ftpDocInner">
+    return `
+  <div id="ftpDocInner" style="font-family:Arial,sans-serif;font-size:9px;color:#111;max-width:800px;margin:0 auto;background:#fff;border:1px solid #ccc">
 
     <!-- CABEÇALHO -->
-    <div class="ftp-hdr">
-      <img src="${LOGO}" class="ftp-hdr-logo" alt="GMF">
-      <div class="ftp-hdr-title">
-        FICHA TÉCNICA DE PRODUTO<br>
-        <span style="font-size:15px;letter-spacing:1px">${nome.toUpperCase()}</span>
+    <div style="display:flex;align-items:stretch;border-bottom:2px solid #1e3a8a">
+      <div style="background:#1e3a8a;color:#fff;padding:8px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:80px">
+        <img src="https://mesdaniel1984.github.io/gmf-formulador/logo_gmf.png" style="width:50px;margin-bottom:4px" onerror="this.style.display='none'">
+        <div style="font-size:7px;font-weight:700;text-align:center">GMF<br>GRUPO MF PARIS</div>
       </div>
-      <div class="ftp-hdr-meta">
-        Código: <strong>${_ftpCodigo}</strong><br>
-        Revisão: <strong>${_ftpRevisao}</strong><br>
-        Data: <strong>${data}</strong><br>
-        Pág.: <strong>1/1</strong>
+      <div style="flex:1;padding:8px 12px;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-size:8px;font-weight:700;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px">Ficha Técnica de Produto</div>
+        <div style="font-size:13px;font-weight:900;color:#1e3a8a;line-height:1.2">${gv('p_nome','—')}</div>
+      </div>
+      <div style="padding:8px 12px;font-size:8px;color:#555;text-align:right;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:140px">
+        <div>Código: <strong>${gv('p_codigo','—')}</strong></div>
+        <div>Revisão: <strong>${_ftpRevisao}</strong></div>
+        <div>Data: <strong>${data}</strong></div>
+        <div>Pág.: <strong>1/1</strong></div>
       </div>
     </div>
 
     <!-- 1. IDENTIFICAÇÃO -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">1. Identificação do produto</div>
+      <div class="ftp-sec-t">1. Identificação do Produto</div>
       <div class="ftp-row">
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Denominação de venda</div><div class="ftp-val"><strong>${gv('p_denominacao','—')}</strong></div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Denominação de Venda</div><div class="ftp-val"><strong>${gv('p_denominacao','—')}</strong></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${_ftpMarca}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Gramatura</div><div class="ftp-val">${_ftpGramatura}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Registro / SIF</div><div class="ftp-val"><strong>${_ftpRegistro}</strong></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
       </div>
       <div class="ftp-row">
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Classificação legal</div><div class="ftp-val" style="color:#1e3a8a;font-weight:700">${classeNomes[classeSel]||'—'}</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Alergênicos · Glúten · Lactose</div><div class="ftp-val">${gv('p_alergenicos')} · ${gv('p_glutenlactose')}</div></div>
+        <div class="ftp-cell" style="flex:3"><div class="ftp-lbl">Registro</div><div class="ftp-val">${_ftpRegistro}</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
+      </div>
+      <div class="ftp-row">
+        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Classificação Legal</div><div class="ftp-val" style="color:#1e3a8a;font-weight:700">${classeNomes[classeSel]||'—'} — ANVISA (RDC 429/2020, IN 75/2020, RDC 778/2023 e IN 211/2023)</div></div>
+      </div>
+      <div class="ftp-row">
+        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Alergênicos · Glúten · Lactose</div><div class="ftp-val">${gv('p_alergenicos')} · ${gv('p_glutenlactose')}</div></div>
       </div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Aspecto / Cor</div><div class="ftp-val">${gv('p_aspecto')}</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Sabor e odor</div><div class="ftp-val">${gv('p_sabor')}</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Sabor e Odor</div><div class="ftp-val">${gv('p_sabor')}</div></div>
       </div>
     </div>
 
-    <!-- 2. INGREDIENTES -->
+    <!-- 2. LISTA DE INGREDIENTES -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">2. Lista de ingredientes</div>
-      <div style="padding:5px 10px;font-size:9.5px;line-height:1.6">${ingList}</div>
+      <div class="ftp-sec-t">2. Lista de Ingredientes</div>
+      <div style="padding:6px 10px;font-size:9px;line-height:1.6">${_listaIngredientes}</div>
+      <div style="padding:4px 10px;font-size:8.5px;font-weight:700;color:#c00">${_alerg}</div>
     </div>
 
-    <!-- 3. INFORMAÇÃO NUTRICIONAL + ALERTAS + SIF -->
+    <!-- 3. INFORMAÇÃO NUTRICIONAL -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">3. Informação nutricional · Alertas frontais · Registro SIF · Códigos de Barras</div>
-      <div style="display:flex;align-items:flex-start;flex-wrap:wrap">
-
+      <div class="ftp-sec-t">3. Informação Nutricional · Rotulagem Frontal</div>
+      <div style="display:flex;gap:0;align-items:flex-start">
         <!-- Tabela nutricional -->
-        <div class="ftp-nutri" style="flex:1.3;min-width:220px;margin:6px">
-          <h5>INFORMAÇÃO NUTRICIONAL</h5>
-          <div style="font-size:8px;padding:2px 5px;border-bottom:1px solid #000">
-            Porções por embalagem: Cerca de ${nP} · Porção: ${P100}g (${mc})
-          </div>
-          <div style="display:flex;justify-content:flex-end;font-size:7.5px;color:#555;padding:1px 5px;border-bottom:1px solid #000">
-            <span style="width:36px;text-align:right">100g</span>
-            <span style="width:36px;text-align:right">${P100}g</span>
-            <span style="width:28px;text-align:right">%VD*</span>
-          </div>
-          <table>
-            ${nr('Valor energético (kcal)',f0(T.kcal),f0(P.kcal),vdp(P.kcal,VD.kcal)+'%',true)}
-            ${nr('Carboidratos (g)',f2(T.cho),f2(P.cho),vdp(P.cho,VD.cho)+'%')}
-            ${nr('Açúcares totais (g)',f2(T.act),f2(P.act),'—',false,true)}
-            ${nr('Açúcares adicionados (g)',f2(T.acad),f2(P.acad),vdp(P.acad,50)+'%',false,true)}
-            ${nr('Proteínas (g)',f2(T.ptn),f2(P.ptn),vdp(P.ptn,VD.ptn)+'%')}
-            ${nr('Gorduras totais (g)',f2(T.gt),f2(P.gt),vdp(P.gt,VD.gtot)+'%')}
-            ${nr('Gorduras saturadas (g)',f2(T.gs),f2(P.gs),vdp(P.gs,VD.gsat)+'%',false,true)}
-            ${nr('Gorduras trans (g)',f2(T.tr),f2(P.tr),'—',false,true)}
-            ${nr('Fibra alimentar (g)',f2(T.fi),f2(P.fi),vdp(P.fi,VD.fibra)+'%')}
-            ${nr('Sódio (mg)',f0(T.na),f0(P.na),vdp(P.na,VD.na)+'%',true)}
+        <div style="flex:1;padding:6px 10px">
+          <div style="font-size:7.5px;font-weight:700;color:#555;margin-bottom:4px">INFORMAÇÃO NUTRICIONAL</div>
+          <div style="font-size:7.5px;color:#555;margin-bottom:4px">Porções por embalagem: cerca de ${Math.round((P100g.pesoTotal||1000)/P100g.pesoPorcao)||'—'} · Porção: ${P100g.pesoPorcao||30} g (${gv('p_medida','2 colheres de sopa')})</div>
+          <table style="width:100%;border-collapse:collapse;font-size:8px">
+            <tr style="background:#222;color:#fff">
+              <th style="padding:3px 5px;text-align:left;font-weight:700"></th>
+              <th style="padding:3px 5px;text-align:center;font-weight:700">100 g</th>
+              <th style="padding:3px 5px;text-align:center;font-weight:700">${P100g.pesoPorcao||30} g</th>
+              <th style="padding:3px 5px;text-align:center;font-weight:700">%VD*</th>
+            </tr>
+            ${[
+              ['Valor energético (kcal)', T.kcal, 2000, 'kcal'],
+              ['Carboidratos (g)', T.cho, 300, 'g'],
+              ['Açúcares totais (g)', T.act, null, 'g'],
+              ['Açúcares adicionados (g)', T.acad, 50, 'g'],
+              ['Proteínas (g)', T.ptn, 75, 'g'],
+              ['Gorduras totais (g)', T.gt, 55, 'g'],
+              ['Gorduras saturadas (g)', T.gs, 22, 'g'],
+              ['Gorduras trans (g)', T.tr, null, 'g'],
+              ['Fibra alimentar (g)', T.fi, 25, 'g'],
+              ['Sódio (mg)', T.na, 2300, 'mg'],
+            ].map(([lbl,v100,vd,u],i)=>{
+              const v30 = v100*P100g.pesoPorcao/100;
+              const pct = vd ? Math.round(v100/vd*100)+'%' : '—';
+              const bg = i%2===0?'#fff':'#f8f8f8';
+              return `<tr style="background:${bg};border-bottom:.5px solid #ddd">
+                <td style="padding:3px 5px">${lbl}</td>
+                <td style="padding:3px 5px;text-align:center">${f2(v100)}</td>
+                <td style="padding:3px 5px;text-align:center">${f2(v30)}</td>
+                <td style="padding:3px 5px;text-align:center">${pct}</td>
+              </tr>`;
+            }).join('')}
           </table>
-          <div style="font-size:7px;padding:2px 5px;color:#555">(*) %VD com base em 2.000 kcal — ANVISA RDC 429/2020</div>
+          <div style="font-size:7px;color:#666;margin-top:3px">(*) %VD com base em uma dieta de 2.000 kcal — ANVISA RDC 429/2020 / IN 75/2020. Valores calculados a partir da formulação; recomenda-se confirmação por análise laboratorial.</div>
         </div>
-
-        <!-- Alertas + SIF + Composição -->
-        <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:6px;padding:6px 8px">
-
-          <!-- Alertas IN 75/2020 -->
+        <!-- Alertas frontais + SIF -->
+        <div style="min-width:180px;padding:6px 8px;display:flex;flex-direction:column;gap:6px">
           ${alertas.length?`<div style="background:#111;color:#fff;border-radius:5px;padding:7px 9px">
             <div style="font-size:7px;font-weight:700;margin-bottom:5px;letter-spacing:.5px;color:#aaa">ALERTAS FRONTAIS OBRIGATÓRIOS — IN 75/2020</div>
             ${alertas.map(a=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
@@ -2903,9 +2909,7 @@ function renderStep4(){
               <span style="font-size:8px;font-weight:700">${a}</span>
             </div>`).join('')}
           </div>`:`<div style="background:#e8f3ed;border:1px solid #2a6e4a;border-radius:4px;padding:5px 7px;font-size:8px;color:#1d5238;font-weight:600">✅ Sem alertas frontais obrigatórios (IN 75/2020)</div>`}
-
-          <!-- SIF -->
-          <div style="display:flex;align-items:center;gap:8px;border:1px solid #ccc;border-radius:4px;padding:5px 8px;background:#fff">
+          ${_ftpRegistro.includes('SIF')||_ftpRegistro.includes('5460')?`<div style="display:flex;align-items:center;gap:8px;border:1px solid #ccc;border-radius:4px;padding:5px 8px;background:#fff">
             <svg viewBox="0 0 80 80" width="36" height="36" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
               <circle cx="40" cy="40" r="38" fill="none" stroke="#000" stroke-width="3"/>
               <defs><path id="arc9" d="M 8 40 A 32 32 0 0 1 72 40"/></defs>
@@ -2915,96 +2919,83 @@ function renderStep4(){
               <text x="40" y="54" text-anchor="middle" font-family="Arial" font-weight="900" font-size="12" fill="#000">5460</text>
               <text x="40" y="64" text-anchor="middle" font-family="Arial" font-weight="700" font-size="8" fill="#000">S.I.F.</text>
             </svg>
-            <div style="font-size:8.5px"><div style="font-weight:700">Grupo MF Paris Alimentos</div><div style="color:#555">SIF nº 5460 · MAPA/Brasil</div></div>
-          </div>
-
-
+            <div style="font-size:8px"><div style="font-weight:700;color:#1e3a8a">SIF 5460</div><div style="color:#555">DMS Indústria<br>de Alimentos</div></div>
+          </div>`:''}
         </div>
       </div>
     </div>
 
-    <!-- COMPOSIÇÃO DA RECEITA -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">3b. Composição da Receita (por kg de produto)</div>
-      <table style="width:100%;border-collapse:collapse;font-size:9px">
-        <tr style="background:#1e3a8a;color:#fff">
-          <th style="padding:5px 8px;text-align:left;font-weight:700">Ingrediente</th>
-          <th style="padding:5px 8px;text-align:center;font-weight:700;width:100px">Quantidade (g)</th>
-          <th style="padding:5px 8px;text-align:center;font-weight:700;width:80px">%</th>
-        </tr>
-        ${receita.slice().sort((a,b)=>b.qtde-a.qtde).map((r,i)=>`
-        <tr style="background:${i%2===0?'#fff':'#f8fafc'};border-bottom:.5px solid #e5e7eb">
-          <td style="padding:5px 8px">${_nomeExibicao(r.d)}</td>
-          <td style="padding:5px 8px;text-align:center">${r.qtde.toFixed(1)}</td>
-          <td style="padding:5px 8px;text-align:center">${f2(r.qtde/totalQ*100)}%</td>
-        </tr>`).join('')}
-        <tr style="background:#f0f4ff;font-weight:700;border-top:1.5px solid #1e3a8a">
-          <td style="padding:5px 8px">Total</td>
-          <td style="padding:5px 8px;text-align:center">${totalQ.toFixed(1)}</td>
-          <td style="padding:5px 8px;text-align:center">100%</td>
-        </tr>
-      </table>
-    </div>
-
     <!-- 4. CARACTERÍSTICAS FÍSICO-QUÍMICAS -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">4. Características físico-químicas (padrões internos)</div>
+      <div class="ftp-sec-t">4. Características Físico-Químicas (Padrões Internos)</div>
       <div class="ftp-row">
-        <div class="ftp-cell"><div class="ftp-lbl">Umidade (%)</div><div class="ftp-val">Máx. 4,0</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Umidade (%)</div><div class="ftp-val">${gv('p_umidade','Máx. 4,0')}</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Proteínas (%)</div><div class="ftp-val">${f2(T.ptn)} (calculado)</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Lipídeos (%)</div><div class="ftp-val">${f2(T.gt)} (calculado)</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">pH (solução 10%)</div><div class="ftp-val">6,0 a 7,0</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Partículas queimadas</div><div class="ftp-val">Máx. Disco B</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">pH (solução 10%)</div><div class="ftp-val">${gv('p_ph','6,0 a 7,0')}</div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Partículas Queimadas</div><div class="ftp-val">${gv('p_particulas','Máx. Disco B')}</div></div>
       </div>
     </div>
 
-    <!-- 5. EMBALAGEM + ARMAZENAMENTO + PREPARO -->
+    <!-- 5. EMBALAGEM, ARMAZENAMENTO E MODO DE PREPARO -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">5. Embalagem, armazenamento e modo de preparo</div>
+      <div class="ftp-sec-t">5. Embalagem, Armazenamento e Modo de Preparo</div>
       <div class="ftp-row">
-        <div class="ftp-cell"><div class="ftp-lbl">Embalagem primária</div><div class="ftp-val">${_ftpEmb1}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Embalagem secundária</div><div class="ftp-val">${gv('p_emb2')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','—')}</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Embalagem Primária</div><div class="ftp-val">${gv('p_emb1','—')}</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Embalagem Secundária</div><div class="ftp-val">${gv('p_emb2','—')}</div></div>
+        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Paletização</div><div class="ftp-val">${gv('p_paletizacao','Pallet descartável · filme stretch · fardo plástico')}</div></div>
       </div>
       <div class="ftp-row">
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Armazenamento e transporte</div><div class="ftp-val" style="white-space:pre-line">${gv('p_armazenamento')}</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Modo de preparo</div><div class="ftp-val" style="white-space:pre-line;font-size:9px">${gv('p_preparo_txt','—')}</div></div>
+        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Armazenamento e Transporte</div><div class="ftp-val">${gv('p_armazenamento','—')}</div></div>
+      </div>
+      <div class="ftp-row">
+        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Modo de Preparo</div><div class="ftp-val">${gv('p_preparo_txt','—')}</div></div>
       </div>
     </div>
 
     <!-- 6. INFORMAÇÕES OBRIGATÓRIAS -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">6. Informações obrigatórias e restrições</div>
-      <div style="padding:5px 10px;font-size:9.5px;font-weight:700;line-height:1.8">${gv('p_obs')}</div>
+      <div class="ftp-sec-t">6. Informações Obrigatórias e Restrições</div>
+      <div style="padding:6px 10px;font-size:9px;font-weight:700;line-height:1.8">${gv('p_obs','—')}</div>
     </div>
 
-    <!-- 7. ASSINATURAS -->
-    <div style="padding:8px 12px">
-      <div style="font-size:7px;color:#888;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eee;padding-bottom:3px;margin-bottom:8px">Aprovação e responsabilidade técnica</div>
-      <div style="display:flex;gap:18px;align-items:flex-end">
-        ${[['p_elaborado','Elaborado por'],['p_revisado','Revisado por'],['p_aprovado','Aprovado por']].map(([id,lbl])=>`
-          <div class="ftp-sign" style="flex:1">
-            <div class="ftp-sign-line"></div>
-            <div style="font-size:8.5px;font-weight:600">${gv(id,'') || '________________________________'}</div>
-            <div style="font-size:7.5px;color:#666">${lbl}</div>
-          </div>`).join('')}
-        <div style="flex:0 0 auto">
-          <table style="border-collapse:collapse;font-size:7.5px">
-            <tr style="background:#1e3a8a;color:#fff"><td style="padding:2px 6px">Rev.</td><td style="padding:2px 6px">Data</td><td style="padding:2px 6px">Descrição</td><td style="padding:2px 6px">Responsável</td></tr>
-            <tr><td style="padding:2px 6px;border:.5px solid #ccc">${gv('p_revisao','00')}</td><td style="padding:2px 6px;border:.5px solid #ccc">${data}</td><td style="padding:2px 6px;border:.5px solid #ccc">Emissão inicial</td><td style="padding:2px 6px;border:.5px solid #ccc">${gv('p_elaborado','—')}</td></tr>
-          </table>
-        </div>
+    <!-- ASSINATURAS -->
+    <div style="padding:8px 12px;border-top:1px solid #ddd">
+      <div style="display:flex;gap:18px;align-items:flex-end;margin-bottom:10px">
+        ${[['Elaborado por',''],['Revisado por',''],['Aprovado por / RT','']].map(([lbl,val])=>`
+        <div style="flex:1;text-align:center">
+          <div style="border-top:1px solid #333;padding-top:3px;font-size:8px;color:#555">${lbl}</div>
+        </div>`).join('')}
       </div>
+      <!-- Histórico de revisões -->
+      <table style="width:100%;border-collapse:collapse;font-size:8px;margin-top:6px">
+        <tr style="background:#f0f4ff">
+          <th style="padding:3px 6px;border:1px solid #ddd;text-align:center;width:50px">Rev.</th>
+          <th style="padding:3px 6px;border:1px solid #ddd;text-align:center;width:90px">Data</th>
+          <th style="padding:3px 6px;border:1px solid #ddd;text-align:left">Descrição</th>
+        </tr>
+        ${(gv('p_revisao','00')==='004'?[
+          ['003','12/06/2026','Emissão inicial'],
+          ['004','12/06/2026','Revisão geral: formulação alinhada ao OMIE; ajustes nutricionais e rotulagem frontal']
+        ]:[
+          ['001','—','Emissão inicial']
+        ]).map(([r,d,desc])=>`<tr>
+          <td style="padding:3px 6px;border:1px solid #ddd;text-align:center">${r}</td>
+          <td style="padding:3px 6px;border:1px solid #ddd;text-align:center">${d}</td>
+          <td style="padding:3px 6px;border:1px solid #ddd">${desc}</td>
+        </tr>`).join('')}
+      </table>
     </div>
 
     <!-- RODAPÉ -->
-    <div style="background:#1e3a8a;color:#fff;padding:4px 12px;display:flex;justify-content:space-between;font-size:7.5px;align-items:center">
-      <span>Grupo MF Paris Alimentos · SIF 5460 · MAPA/Brasil</span>
-      <span style="font-weight:700">CÓPIA NÃO CONTROLADA</span>
-      <span>ANVISA RDC 429/2020 · Portaria SDA/MAPA 1.170/2024 · Gerado em ${data}</span>
+    <div style="background:#f8fafc;border-top:1px solid #e5e7eb;padding:5px 12px;display:flex;justify-content:space-between;align-items:center;font-size:7.5px;color:#888">
+      <span>Grupo MF Paris Alimentos · DMS Indústria de Alimentos · Contagem/MG</span>
+      <span style="font-weight:700;color:#c00">CÓPIA NÃO CONTROLADA</span>
+      <span>RDC 429/2020 · IN 75/2020 · IN 211/2023 · Gerado em ${data}</span>
     </div>
 
-  </div>`;
+  </div>
+`;
 }
 
 function imprimirFTP(){
