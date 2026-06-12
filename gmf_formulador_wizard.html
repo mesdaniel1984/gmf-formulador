@@ -1486,7 +1486,7 @@ async function renderProdutos() {
 
   div.innerHTML = lista.map((p, i) => {
     const cm = CLASSE_META[p.classificacao] || {label:'—',cor:'#666',bg:'#eee',icone:'📄'};
-    const n100 = p.nutri100g || {};
+    const n100 = p.nutri100g || {kcal:p.kcal,ptn:p.ptn,cho:p.cho,gt:p.gt,gs:p.gs,tr:p.tr,fi:p.fi,na:p.na,act:p.act,acad:p.acad};
     const chips = [];
     if ((n100.acad||0)>=15) chips.push(`<span class="chip-alert" style="background:#fdeaea;color:#9b2626">🔍 Açúcar</span>`);
     if ((n100.gs||0)>=6)   chips.push(`<span class="chip-alert" style="background:#fef3d7;color:#92610a">🔍 G.Sat</span>`);
