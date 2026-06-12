@@ -1543,13 +1543,14 @@ function editarProduto(id) {
   document.getElementById('p_nome').value = prod.nome;
   const _cod = document.getElementById('p_codigo'); if (_cod) _cod.value = prod.codigo || '';
   const _rev = document.getElementById('p_revisao'); if (_rev) _rev.value = prod.revisao || '00';
-  document.getElementById('p_gramatura').value = prod.pesoTotal+'g';
-  document.getElementById('p_porcao').value = prod.pesoPorcao;
-  document.getElementById('p_medida').value = prod.medida;
-  document.getElementById('p_peso').value = prod.pesoTotal;
+  document.getElementById('p_gramatura').value = prod.gramatura || (prod.pesoTotal ? prod.pesoTotal+'g' : '');
+  document.getElementById('p_porcao').value = prod.porcao || prod.pesoPorcao || 30;
+  document.getElementById('p_medida').value = prod.medida || prod.medidaCaseira || '2 colheres de sopa';
+  document.getElementById('p_peso').value = prod.peso || prod.pesoTotal || '';
 
   // Restaurar campos do produto salvos (embalagem, validade, armazenamento, etc.)
   const _resto = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== '') el.value = val; };
+  _resto('p_denominacao',   prod.denominacao);
   _resto('p_validade',      prod.validade);
   _resto('p_emb1',          prod.emb1);
   _resto('p_emb2',          prod.emb2);
@@ -1608,9 +1609,10 @@ function editarProduto(id) {
   const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
   const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
 
-  // Carregar ingredientes
+  // Carregar ingredientes (suporta formato antigo prod.ingredientes e novo prod.receita)
   let naoEnc = [];
-  (prod.ingredientes||[]).forEach(ing => {
+  const ingList = prod.receita ? prod.receita.map(r=>({nome:r.d,qtde:r.qtde})) : (prod.ingredientes||[]);
+  ingList.forEach(ing => {
     const found = DB.find(d=>d.n===ing.nome);
     if (found) receita.push({d:found, qtde:ing.qtde});
     else naoEnc.push(ing.nome);
