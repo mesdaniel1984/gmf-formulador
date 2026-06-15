@@ -3492,7 +3492,7 @@ async function _sincronizarSeeds() {
     }
   } catch(e){console.warn('sync:',e);}
 }
-_initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console.warn('sync erro:',e); } await carregarProdutosAsync(); mostrarMenuInicial(); });cial(); });
+_initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console.warn('sync erro:',e); } await carregarProdutosAsync(); mostrarMenuInicial(); });
 </script>
 <div class="panel" id="step6">
   <div style="max-width:960px;margin:0 auto;padding:24px">
