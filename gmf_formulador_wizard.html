@@ -2995,6 +2995,7 @@ function renderStep4(){
 
   </div>
 `;
+}
 
 function imprimirFTP(){
   const doc=document.getElementById('ftpDocInner');
@@ -3173,7 +3174,8 @@ function ltGerarLaudo() {
     ['Partículas estranhas / Macro',glt('lt_part_res','Ausente'),     glt('lt_part_obs')],
   ];
 
-  document.getElementById('s4content').innerHTML = `<tr${bold?' class="nb"':''}${indent&&!bold?' class="ni"':''}>
+  function nr(lbl,v1,v2,vd,bold=false,indent=false){
+    return `<tr${bold?' class="nb"':''}${indent&&!bold?' class="ni"':''}>
       <td>${lbl}</td>
       <td style="text-align:right;width:36px">${v1}</td>
       <td style="text-align:right;width:36px">${v2}</td>
