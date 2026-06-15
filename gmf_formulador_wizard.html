@@ -2805,8 +2805,7 @@ function renderStep4(){
   // Ordem decrescente de quantidade (legislação RDC 429/2020, Art. 19)
   const ingList = gv('p_ingredientes_txt') || _buildIngredientesList();
 
-  function nr(lbl,v1,v2,vd,bold=false,indent=false){
-    return `
+  document.getElementById('s4content').innerHTML = `
   <div id="ftpDocInner" style="font-family:Arial,sans-serif;font-size:9px;color:#111;max-width:800px;margin:0 auto;background:#fff;border:1px solid #ccc">
 
     <!-- CABEÇALHO -->
@@ -2996,7 +2995,6 @@ function renderStep4(){
 
   </div>
 `;
-}
 
 function imprimirFTP(){
   const doc=document.getElementById('ftpDocInner');
@@ -3175,8 +3173,7 @@ function ltGerarLaudo() {
     ['Partículas estranhas / Macro',glt('lt_part_res','Ausente'),     glt('lt_part_obs')],
   ];
 
-  function nr(lbl,v1,v2,vd,bold=false,indent=false){
-    return `<tr${bold?' class="nb"':''}${indent&&!bold?' class="ni"':''}>
+  document.getElementById('s4content').innerHTML = `<tr${bold?' class="nb"':''}${indent&&!bold?' class="ni"':''}>
       <td>${lbl}</td>
       <td style="text-align:right;width:36px">${v1}</td>
       <td style="text-align:right;width:36px">${v2}</td>
