@@ -2864,12 +2864,12 @@ function renderStep4(){
         <!-- Tabela nutricional -->
         <div style="flex:1;padding:6px 10px">
           <div style="font-size:7.5px;font-weight:700;color:#555;margin-bottom:4px">INFORMAÇÃO NUTRICIONAL</div>
-          <div style="font-size:7.5px;color:#555;margin-bottom:4px">Porções por embalagem: cerca de ${Math.round((P100g.pesoTotal||1000)/P100g.pesoPorcao)||'—'} · Porção: ${P100g.pesoPorcao||30} g (${gv('p_medida','2 colheres de sopa')})</div>
+          <div style="font-size:7.5px;color:#555;margin-bottom:4px">Porções por embalagem: cerca de ${Math.round(((_prodOrigem||{}).pesoTotal||1000)/(_prodOrigem||{}).pesoPorcao)||'—'} · Porção: ${(_prodOrigem||{}).pesoPorcao||30} g (${gv('p_medida','2 colheres de sopa')})</div>
           <table style="width:100%;border-collapse:collapse;font-size:8px">
             <tr style="background:#222;color:#fff">
               <th style="padding:3px 5px;text-align:left;font-weight:700"></th>
               <th style="padding:3px 5px;text-align:center;font-weight:700">100 g</th>
-              <th style="padding:3px 5px;text-align:center;font-weight:700">${P100g.pesoPorcao||30} g</th>
+              <th style="padding:3px 5px;text-align:center;font-weight:700">${(_prodOrigem||{}).pesoPorcao||30} g</th>
               <th style="padding:3px 5px;text-align:center;font-weight:700">%VD*</th>
             </tr>
             ${[
@@ -2884,7 +2884,7 @@ function renderStep4(){
               ['Fibra alimentar (g)', T.fi, 25, 'g'],
               ['Sódio (mg)', T.na, 2300, 'mg'],
             ].map(([lbl,v100,vd,u],i)=>{
-              const v30 = v100*P100g.pesoPorcao/100;
+              const v30 = v100*(_prodOrigem||{}).pesoPorcao/100;
               const pct = vd ? Math.round(v100/vd*100)+'%' : '—';
               const bg = i%2===0?'#fff':'#f8f8f8';
               return `<tr style="background:${bg};border-bottom:.5px solid #ddd">
