@@ -3552,3 +3552,12 @@ _initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console
 <!-- v102 -->
 </html>
 <script>/* voltar ao painel principal */(function(){try{var a=document.createElement('a');a.href='index.html';a.textContent='← Central de Sistemas';a.style.cssText='position:fixed;bottom:14px;left:14px;z-index:99999;background:rgba(255,255,255,.96);color:#1a3a8a;font:600 13px system-ui,-apple-system,sans-serif;text-decoration:none;padding:8px 14px;border-radius:9px;box-shadow:0 4px 14px rgba(0,0,0,.22)';document.body.appendChild(a);}catch(e){}})();</script>
+
+<script>/* remover Composicao da Receita dos laudos */
+(function(){
+  function strip(){ try{ var doc=document.getElementById('laudoDoc'); if(!doc) return; var ls=doc.querySelectorAll('.ftp-lbl'); for(var i=0;i<ls.length;i++){ var l=ls[i]; if(/composi[çc][ãa]o da receita/i.test(l.textContent||'')){ var cell=(l.closest&&l.closest('.ftp-cell'))||l.parentElement; if(cell&&cell.parentNode) cell.parentNode.removeChild(cell); } } }catch(e){} }
+  function wrap(){ if(typeof window.ltGerarLaudo==='function' && !window.__ltWrapped){ var o=window.ltGerarLaudo; window.ltGerarLaudo=function(){ var r=o.apply(this,arguments); strip(); return r; }; window.__ltWrapped=true; } }
+  function init(){ wrap(); var d=document.getElementById('laudoDoc'); if(d){ try{ new MutationObserver(strip).observe(d,{childList:true,subtree:true}); }catch(e){} } strip(); }
+  if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
+  setTimeout(init,1500); setInterval(strip,2000);
+})();</script>
