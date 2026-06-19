@@ -1033,7 +1033,7 @@ let _snap = {};
 let _saveTimer = null;
 let _lastLocalSave = 0;
 
-function getCfg(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ return null; } }
+function getCfg(){ try{ var c=JSON.parse(localStorage.getItem(CFG_KEY)); if(c&&c.url&&c.key) return c; }catch(e){} return { url:'https://ailzblgrxtdakpkchstl.supabase.co', key:'sb_publishable_WLhtMnPB4ZF0CFMvKthjCQ_xLjalDz4' }; }
 function setCfg(c){ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
 function initClient(){
   const c = getCfg();
