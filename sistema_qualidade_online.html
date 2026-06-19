@@ -162,6 +162,20 @@
     .section { display: block !important; }
     .panel { box-shadow: none; border: 1px solid var(--border); }
   }
+
+  /* ===== RESPONSIVO / CELULAR ===== */
+  @media (max-width: 760px){
+    .topbar{ height:auto; flex-wrap:wrap; gap:4px 10px; padding:8px 12px; }
+    .topbar .logo{ font-size:15px; }
+    .topbar .clock, .topbar .userbadge, #clockDisplay, #userBadge{ font-size:11px; }
+    .main{ padding:12px !important; }
+    .panel{ padding:14px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .panel table{ font-size:12px; }
+    .panel th, .panel td{ white-space:nowrap; }
+    .modal{ padding:18px; }
+    .section-title{ font-size:18px; }
+    .toolbar{ flex-wrap:wrap; gap:8px; }
+  }
 </style>
 </head>
 <body>
