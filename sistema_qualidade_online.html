@@ -545,6 +545,8 @@
     <h2 id="viewerTitle">Documento</h2>
     <span class="viewer-status" id="viewerStatus"></span>
     <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;margin-left:8px" onclick="printViewer()">🖨️ Imprimir</button>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff" onclick="exportViewerPDF()">⬇️ PDF</button>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff" onclick="exportViewerWord()">⬇️ Word</button>
     <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff" onclick="saveViewerContent()">💾 Salvar</button>
     <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff" onclick="closeViewer()">✕ Fechar</button>
   </div>
@@ -2236,6 +2238,24 @@ function closeViewer() {
 
 function printViewer() {
   window.print();
+}
+function exportViewerPDF() {
+  window.print();
+}
+function exportViewerWord() {
+  var title = (document.getElementById('viewerTitle').textContent || 'documento');
+  var code = (document.getElementById('viewerDocCode').textContent || '');
+  var inner = document.getElementById('viewerEditor').innerHTML;
+  var head = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>' + title + '</title>'
+    + '<style>@page{size:A4;margin:2cm} body{font-family:Arial,sans-serif;font-size:11pt;color:#111;line-height:1.4} h1,h2,h3,h4{color:#1a56a0;margin:14px 0 6px} table{border-collapse:collapse;width:100%;font-size:10pt} td,th{border:1px solid #999;padding:4px 6px;vertical-align:top} th{background:#1f3864;color:#fff}</style></head><body>';
+  var html = head + '<h2 style="margin:0">' + title + '</h2><p style="color:#666;margin:2px 0 14px;font-size:10pt">' + code + '</p>' + inner + '</body></html>';
+  var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var fname = ((code.split(' ')[0] || 'documento') + '_' + title).replace(/[^\w\-]+/g, '_').slice(0, 60) + '.doc';
+  a.href = url; a.download = fname;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
 }
 
 function execFmt(cmd) {
