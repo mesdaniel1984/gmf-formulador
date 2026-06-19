@@ -884,6 +884,27 @@
   </div>
 </div>
 
+<!-- ===== ANEXOS MODAL (licencas/alvaras/laudos) ===== -->
+<div class="modal-bg" id="anexosModal">
+  <div class="modal">
+    <h2>📎 Anexos da Licença</h2>
+    <div id="anexLicTitle" style="font-size:13px;color:var(--text-light);margin:-6px 0 12px"></div>
+    <input type="hidden" id="anexLicId">
+    <div id="anexList" style="margin-bottom:14px"></div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Adicionar arquivo (alvará, laudo, comprovação, medição, renovação...)</label>
+        <input type="file" id="anexFile" multiple>
+      </div>
+    </div>
+    <div id="anexStatus" style="font-size:12px;color:var(--text-light);min-height:18px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('anexosModal')">Fechar</button>
+      <button class="btn btn-primary" id="anexUploadBtn" onclick="uploadAnexoFiles()">⬆️ Enviar</button>
+    </div>
+  </div>
+</div>
+
 <!-- TREIN MODAL -->
 <div class="modal-bg" id="treinModal">
   <div class="modal">
@@ -2007,7 +2028,8 @@ function renderLic(){
       <td>${fmtDate(l.venc)}</td>
       <td>${daysBadge}</td>
       <td>${days<0?'<span class="badge danger">Vencido</span>':days<=30?'<span class="badge danger">Urgente</span>':days<=90?'<span class="badge warn">Atenção</span>':'<span class="badge ok">Ok</span>'}</td>
-      <td><button class="btn btn-sm btn-outline" onclick="editLic('${l.id}')">✏️</button>
+      <td><button class="btn btn-sm btn-outline" onclick="openAnexos('${l.id}')" title="Anexos (alvará/laudo/comprovação)">📎 ${(l.anexos||[]).length}</button>
+      <button class="btn btn-sm btn-outline" onclick="editLic('${l.id}')">✏️</button>
       <button class="btn btn-sm btn-danger" onclick="delLic('${l.id}')">🗑</button></td>
     </tr>`;
   }).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--text-light);padding:24px">Nenhuma licença cadastrada.</td></tr>';
@@ -2026,6 +2048,67 @@ function openLicModal(l){
 }
 function editLic(id){openLicModal(db.licencas.find(l=>l.id===id));}
 function delLic(id){if(confirm('Excluir licença?')){db.licencas=db.licencas.filter(l=>l.id!==id);saveDB();renderLic();}}
+
+// ===== ANEXOS (Supabase Storage) =====
+function openAnexos(id){
+  const l=db.licencas.find(x=>x.id===id);
+  if(!l) return;
+  document.getElementById('anexLicId').value=id;
+  document.getElementById('anexLicTitle').textContent=(l.doc||'Licença')+' · '+(l.empresa||'')+(l.num?(' · '+l.num):'');
+  const fi=document.getElementById('anexFile'); if(fi) fi.value='';
+  document.getElementById('anexStatus').textContent='';
+  renderAnexoList();
+  document.getElementById('anexosModal').classList.add('open');
+}
+function renderAnexoList(){
+  const l=db.licencas.find(x=>x.id===document.getElementById('anexLicId').value);
+  const arr=(l&&l.anexos)||[];
+  const el=document.getElementById('anexList');
+  if(!arr.length){ el.innerHTML='<div style="color:var(--text-light);font-size:13px;padding:6px 0">Nenhum anexo ainda. Use o campo abaixo para enviar.</div>'; return; }
+  el.innerHTML=arr.map((a,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px">
+    <a href="${a.url}" target="_blank" rel="noopener" style="color:#1a56a0;text-decoration:none;font-size:13px;word-break:break-all">📄 ${a.nome}</a>
+    <button class="btn btn-sm btn-danger" onclick="removeAnexo(${i})" title="Remover">🗑</button>
+  </div>`).join('');
+}
+async function uploadAnexoFiles(){
+  const id=document.getElementById('anexLicId').value;
+  const l=db.licencas.find(x=>x.id===id);
+  if(!l) return;
+  const input=document.getElementById('anexFile');
+  const files=[...((input&&input.files)||[])];
+  const st=document.getElementById('anexStatus');
+  const btn=document.getElementById('anexUploadBtn');
+  if(!files.length){ st.style.color='#dc2626'; st.textContent='Selecione ao menos um arquivo.'; return; }
+  if(typeof sb==='undefined'||!sb){ st.style.color='#dc2626'; st.textContent='Sem conexão com a nuvem. Faça login novamente.'; return; }
+  btn.disabled=true; const old=btn.textContent; btn.textContent='Enviando...'; st.style.color='var(--text-light)'; st.textContent='Enviando...';
+  if(!l.anexos) l.anexos=[];
+  let ok=0, fail=0;
+  for(const file of files){
+    try{
+      const safe=(file.name||'arquivo').replace(/[^\w.\-]+/g,'_');
+      const path=id+'/'+uid()+'_'+safe;
+      const r=await sb.storage.from('anexos').upload(path, file, {upsert:false, contentType:file.type||undefined});
+      if(r.error){ fail++; st.style.color='#dc2626'; st.textContent='Erro ao enviar '+file.name+': '+r.error.message; continue; }
+      const pu=sb.storage.from('anexos').getPublicUrl(path);
+      l.anexos.push({nome:file.name, path:path, url:pu.data.publicUrl, ts:new Date().toISOString()});
+      ok++;
+    }catch(e){ fail++; st.style.color='#dc2626'; st.textContent='Erro: '+(e&&e.message?e.message:e); }
+  }
+  saveDB(); renderAnexoList(); renderLic();
+  if(input) input.value='';
+  btn.disabled=false; btn.textContent=old;
+  if(ok&&!fail){ st.style.color='#16a34a'; st.textContent='✓ '+ok+' arquivo(s) enviado(s) e salvo(s) na nuvem.'; }
+}
+async function removeAnexo(i){
+  const id=document.getElementById('anexLicId').value;
+  const l=db.licencas.find(x=>x.id===id);
+  if(!l||!l.anexos||!l.anexos[i]) return;
+  if(!confirm('Remover este anexo?')) return;
+  const a=l.anexos[i];
+  try{ if(typeof sb!=='undefined'&&sb&&a.path) await sb.storage.from('anexos').remove([a.path]); }catch(e){}
+  l.anexos.splice(i,1);
+  saveDB(); renderAnexoList(); renderLic();
+}
 function saveLic(){
   const id=document.getElementById('licEditId').value;
   const obj={id:id||uid(),doc:v('lDoc'),empresa:v('lEmpresa'),orgao:v('lOrgao'),num:v('lNum'),emissao:v('lEmissao'),venc:v('lVenc'),resp:v('lResp'),obs:v('lObs')};
