@@ -1230,6 +1230,19 @@ async function carregarListaIngredientes() {
     if(data?.length) {
       customData = data;
       data.forEach(r=>{ const ex=DB.findIndex(d=>d.n===r.dados.n); if(ex>=0) DB[ex]=r.dados; else DB.push(r.dados); });
+      // Repopula o dropdown de ingredientes com os custom carregados
+      const sel = document.getElementById('selIng');
+      if(sel) {
+        sel.innerHTML = '<option value="">— selecione o ingrediente —</option>';
+        let curG = '';
+        DB.forEach((d,i) => {
+          if(!d || !d.n) return;
+          if(d.g && d.g !== curG) {
+            const og = document.createElement('optgroup'); og.label = d.g; sel.appendChild(og); curG = d.g;
+          }
+          const o = document.createElement('option'); o.value = i; o.textContent = d.n; sel.appendChild(o);
+        });
+      }
     }
   }
 
