@@ -3456,6 +3456,44 @@ function imprimirLaudo() {
 }
 
 
+
+function imprimirLaudoSalvo(l) {
+  const w = window.open('','_blank','width=960,height=720');
+  const html = l.html_content || '';
+  if (html) {
+    w.document.write(`<!DOCTYPE html><html><head>
+      <meta charset="UTF-8"><title>Laudo Técnico — ${l.produto_nome||''} — Lote ${l.lote||''}</title>
+      <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff}
+      @page{size:A4 portrait;margin:10mm}
+      @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+      .ftp-doc{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;background:#fff;border:2px solid #1e3a8a;border-radius:4px;overflow:hidden}
+      .ftp-hdr{background:#1e3a8a;color:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+      .ftp-hdr-logo{height:40px;width:40px;object-fit:contain;background:#fff;border-radius:4px;padding:2px;flex-shrink:0}
+      .ftp-hdr-title{font-size:13px;font-weight:900;letter-spacing:.5px;text-align:center;flex:1}
+      .ftp-hdr-meta{text-align:right;font-size:8.5px;line-height:1.7}
+      .ftp-sec{border-bottom:1px solid #ccc}
+      .ftp-sec-t{background:#1e3a8a;color:#fff;font-size:8.5px;font-weight:700;padding:3px 10px;text-transform:uppercase;letter-spacing:.5px}
+      .ftp-row{display:flex;flex-wrap:wrap}
+      .ftp-cell{padding:4px 8px;border-right:1px solid #ddd;flex:1;min-width:80px}
+      .ftp-cell:last-child{border-right:none}
+      .ftp-lbl{font-size:7.5px;color:#666;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
+      .ftp-val{font-size:9.5px;color:#000;line-height:1.4}
+      .ftp-nutri{border:2px solid #000;margin:6px;border-radius:2px}
+      .ftp-nutri h5{font-size:11px;font-weight:900;border-bottom:2px solid #000;padding:2px 5px;margin:0}
+      .ftp-nutri table{width:100%;border-collapse:collapse;font-size:8.5px}
+      .ftp-nutri td{padding:1.5px 5px;border-bottom:.5px solid #ddd}
+      .ftp-nutri .nb td{font-weight:900;border-bottom:1.5px solid #000}
+      .ftp-nutri .ni td:first-child{padding-left:12px}
+      </style>
+    </head><body>${html}</body></html>`);
+    w.document.close();
+    setTimeout(()=>{ w.print(); }, 700);
+  } else {
+    w.close();
+    alert('Este laudo não possui HTML salvo. Apenas laudos emitidos após a atualização do sistema podem ser reimpressos.');
+  }
+}
+
 function abrirListaLaudos() {
   document.getElementById('laudosPanel').style.display = 'block';
   carregarListaLaudos();
@@ -3479,7 +3517,8 @@ async function salvarLaudoNoBanco() {
       status: 'Emitido',
       usuario_id: _currentUser.id,
       usuario_email: _currentUser.email,
-      dados: { registro: gv('p_registro',''), marca: gv('p_marca',''), classificacao: tipoSel || '' }
+      dados: { registro: gv('p_registro',''), marca: gv('p_marca',''), classificacao: tipoSel || '' },
+      html_content: document.getElementById('laudoDocInner')?.outerHTML || ''
     };
     await _sb.from('laudos').insert(laudo);
   } catch(e) { console.warn('Erro ao salvar laudo:', e); }
@@ -3500,6 +3539,7 @@ async function carregarListaLaudos() {
         <th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb">Destino</th>
         <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Status</th>
         <th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb">Emitido por</th>
+        <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Ações</th>
       </tr>
       ${data.map(l=>`<tr style="border-bottom:1px solid #f3f4f6">
         <td style="padding:8px;font-weight:700;color:#1e3a8a">${l.numero_laudo||'—'}</td>
@@ -3509,6 +3549,7 @@ async function carregarListaLaudos() {
         <td style="padding:8px;color:#6b7280">${l.destino||'—'}</td>
         <td style="padding:8px;text-align:center"><span style="background:${l.status==='Aprovado'?'#dcfce7':'#dbeafe'};color:${l.status==='Aprovado'?'#166534':'#1e40af'};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${l.status}</span></td>
         <td style="padding:8px;color:#6b7280;font-size:11px">${l.usuario_email||'—'}</td>
+        <td style="padding:8px;text-align:center"><button onclick="imprimirLaudoSalvo(${JSON.stringify(l)})" style="background:#1e3a8a;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:700">🖨️ Imprimir</button></td>
       </tr>`).join('')}
     </table>`;
 }
