@@ -1102,7 +1102,7 @@ function goStep(n) {
             DB.forEach((d,i) => {
               if(!d || !d.n) return;
               if(d.g && d.g !== curG) { const og=document.createElement('optgroup');og.label=d.g;sel.appendChild(og);curG=d.g; }
-              const o=document.createElement('option');o.value=i;o.textContent=d.n;sel.appendChild(o);
+              const o=document.createElement('option');o.value=d.n;o.textContent=d.n;sel.appendChild(o);
             });
           }
         }
