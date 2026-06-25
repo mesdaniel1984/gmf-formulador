@@ -1090,6 +1090,24 @@ function goStep(n) {
     back.style.display = '';
     back.onclick = () => goStep(n-1);
     next.onclick = nextStep;
+    // Ao entrar no passo 2 (receita), recarrega ingredientes custom do Supabase
+    if (n === 2 && _sb && _currentUser) {
+      _sb.from('ingredientes_custom').select('nome,dados').order('nome').then(({data}) => {
+        if(data?.length) {
+          data.forEach(r=>{ const ex=DB.findIndex(d=>d.n===r.dados.n); if(ex>=0) DB[ex]=r.dados; else DB.push(r.dados); });
+          const sel = document.getElementById('selIng');
+          if(sel) {
+            sel.innerHTML = '<option value="">— selecione o ingrediente —</option>';
+            let curG = '';
+            DB.forEach((d,i) => {
+              if(!d || !d.n) return;
+              if(d.g && d.g !== curG) { const og=document.createElement('optgroup');og.label=d.g;sel.appendChild(og);curG=d.g; }
+              const o=document.createElement('option');o.value=i;o.textContent=d.n;sel.appendChild(o);
+            });
+          }
+        }
+      });
+    }
     if (n === 4 || n === 5) {
       next.style.display = 'none';
       ind.textContent = n === 4
