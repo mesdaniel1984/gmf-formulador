@@ -1056,7 +1056,7 @@ const SEED_PRODUTOS = [{"id":1779640887609,"tQ":1000,"obs":"ESTE PRODUTO NÃO É
 function goStep(n) {
   if (n < 0 || n > 6) return;
   if (n === 6) { currentStep = 6; }
-  else if (n > 1 && receita.length === 0) {
+  else if (n > 1 && receita.length === 0 && !_prodOrigem) {
     if (n > 2) { alert('Adicione ingredientes na receita antes de avançar.'); return; }
   }
   currentStep = n;
@@ -1646,13 +1646,13 @@ function editarProduto(id) {
     if (found) receita.push({d:found, qtde:ing.qtde});
     else naoEnc.push(ing.nome);
   });
+  goStep(1);
   renderReceita();
 
   // Snapshot após carregar tudo
   _prodOrigemHash = _hashReceitaAtual();
   _atualizarBannerEdicao();
   _travarTipoProduto(tipo); // Travar botões de tipo
-  goStep(1);
   if (naoEnc.length) setTimeout(()=>alert(`ℹ️ Ingrediente(s) não encontrado(s) no banco:\n${naoEnc.join('\n')}`),400);
 }
 
