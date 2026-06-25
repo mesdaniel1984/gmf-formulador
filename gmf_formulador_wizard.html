@@ -2588,10 +2588,10 @@ function populaSel() {
 function addIng(){
   const sel=document.getElementById('selIng');
   const qtde=parseFloat(document.getElementById('qtdeIng').value);
-  const idx=sel.value;
-  if(!idx||!DB[idx]||!DB[idx].n){alert('Selecione um ingrediente.');return;}
+  const idx=sel.value;const _found=DB.find(d=>d&&d.n===idx);
+  if(!idx||!_found){alert('Selecione um ingrediente.');return;}
   if(!qtde||qtde<=0){alert('Informe a quantidade em gramas.');return;}
-  receita.push({d:DB[idx],qtde});
+  receita.push({d:_found,qtde});
   document.getElementById('qtdeIng').value='';
   sel.value='';document.getElementById('ingInfo').textContent='';
   renderReceita();recalc();
