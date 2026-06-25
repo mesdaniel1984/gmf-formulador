@@ -1258,7 +1258,7 @@ async function carregarListaIngredientes() {
           if(d.g && d.g !== curG) {
             const og = document.createElement('optgroup'); og.label = d.g; sel.appendChild(og); curG = d.g;
           }
-          const o = document.createElement('option'); o.value = i; o.textContent = d.n; sel.appendChild(o);
+          const o = document.createElement('option'); o.value = d.n; o.textContent = d.n; sel.appendChild(o);
         });
       }
     }
@@ -2576,10 +2576,10 @@ function populaSel() {
       const og=document.createElement('optgroup');og.label=d.g;sel.appendChild(og);curG=d.g;
     }
     if (!d.n) return;
-    const o=document.createElement('option');o.value=i;o.textContent=d.n;sel.appendChild(o);
+    const o=document.createElement('option');o.value=d.n;o.textContent=d.n;sel.appendChild(o);
   });
   sel.addEventListener('change',()=>{
-    const d=DB[sel.value];if(!d||!d.n)return;
+    const d=DB.find(x=>x&&x.n===sel.value);if(!d||!d.n)return;
     document.getElementById('ingInfo').textContent=
       `${d.ref} [${d.src||'—'}] · ${d.kcal} kcal · PTN ${d.ptn}g · CHO ${d.cho}g · G.tot ${d.gt}g · Na ${d.na}mg — por 100g`;
   });
