@@ -1642,7 +1642,7 @@ function editarProduto(id) {
   // Carregar ingredientes
   let naoEnc = [];
   (prod.ingredientes||[]).forEach(ing => {
-    const found = DB.find(d=>d.n===ing.nome) || (ing.dados ? ing.dados : null);
+    const found = DB.find(d=>d.n===ing.nome) || ing.dados || {n:ing.nome, ref:ing.ref||ing.nome, kcal:0, ptn:0, cho:0, gt:0, na:0, g:"Custom"};
     if (found) receita.push({d:found, qtde:ing.qtde});
     else naoEnc.push(ing.nome);
   });
