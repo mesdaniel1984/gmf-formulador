@@ -1642,7 +1642,7 @@ function editarProduto(id) {
   // Carregar ingredientes
   let naoEnc = [];
   (prod.ingredientes||[]).forEach(ing => {
-    const found = DB.find(d=>d.n===ing.nome);
+    const found = DB.find(d=>d.n===ing.nome) || (ing.dados ? ing.dados : null);
     if (found) receita.push({d:found, qtde:ing.qtde});
     else naoEnc.push(ing.nome);
   });
@@ -1732,7 +1732,7 @@ function salvarProdutoAtual() {
     obs:           document.getElementById('p_obs')?.value || '',
     ingredientes_txt: document.getElementById('p_ingredientes_txt')?.value || '',
     // ── Dados nutricionais ────────────────────────────────────────────────────
-    ingredientes: receita.map(r=>({nome:r.d.n, nomeExib:_nomeExibicao(r.d), ref:r.d.ref, qtde:r.qtde})),
+    ingredientes: receita.map(r=>({nome:r.d.n, nomeExib:_nomeExibicao(r.d), ref:r.d.ref, qtde:r.qtde, dados:r.d})),
     nutri100g: {...T},
     nutriPorcao: {...P},
     _origemId: _prodOrigem ? _prodOrigem.id : null,
