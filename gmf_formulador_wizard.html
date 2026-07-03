@@ -1017,7 +1017,10 @@ async function deletarProdutoAsync(id) {
     }
   } catch(e) {}
   if (_sb) {
-    try { await _sb.from('produtos').delete().eq('id', id); } catch(e) {}
+    try {
+      await _sb.from('laudos').delete().eq('produto_id', String(id));
+      await _sb.from('produtos').delete().eq('id', id);
+    } catch(e) { console.warn('Erro ao deletar produto:', e); }
   }
 }
 
