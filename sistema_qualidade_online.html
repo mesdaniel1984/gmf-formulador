@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistema de Qualidade — MPARIS / DMS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -427,10 +429,12 @@
       </div>
 
       <!-- Histórico -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <span style="font-weight:700;font-size:13px">📋 Histórico</span>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <input type="month" id="cloro-mes" onchange="renderCloro()" style="border:1.5px solid #d1d5db;border-radius:6px;padding:5px 8px;font-size:12px">
+          <button onclick="exportCloroExcel()" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">⬇ Excel</button>
+          <button onclick="exportCloroPDF()" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">⬇ PDF</button>
         </div>
       </div>
       <div style="overflow-x:auto">
@@ -2648,6 +2652,117 @@ function renderCloro() {
     </tr>
   `).join('');
 }
+function exportCloroExcel() {
+  const mes = document.getElementById('cloro-mes')?.value || new Date().toISOString().slice(0,7);
+  const regs = (db.cloro || []).filter(r => r.data && r.data.startsWith(mes))
+    .sort((a,b) => a.data.localeCompare(b.data) || a.hora.localeCompare(b.hora));
+  if (!regs.length) { alert('Nenhum registro neste mês.'); return; }
+
+  const ws_data = [
+    ['CONTROLE DIÁRIO DE CLORO LIVRE & pH — RQ-09.02'],
+    ['Grupo MF Paris Alimentos · SIF 5460'],
+    ['Mês de referência: ' + mes],
+    ['Limites: Cloro 0,5 a 2,0 ppm · pH 6,0 a 9,0'],
+    [],
+    ['Data', 'Hora', 'Ponto', 'Local', 'Cloro (ppm)', 'pH', 'Analista', 'Comentário', 'Status']
+  ];
+  regs.forEach(r => {
+    ws_data.push([
+      r.data ? r.data.split('-').reverse().join('/') : '',
+      r.hora || '',
+      'P' + r.ponto,
+      r.local,
+      r.cloro,
+      r.ph || '',
+      r.analista,
+      r.obs || '',
+      r.status
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!cols'] = [{wch:12},{wch:8},{wch:6},{wch:40},{wch:12},{wch:8},{wch:20},{wch:30},{wch:15}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Cloro ' + mes);
+  XLSX.writeFile(wb, 'Cloro_' + mes + '.xlsx');
+}
+
+function exportCloroPDF() {
+  const mes = document.getElementById('cloro-mes')?.value || new Date().toISOString().slice(0,7);
+  const regs = (db.cloro || []).filter(r => r.data && r.data.startsWith(mes))
+    .sort((a,b) => a.data.localeCompare(b.data) || a.hora.localeCompare(b.hora));
+  if (!regs.length) { alert('Nenhum registro neste mês.'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  // Cabeçalho
+  doc.setFillColor(30, 58, 95);
+  doc.rect(0, 0, 297, 18, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('CONTROLE DIÁRIO DE CLORO LIVRE & pH — RQ-09.02', 148, 8, {align:'center'});
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'normal');
+  doc.text('Grupo MF Paris Alimentos · SIF 5460 · POP 09', 148, 14, {align:'center'});
+
+  // Info
+  doc.setTextColor(0,0,0);
+  doc.setFontSize(9);
+  doc.text('Mês: ' + mes, 10, 25);
+  doc.text('Limites: Cloro 0,5 a 2,0 ppm  |  pH 6,0 a 9,0 (semestral)', 10, 30);
+  doc.text('Emitido em: ' + new Date().toLocaleDateString('pt-BR'), 240, 25);
+
+  // Tabela
+  const headers = ['Data','Hora','Pto','Local','Cloro (ppm)','pH','Analista','Status'];
+  const cols = [18, 12, 10, 70, 20, 12, 35, 28];
+  const startX = 10;
+  let y = 38;
+
+  // Header tabela
+  doc.setFillColor(30, 58, 95);
+  doc.rect(startX, y, cols.reduce((a,b)=>a+b,0), 7, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'bold');
+  let x = startX;
+  headers.forEach((h, i) => { doc.text(h, x+1, y+5); x += cols[i]; });
+
+  // Linhas
+  doc.setFont(undefined, 'normal');
+  regs.forEach((r, idx) => {
+    y += 7;
+    if (y > 190) { doc.addPage(); y = 20; }
+    if (idx % 2 === 0) { doc.setFillColor(248,250,252); doc.rect(startX, y, cols.reduce((a,b)=>a+b,0), 7, 'F'); }
+    doc.setTextColor(r.status === 'Conforme' ? 22 : 220, r.status === 'Conforme' ? 163 : 38, r.status === 'Conforme' ? 74 : 38);
+    const row = [
+      r.data ? r.data.split('-').reverse().join('/') : '',
+      r.hora || '',
+      'P'+r.ponto,
+      r.local,
+      String(r.cloro),
+      r.ph ? String(r.ph) : '—',
+      r.analista,
+      r.status
+    ];
+    x = startX;
+    doc.setTextColor(0,0,0);
+    row.forEach((v, i) => {
+      if (i === 7) doc.setTextColor(r.status==='Conforme'?22:220, r.status==='Conforme'?163:38, r.status==='Conforme'?74:38);
+      doc.text(String(v).substring(0,i===3?38:20), x+1, y+5);
+      x += cols[i];
+    });
+  });
+
+  // Rodapé
+  doc.setTextColor(128,128,128);
+  doc.setFontSize(7);
+  doc.text('Documento gerado automaticamente pelo Sistema de Gestão da Qualidade — Grupo MF Paris Alimentos', 148, 205, {align:'center'});
+
+  doc.save('Cloro_' + mes + '.pdf');
+}
+
 // ===== FIM POTABILIDADE =====
 
 </script>
