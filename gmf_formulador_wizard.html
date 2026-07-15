@@ -1586,6 +1586,9 @@ function editarProduto(id) {
   // Restaurar campos do produto salvos (embalagem, validade, armazenamento, etc.)
   const _resto = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== '') el.value = val; };
   _resto('p_validade',      prod.validade);
+  _resto('p_elaborado',     prod.elaborado);
+  _resto('p_revisado',      prod.revisado);
+  _resto('p_aprovado',      prod.aprovado);
   _resto('p_emb1',          prod.emb1);
   _resto('p_emb2',          prod.emb2);
   _resto('p_armazenamento', prod.armazenamento);
@@ -1732,6 +1735,9 @@ function salvarProdutoAtual() {
     embalagensSel: getEmbalagensSelecionadas(),
     validade:      document.getElementById('p_validade')?.value || '',
     armazenamento: document.getElementById('p_armazenamento')?.value || '',
+    elaborado:     document.getElementById('p_elaborado')?.value || '',
+    revisado:      document.getElementById('p_revisado')?.value || '',
+    aprovado:      document.getElementById('p_aprovado')?.value || '',
     preparo:       document.getElementById('p_preparo_txt')?.value || '',
     obs:           document.getElementById('p_obs')?.value || '',
     ingredientes_txt: document.getElementById('p_ingredientes_txt')?.value || '',
@@ -3002,9 +3008,10 @@ function renderStep4(){
     <!-- ASSINATURAS -->
     <div style="padding:8px 12px;border-top:1px solid #ddd">
       <div style="display:flex;gap:18px;align-items:flex-end;margin-bottom:10px">
-        ${[['Elaborado por',''],['Revisado por',''],['Aprovado por / RT','']].map(([lbl,val])=>`
+        ${[['Elaborado por',gv('p_elaborado','')],['Revisado por',gv('p_revisado','')],['Aprovado por / RT',gv('p_aprovado','')]].map(([lbl,val])=>`
         <div style="flex:1;text-align:center">
-          <div style="border-top:1px solid #333;padding-top:3px;font-size:8px;color:#555">${lbl}</div>
+          <div style="min-height:28px;border-bottom:1px solid #333;margin-bottom:3px;font-size:9px;color:#222;font-weight:600;padding:2px 4px;text-align:center">${val||'&nbsp;'}</div>
+          <div style="font-size:8px;color:#555">${lbl}</div>
         </div>`).join('')}
       </div>
       <!-- Histórico de revisões -->
