@@ -815,7 +815,7 @@
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group" style="grid-column:1/-1"><label>Produto / Matéria-Prima / Local de Coleta</label><input type="text" id="aProduto"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Produto / Matéria-Prima / Local de Coleta</label><input type="text" id="aProduto" oninput="ajustarAnexos(this.value)"></div>
     </div>
     <div class="form-row">
       <div class="form-group" style="grid-column:1/-1"><label>Parâmetros Analisados</label><input type="text" id="aParams" placeholder="ex: Coliformes, Salmonella, Umidade..."></div>
@@ -827,11 +827,21 @@
         <select id="aStatus"><option>Pendente</option><option>Em andamento</option><option>Aprovado</option><option>Reprovado</option></select>
       </div>
     </div>
-    <div class="form-row">
+    <div class="form-row" id="anexos-container">
       <div class="form-group" style="grid-column:1/-1">
-        <label>Anexar Laudo (PDF/imagem)</label>
+        <label>📎 Anexo 1 — Laudo Microbiológico</label>
         <input type="file" id="aArquivo" accept=".pdf,.jpg,.jpeg,.png" style="padding:6px;border:1px dashed var(--border);border-radius:6px;width:100%;box-sizing:border-box">
         <div id="aArquivoAtual" style="font-size:12px;color:var(--text-light);margin-top:4px"></div>
+      </div>
+      <div class="form-group" style="grid-column:1/-1" id="anexo2-wrap" style="display:none">
+        <label>📎 Anexo 2 — Laudo Físico-Químico</label>
+        <input type="file" id="aArquivo2" accept=".pdf,.jpg,.jpeg,.png" style="padding:6px;border:1px dashed var(--border);border-radius:6px;width:100%;box-sizing:border-box">
+        <div id="aArquivo2Atual" style="font-size:12px;color:var(--text-light);margin-top:4px"></div>
+      </div>
+      <div class="form-group" style="grid-column:1/-1" id="anexo3-wrap" style="display:none">
+        <label>📎 Anexo 3 — Laudo Sensorial / Micotoxinas</label>
+        <input type="file" id="aArquivo3" accept=".pdf,.jpg,.jpeg,.png" style="padding:6px;border:1px dashed var(--border);border-radius:6px;width:100%;box-sizing:border-box">
+        <div id="aArquivo3Atual" style="font-size:12px;color:var(--text-light);margin-top:4px"></div>
       </div>
     </div>
     <div class="form-row">
@@ -1892,7 +1902,11 @@ function renderAnal(){
   tbody.innerHTML=rows.map(a=>{
     const plano=db.analPlanos?(db.analPlanos.find(p=>p.id===a.planoId)||null):null;
     const nomeAnl=plano?plano.nome:(a.nomeAnalise||a.tipo||'—');
-    const anexoBtn=a.arquivo?`<button class="btn btn-sm btn-outline" onclick="abrirAnexo('${a.id}')" title="Ver laudo">📎</button>`:'—';
+    const anexoBtn=[
+      a.arquivo?`<button class="btn btn-sm btn-outline" onclick="abrirAnexoN('${a.id}',1)" title="Laudo Microbiológico">📎1</button>`:'',
+      a.arquivo2?`<button class="btn btn-sm btn-outline" onclick="abrirAnexoN('${a.id}',2)" title="Laudo Físico-Químico" style="margin-left:3px">📎2</button>`:'',
+      a.arquivo3?`<button class="btn btn-sm btn-outline" onclick="abrirAnexoN('${a.id}',3)" title="Laudo Sensorial/Micotoxinas" style="margin-left:3px">📎3</button>`:'',
+    ].filter(Boolean).join('')||'—';
     return `<tr>
       <td>${fmtDate(a.data)}</td>
       <td><b>${a.produto||'—'}</b><br><span style="font-size:11px;color:var(--text-light)">${nomeAnl}</span></td>
@@ -1925,6 +1939,11 @@ function openAnalModal(a, planoId, dtPre){
   document.getElementById('aObs').value=a?a.obs:'';
   document.getElementById('aArquivo').value='';
   document.getElementById('aArquivoAtual').textContent=a&&a.arquivoNome?'Anexo atual: '+a.arquivoNome:'';
+  document.getElementById('aArquivo2').value='';
+  document.getElementById('aArquivo2Atual').textContent=a&&a.arquivo2Nome?'Anexo atual: '+a.arquivo2Nome:'';
+  document.getElementById('aArquivo3').value='';
+  document.getElementById('aArquivo3Atual').textContent=a&&a.arquivo3Nome?'Anexo atual: '+a.arquivo3Nome:'';
+  setTimeout(()=>ajustarAnexos(document.getElementById('aProduto').value),50);
   // Populate plan select
   const sel=document.getElementById('aPlanoId');
   sel.innerHTML='<option value="">— sem plano —</option>'+((db.analPlanos||[]).map(p=>`<option value="${p.id}">${p.nome}</option>`).join(''));
@@ -1950,6 +1969,14 @@ function preencherPlano(planoId){
 function editAnal(id){openAnalModal(db.analises.find(a=>a.id===id));}
 function delAnal(id){if(confirm('Excluir análise?')){db.analises=db.analises.filter(a=>a.id!==id);saveDB();renderAnal();}}
 
+function abrirAnexoN(id, n){
+  const a=db.analises.find(x=>x.id===id);
+  if(!a)return;
+  const arq = n===1?a.arquivo:n===2?a.arquivo2:a.arquivo3;
+  if(!arq){alert('Anexo '+n+' não encontrado.');return;}
+  const w=window.open();
+  w.document.write('<iframe src="'+arq+'" style="width:100%;height:100%;border:none"></iframe>');
+}
 function abrirAnexo(id){
   const a=db.analises.find(x=>x.id===id);
   if(!a||!a.arquivo)return;
@@ -1961,7 +1988,18 @@ function saveAnal(){
   const id=document.getElementById('analEditId').value;
   const fileInput=document.getElementById('aArquivo');
   const file=fileInput.files[0];
-  function finish(arquivoData, arquivoNome){
+  const file2=document.getElementById('aArquivo2').files[0];
+  const file3=document.getElementById('aArquivo3').files[0];
+
+  function readFile(f, cb) {
+    if (!f) { cb(null, null); return; }
+    const r = new FileReader();
+    r.onload = e => cb(e.target.result, f.name);
+    r.readAsDataURL(f);
+  }
+
+  function finish(arquivoData, arquivoNome, arquivo2Data, arquivo2Nome, arquivo3Data, arquivo3Nome){
+    const existing = db.analises.find(x=>x.id===id);
     const obj={
       id:id||uid(),
       data:v('aData'),
@@ -1975,8 +2013,12 @@ function saveAnal(){
       laudo:v('aLaudo'),
       status:v('aStatus'),
       obs:v('aObs'),
-      arquivo:arquivoData||null,
-      arquivoNome:arquivoNome||null,
+      arquivo:arquivoData||(existing&&existing.arquivo)||null,
+      arquivoNome:arquivoNome||(existing&&existing.arquivoNome)||null,
+      arquivo2:arquivo2Data||(existing&&existing.arquivo2)||null,
+      arquivo2Nome:arquivo2Nome||(existing&&existing.arquivo2Nome)||null,
+      arquivo3:arquivo3Data||(existing&&existing.arquivo3)||null,
+      arquivo3Nome:arquivo3Nome||(existing&&existing.arquivo3Nome)||null,
     };
     if(id){
       // Preserve existing arquivo if no new file
@@ -1989,13 +2031,13 @@ function saveAnal(){
     }
     saveDB();closeModal('analModal');renderAnal();
   }
-  if(file){
-    const reader=new FileReader();
-    reader.onload=e=>finish(e.target.result, file.name);
-    reader.readAsDataURL(file);
-  }else{
-    finish(null, null);
-  }
+  readFile(file, (d1,n1) => {
+    readFile(file2, (d2,n2) => {
+      readFile(file3, (d3,n3) => {
+        finish(d1,n1,d2,n2,d3,n3);
+      });
+    });
+  });
 }
 
 // ===== PLANOS MODAL =====
@@ -2764,6 +2806,23 @@ function exportCloroPDF() {
 }
 
 // ===== FIM POTABILIDADE =====
+
+// ===== MÚLTIPLOS ANEXOS =====
+const PRODS_2_ANEXOS = ['achocolatado','açúcar','acucar','composto lácteo','composto lacteo','mistura em pó','mistura em po','soro em pó','soro em po','permeado'];
+const PRODS_3_ANEXOS = ['café','cafe','leite em pó','leite em po'];
+
+function ajustarAnexos(produto) {
+  const p = produto.toLowerCase();
+  const tem3 = PRODS_3_ANEXOS.some(x => p.includes(x));
+  const tem2 = tem3 || PRODS_2_ANEXOS.some(x => p.includes(x));
+  document.getElementById('anexo2-wrap').style.display = tem2 ? '' : 'none';
+  document.getElementById('anexo3-wrap').style.display = tem3 ? '' : 'none';
+  // Atualizar label do anexo 1
+  const lbl1 = document.querySelector('#aArquivo').previousElementSibling;
+  if (lbl1) lbl1.textContent = tem2 ? '📎 Anexo 1 — Laudo Microbiológico' : '📎 Anexar Laudo (PDF/imagem)';
+}
+// ===== FIM MÚLTIPLOS ANEXOS =====
+
 
 </script>
 </body>
