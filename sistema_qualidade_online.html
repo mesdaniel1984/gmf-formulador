@@ -369,6 +369,92 @@
   <div class="section-title">Controle de Análises</div>
   <div class="section-sub">Microbiológicas, sensoriais e físico-químicas</div>
 
+  <!-- SUBTABS -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0">
+    <button id="subtab-analises" onclick="showSubtab('analises')" style="padding:8px 18px;border:none;background:none;font-size:13px;font-weight:700;color:#1e3a8a;border-bottom:3px solid #1e3a8a;cursor:pointer;margin-bottom:-2px">🔬 Análises</button>
+    <button id="subtab-cloro" onclick="showSubtab('cloro')" style="padding:8px 18px;border:none;background:none;font-size:13px;font-weight:600;color:var(--dim);border-bottom:3px solid transparent;cursor:pointer;margin-bottom:-2px">💧 Potabilidade da Água</button>
+  </div>
+
+  <!-- SEÇÃO POTABILIDADE -->
+  <div id="sub-cloro" style="display:none">
+    <div class="panel" style="margin-bottom:18px">
+      <div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:4px">💧 Controle Diário de Cloro Livre & pH — RQ-09.02</div>
+      <div style="font-size:12px;color:var(--dim);margin-bottom:16px">POP 09 · Cloro: VMP 0,5 a 2,0 mg/L · pH: VMP 6,0 a 9,0 (semestral) · 1 coleta por ponto</div>
+
+      <!-- KPIs cloro -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="cloro-kpis">
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Registros Hoje</div>
+          <div style="font-size:22px;font-weight:800;color:#16a34a" id="cloro-k1">—</div>
+        </div>
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Conformes</div>
+          <div style="font-size:22px;font-weight:800;color:#16a34a" id="cloro-k2">—</div>
+        </div>
+        <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Não Conformes</div>
+          <div style="font-size:22px;font-weight:800;color:#dc2626" id="cloro-k3">—</div>
+        </div>
+        <div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Cloro Médio</div>
+          <div style="font-size:22px;font-weight:800;color:#1e3a8a" id="cloro-k4">—</div>
+        </div>
+      </div>
+
+      <!-- Formulário -->
+      <div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:18px">
+        <div style="font-weight:700;font-size:13px;margin-bottom:12px;color:#1e3a8a">➕ Novo Registro</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="display:block;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">Data</label>
+            <input type="date" id="cloro-data" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:7px 9px;font-size:13px">
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">Hora</label>
+            <input type="time" id="cloro-hora" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:7px 9px;font-size:13px">
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">Analista</label>
+            <input type="text" id="cloro-analista" placeholder="Nome do analista" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:7px 9px;font-size:13px">
+          </div>
+        </div>
+
+        <!-- 8 pontos -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px" id="cloro-pontos-form">
+        </div>
+
+        <button onclick="salvarCloro()" style="background:#1e3a8a;color:#fff;border:none;border-radius:7px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;width:100%">💾 Salvar Registros do Dia</button>
+      </div>
+
+      <!-- Histórico -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-weight:700;font-size:13px">📋 Histórico</span>
+        <div style="display:flex;gap:8px">
+          <input type="month" id="cloro-mes" onchange="renderCloro()" style="border:1.5px solid #d1d5db;border-radius:6px;padding:5px 8px;font-size:12px">
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:#f8fafc">
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #e5e7eb">Data</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #e5e7eb">Hora</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #e5e7eb">Ponto</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #e5e7eb">Cloro (ppm)</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #e5e7eb">pH</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #e5e7eb">Analista</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #e5e7eb">Status</th>
+            </tr>
+          </thead>
+          <tbody id="cloro-tabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO ANÁLISES (existente) -->
+  <div id="sub-analises">
+
   <!-- PRÓXIMAS ANÁLISES -->
   <div class="panel" style="margin-bottom:18px" id="proxPanel">
     <div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:14px">⏰ Próximas Análises — por Produto</div>
@@ -421,6 +507,7 @@
       </table>
     </div>
   </div>
+  </div><!-- /sub-analises -->
 </div>
 
 <!-- ===== NCS ===== -->
@@ -2396,6 +2483,173 @@ async function boot(){
   }
 }
 boot();
+
+// ===== POTABILIDADE / CLORO =====
+const CLORO_PONTOS = [
+  'Barreira Sanitária 1 — Piso Lácteos',
+  'Barreira Sanitária 2 — Piso Lácteos',
+  'Pia de Lavagem — Lácteos',
+  'Café — Pia da Copa',
+  'Café — Barreira Sanitária Abismachine',
+  'Café — Barreira Sanitária',
+  'G3 — Refeitório',
+  'Mistura após Cloração'
+];
+
+function showSubtab(tab) {
+  document.getElementById('sub-analises').style.display = tab === 'analises' ? '' : 'none';
+  document.getElementById('sub-cloro').style.display = tab === 'cloro' ? '' : 'none';
+  const ta = document.getElementById('subtab-analises');
+  const tc = document.getElementById('subtab-cloro');
+  if (tab === 'analises') {
+    ta.style.color='#1e3a8a'; ta.style.borderBottom='3px solid #1e3a8a';
+    tc.style.color='var(--dim)'; tc.style.borderBottom='3px solid transparent';
+  } else {
+    tc.style.color='#1e3a8a'; tc.style.borderBottom='3px solid #1e3a8a';
+    ta.style.color='var(--dim)'; ta.style.borderBottom='3px solid transparent';
+    initCloroForm();
+    renderCloro();
+  }
+}
+
+function initCloroForm() {
+  const hoje = new Date().toISOString().split('T')[0];
+  const agora = new Date().toTimeString().slice(0,5);
+  const dataEl = document.getElementById('cloro-data');
+  const horaEl = document.getElementById('cloro-hora');
+  const mesEl = document.getElementById('cloro-mes');
+  if (dataEl && !dataEl.value) dataEl.value = hoje;
+  if (horaEl && !horaEl.value) horaEl.value = agora;
+  if (mesEl && !mesEl.value) mesEl.value = hoje.slice(0,7);
+
+  const cont = document.getElementById('cloro-pontos-form');
+  if (!cont || cont.dataset.init) return;
+  cont.dataset.init = '1';
+  cont.innerHTML = CLORO_PONTOS.map((p, i) => `
+    <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;background:#fff" id="cloro-pcard-${i}">
+      <div style="font-size:11px;font-weight:700;color:#1e3a8a;margin-bottom:8px">
+        <span style="background:#e0e7ff;color:#3730a3;padding:1px 7px;border-radius:4px;font-size:10px;margin-right:6px">P${i+1}</span>
+        ${p}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <label style="display:block;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">Cloro (ppm)</label>
+          <input type="number" step="0.01" id="cloro-p${i}-cloro" placeholder="Ex: 1.2"
+            oninput="validCloroField(this,${i})"
+            style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:13px">
+        </div>
+        <div>
+          <label style="display:block;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">pH <span style="font-weight:400;color:#9ca3af">(semestral)</span></label>
+          <input type="number" step="0.1" id="cloro-p${i}-ph" placeholder="—"
+            oninput="validPhField(this)"
+            style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:13px">
+        </div>
+        <div style="grid-column:span 2">
+          <label style="display:block;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">Comentário</label>
+          <input type="text" id="cloro-p${i}-obs" placeholder="Opcional"
+            style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:13px">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function validCloroField(el, i) {
+  const v = parseFloat(el.value);
+  const card = document.getElementById('cloro-pcard-' + i);
+  if (isNaN(v)) { el.style.borderColor='#d1d5db'; el.style.background=''; return; }
+  const ok = v >= 0.5 && v <= 2.0;
+  el.style.borderColor = ok ? '#16a34a' : '#dc2626';
+  el.style.background = ok ? '#f0fdf4' : '#fef2f2';
+  card.style.borderColor = ok ? '#86efac' : '#fca5a5';
+  card.style.background = ok ? '#f0fdf4' : '#fef2f2';
+}
+
+function validPhField(el) {
+  const v = parseFloat(el.value);
+  if (isNaN(v)) { el.style.borderColor='#d1d5db'; el.style.background=''; return; }
+  const ok = v >= 6.0 && v <= 9.0;
+  el.style.borderColor = ok ? '#16a34a' : '#dc2626';
+  el.style.background = ok ? '#f0fdf4' : '#fef2f2';
+}
+
+function salvarCloro() {
+  const data = document.getElementById('cloro-data').value;
+  const hora = document.getElementById('cloro-hora').value;
+  const analista = document.getElementById('cloro-analista').value.trim();
+  if (!data || !hora || !analista) { alert('Preencha Data, Hora e Analista.'); return; }
+
+  if (!db.cloro) db.cloro = [];
+
+  let salvos = 0;
+  CLORO_PONTOS.forEach((p, i) => {
+    const cloro = document.getElementById('cloro-p' + i + '-cloro').value;
+    if (!cloro) return;
+    const ph = document.getElementById('cloro-p' + i + '-ph').value;
+    const obs = document.getElementById('cloro-p' + i + '-obs').value;
+    const v = parseFloat(cloro);
+    const status = (v >= 0.5 && v <= 2.0) ? 'Conforme' : 'Não Conforme';
+    db.cloro.push({
+      id: Date.now() + i,
+      data, hora, analista,
+      ponto: i + 1,
+      local: p,
+      cloro: parseFloat(cloro),
+      ph: ph ? parseFloat(ph) : null,
+      obs, status
+    });
+    salvos++;
+  });
+
+  if (!salvos) { alert('Preencha ao menos um ponto de coleta.'); return; }
+  saveDB();
+  renderCloro();
+  // Limpar form
+  document.getElementById('cloro-pontos-form').dataset.init = '';
+  document.getElementById('cloro-pontos-form').innerHTML = '';
+  initCloroForm();
+  alert('✅ ' + salvos + ' registro(s) salvo(s) com sucesso!');
+}
+
+function renderCloro() {
+  const mes = document.getElementById('cloro-mes')?.value || new Date().toISOString().slice(0,7);
+  const regs = (db.cloro || []).filter(r => r.data && r.data.startsWith(mes))
+    .sort((a,b) => b.data.localeCompare(a.data) || b.hora.localeCompare(a.hora));
+
+  // KPIs
+  const hoje = new Date().toISOString().split('T')[0];
+  const hj = (db.cloro || []).filter(r => r.data === hoje);
+  document.getElementById('cloro-k1').textContent = hj.length + '/8';
+  document.getElementById('cloro-k2').textContent = hj.filter(r => r.status === 'Conforme').length;
+  document.getElementById('cloro-k3').textContent = hj.filter(r => r.status === 'Não Conforme').length;
+  const med = hj.length ? (hj.reduce((s,r) => s + r.cloro, 0) / hj.length).toFixed(2) : '—';
+  document.getElementById('cloro-k4').textContent = med !== '—' ? med + ' ppm' : '—';
+
+  // Tabela
+  const tb = document.getElementById('cloro-tabela');
+  if (!tb) return;
+  if (!regs.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#9ca3af">Nenhum registro neste mês.</td></tr>'; return; }
+  tb.innerHTML = regs.map(r => `
+    <tr style="border-bottom:1px solid #f3f4f6">
+      <td style="padding:8px 10px">${r.data ? r.data.split('-').reverse().join('/') : '—'}</td>
+      <td style="padding:8px 10px">${r.hora || '—'}</td>
+      <td style="padding:8px 10px">
+        <span style="background:#e0e7ff;color:#3730a3;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700">P${r.ponto}</span>
+        <span style="font-size:11px;color:#374151;margin-left:6px">${r.local}</span>
+      </td>
+      <td style="padding:8px 10px;font-weight:700;color:${r.cloro>=0.5&&r.cloro<=2.0?'#16a34a':'#dc2626'}">${r.cloro}</td>
+      <td style="padding:8px 10px;color:#6b7280">${r.ph || '—'}</td>
+      <td style="padding:8px 10px">${r.analista}</td>
+      <td style="padding:8px 10px">
+        <span style="background:${r.status==='Conforme'?'#dcfce7':'#fee2e2'};color:${r.status==='Conforme'?'#166534':'#991b1b'};padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700">
+          ${r.status==='Conforme'?'✅':'❌'} ${r.status}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+// ===== FIM POTABILIDADE =====
+
 </script>
 </body>
 </html>
