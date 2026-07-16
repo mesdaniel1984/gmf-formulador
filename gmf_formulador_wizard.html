@@ -1223,6 +1223,11 @@ async function salvarIngrediente() {
     na:   parseFloat(document.getElementById('ing_na')?.value)||0,
     rotulo: document.getElementById('ing_rotulo')?.value?.trim()||'',
     rotuloCompleto: document.getElementById('ing_rotuloCompleto')?.value?.trim()||'',
+    lacteo: document.getElementById('ing_lacteo')?.value||'',
+    statusFisico: document.getElementById('ing_status_fisico')?.value||'',
+    fatorReconst: parseFloat(document.getElementById('ing_fator_reconst')?.value)||1,
+    alergenicoPrincipal: document.getElementById('ing_alergenico_principal')?.value||'',
+    alergenicos: Array.from(document.querySelectorAll('[id^="ing_al_"]:checked')).map(el=>el.value),
     cadastradoPor: _currentUser.email,
   };
   const { error } = await _sb.from('ingredientes_custom').upsert({nome:ing.n,dados:ing,usuario_id:_currentUser.id},{onConflict:'nome'});
@@ -1255,6 +1260,11 @@ function editarIngCustom(dadosEncoded) {
   set('ing_ref', d.ref);
   set('ing_rotulo', d.rotulo);
   set('ing_rotuloCompleto', d.rotuloCompleto);
+  const sl = document.getElementById('ing_lacteo'); if(sl) sl.value = d.lacteo||'';
+  const sf = document.getElementById('ing_status_fisico'); if(sf) sf.value = d.statusFisico||'';
+  set('ing_fator_reconst', d.fatorReconst||'');
+  const sa = document.getElementById('ing_alergenico_principal'); if(sa) sa.value = d.alergenicoPrincipal||'';
+  document.querySelectorAll('[id^="ing_al_"]').forEach(el=>{ el.checked = (d.alergenicos||[]).includes(el.value); });
   set('ing_kcal', d.kcal);
   set('ing_cho', d.cho);
   set('ing_act', d.act);
@@ -1276,7 +1286,11 @@ function editarIngCustom(dadosEncoded) {
 }
 
 function limparFormIngrediente() {
-  ['ing_nome','ing_ref','ing_rotulo','ing_rotuloCompleto','ing_kcal','ing_cho','ing_act','ing_acad','ing_ptn','ing_gt','ing_gs','ing_tr','ing_fi','ing_na'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['ing_nome','ing_ref','ing_rotulo','ing_rotuloCompleto','ing_kcal','ing_cho','ing_act','ing_acad','ing_ptn','ing_gt','ing_gs','ing_tr','ing_fi','ing_na','ing_fator_reconst'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';})
+  const sl2=document.getElementById('ing_lacteo');if(sl2)sl2.value='';
+  const sf2=document.getElementById('ing_status_fisico');if(sf2)sf2.value='';
+  const sa2=document.getElementById('ing_alergenico_principal');if(sa2)sa2.value='';
+  document.querySelectorAll('[id^="ing_al_"]').forEach(el=>el.checked=false);;
   const s=document.getElementById('ing_src'); if(s) s.value='FT';
 }
 
@@ -3677,6 +3691,54 @@ _initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console
         <div class="field"><label>Fonte</label><select id="ing_src"><option value="FT">Ficha Técnica (FT)</option><option value="Usuário">Usuário</option><option value="TACO">TACO</option><option value="IBGE">IBGE</option></select></div>
         <div class="field"><label>Rótulo completo (subingredientes)</label><input id="ing_rotuloCompleto" type="text" placeholder="Ex: leite em pó (ingrediente A, B)"></div>
       </div>
+
+      <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin:16px 0 8px">🏷️ Classificação do Ingrediente — Módulo A</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+        <div class="field">
+          <label>Classificação Láctea</label>
+          <select id="ing_lacteo">
+            <option value="">— selecione —</option>
+            <option value="lacteo">Lácteo</option>
+            <option value="nao_lacteo">Não Lácteo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status Físico</label>
+          <select id="ing_status_fisico">
+            <option value="">— selecione —</option>
+            <option value="po">Pó</option>
+            <option value="liquido">Líquido</option>
+            <option value="concentrado">Concentrado</option>
+            <option value="solido">Sólido</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Fator de Reconstituição</label>
+          <input id="ing_fator_reconst" type="number" step="0.1" min="1" placeholder="Ex: 8.5 (leite em pó)">
+        </div>
+        <div class="field">
+          <label>Grupo de Alergênicos</label>
+          <select id="ing_alergenico_principal">
+            <option value="">Nenhum</option>
+            <option value="leite">Leite (Lactose)</option>
+            <option value="gluten">Glúten (Trigo/Centeio/Cevada/Aveia)</option>
+            <option value="soja">Soja</option>
+            <option value="ovo">Ovo</option>
+            <option value="amendoim">Amendoim</option>
+            <option value="castanhas">Castanhas/Nozes</option>
+            <option value="peixe">Peixe/Frutos do Mar</option>
+            <option value="sesamo">Gergelim/Sésamo</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">Alergênicos Detalhados (RDC 727/2022)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:10px">
+        ${['Trigo','Centeio','Cevada','Aveia','Leite','Soja','Amendoim','Castanha-do-Pará','Castanha-de-Caju','Nozes','Amêndoas','Avelãs','Macadâmia','Pistache','Pecã','Ovo','Peixe','Crustáceos','Moluscos','Gergelim','Látex','Mostarda','Aipo','Sulfitos'].map(a=>`
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+          <input type="checkbox" id="ing_al_${a.toLowerCase().replace(/[^a-z]/g,'')}" value="${a}"> ${a}
+        </label>`).join('')}
+      </div>
+
       <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin:16px 0 8px">📊 Informação Nutricional (por 100g)</div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
         <div class="field"><label>Energia (kcal)</label><input id="ing_kcal" type="number" step="0.1" min="0" placeholder="0"></div>
