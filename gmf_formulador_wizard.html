@@ -1335,6 +1335,7 @@ async function carregarListaIngredientes() {
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">kcal</th>
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">CHO g</th>
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">PTN g</th>
+      <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb;background:#fef9c3">Ac.Ad. g</th>
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">G.tot g</th>
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">G.sat g</th>
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">G.tr g</th>
@@ -1349,6 +1350,7 @@ async function carregarListaIngredientes() {
       <td style="padding:8px;text-align:center">${d.kcal||0}</td>
       <td style="padding:8px;text-align:center">${d.cho||0}</td>
       <td style="padding:8px;text-align:center">${d.ptn||0}</td>
+      <td style="padding:8px;text-align:center;background:${(d.acad||0)>0?'#fef9c3':''}">${d.acad||0}</td>
       <td style="padding:8px;text-align:center">${d.gt||0}</td>
       <td style="padding:8px;text-align:center">${d.gs||0}</td>
       <td style="padding:8px;text-align:center">${d.tr||0}</td>
