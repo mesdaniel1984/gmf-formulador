@@ -1237,6 +1237,44 @@ async function salvarIngrediente() {
   }
 }
 
+
+async function excluirIngCustom(nome) {
+  if (!confirm('Excluir ingrediente "' + nome + '"?\nEsta ação não pode ser desfeita.')) return;
+  const { error } = await _sb.from('ingredientes_custom').delete().eq('nome', nome);
+  if (error) { alert('Erro ao excluir: ' + error.message); return; }
+  const idx = DB.findIndex(d=>d.n===nome);
+  if (idx>=0) DB.splice(idx,1);
+  carregarListaIngredientes();
+}
+
+function editarIngCustom(dadosEncoded) {
+  const d = JSON.parse(decodeURIComponent(dadosEncoded));
+  // Preenche o formulário de ingrediente com os dados existentes
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('ing_nome', d.n);
+  set('ing_ref', d.ref);
+  set('ing_rotulo', d.rotulo);
+  set('ing_rotuloCompleto', d.rotuloCompleto);
+  set('ing_kcal', d.kcal);
+  set('ing_cho', d.cho);
+  set('ing_act', d.act);
+  set('ing_acad', d.acad);
+  set('ing_ptn', d.ptn);
+  set('ing_gt', d.gt);
+  set('ing_gs', d.gs);
+  set('ing_tr', d.tr);
+  set('ing_fi', d.fi);
+  set('ing_na', d.na);
+  const s = document.getElementById('ing_src'); if(s) s.value = d.src||'Usuário';
+  // Navegar para a tela de ingredientes
+  irParaIngredientes();
+  // Scroll para o topo do formulário
+  setTimeout(()=>{ const el=document.getElementById('ing_nome'); if(el){ el.focus(); el.scrollIntoView({behavior:'smooth',block:'center'}); } }, 300);
+  // Avisar usuário
+  const msg = document.getElementById('ing_msg');
+  if(msg){ msg.style.color='#1e40af'; msg.textContent='✏️ Editando: ' + d.n + ' — altere os campos e clique em Salvar Ingrediente.'; }
+}
+
 function limparFormIngrediente() {
   ['ing_nome','ing_ref','ing_rotulo','ing_rotuloCompleto','ing_kcal','ing_cho','ing_act','ing_acad','ing_ptn','ing_gt','ing_gs','ing_tr','ing_fi','ing_na'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const s=document.getElementById('ing_src'); if(s) s.value='FT';
@@ -1289,6 +1327,7 @@ async function carregarListaIngredientes() {
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Fibra g</th>
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Na mg</th>
       <th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb">Fornecedor</th>
+      <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Ações</th>
     </tr>
     ${todosIng.map(({dados:d,custom})=>`<tr style="border-bottom:1px solid #f3f4f6${custom?' background:#f0fdf4':''}">
       <td style="padding:8px;font-weight:600">${d.n}${custom?' <span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:10px">novo</span>':''}</td>
@@ -1302,6 +1341,7 @@ async function carregarListaIngredientes() {
       <td style="padding:8px;text-align:center">${d.fi||0}</td>
       <td style="padding:8px;text-align:center">${d.na||0}</td>
       <td style="padding:8px;color:#6b7280;font-size:11px">${d.ref||'—'}</td>
+      <td style="padding:8px;text-align:center">${custom?`<button onclick="editarIngCustom('${encodeURIComponent(JSON.stringify(d))}')" style="background:#1e3a8a;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;margin-right:4px">✏️ Editar</button><button onclick="excluirIngCustom('${d.n}')" style="background:#dc2626;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">🗑️</button>`:'—'}</td>
     </tr>`).join('')}
   </table>`;
 }
