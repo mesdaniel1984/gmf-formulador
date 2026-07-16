@@ -3051,9 +3051,41 @@ function renderStep4(){
       </div>
     </div>
 
-    <!-- 6. EMBALAGEM, ARMAZENAMENTO E MODO DE PREPARO -->
+    <!-- 6. MATÉRIAS ESTRANHAS E SUJIDADES -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">6. Embalagem, Armazenamento e Modo de Preparo</div>
+      <div class="ftp-sec-t">6. Matérias Estranhas e Sujidades — RDC ANVISA nº 623/2022</div>
+      <div class="ftp-row">
+        <div class="ftp-cell">
+          <div class="ftp-lbl">Fragmentos de Insetos</div>
+          <div class="ftp-val">${(['composto-sem','composto-com','mistura','leite-integral','leite-desnatado','leite-instantaneo'].includes(tipoSel)?'Ausência':'Máx. 1 fragmento/25g')}</div>
+        </div>
+        <div class="ftp-cell">
+          <div class="ftp-lbl">Pelos de Roedores</div>
+          <div class="ftp-val">${(['composto-sem','composto-com','mistura','leite-integral','leite-desnatado','leite-instantaneo'].includes(tipoSel)?'<strong style="color:#dc2626">AUSÊNCIA (obrigatório — produto lácteo)</strong>':'Ausência')}</div>
+        </div>
+        <div class="ftp-cell">
+          <div class="ftp-lbl">Cinzas Insolúveis em Ácido</div>
+          <div class="ftp-val">Máx. 0,1% m/m</div>
+        </div>
+        <div class="ftp-cell">
+          <div class="ftp-lbl">Matérias Estranhas Diversas</div>
+          <div class="ftp-val">Ausência (vidro, metal, plástico, madeira)</div>
+        </div>
+      </div>
+      <div class="ftp-row">
+        <div class="ftp-cell" style="flex:4">
+          <div class="ftp-lbl" style="font-size:7px">
+            ${(['composto-sem','composto-com','mistura','leite-integral','leite-desnatado','leite-instantaneo'].includes(tipoSel)?
+              '⚠️ Produto lácteo: limite de pelos de roedores = AUSÊNCIA obrigatória conforme Módulo C / RDC 623/2022. Qualquer tolerância de ingredientes secundários NÃO se aplica ao produto final.':
+              'Análise por método visual e microscópico · Frequência: por lote · Laboratório interno / terceirizado')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. EMBALAGEM, ARMAZENAMENTO E MODO DE PREPARO -->
+    <div class="ftp-sec">
+      <div class="ftp-sec-t">7. Embalagem, Armazenamento e Modo de Preparo</div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Embalagem Primária</div><div class="ftp-val">${gv('p_emb1','—')}</div></div>
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Embalagem Secundária</div><div class="ftp-val">${gv('p_emb2','—')}</div></div>
