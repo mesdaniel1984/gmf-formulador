@@ -2663,6 +2663,64 @@ function addIng(){
 
 function remIng(i){receita.splice(i,1);renderReceita();recalc();}
 
+
+// ===== MÓDULO B — Cálculo Pro-Rata de Contaminantes =====
+const LIMITES_CONTAM_PADRAO = {
+  as: 0.5,  // Arsênio mg/kg
+  cd: 0.1,  // Cádmio mg/kg
+  pb: 0.2,  // Chumbo mg/kg
+  sn: 50,   // Estanho mg/kg
+  aflatoxinas: 5,    // mcg/kg
+  ocratoxina: 10,    // mcg/kg (café)
+};
+
+// Limites por categoria de ingrediente (IN 160/2022)
+const LIMITES_CONTAM_CATEGORIA = {
+  lacteo:   { as: 0.1, cd: 0.05, pb: 0.02, sn: 50, aflatoxinas: 0.5, ocratoxina: null },
+  cafe:     { as: 0.2, cd: 0.3,  pb: 0.5,  sn: 50, aflatoxinas: 10,  ocratoxina: 10   },
+  cacau:    { as: 0.5, cd: 0.5,  pb: 0.1,  sn: 50, aflatoxinas: 10,  ocratoxina: null },
+  cereal:   { as: 0.2, cd: 0.1,  pb: 0.2,  sn: 50, aflatoxinas: 10,  ocratoxina: 10   },
+  acucar:   { as: 0.2, cd: 0.05, pb: 0.05, sn: 50, aflatoxinas: 5,   ocratoxina: null },
+  default:  { as: 0.5, cd: 0.1,  pb: 0.2,  sn: 50, aflatoxinas: 5,   ocratoxina: null },
+};
+
+function getCategContam(ing) {
+  const n = (ing.n||'').toLowerCase();
+  if (ing.lacteo === 'lacteo' || n.includes('leite') || n.includes('soro') || n.includes('permeado') || n.includes('caseina') || n.includes('manteiga')) return 'lacteo';
+  if (n.includes('café') || n.includes('cafe')) return 'cafe';
+  if (n.includes('cacau') || n.includes('chocolate')) return 'cacau';
+  if (n.includes('açúcar') || n.includes('acucar') || n.includes('sacarose')) return 'acucar';
+  if (n.includes('aveia') || n.includes('trigo') || n.includes('milho') || n.includes('arroz')) return 'cereal';
+  return 'default';
+}
+
+function calcContaminantesProRata() {
+  const tQ = receita.reduce((s,r)=>s+r.qtde, 0);
+  if (!tQ || !receita.length) return null;
+
+  let limProRata = { as: 0, cd: 0, pb: 0, sn: 0, aflatoxinas: 0, ocratoxina: 0 };
+  let temCafe = false;
+
+  receita.forEach(r => {
+    const frac = r.qtde / tQ;
+    const cat = getCategContam(r.d);
+    const lim = LIMITES_CONTAM_CATEGORIA[cat] || LIMITES_CONTAM_CATEGORIA.default;
+    if (cat === 'cafe') temCafe = true;
+    limProRata.as         += frac * lim.as;
+    limProRata.cd         += frac * lim.cd;
+    limProRata.pb         += frac * lim.pb;
+    limProRata.sn         += frac * lim.sn;
+    limProRata.aflatoxinas += frac * (lim.aflatoxinas || LIMITES_CONTAM_PADRAO.aflatoxinas);
+    if (lim.ocratoxina) limProRata.ocratoxina += frac * lim.ocratoxina;
+  });
+
+  // Arredondar para 3 casas
+  Object.keys(limProRata).forEach(k => limProRata[k] = Math.round(limProRata[k]*1000)/1000);
+  limProRata.temCafe = temCafe;
+  return limProRata;
+}
+// ===== FIM MÓDULO B =====
+
 function calcT(){
   const tQ=receita.reduce((s,r)=>s+r.qtde,0);
   if(!tQ)return{kcal:0,cho:0,act:0,acad:0,ptn:0,gt:0,gs:0,tr:0,fi:0,na:0};
@@ -3087,10 +3145,17 @@ function renderStep4(){
     <div class="ftp-sec">
       <div class="ftp-sec-t">7. Contaminantes Químicos, Metais Pesados e Micotoxinas — IN ANVISA 160/2022 / RDC 331/2019</div>
       <div class="ftp-row">
+        ${(()=>{ const cr=calcContaminantesProRata(); return cr ? `
+        <div class="ftp-cell"><div class="ftp-lbl">Arsênio (As)</div><div class="ftp-val">Máx. ${cr.as} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Cádmio (Cd)</div><div class="ftp-val">Máx. ${cr.cd} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Chumbo (Pb)</div><div class="ftp-val">Máx. ${cr.pb} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
+        <div class="ftp-cell"><div class="ftp-lbl">Estanho (Sn)</div><div class="ftp-val">Máx. ${cr.sn} mg/kg</div></div>
+        ` : `
         <div class="ftp-cell"><div class="ftp-lbl">Arsênio (As)</div><div class="ftp-val">Máx. 0,5 mg/kg (pro-rata)</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Cádmio (Cd)</div><div class="ftp-val">Máx. 0,1 mg/kg (pro-rata)</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Chumbo (Pb)</div><div class="ftp-val">Máx. 0,2 mg/kg (pro-rata)</div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Estanho (Sn)</div><div class="ftp-val">Máx. 50 mg/kg</div></div>
+        `; })()}
       </div>
       <div class="ftp-row">
         <div class="ftp-cell"><div class="ftp-lbl">Aflatoxinas Totais (B1+B2+G1+G2)</div><div class="ftp-val">${(['cafe-torrado-moido','cafe-torrado','cacau','achocolatado'].includes(tipoSel)?'Máx. 10 mcg/kg':'Máx. 5 mcg/kg')}</div></div>
