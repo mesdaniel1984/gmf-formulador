@@ -2780,7 +2780,9 @@ function renderStep3(){
   const P100=parseFloat(document.getElementById('p_porcao').value)||30;
   const pesoTotal=parseFloat(document.getElementById('p_peso').value)||1000;
   const mc=document.getElementById('p_medida').value||'—';
-  const nP=Math.round(pesoTotal/P100);
+  const _nPExato = pesoTotal/P100;
+  const nP = Math.round(_nPExato);
+  const _nPLabel = Number.isInteger(_nPExato) ? String(nP) : 'Cerca de ' + nP;
   const T=calcT();
   const P={};Object.keys(T).forEach(k=>P[k]=T[k]*P100/100);
 
@@ -2797,6 +2799,21 @@ function renderStep3(){
   if((T.gs||0)>=6)al.push({cls:'warn',msg:'🔍 <strong>Alto em Gordura Saturada</strong> ≥6g/100g — alerta frontal obrigatório (IN 75/2020)'});
   if((T.na||0)>=600)al.push({cls:'danger',msg:'🔍 <strong>Alto em Sódio</strong> ≥600mg/100g — alerta frontal obrigatório (IN 75/2020)'});
   if((T.tr||0)>=0.2)al.push({cls:'warn',msg:'⚠️ Gordura trans detectada (IN 75/2020)'});
+  // Módulo 4 — Validações IN 75/2020
+  // 1. Balanço de massa (soma macros ≤ 100g)
+  const somaMacros = (T.cho||0) + (T.ptn||0) + (T.gt||0) + (T.fi||0);
+  if (somaMacros > 105) al.push({cls:'danger', msg:'⚖️ <strong>Erro de Balanço de Massa:</strong> Soma de macronutrientes (' + somaMacros.toFixed(1) + 'g) excede 100g/100g. Verifique a composição dos ingredientes.'});
+
+  // 2. Validação energia pelos fatores de Atwater (IN 75/2020, Anexo XXII)
+  const kcalCalc = (T.cho||0)*4 + (T.ptn||0)*4 + (T.gt||0)*9 + (T.fi||0)*2;
+  const difEnergia = Math.abs((T.kcal||0) - kcalCalc);
+  if (difEnergia > 15) al.push({cls:'warn', msg:'⚡ <strong>Divergência Energética:</strong> Energia calculada pelos fatores de Atwater = ' + Math.round(kcalCalc) + ' kcal vs declarada = ' + Math.round(T.kcal||0) + ' kcal (diferença: ' + Math.round(difEnergia) + ' kcal). Verifique os valores dos ingredientes.'});
+
+  // 3. Validação subgrupos (açúcares totais ≤ carboidratos)
+  if ((T.act||0) > (T.cho||0) + 0.1) al.push({cls:'danger', msg:'🌾 <strong>Erro de Subgrupo:</strong> Açúcares totais (' + (T.act||0).toFixed(1) + 'g) superam carboidratos totais (' + (T.cho||0).toFixed(1) + 'g). Verifique os ingredientes.'});
+  if ((T.acad||0) > (T.act||0) + 0.1) al.push({cls:'danger', msg:'🍬 <strong>Erro de Subgrupo:</strong> Açúcares adicionados (' + (T.acad||0).toFixed(1) + 'g) superam açúcares totais (' + (T.act||0).toFixed(1) + 'g).'});
+  if ((T.gs||0) > (T.gt||0) + 0.1) al.push({cls:'danger', msg:'🫒 <strong>Erro de Subgrupo:</strong> Gordura saturada (' + (T.gs||0).toFixed(1) + 'g) supera gordura total (' + (T.gt||0).toFixed(1) + 'g).'});
+
   const adiv=document.getElementById('alertasDiv');
   adiv.innerHTML=al.length?al.map(a=>`<div class="alert alert-${a.cls}">${a.msg}</div>`).join('')
     :'<div class="alert alert-ok">✅ Sem alertas frontais obrigatórios (IN 75/2020 · RDC 429/2020)</div>';
@@ -2808,7 +2825,7 @@ function renderStep3(){
   }
   document.getElementById('tabelaNutri').innerHTML=`
     <h4>INFORMAÇÃO NUTRICIONAL</h4>
-    <div style="font-size:9px;border-bottom:1px solid #000;padding-bottom:3px;margin-bottom:4px">Porções por embalagem: Cerca de ${nP} | Porção: ${P100} g (${mc})</div>
+    <div style="font-size:9px;border-bottom:1px solid #000;padding-bottom:3px;margin-bottom:4px">Porções por embalagem: ${_nPLabel} | Porção: ${P100} g (${mc})</div>
     <table class="ntbl">
       <tr class="col-hdr"><td></td><td class="num">100g</td><td class="num">${P100}g</td><td class="vd">%VD*</td></tr>
       ${nrow('Valor energético (kcal)',f0(T.kcal),f0(P.kcal),vdp(P.kcal,VD.kcal)+'%',true)}
