@@ -3319,7 +3319,7 @@ function renderStep4(){
       </div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:4">
-          <div class="ftp-lbl" style="font-size:7px">Método: ${cr&&cr.metodo==='direto'?'Limite DIRETO pela categoria do produto ('+cr.fonte+')':'Calculado PRO-RATA pela fração de cada ingrediente — '+((cr&&cr.fonte)||'IN ANVISA 160/2022, Art. 4º')}. Frequência de monitoramento: por fornecedor / semestral ou conforme POP-QUA-008. Laudos de análise arquivados por 2 anos.</div>
+          <div class="ftp-lbl" style="font-size:7px">${(()=>{ const _cr=getLimitesContaminantes(); return _cr&&_cr.metodo==='direto'?'Limite DIRETO — '+(_cr.fonte||'IN 160/2022'):'Calculado PRO-RATA — IN ANVISA 160/2022, Art. 4º'; })()} · Frequência: por fornecedor / semestral ou conforme POP-QUA-008. Laudos arquivados por 2 anos.</div>
         </div>
       </div>
     </div>
