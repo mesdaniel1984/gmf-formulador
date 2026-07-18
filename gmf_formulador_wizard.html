@@ -2671,6 +2671,57 @@ function addIng(){
 function remIng(i){receita.splice(i,1);renderReceita();recalc();}
 
 
+
+// ===== MÓDULO 1 — Limites Diretos por Categoria do Produto Acabado (IN 160/2022) =====
+const LIMITES_DIRETOS_PRODUTO = {
+  // Leites em pó
+  'leite-integral':    { as:0.1, cd:0.05, pb:0.02, sn:50, aflatoxinas:0.5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó' },
+  'leite-desnatado':   { as:0.1, cd:0.05, pb:0.02, sn:50, aflatoxinas:0.5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó' },
+  'leite-instantaneo': { as:0.1, cd:0.05, pb:0.02, sn:50, aflatoxinas:0.5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó' },
+  // Compostos e misturas lácteas — sem categoria direta, usa pro-rata
+  'composto-sem':      null,
+  'composto-com':      null,
+  'mistura':           null,
+  // Cafés
+  'cafe-torrado-moido':{ as:0.2, cd:0.3,  pb:0.5,  sn:50, aflatoxinas:10, ocratoxina:10, fonte:'IN 160/2022 — Café torrado' },
+  'cafe-torrado':      { as:0.2, cd:0.3,  pb:0.5,  sn:50, aflatoxinas:10, ocratoxina:10, fonte:'IN 160/2022 — Café torrado' },
+  // Cacau
+  'cacau':             { as:0.5, cd:0.5,  pb:0.1,  sn:50, aflatoxinas:10, ocratoxina:null, fonte:'IN 160/2022 — Cacau em pó' },
+  'achocolatado':      { as:0.3, cd:0.3,  pb:0.1,  sn:50, aflatoxinas:5,  ocratoxina:null, fonte:'IN 160/2022 — Achocolatado' },
+  // Pó para preparo — sem categoria direta, usa pro-rata
+  'po-preparo':        null,
+  'soro':              null,
+};
+
+function getLimitesContaminantes() {
+  // PASSO 1: Verificar se produto acabado tem categoria direta na legislação
+  const tipoAtual = tipoSel || classeSel;
+  const limiteDireto = LIMITES_DIRETOS_PRODUTO[tipoAtual];
+
+  if (limiteDireto !== undefined && limiteDireto !== null) {
+    // Produto tem categoria direta — usa limite direto, bloqueia pro-rata
+    return { ...limiteDireto, metodo: 'direto' };
+  }
+
+  // PASSO 2: Produto sem categoria direta — calcula pro-rata
+  const proRata = calcContaminantesProRata();
+  if (!proRata) return null;
+
+  // PASSO 3: Regra de segurança — limite pro-rata não pode superar o maior limite dos ingredientes
+  const maxIngrediente = { as: 0.5, cd: 0.3, pb: 0.5, sn: 50 };
+  return {
+    as: Math.min(proRata.as, maxIngrediente.as),
+    cd: Math.min(proRata.cd, maxIngrediente.cd),
+    pb: Math.min(proRata.pb, maxIngrediente.pb),
+    sn: Math.min(proRata.sn, maxIngrediente.sn),
+    aflatoxinas: proRata.aflatoxinas,
+    ocratoxina: proRata.ocratoxina,
+    fonte: 'IN 160/2022 — Calculado pro-rata pela fórmula',
+    metodo: 'pro-rata',
+  };
+}
+// ===== FIM MÓDULO 1 =====
+
 // ===== MÓDULO B — Cálculo Pro-Rata de Contaminantes =====
 const LIMITES_CONTAM_PADRAO = {
   as: 0.5,  // Arsênio mg/kg
@@ -3248,7 +3299,7 @@ function renderStep4(){
     <div class="ftp-sec">
       <div class="ftp-sec-t">7. Contaminantes Químicos, Metais Pesados e Micotoxinas — IN ANVISA 160/2022 / RDC 331/2019</div>
       <div class="ftp-row">
-        ${(()=>{ const cr=calcContaminantesProRata(); return cr ? `
+        ${(()=>{ const cr=getLimitesContaminantes(); return cr ? `
         <div class="ftp-cell"><div class="ftp-lbl">Arsênio (As)</div><div class="ftp-val">Máx. ${cr.as} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Cádmio (Cd)</div><div class="ftp-val">Máx. ${cr.cd} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
         <div class="ftp-cell"><div class="ftp-lbl">Chumbo (Pb)</div><div class="ftp-val">Máx. ${cr.pb} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
@@ -3268,7 +3319,7 @@ function renderStep4(){
       </div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:4">
-          <div class="ftp-lbl" style="font-size:7px">Limites calculados pro-rata pela fração de cada ingrediente no produto final (IN ANVISA 160/2022, Art. 4º). Frequência de monitoramento: por fornecedor / semestral ou conforme POP-QUA-008. Laudos de análise arquivados por 2 anos.</div>
+          <div class="ftp-lbl" style="font-size:7px">Método: ${cr&&cr.metodo==='direto'?'Limite DIRETO pela categoria do produto ('+cr.fonte+')':'Calculado PRO-RATA pela fração de cada ingrediente — '+((cr&&cr.fonte)||'IN ANVISA 160/2022, Art. 4º')}. Frequência de monitoramento: por fornecedor / semestral ou conforme POP-QUA-008. Laudos de análise arquivados por 2 anos.</div>
         </div>
       </div>
     </div>
