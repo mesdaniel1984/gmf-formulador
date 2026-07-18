@@ -495,7 +495,7 @@ tr:last-child td{border-bottom:none}
     <div class="grid2" style="margin-bottom:10px">
       <div class="field"><label>Aspecto / Cor</label><input id="p_aspecto" type="text" value="Pó uniforme, sem grumos, coloração branco a creme"></div>
       <div class="field"><label>Sabor e odor</label><input id="p_sabor" type="text" value="Característico, não rançoso, livre de sabores e odores estranhos"></div>
-      <div class="field"><label>Alergênicos</label><input id="p_alergenicos" type="text" value="CONTÉM DERIVADOS DE LEITE. PODE CONTER SOJA."></div>
+      <div class="field"><label>Alergênicos</label><input id="p_alergenicos" type="text" oninput="this.dataset.editadoManual='1'" value="CONTÉM DERIVADOS DE LEITE. PODE CONTER SOJA."></div>
       <div class="field"><label>Glúten / Lactose</label><input id="p_glutenlactose" type="text" value="NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE."></div>
       <div class="field"><label>Embalagem primária</label><input id="p_emb1" type="text" value="Saco plástico atóxico (polietileno), fechado hermeticamente"></div>
       <div class="field"><label>Embalagem secundária</label><input id="p_emb2" type="text" value="Fardo de papel kraft multifolhado 25 kg"></div>
@@ -2728,6 +2728,83 @@ function calcContaminantesProRata() {
 }
 // ===== FIM MÓDULO B =====
 
+
+// ===== MÓDULO 2 — Gatilhos de Contaminantes (IN 160/2022) =====
+const GATILHOS_CONTAMINANTES = [
+  { match: ['cacau','chocolate'], label: 'Cacau', contaminantes: ['Cádmio (Cd)','Chumbo (Pb)','Arsênio (As)','Aflatoxinas Totais','Ocratoxina A'] },
+  { match: ['milho','amido de milho','fubá'], label: 'Milho', contaminantes: ['Fumonisinas B1+B2','Zearalenona'] },
+  { match: ['trigo','cevada','aveia','centeio'], label: 'Cereal', contaminantes: ['DON (Desoxinivalenol)','Zearalenona','Ocratoxina A'] },
+  { match: ['leite','soro','permeado','caseina','caseinato','whey','wpc','wpi'], label: 'Fração Láctea', contaminantes: ['Aflatoxina M1 — máx. 0,5 mcg/kg (fluido) / 5 mcg/kg (pó)'] },
+  { match: ['amendoim'], label: 'Amendoim', contaminantes: ['Aflatoxinas Totais B1+B2+G1+G2'] },
+  { match: ['castanha','nozes','amêndoa','pistache','macadâmia','avelã'], label: 'Castanhas', contaminantes: ['Aflatoxinas Totais B1+B2+G1+G2'] },
+  { match: ['café','cafe'], label: 'Café', contaminantes: ['Ocratoxina A — máx. 10 mcg/kg','Aflatoxinas Totais'] },
+];
+
+function renderGatilhosContaminantes() {
+  const div = document.getElementById('gatilhosContaminantesDiv');
+  if (!div) return;
+  if (!receita.length) { div.style.display='none'; return; }
+  const ativos = [];
+  receita.forEach(r => {
+    const nome = (r.d.n||'').toLowerCase();
+    GATILHOS_CONTAMINANTES.forEach(g => {
+      if (g.match.some(m => nome.includes(m)) && !ativos.find(x=>x.label===g.label)) ativos.push(g);
+    });
+  });
+  if (!ativos.length) { div.style.display='none'; return; }
+  div.style.display='';
+  div.innerHTML = '<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:12px;margin-top:8px"><div style="font-size:12px;font-weight:700;color:#9a3412;margin-bottom:8px">⚠️ Monitoramento Obrigatório de Contaminantes (IN 160/2022)</div>' +
+    ativos.map(g => '<div style="margin-bottom:6px"><span style="background:#9a3412;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-right:6px">' + g.label + '</span>' +
+      g.contaminantes.map(ct => '<span style="font-size:11px;color:#1c1917;margin-right:8px">• ' + ct + '</span>').join('') + '</div>').join('') + '</div>';
+}
+
+// ===== MÓDULO 3 — Alergênicos Inteligentes RDC 727/2022 =====
+const ALERGENICOS_MAP = [
+  { raiz: 'LEITE', derivado: false, match: ['leite integral','leite desnatado','leite uht','leite fluido'] },
+  { raiz: 'LEITE', derivado: true, match: ['soro','permeado','caseina','caseinato','whey','wpc','wpi','leite em po','leite em pó','composto lácteo','mistura láctea','manteiga','creme de leite'] },
+  { raiz: 'SOJA', derivado: false, match: ['soja integral'] },
+  { raiz: 'SOJA', derivado: true, match: ['lecitina de soja','proteína de soja','isolado de soja','concentrado de soja'] },
+  { raiz: 'TRIGO', derivado: false, match: ['trigo','farinha de trigo'] },
+  { raiz: 'CENTEIO', derivado: false, match: ['centeio'] },
+  { raiz: 'CEVADA', derivado: false, match: ['cevada','malte'] },
+  { raiz: 'AVEIA', derivado: false, match: ['aveia'] },
+  { raiz: 'AMENDOIM', derivado: false, match: ['amendoim'] },
+  { raiz: 'CASTANHA-DO-PARÁ', derivado: false, match: ['castanha-do-pará','castanha do para'] },
+  { raiz: 'CASTANHA-DE-CAJU', derivado: false, match: ['castanha-de-caju','castanha de caju'] },
+  { raiz: 'NOZES', derivado: false, match: ['nozes','pecan','pecã','macadâmia','pistache','avelã','amêndoa'] },
+  { raiz: 'OVO', derivado: false, match: ['ovo','clara','albumina'] },
+  { raiz: 'PEIXE', derivado: false, match: ['peixe','atum','salmão'] },
+  { raiz: 'CRUSTÁCEOS', derivado: false, match: ['camarão','lagosta','caranguejo'] },
+  { raiz: 'GERGELIM', derivado: false, match: ['gergelim','sésamo','tahine'] },
+  { raiz: 'CACAU', derivado: false, match: ['cacau','chocolate'] },
+];
+
+function gerarTextoAlergenicos() {
+  if (!receita.length) return '';
+  const contem = new Set();
+  const contemDerivados = new Set();
+  receita.forEach(r => {
+    const nome = (r.d.n||'').toLowerCase() + ' ' + (r.d.rotulo||'').toLowerCase();
+    if (r.d.alergenicos && r.d.alergenicos.length) r.d.alergenicos.forEach(a => contem.add(a.toUpperCase()));
+    ALERGENICOS_MAP.forEach(al => {
+      if (al.match.some(m => nome.includes(m))) {
+        if (al.derivado) contemDerivados.add(al.raiz);
+        else contem.add(al.raiz);
+      }
+    });
+  });
+  contem.forEach(a => contemDerivados.delete(a));
+  const frases = [...contem].concat([...contemDerivados].map(a => 'DERIVADOS DE ' + a));
+  if (!frases.length) return 'NÃO CONTÉM ALER GÊNICOS DECLARÁVEIS (RDC 727/2022).';
+  return 'ALÉRGICOS: CONTÉM ' + frases.join(', ') + '.';
+}
+
+function autoPreencherAlergenicos() {
+  const el = document.getElementById('p_alergenicos');
+  if (el && !el.dataset.editadoManual) el.value = gerarTextoAlergenicos();
+}
+// ===== FIM MÓDULOS 2 e 3 =====
+
 function calcT(){
   const tQ=receita.reduce((s,r)=>s+r.qtde,0);
   if(!tQ)return{kcal:0,cho:0,act:0,acad:0,ptn:0,gt:0,gs:0,tr:0,fi:0,na:0};
@@ -2762,6 +2839,8 @@ function renderReceita(){
   document.getElementById('ft_c').textContent=f2(T.cho*tQ/100);
   document.getElementById('ft_g').textContent=f2(T.gt*tQ/100);
   document.getElementById('ft_n').textContent=f0(T.na*tQ/100);
+  renderGatilhosContaminantes();
+  autoPreencherAlergenicos();
 }
 
 function recalc(){
