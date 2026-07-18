@@ -1226,7 +1226,7 @@ async function salvarIngrediente() {
     lacteo: document.getElementById('ing_lacteo')?.value||'',
     statusFisico: document.getElementById('ing_status_fisico')?.value||'',
     fatorReconst: parseFloat(document.getElementById('ing_fator_reconst')?.value)||1,
-    alergenicoPrincipal: document.getElementById('ing_alergenico_principal')?.value||'',
+    alergenicoPrincipal: Array.from(document.getElementById('ing_alergenico_principal')?.selectedOptions||[]).map(o=>o.value).join(','),
     alergenicos: Array.from(document.querySelectorAll('[id^="ing_al_"]:checked')).map(el=>el.value),
     cadastradoPor: _currentUser.email,
   };
@@ -1263,7 +1263,11 @@ function editarIngCustom(dadosEncoded) {
   const sl = document.getElementById('ing_lacteo'); if(sl) sl.value = d.lacteo||'';
   const sf = document.getElementById('ing_status_fisico'); if(sf) sf.value = d.statusFisico||'';
   set('ing_fator_reconst', d.fatorReconst||'');
-  const sa = document.getElementById('ing_alergenico_principal'); if(sa) sa.value = d.alergenicoPrincipal||'';
+  const sa = document.getElementById('ing_alergenico_principal');
+  if(sa && d.alergenicoPrincipal) {
+    const vals = d.alergenicoPrincipal.split(',');
+    Array.from(sa.options).forEach(o => o.selected = vals.includes(o.value));
+  }
   document.querySelectorAll('[id^="ing_al_"]').forEach(el=>{ el.checked = (d.alergenicos||[]).includes(el.value); });
   set('ing_kcal', d.kcal);
   set('ing_cho', d.cho);
@@ -1289,7 +1293,7 @@ function limparFormIngrediente() {
   ['ing_nome','ing_ref','ing_rotulo','ing_rotuloCompleto','ing_kcal','ing_cho','ing_act','ing_acad','ing_ptn','ing_gt','ing_gs','ing_tr','ing_fi','ing_na','ing_fator_reconst'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';})
   const sl2=document.getElementById('ing_lacteo');if(sl2)sl2.value='';
   const sf2=document.getElementById('ing_status_fisico');if(sf2)sf2.value='';
-  const sa2=document.getElementById('ing_alergenico_principal');if(sa2)sa2.value='';
+  const sa2=document.getElementById('ing_alergenico_principal');if(sa2)Array.from(sa2.options).forEach(o=>o.selected=false);
   document.querySelectorAll('[id^="ing_al_"]').forEach(el=>el.checked=false);;
   const s=document.getElementById('ing_src'); if(s) s.value='FT';
 }
@@ -3833,8 +3837,14 @@ _initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console
           <label>Classificação Láctea</label>
           <select id="ing_lacteo">
             <option value="">— selecione —</option>
-            <option value="lacteo">Lácteo</option>
             <option value="nao_lacteo">Não Lácteo</option>
+            <option value="lacteo">Lácteo (genérico)</option>
+            <option value="composto_com">Composto Lácteo com Adição</option>
+            <option value="composto_sem">Composto Lácteo sem Adição</option>
+            <option value="mistura_lactea">Mistura Láctea</option>
+            <option value="leite_po">Leite em Pó</option>
+            <option value="po_preparo">Pó para Preparo</option>
+            <option value="derivado_lacteo">Outros Derivados Lácteos</option>
           </select>
         </div>
         <div class="field">
@@ -3852,9 +3862,8 @@ _initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console
           <input id="ing_fator_reconst" type="number" step="0.1" min="1" placeholder="Ex: 8.5 (leite em pó)">
         </div>
         <div class="field">
-          <label>Grupo de Alergênicos</label>
-          <select id="ing_alergenico_principal">
-            <option value="">Nenhum</option>
+          <label>Grupos de Alergênicos (múltipla seleção)</label>
+          <select id="ing_alergenico_principal" multiple size="5" style="height:auto;min-height:90px">
             <option value="leite">Leite (Lactose)</option>
             <option value="gluten">Glúten (Trigo/Centeio/Cevada/Aveia)</option>
             <option value="soja">Soja</option>
@@ -3863,15 +3872,40 @@ _initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console
             <option value="castanhas">Castanhas/Nozes</option>
             <option value="peixe">Peixe/Frutos do Mar</option>
             <option value="sesamo">Gergelim/Sésamo</option>
+            <option value="latex">Látex</option>
+            <option value="mostarda">Mostarda</option>
+            <option value="aipo">Aipo</option>
+            <option value="sulfitos">Sulfitos</option>
           </select>
+          <div style="font-size:10px;color:#6b7280;margin-top:3px">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar múltiplos</div>
         </div>
       </div>
       <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">Alergênicos Detalhados (RDC 727/2022)</div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:10px">
-        ${['Trigo','Centeio','Cevada','Aveia','Leite','Soja','Amendoim','Castanha-do-Pará','Castanha-de-Caju','Nozes','Amêndoas','Avelãs','Macadâmia','Pistache','Pecã','Ovo','Peixe','Crustáceos','Moluscos','Gergelim','Látex','Mostarda','Aipo','Sulfitos'].map(a=>`
-        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
-          <input type="checkbox" id="ing_al_${a.toLowerCase().replace(/[^a-z]/g,'')}" value="${a}"> ${a}
-        </label>`).join('')}
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_trigo" value="Trigo"> Trigo</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_centeio" value="Centeio"> Centeio</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_cevada" value="Cevada"> Cevada</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_aveia" value="Aveia"> Aveia</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_leite" value="Leite"> Leite</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_soja" value="Soja"> Soja</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_amendoim" value="Amendoim"> Amendoim</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_castanha-do-para" value="Castanha-do-Pará"> Castanha-do-Pará</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_castanha-de-caju" value="Castanha-de-Caju"> Castanha-de-Caju</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_nozes" value="Nozes"> Nozes</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_amendoas" value="Amêndoas"> Amêndoas</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_avelas" value="Avelãs"> Avelãs</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_macadamia" value="Macadâmia"> Macadâmia</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_pistache" value="Pistache"> Pistache</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_peca" value="Pecã"> Pecã</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_ovo" value="Ovo"> Ovo</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_peixe" value="Peixe"> Peixe</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_crustaceos" value="Crustáceos"> Crustáceos</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_moluscos" value="Moluscos"> Moluscos</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_gergelim" value="Gergelim"> Gergelim</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_latex" value="Látex"> Látex</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_mostarda" value="Mostarda"> Mostarda</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_aipo" value="Aipo"> Aipo</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" id="ing_al_sulfitos" value="Sulfitos"> Sulfitos</label>
       </div>
 
       <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin:16px 0 8px">📊 Informação Nutricional (por 100g)</div>
