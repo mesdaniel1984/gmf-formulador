@@ -338,6 +338,7 @@ tr:last-child td{border-bottom:none}
           Exportar .json
         </button>
         <button onclick="abrirRevisaoMassa()" style="background:#fef9c3;border:1px solid #fde68a;color:#92400e;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer">🔍 Revisar Produtos</button>
+        <button onclick="migrarProdutosMassa()" style="background:#f0fdf4;border:1px solid #86efac;color:#166534;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer">🔧 Corrigir Todos</button>
         <button onclick="mostrarMenuInicial()" style="background:rgba(30,58,138,0.1);border:1px solid #e5e7eb;color:#1e3a8a;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-weight:600">☰ Menu</button>
         <div id="userInfo" style="display:flex;align-items:center;gap:8px;margin-right:8px"></div>
       <button class="btn btn-primary" onclick="novoProduto()">
@@ -4120,6 +4121,71 @@ _initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console
 </div>
 
 <script>
+
+async function migrarProdutosMassa() {
+  if (!_sb || !_currentUser) { alert('Faça login primeiro.'); return; }
+  if (!confirm('Isso vai corrigir automaticamente todos os produtos:\n\n• Recalcular porções por embalagem\n• Remover cacau dos alergênicos\n• Formatar lista de ingredientes\n\nDeseja continuar?')) return;
+
+  const { data: produtos, error } = await _sb.from('produtos').select('*');
+  if (error || !produtos) { alert('Erro ao buscar produtos: ' + (error?.message||'desconhecido')); return; }
+
+  let corrigidos = 0;
+  const log = [];
+
+  for (const p of produtos) {
+    const d = p.dados || {};
+    let alterado = false;
+    const mudancas = [];
+
+    // 1. Recalcular nPorcoes
+    if (d.pesoTotal && d.pesoPorcao) {
+      const correto = Math.round(d.pesoTotal / d.pesoPorcao);
+      if (d.nPorcoes !== correto) {
+        mudancas.push('porções: '+d.nPorcoes+'→'+correto);
+        d.nPorcoes = correto;
+        alterado = true;
+      }
+    }
+
+    // 2. Remover cacau dos alergênicos
+    if (d.alergenicos && d.alergenicos.toLowerCase().includes('cacau')) {
+      d.alergenicos = d.alergenicos
+        .replace(/,?\s*CONT[ÉE]M CACAU\.?/gi, '')
+        .replace(/CONT[ÉE]M CACAU[.,]?\s*/gi, '')
+        .replace(/[,]?\s*CACAU[.,]?\s*/gi, '')
+        .replace(/,\s*,/g, ',').replace(/^[,\s.]+/, '').replace(/[,\s.]+$/, '').trim();
+      mudancas.push('cacau removido dos alergênicos');
+      alterado = true;
+    }
+
+    // 3. Formatar ingredientes_txt
+    if (d.ingredientes_txt && d.ingredientes_txt.length > 1) {
+      const fmt = d.ingredientes_txt.charAt(0).toUpperCase() + d.ingredientes_txt.slice(1).toLowerCase();
+      if (fmt !== d.ingredientes_txt) {
+        d.ingredientes_txt = fmt;
+        mudancas.push('ingredientes formatado');
+        alterado = true;
+      }
+    }
+
+    if (alterado) {
+      const { error: updErr } = await _sb.from('produtos').update({ dados: d }).eq('id', p.id);
+      if (!updErr) {
+        corrigidos++;
+        log.push('✅ ' + (d.nome||p.id) + ': ' + mudancas.join(', '));
+        // Atualizar cache local
+        const idx = (_produtosCache||[]).findIndex(x=>x.id===d.id);
+        if (idx>=0 && _produtosCache) _produtosCache[idx] = d;
+      } else {
+        log.push('❌ ' + (d.nome||p.id) + ': ' + updErr.message);
+      }
+    }
+  }
+
+  alert('Migração concluída!\n\n' + corrigidos + ' de ' + produtos.length + ' produtos corrigidos.\n\n' + log.join('\n'));
+  renderProdutos();
+}
+
 function abrirRevisaoMassa() {
   const prods = getProdutos();
   const problemas = [];
