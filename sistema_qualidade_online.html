@@ -628,6 +628,8 @@
       <option value="Atrasada">Atrasada</option>
     </select>
     <button class="btn btn-primary" onclick="openPAModal()">+ Nova Ação</button>
+  <button class="btn btn-outline" onclick="exportPAExcel()" style="margin-left:8px">⬇ Excel</button>
+  <button class="btn btn-outline" onclick="exportPAPDF()" style="margin-left:4px">⬇ PDF</button>
   </div>
 
   <div class="panel">
@@ -1089,7 +1091,7 @@
     <input type="hidden" id="paEditId">
     <div class="form-row">
       <div class="form-group"><label>Origem</label>
-        <select id="paOrigem"><option>NC Interna</option><option>Reclamação SAC</option><option>Auditoria</option><option>Indicador</option><option>Melhoria</option><option>Outro</option></select>
+        <select id="paOrigem"><option>NC Interna</option><option>Reclamação SAC</option><option>Auditoria</option><option>Auditoria MAPA</option><option>Auditoria VISA</option><option>Indicador</option><option>Melhoria</option><option>Outro</option></select>
       </div>
       <div class="form-group"><label>Empresa</label>
         <select id="paEmpresa"><option>DMS</option><option>MFParis</option><option>Profi</option></select>
@@ -2803,6 +2805,81 @@ function exportCloroPDF() {
   doc.text('Documento gerado automaticamente pelo Sistema de Gestão da Qualidade — Grupo MF Paris Alimentos', 148, 205, {align:'center'});
 
   doc.save('Cloro_' + mes + '.pdf');
+}
+
+
+function exportPAExcel() {
+  const rows = db.planoacao || [];
+  if (!rows.length) { alert('Nenhuma ação cadastrada.'); return; }
+  const ws_data = [
+    ['PLANO DE AÇÃO 5W2H — GRUPO MF PARIS'],
+    ['Exportado em: ' + new Date().toLocaleDateString('pt-BR')],
+    [],
+    ['O QUE','POR QUE','ONDE','QUEM','QUANDO','COMO','QUANTO CUSTA','ORIGEM','STATUS','% CONCLUÍDO','PRAZO']
+  ];
+  rows.forEach(p => {
+    ws_data.push([
+      p.oque||'', p.porque||'', p.onde||'', p.quem||'',
+      p.quando||'', p.como||'', p.quanto||'',
+      p.origem||'', p.status||'', (p.pct||0)+'%', p.prazo||''
+    ]);
+  });
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!cols'] = [{wch:30},{wch:30},{wch:15},{wch:15},{wch:15},{wch:30},{wch:15},{wch:15},{wch:12},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Plano de Ação');
+  XLSX.writeFile(wb, 'PlanoAcao_' + new Date().toISOString().slice(0,10) + '.xlsx');
+}
+
+function exportPAPDF() {
+  const rows = db.planoacao || [];
+  if (!rows.length) { alert('Nenhuma ação cadastrada.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  // Cabeçalho
+  doc.setFillColor(30, 58, 95);
+  doc.rect(0, 0, 297, 18, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(12); doc.setFont(undefined,'bold');
+  doc.text('PLANO DE AÇÃO 5W2H — GRUPO MF PARIS ALIMENTOS', 148, 8, {align:'center'});
+  doc.setFontSize(9); doc.setFont(undefined,'normal');
+  doc.text('Exportado em: ' + new Date().toLocaleDateString('pt-BR'), 148, 14, {align:'center'});
+
+  // Tabela
+  const headers = ['O QUE','POR QUE','QUEM','PRAZO','ORIGEM','STATUS','%'];
+  const cols = [55,55,25,22,25,18,10];
+  const startX = 8;
+  let y = 26;
+
+  doc.setFillColor(30,58,95);
+  doc.rect(startX, y, cols.reduce((a,b)=>a+b,0), 7, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont(undefined,'bold');
+  let x = startX;
+  headers.forEach((h,i) => { doc.text(h, x+1, y+5); x += cols[i]; });
+
+  doc.setFont(undefined,'normal');
+  rows.forEach((p, idx) => {
+    y += 8;
+    if (y > 190) { doc.addPage(); y = 20; }
+    if (idx%2===0) { doc.setFillColor(248,250,252); doc.rect(startX, y, cols.reduce((a,b)=>a+b,0), 7, 'F'); }
+    doc.setTextColor(0,0,0);
+    const row = [
+      (p.oque||'').substring(0,35),
+      (p.porque||'').substring(0,35),
+      (p.quem||'').substring(0,18),
+      p.prazo||'',
+      p.origem||'',
+      p.status||'',
+      (p.pct||0)+'%'
+    ];
+    x = startX;
+    row.forEach((v,i) => { doc.text(String(v), x+1, y+5); x += cols[i]; });
+  });
+
+  doc.setTextColor(128,128,128); doc.setFontSize(7);
+  doc.text('Grupo MF Paris Alimentos — Sistema de Gestão da Qualidade', 148, 205, {align:'center'});
+  doc.save('PlanoAcao_' + new Date().toISOString().slice(0,10) + '.pdf');
 }
 
 // ===== FIM POTABILIDADE =====
