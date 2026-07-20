@@ -2621,11 +2621,12 @@ function _nomeExibicao(d) {
 // Ingredientes com campo `rotulo` no DB são expandidos com seus subingredientes
 function _buildIngredientesList() {
   if (!receita.length) return '';
-  return receita
+  const _lista = receita
     .slice()
     .sort((a,b) => b.qtde - a.qtde)
-    .map(r => r.d.rotuloCompleto || r.d.rotulo || r.d.n)
+    .map(r => (r.d.rotuloCompleto || r.d.rotulo || r.d.n || '').toLowerCase())
     .join(', ');
+  return _lista ? _lista.charAt(0).toUpperCase() + _lista.slice(1) : _lista;
 }
 
 function autoPreencherIngredientes() {
@@ -2827,7 +2828,6 @@ const ALERGENICOS_MAP = [
   { raiz: 'PEIXE', derivado: false, match: ['peixe','atum','salmão'] },
   { raiz: 'CRUSTÁCEOS', derivado: false, match: ['camarão','lagosta','caranguejo'] },
   { raiz: 'GERGELIM', derivado: false, match: ['gergelim','sésamo','tahine'] },
-  { raiz: 'CACAU', derivado: false, match: ['cacau','chocolate'] },
 ];
 
 function gerarTextoAlergenicos() {
