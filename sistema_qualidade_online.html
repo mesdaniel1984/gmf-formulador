@@ -887,37 +887,113 @@
 
 <!-- NC MODAL -->
 <div class="modal-bg" id="ncModal">
-  <div class="modal">
+  <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
     <h2 id="ncModalTitle">Nova Não Conformidade</h2>
     <input type="hidden" id="ncEditId">
-    <div class="form-row">
-      <div class="form-group"><label>Data</label><input type="date" id="ncData"></div>
-      <div class="form-group"><label>Tipo</label>
-        <select id="ncTipoI"><option>Interna</option><option>Externa Cliente</option><option>Externa Fornecedor</option></select>
+
+    <!-- Abas -->
+    <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+      <button id="nc-tab-geral" onclick="ncTab('geral')" style="padding:7px 14px;border:none;background:none;font-size:13px;font-weight:700;color:#1e3a8a;border-bottom:3px solid #1e3a8a;cursor:pointer;margin-bottom:-2px">📋 Geral</button>
+      <button id="nc-tab-causa" onclick="ncTab('causa')" style="padding:7px 14px;border:none;background:none;font-size:13px;font-weight:600;color:var(--dim);border-bottom:3px solid transparent;cursor:pointer;margin-bottom:-2px">🔍 Análise de Causa</button>
+      <button id="nc-tab-acoes" onclick="ncTab('acoes')" style="padding:7px 14px;border:none;background:none;font-size:13px;font-weight:600;color:var(--dim);border-bottom:3px solid transparent;cursor:pointer;margin-bottom:-2px">✅ Ações por Área</button>
+    </div>
+
+    <!-- ABA GERAL -->
+    <div id="nc-panel-geral">
+      <div class="form-row">
+        <div class="form-group"><label>Data</label><input type="date" id="ncData"></div>
+        <div class="form-group"><label>Tipo</label>
+          <select id="ncTipoI"><option>Interna</option><option>Externa Cliente</option><option>Externa Fornecedor</option></select>
+        </div>
+        <div class="form-group"><label>Empresa</label>
+          <select id="ncEmpresa"><option>DMS</option><option>MFParis</option><option>Profi</option></select>
+        </div>
       </div>
-      <div class="form-group"><label>Empresa</label>
-        <select id="ncEmpresa"><option>DMS</option><option>MFParis</option><option>Profi</option></select>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1"><label>Descrição da NC</label><textarea id="ncDesc" rows="2"></textarea></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Produto/Processo</label><input type="text" id="ncProd"></div>
+        <div class="form-group"><label>Responsável</label><input type="text" id="ncResp"></div>
+        <div class="form-group"><label>Prazo Tratativa</label><input type="date" id="ncPrazo"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Qtd. Reprocesso (kg/un)</label><input type="number" step="0.01" id="ncQtdReprocesso" placeholder="0"></div>
+        <div class="form-group"><label>Qtd. Perda Embalagem (un)</label><input type="number" step="1" id="ncQtdPerdaEmb" placeholder="0"></div>
+        <div class="form-group"><label>Qtd. Descarte Produto (kg)</label><input type="number" step="0.01" id="ncQtdDescarte" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>📸 Foto da NC</label>
+          <input type="file" id="ncFotoFile" accept="image/*" style="display:none" onchange="carregarFotoNC(this)">
+          <button type="button" class="btn btn-outline" onclick="document.getElementById('ncFotoFile').click()" style="margin-bottom:6px">📷 Anexar Foto</button>
+          <input type="hidden" id="ncFotoB64">
+          <div id="ncFotoPreview" style="display:none;margin-top:6px"><img id="ncFotoImg" style="max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--border)"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1"><label>Causa Raiz (resumo)</label><textarea id="ncCausa" rows="2" placeholder="Preencha na aba Análise de Causa"></textarea></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1"><label>Ação Corretiva (resumo)</label><textarea id="ncAcao" rows="2" placeholder="Preencha na aba Ações por Área"></textarea></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Status</label>
+          <select id="ncStatusI"><option>Aberta</option><option>Em análise</option><option>Fechada</option></select>
+        </div>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group" style="grid-column:1/-1"><label>Descrição da NC</label><textarea id="ncDesc" rows="2"></textarea></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Produto/Processo</label><input type="text" id="ncProd"></div>
-      <div class="form-group"><label>Responsável</label><input type="text" id="ncResp"></div>
-      <div class="form-group"><label>Prazo Tratativa</label><input type="date" id="ncPrazo"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group" style="grid-column:1/-1"><label>Causa Raiz</label><textarea id="ncCausa" rows="2"></textarea></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group" style="grid-column:1/-1"><label>Ação Corretiva</label><textarea id="ncAcao" rows="2"></textarea></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Status</label>
-        <select id="ncStatusI"><option>Aberta</option><option>Em análise</option><option>Fechada</option></select>
+
+    <!-- ABA ANÁLISE DE CAUSA -->
+    <div id="nc-panel-causa" style="display:none">
+      <!-- 5 Porquês -->
+      <div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:10px">❓ 5 Porquês</div>
+        ${[1,2,3,4,5].map(i=>`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="background:#1e3a8a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i}</span>
+          <input type="text" id="nc5p${i}" placeholder="Por quê ${i}..." style="flex:1;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px">
+        </div>`).join('')}
+      </div>
+
+      <!-- Espinha de Peixe -->
+      <div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:10px">🐟 Espinha de Peixe (Ishikawa)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          ${['Método','Máquina','Mão de Obra','Material','Meio Ambiente','Medição'].map(cat=>`
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">${cat}</label>
+            <textarea id="nc-ishikawa-${cat.toLowerCase().replace(/ /g,'-')}" rows="2" placeholder="Causas relacionadas a ${cat}..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Brainstorming -->
+      <div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px">
+        <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:10px">💡 Brainstorming de Causas</div>
+        <textarea id="ncBrainstorming" rows="4" placeholder="Liste todas as possíveis causas identificadas pela equipe..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:8px 10px;font-size:13px;resize:vertical"></textarea>
+        <button type="button" onclick="consolidarCausaRaiz()" style="margin-top:8px;background:#1e3a8a;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:700">↩ Consolidar na Causa Raiz</button>
       </div>
     </div>
+
+    <!-- ABA AÇÕES POR ÁREA -->
+    <div id="nc-panel-acoes" style="display:none">
+      <div style="font-size:12px;color:#6b7280;margin-bottom:12px">Distribua as ações corretivas por área responsável. As ações serão automaticamente adicionadas ao Plano de Ação.</div>
+      <div id="nc-acoes-areas">
+        ${['Produção','Qualidade','Manutenção','Logística','Comercial','RH'].map(area=>`
+        <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">${area}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Ação</label>
+              <input type="text" id="nc-acao-${area.toLowerCase()}" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Responsável / Prazo</label>
+              <input type="text" id="nc-resp-${area.toLowerCase()}" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+          </div>
+        </div>`).join('')}
+      </div>
+      <button type="button" onclick="gerarPAdasAcoes()" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:4px">📋 Gerar Plano de Ação com estas Ações</button>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('ncModal')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveNC()">Salvar</button>
@@ -2109,7 +2185,23 @@ function openNCModal(n){
   document.getElementById('ncPrazo').value=n?n.prazo:'';
   document.getElementById('ncCausa').value=n?n.causa:'';
   document.getElementById('ncAcao').value=n?n.acao:'';
+  document.getElementById('ncQtdReprocesso').value=n?n.qtdReprocesso||'':'';
+  document.getElementById('ncQtdPerdaEmb').value=n?n.qtdPerdaEmb||'':'';
+  document.getElementById('ncQtdDescarte').value=n?n.qtdDescarte||'':'';
+  // Foto
+  const fotoB64 = document.getElementById('ncFotoB64');
+  if(fotoB64) fotoB64.value = n&&n.foto ? n.foto : '';
+  const fotoPreview = document.getElementById('ncFotoPreview');
+  const fotoImg = document.getElementById('ncFotoImg');
+  if(n&&n.foto&&fotoPreview&&fotoImg){fotoImg.src=n.foto;fotoPreview.style.display='';}
+  else if(fotoPreview) fotoPreview.style.display='none';
+  // 5 Porquês
+  [1,2,3,4,5].forEach(i=>{const el=document.getElementById('nc5p'+i);if(el)el.value=n&&n.porques?n.porques[i-1]||'':'';});
+  // Ishikawa
+  ['método','máquina','mão-de-obra','material','meio-ambiente','medição'].forEach(cat=>{const el=document.getElementById('nc-ishikawa-'+cat);if(el)el.value=n&&n.ishikawa?n.ishikawa[cat]||'':'';});
+  const brain=document.getElementById('ncBrainstorming');if(brain)brain.value=n?n.brainstorming||'':'';
   if(n){document.getElementById('ncTipoI').value=n.tipo;document.getElementById('ncEmpresa').value=n.empresa;document.getElementById('ncStatusI').value=n.status;}
+  ncTab('geral');
   document.getElementById('ncModal').classList.add('open');
 }
 function editNC(id){openNCModal(db.ncs.find(n=>n.id===id));}
@@ -2117,7 +2209,20 @@ function delNC(id){if(confirm('Excluir NC?')){db.ncs=db.ncs.filter(n=>n.id!==id)
 function saveNC(){
   const id=document.getElementById('ncEditId').value;
   ncSeq++;
-  const obj={id:id||uid(),num:'NC-'+String(db.ncs.length+1).padStart(3,'0'),data:v('ncData'),tipo:v('ncTipoI'),empresa:v('ncEmpresa'),desc:v('ncDesc'),prod:v('ncProd'),resp:v('ncResp'),prazo:v('ncPrazo'),causa:v('ncCausa'),acao:v('ncAcao'),status:v('ncStatusI')};
+  const obj={
+    id:id||uid(),
+    num:id?(db.ncs.find(n=>n.id===id)||{}).num||('NC-'+String(db.ncs.length+1).padStart(3,'0')):'NC-'+String(db.ncs.length+1).padStart(3,'0'),
+    data:v('ncData'),tipo:v('ncTipoI'),empresa:v('ncEmpresa'),
+    desc:v('ncDesc'),prod:v('ncProd'),resp:v('ncResp'),prazo:v('ncPrazo'),
+    causa:v('ncCausa'),acao:v('ncAcao'),status:v('ncStatusI'),
+    qtdReprocesso:parseFloat(document.getElementById('ncQtdReprocesso')?.value)||0,
+    qtdPerdaEmb:parseFloat(document.getElementById('ncQtdPerdaEmb')?.value)||0,
+    qtdDescarte:parseFloat(document.getElementById('ncQtdDescarte')?.value)||0,
+    foto:document.getElementById('ncFotoB64')?.value||null,
+    porques:[1,2,3,4,5].map(i=>document.getElementById('nc5p'+i)?.value||''),
+    ishikawa:Object.fromEntries(['método','máquina','mão-de-obra','material','meio-ambiente','medição'].map(cat=>[cat,document.getElementById('nc-ishikawa-'+cat)?.value||''])),
+    brainstorming:document.getElementById('ncBrainstorming')?.value||'',
+  };
   if(id){const i=db.ncs.findIndex(n=>n.id===id);db.ncs[i]=obj;}else{db.ncs.push(obj);}
   saveDB();closeModal('ncModal');renderNCs();
 }
@@ -2696,6 +2801,120 @@ function renderCloro() {
     </tr>
   `).join('');
 }
+
+// ===== NC — Funções das abas e ferramentas =====
+function ncTab(tab) {
+  ['geral','causa','acoes'].forEach(t => {
+    document.getElementById('nc-panel-'+t).style.display = t===tab ? '' : 'none';
+    const btn = document.getElementById('nc-tab-'+t);
+    if (btn) {
+      btn.style.color = t===tab ? '#1e3a8a' : 'var(--dim)';
+      btn.style.borderBottom = t===tab ? '3px solid #1e3a8a' : '3px solid transparent';
+      btn.style.fontWeight = t===tab ? '700' : '600';
+    }
+  });
+}
+
+function carregarFotoNC(input) {
+  const f = input.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Comprimir foto
+    const img = new Image();
+    img.onload = function() {
+      const MAX = 1024;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      let q = 0.85;
+      let b64 = canvas.toDataURL('image/jpeg', q);
+      while (b64.length > 200*1024*1.37 && q > 0.1) { q -= 0.1; b64 = canvas.toDataURL('image/jpeg', q); }
+      document.getElementById('ncFotoB64').value = b64;
+      document.getElementById('ncFotoImg').src = b64;
+      document.getElementById('ncFotoPreview').style.display = '';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+function consolidarCausaRaiz() {
+  const porques = [1,2,3,4,5].map(i => document.getElementById('nc5p'+i)?.value).filter(Boolean);
+  const ishikawa = ['método','máquina','mão-de-obra','material','meio-ambiente','medição'].map(cat => {
+    const el = document.getElementById('nc-ishikawa-'+cat);
+    return el && el.value ? cat.toUpperCase()+': '+el.value : '';
+  }).filter(Boolean);
+  const brain = document.getElementById('ncBrainstorming')?.value || '';
+
+  let texto = '';
+  if (porques.length) texto += '5 PORQUÊS:
+' + porques.map((p,i)=>(i+1)+'. '+p).join('
+') + '
+
+';
+  if (ishikawa.length) texto += 'ISHIKAWA:
+' + ishikawa.join('
+') + '
+
+';
+  if (brain) texto += 'BRAINSTORMING:
+' + brain;
+
+  const el = document.getElementById('ncCausa');
+  if (el) { el.value = texto.trim(); ncTab('geral'); }
+}
+
+function gerarPAdasAcoes() {
+  const areas = ['Produção','Qualidade','Manutenção','Logística','Comercial','RH'];
+  const ncProd = document.getElementById('ncProd')?.value || 'NC';
+  const ncPrazo = document.getElementById('ncPrazo')?.value || '';
+  let geradas = 0;
+
+  areas.forEach(area => {
+    const acao = document.getElementById('nc-acao-'+area.toLowerCase())?.value;
+    const resp = document.getElementById('nc-resp-'+area.toLowerCase())?.value || '';
+    if (!acao) return;
+
+    const [quem, prazoStr] = resp.split('·').map(s=>s.trim());
+    if (!db.planoacao) db.planoacao = [];
+    db.planoacao.push({
+      id: uid(),
+      oque: acao,
+      porque: 'NC: ' + ncProd,
+      onde: area,
+      quem: quem || area,
+      quando: prazoStr || ncPrazo,
+      como: acao,
+      quanto: '',
+      origem: 'NC Interna',
+      status: 'Pendente',
+      pct: 0,
+      prazo: prazoStr || ncPrazo,
+    });
+    geradas++;
+  });
+
+  if (geradas) {
+    saveDB();
+    alert('✅ ' + geradas + ' ação(ões) adicionada(s) ao Plano de Ação!');
+    // Consolidar no campo ação corretiva
+    const resumo = areas.map(area => {
+      const acao = document.getElementById('nc-acao-'+area.toLowerCase())?.value;
+      return acao ? area+': '+acao : '';
+    }).filter(Boolean).join('
+');
+    const el = document.getElementById('ncAcao');
+    if (el && resumo) el.value = resumo;
+    ncTab('geral');
+  } else {
+    alert('Preencha ao menos uma ação antes de gerar o Plano de Ação.');
+  }
+}
+// ===== FIM NC =====
+
 function exportCloroExcel() {
   const mes = document.getElementById('cloro-mes')?.value || new Date().toISOString().slice(0,7);
   const regs = (db.cloro || []).filter(r => r.data && r.data.startsWith(mes))
