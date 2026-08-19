@@ -2916,18 +2916,9 @@ function consolidarCausaRaiz() {
   const brain = document.getElementById('ncBrainstorming')?.value || '';
 
   let texto = '';
-  if (porques.length) texto += '5 PORQUÊS:
-' + porques.map((p,i)=>(i+1)+'. '+p).join('
-') + '
-
-';
-  if (ishikawa.length) texto += 'ISHIKAWA:
-' + ishikawa.join('
-') + '
-
-';
-  if (brain) texto += 'BRAINSTORMING:
-' + brain;
+  if (porques.length) texto += '5 PORQU\u00cAS:\n' + porques.map((p,i)=>(i+1)+'. '+p).join('\n') + '\n\n';
+  if (ishikawa.length) texto += 'ISHIKAWA:\n' + ishikawa.join('\n') + '\n\n';
+  if (brain) texto += 'BRAINSTORMING:\n' + brain;
 
   const el = document.getElementById('ncCausa');
   if (el) { el.value = texto.trim(); ncTab('geral'); }
