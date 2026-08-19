@@ -2961,8 +2961,7 @@ function gerarPAdasAcoes() {
     const resumo = areas.map(area => {
       const acao = document.getElementById('nc-acao-'+area.toLowerCase())?.value;
       return acao ? area+': '+acao : '';
-    }).filter(Boolean).join('
-');
+    }).filter(Boolean).join('\n');
     const el = document.getElementById('ncAcao');
     if (el && resumo) el.value = resumo;
     ncTab('geral');
