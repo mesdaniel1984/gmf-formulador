@@ -949,22 +949,44 @@
       <!-- 5 Porquês -->
       <div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:14px">
         <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:10px">❓ 5 Porquês</div>
-        ${[1,2,3,4,5].map(i=>`
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="background:#1e3a8a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i}</span>
-          <input type="text" id="nc5p${i}" placeholder="Por quê ${i}..." style="flex:1;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px">
-        </div>`).join('')}
+          <span style="background:#1e3a8a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
+          <input type="text" id="nc5p1" placeholder="Por quê 1..." style="flex:1;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="background:#1e3a8a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span>
+          <input type="text" id="nc5p2" placeholder="Por quê 2..." style="flex:1;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="background:#1e3a8a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span>
+          <input type="text" id="nc5p3" placeholder="Por quê 3..." style="flex:1;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="background:#1e3a8a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</span>
+          <input type="text" id="nc5p4" placeholder="Por quê 4..." style="flex:1;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="background:#1e3a8a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">5</span>
+          <input type="text" id="nc5p5" placeholder="Por quê 5..." style="flex:1;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px">
+        </div>
       </div>
 
       <!-- Espinha de Peixe -->
       <div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:14px">
         <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:10px">🐟 Espinha de Peixe (Ishikawa)</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          ${['Método','Máquina','Mão de Obra','Material','Meio Ambiente','Medição'].map(cat=>`
-          <div>
-            <label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">${cat}</label>
-            <textarea id="nc-ishikawa-${cat.toLowerCase().replace(/ /g,'-')}" rows="2" placeholder="Causas relacionadas a ${cat}..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea>
-          </div>`).join('')}
+          <div><label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">Método</label>
+            <textarea id="nc-ishikawa-método" rows="2" placeholder="Causas relacionadas a Método..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea></div>
+          <div><label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">Máquina</label>
+            <textarea id="nc-ishikawa-máquina" rows="2" placeholder="Causas relacionadas a Máquina..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea></div>
+          <div><label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">Mão de Obra</label>
+            <textarea id="nc-ishikawa-mão-de-obra" rows="2" placeholder="Causas relacionadas a Mão de Obra..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea></div>
+          <div><label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">Material</label>
+            <textarea id="nc-ishikawa-material" rows="2" placeholder="Causas relacionadas a Material..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea></div>
+          <div><label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">Meio Ambiente</label>
+            <textarea id="nc-ishikawa-meio-ambiente" rows="2" placeholder="Causas relacionadas a Meio Ambiente..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea></div>
+          <div><label style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;display:block;margin-bottom:4px">Medição</label>
+            <textarea id="nc-ishikawa-medição" rows="2" placeholder="Causas relacionadas a Medição..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px;resize:vertical"></textarea></div>
         </div>
       </div>
 
@@ -980,16 +1002,60 @@
     <div id="nc-panel-acoes" style="display:none">
       <div style="font-size:12px;color:#6b7280;margin-bottom:12px">Distribua as ações corretivas por área responsável. As ações serão automaticamente adicionadas ao Plano de Ação.</div>
       <div id="nc-acoes-areas">
-        ${['Produção','Qualidade','Manutenção','Logística','Comercial','RH'].map(area=>`
         <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
-          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">${area}</div>
+          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">Produção</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Ação</label>
-              <input type="text" id="nc-acao-${area.toLowerCase()}" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+              <input type="text" id="nc-acao-producao" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
             <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Responsável / Prazo</label>
-              <input type="text" id="nc-resp-${area.toLowerCase()}" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+              <input type="text" id="nc-resp-producao" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
           </div>
-        </div>`).join('')}
+        </div>
+        <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">Qualidade</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Ação</label>
+              <input type="text" id="nc-acao-qualidade" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Responsável / Prazo</label>
+              <input type="text" id="nc-resp-qualidade" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+          </div>
+        </div>
+        <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">Manutenção</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Ação</label>
+              <input type="text" id="nc-acao-manutencao" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Responsável / Prazo</label>
+              <input type="text" id="nc-resp-manutencao" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+          </div>
+        </div>
+        <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">Logística</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Ação</label>
+              <input type="text" id="nc-acao-logística" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Responsável / Prazo</label>
+              <input type="text" id="nc-resp-logística" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+          </div>
+        </div>
+        <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">Comercial</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Ação</label>
+              <input type="text" id="nc-acao-comercial" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Responsável / Prazo</label>
+              <input type="text" id="nc-resp-comercial" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+          </div>
+        </div>
+        <div style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:8px">RH</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Ação</label>
+              <input type="text" id="nc-acao-rh" placeholder="Descreva a ação..." style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Responsável / Prazo</label>
+              <input type="text" id="nc-resp-rh" placeholder="Nome · DD/MM/AAAA" style="width:100%;border:1.5px solid #d1d5db;border-radius:6px;padding:6px 8px;font-size:12px"></div>
+          </div>
+        </div>
       </div>
       <button type="button" onclick="gerarPAdasAcoes()" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:4px">📋 Gerar Plano de Ação com estas Ações</button>
     </div>
