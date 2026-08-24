@@ -1069,7 +1069,7 @@
 
 <!-- SAC MODAL -->
 <div class="modal-bg" id="sacModal">
-  <div class="modal">
+  <div class="modal" style="max-width:680px;max-height:90vh;overflow-y:auto">
     <h2 id="sacModalTitle">Nova Reclamação SAC</h2>
     <input type="hidden" id="sacEditId">
     <div class="form-row">
@@ -1082,27 +1082,47 @@
     <div class="form-row">
       <div class="form-group"><label>Produto</label><input type="text" id="sProd"></div>
       <div class="form-group"><label>Lote</label><input type="text" id="sLote"></div>
+      <div class="form-group"><label>NF (Nota Fiscal)</label><input type="text" id="sNF" placeholder="Ex: 12345"></div>
+    </div>
+    <div class="form-row">
       <div class="form-group"><label>Empresa</label>
         <select id="sEmpresa"><option>DMS</option><option>MFParis</option><option>Profi</option></select>
       </div>
+      <div class="form-group"><label>Tipo</label>
+        <select id="sTipo"><option>Qualidade</option><option>Corpo Estranho</option><option>Embalagem</option><option>Rotulagem</option><option>Sabor/Odor</option><option>Outro</option></select>
+      </div>
+      <div class="form-group"><label>Responsável</label><input type="text" id="sResp"></div>
     </div>
     <div class="form-row">
       <div class="form-group" style="grid-column:1/-1"><label>Descrição da Reclamação</label><textarea id="sDesc" rows="2"></textarea></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Tipo</label>
-        <select id="sTipo"><option>Qualidade</option><option>Corpo Estranho</option><option>Embalagem</option><option>Rotulagem</option><option>Sabor/Odor</option><option>Outro</option></select>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Fotos da Reclama&ccedil;&atilde;o</label>
+        <input type="file" id="sFotoFile" accept="image/*" multiple capture="environment" style="display:none" onchange="carregarFotoSAC(this)">
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('sFotoFile').click()" style="margin-bottom:6px">&#128247; Anexar Fotos</button>
+        <div id="sFotoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
       </div>
-      <div class="form-group"><label>Responsável</label><input type="text" id="sResp"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1"><label>Causa Raiz</label><textarea id="sCausa" rows="2" placeholder="Descreva a causa raiz identificada..."></textarea></div>
+    </div>
+    <div class="form-row">
       <div class="form-group"><label>Prazo Resposta</label><input type="date" id="sPrazo"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group" style="grid-column:1/-1"><label>Ação Tomada / Resposta</label><textarea id="sAcao" rows="2"></textarea></div>
-    </div>
-    <div class="form-row">
       <div class="form-group"><label>Status</label>
         <select id="sStatus"><option>Aberta</option><option>Em tratativa</option><option>Encerrada</option></select>
       </div>
+    </div>
+
+    <!-- Plano de Ações -->
+    <div style="margin-top:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px">
+      <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:10px">Plano de Acoes</div>
+      <div id="sac-acoes-lista"></div>
+      <button type="button" onclick="sacAddAcao()" style="background:#1e3a8a;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:700;margin-top:8px">+ Adicionar Acao</button>
+    </div>
+
+    <div class="form-row" style="margin-top:12px">
+      <div class="form-group" style="grid-column:1/-1"><label>Observacoes / Resposta ao Cliente</label><textarea id="sAcao" rows="2"></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('sacModal')">Cancelar</button>
@@ -2295,41 +2315,185 @@ function saveNC(){
 
 // ===== SAC =====
 function renderSAC(){
-  const search=document.getElementById('sacSearch').value.toLowerCase();
-  const status=document.getElementById('sacStatus').value;
-  let rows=db.sac.filter(s=>(!search||s.cliente.toLowerCase().includes(search)||s.prod.toLowerCase().includes(search)||s.desc.toLowerCase().includes(search))&&(!status||s.status===status));
-  document.getElementById('sacTable').innerHTML=rows.map((s,i)=>`<tr>
-    <td>${s.num||('SAC-'+String(i+1).padStart(3,'0'))}</td>
-    <td>${fmtDate(s.data)}</td>
-    <td>${s.cliente}</td>
-    <td>${s.prod}</td>
-    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.desc}</td>
-    <td><span class="badge blue">${s.tipo}</span></td>
-    <td>${s.origem}</td>
-    <td>${s.resp||'—'}</td>
-    <td>${fmtDate(s.prazo)}</td>
-    <td>${statusBadge(s.status)}</td>
-    <td><button class="btn btn-sm btn-outline" onclick="editSAC('${s.id}')">✏️</button>
-    <button class="btn btn-sm btn-danger" onclick="delSAC('${s.id}')">🗑</button></td>
-  </tr>`).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--text-light);padding:24px">Nenhuma reclamação registrada.</td></tr>';
+  var search=(document.getElementById('sacSearch').value||'').toLowerCase();
+  var status=document.getElementById('sacStatus').value;
+  var lc=function(t){ return String(t||'').toLowerCase(); };
+  var rows=db.sac.filter(function(s){
+    return (!search||lc(s.cliente).indexOf(search)>-1||lc(s.prod).indexOf(search)>-1||lc(s.desc).indexOf(search)>-1||lc(s.nf).indexOf(search)>-1)
+      && (!status||s.status===status);
+  });
+  document.getElementById('sacTable').innerHTML=rows.map(function(s,i){
+    var ac=Array.isArray(s.acoes)?s.acoes:[];
+    var done=ac.filter(function(a){return a.status==='Concluida';}).length;
+    var plano=ac.length?' <span class="badge '+(done===ac.length?'ok':'warn')+'" title="Plano de acoes">'+done+'/'+ac.length+'</span>':'';
+    var nfotos=Array.isArray(s.fotos)?s.fotos.length:0;
+    var foto=nfotos?' <span title="'+nfotos+' foto(s)">&#128247;'+(nfotos>1?nfotos:'')+'</span>':'';
+    return '<tr>'
+      +'<td>'+(s.num||('SAC-'+String(i+1).padStart(3,'0')))+'</td>'
+      +'<td>'+fmtDate(s.data)+'</td>'
+      +'<td>'+(s.cliente||'')+'</td>'
+      +'<td>'+(s.prod||'')+'</td>'
+      +'<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(s.desc||'')+foto+'</td>'
+      +'<td><span class="badge blue">'+(s.tipo||'')+'</span></td>'
+      +'<td>'+(s.origem||'')+'</td>'
+      +'<td>'+(s.resp||'—')+'</td>'
+      +'<td>'+fmtDate(s.prazo)+'</td>'
+      +'<td>'+statusBadge(s.status)+plano+'</td>'
+      +'<td><button class="btn btn-sm btn-outline" onclick="editSAC(\''+s.id+'\')">✏️</button>'
+      +'<button class="btn btn-sm btn-danger" onclick="delSAC(\''+s.id+'\')">🗑</button></td>'
+    +'</tr>';
+  }).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--text-light);padding:24px">Nenhuma reclamacao registrada.</td></tr>';
 }
+// ---- helpers SAC ----
+let _sacFotos = [];
+let _sacAcoes = [];
+function _sacEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function _sacCompress(file, maxPx, q){
+  return new Promise(function(res){
+    var fr = new FileReader();
+    fr.onload = function(e){
+      if(!/^image\//.test(file.type)){ res({tipo:'arquivo', nome:file.name, data:e.target.result}); return; }
+      var img = new Image();
+      img.onload = function(){
+        var w=img.width, h=img.height, sc=Math.min(1, maxPx/Math.max(w,h));
+        w=Math.round(w*sc); h=Math.round(h*sc);
+        var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        res({tipo:'imagem', nome:file.name, data:cv.toDataURL('image/jpeg', q)});
+      };
+      img.onerror = function(){ res({tipo:'arquivo', nome:file.name, data:e.target.result}); };
+      img.src = e.target.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+function _sacAbrir(tipo, data, nome){
+  var w = window.open('');
+  if(!w){ alert('Permita pop-ups para visualizar o anexo.'); return; }
+  w.document.write(tipo==='imagem'
+    ? '<title>'+(nome||'Foto')+'</title><body style="margin:0;background:#111"><img src="'+data+'" style="max-width:100%;display:block;margin:auto">'
+    : '<title>'+(nome||'Anexo')+'</title><body style="margin:0"><iframe src="'+data+'" style="width:100%;height:100vh;border:0"></iframe>');
+}
+
+// ---- Fotos da reclamacao (multiplas) ----
+async function carregarFotoSAC(input){
+  var files = Array.prototype.slice.call(input.files||[]);
+  for(var k=0;k<files.length;k++){
+    var r = await _sacCompress(files[k], 1200, 0.65);
+    _sacFotos.push({nome:r.nome, data:r.data});
+  }
+  input.value=''; sacRenderFotos();
+}
+function sacRenderFotos(){
+  var box=document.getElementById('sFotoPreview'); if(!box) return;
+  box.innerHTML=_sacFotos.map(function(f,i){
+    return '<div style="position:relative">'
+      +'<img src="'+f.data+'" onclick="sacVerFoto('+i+')" style="width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:zoom-in">'
+      +'<button type="button" onclick="sacDelFoto('+i+')" title="Remover" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:none;background:#dc2626;color:#fff;font-size:12px;line-height:1;cursor:pointer">&times;</button>'
+      +'</div>';
+  }).join('');
+}
+function sacDelFoto(i){ _sacFotos.splice(i,1); sacRenderFotos(); }
+function sacVerFoto(i){ _sacAbrir('imagem', _sacFotos[i].data, _sacFotos[i].nome); }
+
+// ---- Plano de acoes + evidencias ----
+function sacTemEvid(a){ return !!(a && (a.evid || String(a.evidTxt||'').trim().length>=3)); }
+function sacAddAcao(){ _sacAcoes.push({id:uid(),oque:'',quem:'',prazo:'',status:'Pendente',evidTxt:'',evid:null}); sacRenderAcoes(); }
+function sacDelAcao(i){ if(confirm('Remover esta acao do plano?')){ _sacAcoes.splice(i,1); sacRenderAcoes(); } }
+function sacSetAcao(i,campo,val){ if(_sacAcoes[i]) _sacAcoes[i][campo]=val; }
+function sacStatusAcao(i,sel){
+  var a=_sacAcoes[i]; if(!a) return;
+  if(sel.value==='Concluida' && !sacTemEvid(a)){
+    alert('Para concluir esta acao e obrigatorio registrar a EVIDENCIA (anexo ou descricao).');
+    sel.value=a.status; return;
+  }
+  a.status=sel.value; sacRenderAcoes();
+}
+async function sacAnexarEvid(i,input){
+  var f=(input.files||[])[0]; if(!f) return;
+  var r=await _sacCompress(f,1400,0.7);
+  _sacAcoes[i].evid={tipo:r.tipo,nome:r.nome,data:r.data};
+  input.value=''; sacRenderAcoes();
+}
+function sacDelEvid(i){
+  var a=_sacAcoes[i]; if(!a) return;
+  a.evid=null;
+  if(a.status==='Concluida' && !sacTemEvid(a)) a.status='Em andamento';
+  sacRenderAcoes();
+}
+function sacVerEvid(i){ var e=_sacAcoes[i].evid; if(e) _sacAbrir(e.tipo,e.data,e.nome); }
+
+function sacRenderAcoes(){
+  var box=document.getElementById('sac-acoes-lista'); if(!box) return;
+  if(!_sacAcoes.length){ box.innerHTML='<div style="font-size:12px;color:#64748b;padding:4px 0">Nenhuma acao cadastrada. Clique em "+ Adicionar Acao".</div>'; return; }
+  var inp='width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit';
+  box.innerHTML=_sacAcoes.map(function(a,i){
+    var ok=sacTemEvid(a);
+    var cor=a.status==='Concluida'?'#16a34a':(a.status==='Em andamento'?'#d97706':'#94a3b8');
+    var opts=['Pendente','Em andamento','Concluida'].map(function(o){ return '<option'+(a.status===o?' selected':'')+(o==='Concluida'&&!ok?' disabled':'')+'>'+o+'</option>'; }).join('');
+    var evid = a.evid
+      ? '<span style="font-size:11px;color:#16a34a;font-weight:700">&#128206; '+_sacEsc(a.evid.nome)+'</span>'
+        +'<button type="button" onclick="sacVerEvid('+i+')" style="background:none;border:none;color:#1e3a8a;font-size:11px;text-decoration:underline;cursor:pointer">ver</button>'
+        +'<button type="button" onclick="sacDelEvid('+i+')" style="background:none;border:none;color:#dc2626;font-size:11px;text-decoration:underline;cursor:pointer">remover</button>'
+      : '<button type="button" onclick="document.getElementById(\'sacEvidFile'+i+'\').click()" style="background:#e2e8f0;border:none;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:700">&#128206; Anexar evidencia</button>'
+        +'<span style="font-size:11px;color:#94a3b8">sem evidencia &rarr; nao pode concluir</span>';
+    return '<div style="border:1px solid #e5e7eb;border-left:3px solid '+cor+';background:#fff;border-radius:6px;padding:10px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+        +'<b style="font-size:12px;color:#1e3a8a">Acao '+(i+1)+'</b>'
+        +'<button type="button" onclick="sacDelAcao('+i+')" title="Remover acao" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px">&#128465;</button>'
+      +'</div>'
+      +'<input type="text" placeholder="O que sera feito" value="'+_sacEsc(a.oque)+'" oninput="sacSetAcao('+i+',\'oque\',this.value)" style="'+inp+'">'
+      +'<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">'
+        +'<input type="text" placeholder="Responsavel" value="'+_sacEsc(a.quem)+'" oninput="sacSetAcao('+i+',\'quem\',this.value)" style="flex:1 1 120px;'+inp+'">'
+        +'<input type="date" value="'+_sacEsc(a.prazo)+'" oninput="sacSetAcao('+i+',\'prazo\',this.value)" style="flex:1 1 120px;'+inp+'">'
+        +'<select onchange="sacStatusAcao('+i+',this)" style="flex:1 1 120px;'+inp+'">'+opts+'</select>'
+      +'</div>'
+      +'<input type="text" placeholder="Evidencia (descricao)" value="'+_sacEsc(a.evidTxt)+'" oninput="sacSetAcao('+i+',\'evidTxt\',this.value)" onchange="sacRenderAcoes()" style="margin-top:6px;'+inp+'">'
+      +'<input type="file" id="sacEvidFile'+i+'" accept="image/*,application/pdf" style="display:none" onchange="sacAnexarEvid('+i+',this)">'
+      +'<div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+evid+'</div>'
+    +'</div>';
+  }).join('');
+}
+
 function openSACModal(s){
-  document.getElementById('sacModalTitle').textContent=s?'Editar Reclamação':'Nova Reclamação SAC';
+  document.getElementById('sacModalTitle').textContent=s?'Editar Reclamacao':'Nova Reclamacao SAC';
   document.getElementById('sacEditId').value=s?s.id:'';
   document.getElementById('sData').value=s?s.data:today();
-  ['sCliente','sProd','sLote','sDesc','sResp','sPrazo','sAcao'].forEach(id=>{
-    const map={sCliente:'cliente',sProd:'prod',sLote:'lote',sDesc:'desc',sResp:'resp',sPrazo:'prazo',sAcao:'acao'};
-    document.getElementById(id).value=s?(s[map[id]]||''):'';
-  });
-  if(s){document.getElementById('sOrigem').value=s.origem;document.getElementById('sEmpresa').value=s.empresa;document.getElementById('sTipo').value=s.tipo;document.getElementById('sStatus').value=s.status;}
+  var map={sCliente:'cliente',sProd:'prod',sLote:'lote',sNF:'nf',sDesc:'desc',sCausa:'causa',sResp:'resp',sPrazo:'prazo',sAcao:'acao'};
+  Object.keys(map).forEach(function(id){ var el=document.getElementById(id); if(el) el.value=s?(s[map[id]]||''):''; });
+  if(s){
+    document.getElementById('sOrigem').value=s.origem||'Consumidor Final';
+    document.getElementById('sEmpresa').value=s.empresa||'DMS';
+    document.getElementById('sTipo').value=s.tipo||'Qualidade';
+    document.getElementById('sStatus').value=s.status||'Aberta';
+  }else{
+    document.getElementById('sOrigem').selectedIndex=0;
+    document.getElementById('sEmpresa').selectedIndex=0;
+    document.getElementById('sTipo').selectedIndex=0;
+    document.getElementById('sStatus').selectedIndex=0;
+  }
+  _sacFotos = (s && Array.isArray(s.fotos)) ? s.fotos.slice() : (s && s.foto ? [{nome:'foto',data:s.foto}] : []);
+  _sacAcoes = (s && Array.isArray(s.acoes)) ? JSON.parse(JSON.stringify(s.acoes)) : [];
+  sacRenderFotos(); sacRenderAcoes();
   document.getElementById('sacModal').classList.add('open');
 }
-function editSAC(id){openSACModal(db.sac.find(s=>s.id===id));}
-function delSAC(id){if(confirm('Excluir SAC?')){db.sac=db.sac.filter(s=>s.id!==id);saveDB();renderSAC();}}
+function editSAC(id){openSACModal(db.sac.find(function(s){return s.id===id;}));}
+function delSAC(id){if(confirm('Excluir SAC?')){db.sac=db.sac.filter(function(s){return s.id!==id;});saveDB();renderSAC();}}
 function saveSAC(){
-  const id=document.getElementById('sacEditId').value;
-  const obj={id:id||uid(),num:'SAC-'+String(db.sac.length+1).padStart(3,'0'),data:v('sData'),cliente:v('sCliente'),prod:v('sProd'),lote:v('sLote'),desc:v('sDesc'),tipo:v('sTipo'),origem:v('sOrigem'),empresa:v('sEmpresa'),resp:v('sResp'),prazo:v('sPrazo'),acao:v('sAcao'),status:v('sStatus')};
-  if(id){const i=db.sac.findIndex(s=>s.id===id);db.sac[i]=obj;}else{db.sac.push(obj);}
+  var id=document.getElementById('sacEditId').value;
+  var pend=_sacAcoes.filter(function(a){return a.status!=='Concluida';}).length;
+  if(v('sStatus')==='Encerrada' && pend>0 && !confirm('Existem '+pend+' acao(oes) do plano nao concluida(s). Encerrar mesmo assim?')) return;
+  var ant=id?db.sac.find(function(s){return s.id===id;}):null;
+  var obj={
+    id:id||uid(),
+    num:(ant&&ant.num)||('SAC-'+String(db.sac.length+1).padStart(3,'0')),
+    data:v('sData'),cliente:v('sCliente'),prod:v('sProd'),lote:v('sLote'),nf:v('sNF'),
+    desc:v('sDesc'),causa:v('sCausa'),tipo:v('sTipo'),origem:v('sOrigem'),empresa:v('sEmpresa'),
+    resp:v('sResp'),prazo:v('sPrazo'),acao:v('sAcao'),status:v('sStatus'),
+    fotos:_sacFotos.slice(), acoes:JSON.parse(JSON.stringify(_sacAcoes))
+  };
+  if(id){var i=db.sac.findIndex(function(s){return s.id===id;});db.sac[i]=obj;}else{db.sac.push(obj);}
   saveDB();closeModal('sacModal');renderSAC();
 }
 
