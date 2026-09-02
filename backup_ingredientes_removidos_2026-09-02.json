@@ -1,0 +1,597 @@
+[
+ {
+  "indice": 25,
+  "nome": "Cacau em pó natural 8%",
+  "json": "{n:\"Cacau em pó natural 8%\",ref:\"Fralia\",src:\"Usuário\",kcal:438.0,cho:58.0,act:1.8,acad:0.0,ptn:20.0,gt:14.0,gs:8.1,tr:0.0,fi:37.0,na:21.0}"
+ },
+ {
+  "indice": 36,
+  "nome": "Aveia em pó",
+  "json": "{n:\"Aveia em pó\",ref:\"Cerealsita Express\",src:\"Usuário\",kcal:342.0,cho:54.0,act:0.0,acad:0.0,ptn:15.2,gt:7.0,gs:0.0,tr:0.0,fi:9.8,na:18.0}"
+ },
+ {
+  "indice": 37,
+  "nome": "Cenoura crua",
+  "json": "{n:\"Cenoura crua\",ref:\"Tucunduva\",src:\"Usuário\",kcal:43.0,cho:10.1,act:1.0,acad:1.0,ptn:1.04,gt:0.19,gs:0.03,tr:0.0,fi:2.6,na:35.0}"
+ },
+ {
+  "indice": 38,
+  "nome": "Chocolate em pó",
+  "json": "{n:\"Chocolate em pó\",ref:\"Nestlé\",src:\"Usuário\",kcal:350.0,cho:60.0,act:5.0,acad:5.0,ptn:11.5,gt:7.5,gs:4.5,tr:0.0,fi:14.5,na:0.0}"
+ },
+ {
+  "indice": 39,
+  "nome": "Chocolate em pó",
+  "json": "{n:\"Chocolate em pó\",ref:\"Mavalério\",src:\"Usuário\",kcal:335.0,cho:75.0,act:5.0,acad:5.0,ptn:7.5,gt:3.5,gs:2.0,tr:0.0,fi:10.0,na:15.0}"
+ },
+ {
+  "indice": 40,
+  "nome": "Choco Power Ball",
+  "json": "{n:\"Choco Power Ball\",ref:\"Mavalério\",src:\"Usuário\",kcal:488.0,cho:60.3333,act:3.3333,acad:3.3333,ptn:6.6667,gt:24.3333,gs:22.6667,tr:0.0,fi:2.0,na:63.3333}"
+ },
+ {
+  "indice": 41,
+  "nome": "Clara de ovo de galinha",
+  "json": "{n:\"Clara de ovo de galinha\",ref:\"Tucunduva\",src:\"Usuário\",kcal:50.0,cho:1.04,act:1.0,acad:1.0,ptn:10.5,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:164.0}"
+ },
+ {
+  "indice": 42,
+  "nome": "Cobertura sabor chocolate branco (barra)",
+  "json": "{n:\"Cobertura sabor chocolate branco (barra)\",ref:\"Garoto\",src:\"Usuário\",kcal:540.0,cho:58.0,act:4.0,acad:4.0,ptn:6.4,gt:32.8,gs:20.4,tr:0.0,fi:0.0,na:100.4}"
+ },
+ {
+  "indice": 43,
+  "nome": "Cobertura sabor chocolate 1/2 amargo (barra)",
+  "json": "{n:\"Cobertura sabor chocolate 1/2 amargo (barra)\",ref:\"Garoto\",src:\"Usuário\",kcal:496.0,cho:61.6,act:4.0,acad:4.0,ptn:4.4,gt:31.6,gs:19.2,tr:0.0,fi:7.6,na:0.0}"
+ },
+ {
+  "indice": 44,
+  "nome": "Cobertura sabor chocolate branco (barra)",
+  "json": "{n:\"Cobertura sabor chocolate branco (barra)\",ref:\"Harald\",src:\"Usuário\",kcal:576.0,cho:64.0,act:4.0,acad:4.0,ptn:1.6,gt:35.6,gs:18.4,tr:10.4,fi:0.0,na:38.0}"
+ },
+ {
+  "indice": 45,
+  "nome": "Cobertura sabor chocolate 1/2 amargo (barra)",
+  "json": "{n:\"Cobertura sabor chocolate 1/2 amargo (barra)\",ref:\"Harald\",src:\"Usuário\",kcal:568.0,cho:60.0,act:4.0,acad:4.0,ptn:2.4,gt:35.2,gs:12.4,tr:13.2,fi:3.6,na:0.0}"
+ },
+ {
+  "indice": 46,
+  "nome": "Coco ralado desidratado fino",
+  "json": "{n:\"Coco ralado desidratado fino\",ref:\"Extra Coco\",src:\"Usuário\",kcal:616.6667,cho:22.5,act:8.3333,acad:8.3333,ptn:6.6667,gt:55.0,gs:48.3333,tr:0.0,fi:10.0,na:0.0}"
+ },
+ {
+  "indice": 47,
+  "nome": "Coco ralado fresco",
+  "json": "{n:\"Coco ralado fresco\",ref:\"FrutCoco\",src:\"Usuário\",kcal:366.6667,cho:0.0,act:8.3333,acad:8.3333,ptn:0.0,gt:38.3333,gs:36.6667,tr:0.0,fi:10.0,na:0.0}"
+ },
+ {
+  "indice": 48,
+  "nome": "Coco ralado fresco (T)",
+  "json": "{n:\"Coco ralado fresco (T)\",ref:\"Tucunduva\",src:\"Usuário\",kcal:354.0,cho:15.2,act:1.0,acad:1.0,ptn:3.34,gt:33.5,gs:29.7,tr:0.0,fi:9.4,na:20.0}"
+ },
+ {
+  "indice": 49,
+  "nome": "Contra File",
+  "json": "{n:\"Contra File\",ref:\"TACO\",src:\"Usuário\",kcal:239.0,cho:0.0,act:1.0,acad:1.0,ptn:35.1,gt:10.0,gs:4.63,tr:0.0,fi:0.0,na:82.8}"
+ },
+ {
+  "indice": 50,
+  "nome": "Couscous Marroquino",
+  "json": "{n:\"Couscous Marroquino\",ref:\"-\",src:\"Usuário\",kcal:349.0,cho:69.9,act:1.0,acad:1.0,ptn:12.0,gt:1.6,gs:0.0,tr:0.0,fi:3.9,na:0.2}"
+ },
+ {
+  "indice": 51,
+  "nome": "Couve Flor",
+  "json": "{n:\"Couve Flor\",ref:\"TACO\",src:\"Usuário\",kcal:18.0,cho:2.5714,act:1.4286,acad:1.4286,ptn:1.8571,gt:0.1429,gs:0.0,tr:0.0,fi:2.2857,na:24.0}"
+ },
+ {
+  "indice": 52,
+  "nome": "Couve",
+  "json": "{n:\"Couve\",ref:\"TACO\",src:\"Usuário\",kcal:27.0,cho:4.3,act:1.0,acad:1.0,ptn:2.9,gt:0.5,gs:0.0,tr:0.0,fi:3.1,na:6.0}"
+ },
+ {
+  "indice": 53,
+  "nome": "Coxão Mole",
+  "json": "{n:\"Coxão Mole\",ref:\"TACO\",src:\"Usuário\",kcal:146.0,cho:0.0,act:1.0,acad:1.0,ptn:21.0,gt:6.1,gs:2.0,tr:0.0,fi:0.0,na:132.0}"
+ },
+ {
+  "indice": 55,
+  "nome": "Creme de avelã com cacau",
+  "json": "{n:\"Creme de avelã com cacau\",ref:\"Sweet company\",src:\"Usuário\",kcal:520.0,cho:55.0,act:5.0,acad:5.0,ptn:55.0,gt:30.0,gs:10.0,tr:0.0,fi:4.0,na:32.5}"
+ },
+ {
+  "indice": 58,
+  "nome": "Cremfil Classic Baunilha (cobertura pronta)",
+  "json": "{n:\"Cremfil Classic Baunilha (cobertura pronta)\",ref:\"Puratos\",src:\"Usuário\",kcal:270.0,cho:60.0,act:5.0,acad:5.0,ptn:0.0,gt:3.5,gs:1.5,tr:0.0,fi:0.0,na:115.0}"
+ },
+ {
+  "indice": 59,
+  "nome": "Cremfil Classic Chocolate (cobertura pronta)",
+  "json": "{n:\"Cremfil Classic Chocolate (cobertura pronta)\",ref:\"Puratos\",src:\"Usuário\",kcal:255.0,cho:60.0,act:5.0,acad:5.0,ptn:0.0,gt:1.0,gs:0.0,tr:0.0,fi:0.0,na:105.0}"
+ },
+ {
+  "indice": 62,
+  "nome": "Champignon",
+  "json": "{n:\"Champignon\",ref:\"-\",src:\"Usuário\",kcal:18.0,cho:1.8,act:2.0,acad:2.0,ptn:2.2,gt:0.0,gs:0.0,tr:0.0,fi:2.6,na:696.0}"
+ },
+ {
+  "indice": 64,
+  "nome": "Ervilha em conserva",
+  "json": "{n:\"Ervilha em conserva\",ref:\"Quero\",src:\"Usuário\",kcal:74.0,cho:13.4,act:1.0,acad:1.0,ptn:4.6,gt:0.4,gs:0.1,tr:0.0,fi:5.1,na:372.0}"
+ },
+ {
+  "indice": 65,
+  "nome": "Espagueti",
+  "json": "{n:\"Espagueti\",ref:\"Barilla\",src:\"Usuário\",kcal:350.0,cho:72.5,act:1.25,acad:1.25,ptn:11.5,gt:1.5,gs:0.25,tr:0.0,fi:3.0,na:0.0}"
+ },
+ {
+  "indice": 66,
+  "nome": "Espinafre cru",
+  "json": "{n:\"Espinafre cru\",ref:\"TACO\",src:\"Usuário\",kcal:16.0,cho:3.0,act:1.0,acad:1.0,ptn:2.0,gt:0.0,gs:0.0,tr:0.0,fi:2.1,na:6.0}"
+ },
+ {
+  "indice": 67,
+  "nome": "Extrato de Tomate",
+  "json": "{n:\"Extrato de Tomate\",ref:\"Knor\",src:\"Usuário\",kcal:66.6667,cho:14.0,act:3.3333,acad:3.3333,ptn:3.0,gt:0.0,gs:0.0,tr:0.0,fi:3.0,na:433.3333}"
+ },
+ {
+  "indice": 68,
+  "nome": "Farinha de trigo",
+  "json": "{n:\"Farinha de trigo\",ref:\"-\",src:\"Usuário\",kcal:350.0,cho:72.0,act:2.0,acad:2.0,ptn:10.0,gt:1.4,gs:0.0,tr:0.0,fi:2.8,na:0.0}"
+ },
+ {
+  "indice": 69,
+  "nome": "Farinha de trigo integral",
+  "json": "{n:\"Farinha de trigo integral\",ref:\"Dona Benta\",src:\"Usuário\",kcal:338.0,cho:68.0,act:2.0,acad:2.0,ptn:12.0,gt:2.0,gs:0.0,tr:0.0,fi:12.0,na:0.0}"
+ },
+ {
+  "indice": 70,
+  "nome": "Feijão Preto",
+  "json": "{n:\"Feijão Preto\",ref:\"-\",src:\"Usuário\",kcal:266.6667,cho:43.3333,act:3.3333,acad:3.3333,ptn:16.6667,gt:0.0,gs:0.0,tr:0.0,fi:20.0,na:0.0}"
+ },
+ {
+  "indice": 71,
+  "nome": "Feijão",
+  "json": "{n:\"Feijão\",ref:\"Broto Legal\",src:\"Usuário\",kcal:266.6667,cho:43.3333,act:3.3333,acad:3.3333,ptn:16.6667,gt:0.0,gs:0.0,tr:0.0,fi:16.6667,na:0.0}"
+ },
+ {
+  "indice": 72,
+  "nome": "Fermento em pó químico",
+  "json": "{n:\"Fermento em pó químico\",ref:\"Fleischmann\",src:\"Usuário\",kcal:127.0,cho:31.0,act:1.0,acad:1.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:15500.0}"
+ },
+ {
+  "indice": 73,
+  "nome": "Fermento biológico fresco",
+  "json": "{n:\"Fermento biológico fresco\",ref:\"Fleischmann\",src:\"Usuário\",kcal:104.0,cho:8.0,act:1.0,acad:1.0,ptn:14.5,gt:1.5,gs:0.3,tr:0.0,fi:4.5,na:17.0}"
+ },
+ {
+  "indice": 74,
+  "nome": "Filé mignon",
+  "json": "{n:\"Filé mignon\",ref:\"TACO\",src:\"Usuário\",kcal:143.0,cho:0.0,act:1.0,acad:1.0,ptn:21.6,gt:5.6,gs:2.9,tr:0.0,fi:0.0,na:49.0}"
+ },
+ {
+  "indice": 75,
+  "nome": "Frutas cristalizadas",
+  "json": "{n:\"Frutas cristalizadas\",ref:\"Gianoni e Cia\",src:\"Usuário\",kcal:293.3333,cho:73.3333,act:3.3333,acad:3.3333,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:126.6667}"
+ },
+ {
+  "indice": 76,
+  "nome": "Farinha de Milho",
+  "json": "{n:\"Farinha de Milho\",ref:\"Solar\",src:\"Usuário\",kcal:358.0,cho:79.0,act:0.0,acad:0.0,ptn:7.2,gt:1.5,gs:0.4,tr:0.0,fi:5.5,na:45.0}"
+ },
+ {
+  "indice": 77,
+  "nome": "Funghi Secci",
+  "json": "{n:\"Funghi Secci\",ref:\"2 imãos\",src:\"Usuário\",kcal:300.0,cho:75.0,act:10.0,acad:10.0,ptn:10.0,gt:0.0,gs:0.0,tr:0.0,fi:12.0,na:0.0}"
+ },
+ {
+  "indice": 78,
+  "nome": "Gelatina sem sabor",
+  "json": "{n:\"Gelatina sem sabor\",ref:\"Oetker\",src:\"Usuário\",kcal:344.8276,cho:0.0,act:34.4828,acad:34.4828,ptn:82.7586,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 79,
+  "nome": "Geléia de brilho chocolate (Harmony Cold)",
+  "json": "{n:\"Geléia de brilho chocolate (Harmony Cold)\",ref:\"Puratos\",src:\"Usuário\",kcal:282.0,cho:60.0,act:1.0,acad:1.0,ptn:1.3,gt:0.6,gs:0.4,tr:0.0,fi:1.7,na:39.0}"
+ },
+ {
+  "indice": 80,
+  "nome": "Geléia de brilho neutra (Harmony Cold)",
+  "json": "{n:\"Geléia de brilho neutra (Harmony Cold)\",ref:\"Puratos\",src:\"Usuário\",kcal:286.0,cho:63.0,act:1.0,acad:1.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:34.0}"
+ },
+ {
+  "indice": 81,
+  "nome": "Gema de ovo de galinha",
+  "json": "{n:\"Gema de ovo de galinha\",ref:\"Tucunduva\",src:\"Usuário\",kcal:358.0,cho:1.79,act:1.0,acad:1.0,ptn:16.8,gt:30.9,gs:9.55,tr:0.0,fi:0.0,na:43.0}"
+ },
+ {
+  "indice": 82,
+  "nome": "Gema de ovo pasteurizada",
+  "json": "{n:\"Gema de ovo pasteurizada\",ref:\"Fleischmann\",src:\"Usuário\",kcal:303.0,cho:1.1,act:1.0,acad:1.0,ptn:15.5,gt:25.6,gs:7.8,tr:0.0,fi:0.0,na:67.0}"
+ },
+ {
+  "indice": 83,
+  "nome": "Glutamato monossódico",
+  "json": "{n:\"Glutamato monossódico\",ref:\"Ajinomoto\",src:\"Usuário\",kcal:0.0,cho:0.0,act:100.0,acad:100.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:12300.0}"
+ },
+ {
+  "indice": 84,
+  "nome": "Goiabada",
+  "json": "{n:\"Goiabada\",ref:\"Predilecta\",src:\"Usuário\",kcal:337.5,cho:80.0,act:2.5,acad:2.5,ptn:0.0,gt:2.0,gs:0.75,tr:0.0,fi:4.0,na:25.0}"
+ },
+ {
+  "indice": 86,
+  "nome": "Gotas de chocolate branco",
+  "json": "{n:\"Gotas de chocolate branco\",ref:\"Arcor\",src:\"Usuário\",kcal:543.0,cho:57.0,act:1.0,acad:1.0,ptn:9.0,gt:31.0,gs:18.0,tr:0.2,fi:0.0,na:131.0}"
+ },
+ {
+  "indice": 87,
+  "nome": "Gotas de chocolate ao leite",
+  "json": "{n:\"Gotas de chocolate ao leite\",ref:\"Arcor\",src:\"Usuário\",kcal:492.0,cho:68.0,act:4.0,acad:4.0,ptn:2.0,gt:27.6,gs:16.4,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 88,
+  "nome": "Gradina Panetone",
+  "json": "{n:\"Gradina Panetone\",ref:\"Gradina\",src:\"Usuário\",kcal:430.0,cho:66.6667,act:3.3333,acad:3.3333,ptn:5.6667,gt:16.0,gs:6.6667,tr:0.0,fi:2.3333,na:486.6667}"
+ },
+ {
+  "indice": 89,
+  "nome": "Granulado",
+  "json": "{n:\"Granulado\",ref:\"Mavalério\",src:\"Usuário\",kcal:476.0,cho:78.0,act:4.0,acad:4.0,ptn:0.8,gt:18.0,gs:6.0,tr:6.8,fi:1.6,na:19.2}"
+ },
+ {
+  "indice": 91,
+  "nome": "Kamix",
+  "json": "{n:\"Kamix\",ref:\"-\",src:\"Usuário\",kcal:266.0,cho:0.99,act:1.0,acad:1.0,ptn:0.0,gt:22.0,gs:4.0,tr:0.0,fi:0.0,na:1.6}"
+ },
+ {
+  "indice": 94,
+  "nome": "Leite de coco",
+  "json": "{n:\"Leite de coco\",ref:\"Sergipe\",src:\"Usuário\",kcal:12.0,cho:0.1,act:0.5,acad:0.5,ptn:0.0,gt:1.25,gs:1.0,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 103,
+  "nome": "Lentilha",
+  "json": "{n:\"Lentilha\",ref:\"Yoki\",src:\"Usuário\",kcal:348.3333,cho:58.3333,act:1.6667,acad:1.6667,ptn:28.3333,gt:1.0,gs:0.0,tr:0.0,fi:3.0,na:170.0}"
+ },
+ {
+  "indice": 104,
+  "nome": "Limão (suco)",
+  "json": "{n:\"Limão (suco)\",ref:\"Tucunduva\",src:\"Usuário\",kcal:25.0,cho:8.64,act:1.0,acad:1.0,ptn:0.38,gt:0.13,gs:0.04,tr:0.0,fi:0.4,na:1.0}"
+ },
+ {
+  "indice": 105,
+  "nome": "Linhaça",
+  "json": "{n:\"Linhaça\",ref:\"-\",src:\"Usuário\",kcal:500.0,cho:28.6667,act:6.6667,acad:6.6667,ptn:19.3333,gt:34.0,gs:0.0,tr:0.0,fi:28.0,na:0.0}"
+ },
+ {
+  "indice": 106,
+  "nome": "Lingüiça calabresa",
+  "json": "{n:\"Lingüiça calabresa\",ref:\"Sadia\",src:\"Usuário\",kcal:308.0,cho:0.0,act:2.0,acad:2.0,ptn:14.0,gt:28.0,gs:7.0,tr:0.0,fi:0.0,na:1200.0}"
+ },
+ {
+  "indice": 107,
+  "nome": "Lombo salgado",
+  "json": "{n:\"Lombo salgado\",ref:\"-\",src:\"Usuário\",kcal:137.7778,cho:0.0,act:1.1111,acad:1.1111,ptn:21.1111,gt:5.5556,gs:2.0,tr:0.0,fi:0.0,na:3993.3333}"
+ },
+ {
+  "indice": 108,
+  "nome": "Macarrão penne com ovos",
+  "json": "{n:\"Macarrão penne com ovos\",ref:\"-\",src:\"Usuário\",kcal:347.5,cho:72.5,act:1.25,acad:1.25,ptn:11.25,gt:1.375,gs:0.625,tr:0.0,fi:25.0,na:2.75}"
+ },
+ {
+  "indice": 109,
+  "nome": "Macarrão de arroz Urbano",
+  "json": "{n:\"Macarrão de arroz Urbano\",ref:\"Urbano\",src:\"Usuário\",kcal:363.75,cho:80.0,act:1.25,acad:1.25,ptn:7.0,gt:1.75,gs:0.625,tr:0.0,fi:0.875,na:0.0}"
+ },
+ {
+  "indice": 110,
+  "nome": "Mandioquinha crua",
+  "json": "{n:\"Mandioquinha crua\",ref:\"TACO\",src:\"Usuário\",kcal:102.0,cho:24.0,act:2.0,acad:2.0,ptn:1.8,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 111,
+  "nome": "Maracujá",
+  "json": "{n:\"Maracujá\",ref:\"TACO\",src:\"Usuário\",kcal:68.0,cho:13.3,act:1.0,acad:1.0,ptn:2.0,gt:2.1,gs:0.0,tr:0.0,fi:1.1,na:2.0}"
+ },
+ {
+  "indice": 112,
+  "nome": "Maionese",
+  "json": "{n:\"Maionese\",ref:\"Soya\",src:\"Usuário\",kcal:170.0,cho:8.8,act:1.0,acad:1.0,ptn:0.0,gt:15.0,gs:2.6,tr:0.0,fi:0.0,na:877.0}"
+ },
+ {
+  "indice": 114,
+  "nome": "Margarina bolo",
+  "json": "{n:\"Margarina bolo\",ref:\"Gradina\",src:\"Usuário\",kcal:730.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:43.0,tr:0.0,fi:0.0,na:320.0}"
+ },
+ {
+  "indice": 115,
+  "nome": "Margarina para folhados",
+  "json": "{n:\"Margarina para folhados\",ref:\"Bunge\",src:\"Usuário\",kcal:730.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:30.0,tr:7.0,fi:0.0,na:750.0}"
+ },
+ {
+  "indice": 116,
+  "nome": "Margarina uso geral",
+  "json": "{n:\"Margarina uso geral\",ref:\"Amélia\",src:\"Usuário\",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:18.0,tr:20.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 117,
+  "nome": "Margarina Qualy sem sal",
+  "json": "{n:\"Margarina Qualy sem sal\",ref:\"Qualy\",src:\"Usuário\",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:23.0,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 118,
+  "nome": "Margarina Qualy COM sal",
+  "json": "{n:\"Margarina Qualy COM sal\",ref:\"Qualy\",src:\"Usuário\",kcal:720.0,cho:0.0,act:10.0,acad:10.0,ptn:0.0,gt:80.0,gs:23.0,tr:0.0,fi:0.0,na:600.0}"
+ },
+ {
+  "indice": 119,
+  "nome": "Massa verde de lasanha",
+  "json": "{n:\"Massa verde de lasanha\",ref:\"Familia\",src:\"Usuário\",kcal:125.0,cho:25.0,act:1.0,acad:1.0,ptn:4.0,gt:1.0,gs:0.0,tr:0.0,fi:1.0,na:10.0}"
+ },
+ {
+  "indice": 120,
+  "nome": "Milho verde cru",
+  "json": "{n:\"Milho verde cru\",ref:\"TACO\",src:\"Usuário\",kcal:138.0,cho:28.6,act:1.0,acad:1.0,ptn:6.6,gt:0.6,gs:0.0,tr:0.0,fi:3.9,na:1.0}"
+ },
+ {
+  "indice": 121,
+  "nome": "Milho verde",
+  "json": "{n:\"Milho verde\",ref:\"Quero\",src:\"Usuário\",kcal:99.2308,cho:19.2308,act:0.7692,acad:0.7692,ptn:3.2308,gt:1.1538,gs:0.0,tr:0.0,fi:2.0769,na:466.1538}"
+ },
+ {
+  "indice": 124,
+  "nome": "Mistura para bolos e muffins de chocolate",
+  "json": "{n:\"Mistura para bolos e muffins de chocolate\",ref:\"Puratos\",src:\"Usuário\",kcal:378.125,cho:71.875,act:3.125,acad:3.125,ptn:6.875,gt:6.875,gs:0.625,tr:0.0,fi:4.0625,na:625.0}"
+ },
+ {
+  "indice": 125,
+  "nome": "Mistura para creme de confeiteiro",
+  "json": "{n:\"Mistura para creme de confeiteiro\",ref:\"Puratos\",src:\"Usuário\",kcal:385.0,cho:95.0,act:5.0,acad:5.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 126,
+  "nome": "Morango",
+  "json": "{n:\"Morango\",ref:\"TACO\",src:\"Usuário\",kcal:30.0,cho:6.8,act:1.0,acad:1.0,ptn:0.9,gt:0.3,gs:0.0,tr:0.0,fi:1.7,na:0.0}"
+ },
+ {
+  "indice": 127,
+  "nome": "Mostarda",
+  "json": "{n:\"Mostarda\",ref:\"Hellmans\",src:\"Usuário\",kcal:225.0,cho:12.5,act:8.3333,acad:8.3333,ptn:0.0,gt:0.0,gs:3.3333,tr:0.0,fi:8.3333,na:625.0}"
+ },
+ {
+  "indice": 128,
+  "nome": "Mostarda Folha",
+  "json": "{n:\"Mostarda Folha\",ref:\"TACO\",src:\"Usuário\",kcal:18.0,cho:3.2,act:1.0,acad:1.0,ptn:2.1,gt:0.2,gs:0.0,tr:0.0,fi:1.9,na:3.0}"
+ },
+ {
+  "indice": 129,
+  "nome": "Molho de tomate",
+  "json": "{n:\"Molho de tomate\",ref:\"-\",src:\"Usuário\",kcal:50.0,cho:9.6667,act:1.6667,acad:1.6667,ptn:1.0,gt:0.0,gs:0.0,tr:0.0,fi:1.1667,na:518.3333}"
+ },
+ {
+  "indice": 130,
+  "nome": "Molho Ingles",
+  "json": "{n:\"Molho Ingles\",ref:\"Kenji\",src:\"Usuário\",kcal:36.3636,cho:10.0,act:9.0909,acad:9.0909,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:2490.9091}"
+ },
+ {
+  "indice": 131,
+  "nome": "Nozes",
+  "json": "{n:\"Nozes\",ref:\"TACO\",src:\"Usuário\",kcal:620.0,cho:18.4,act:1.0,acad:1.0,ptn:14.0,gt:59.4,gs:0.0,tr:0.0,fi:7.2,na:5.0}"
+ },
+ {
+  "indice": 132,
+  "nome": "Oleo de soja",
+  "json": "{n:\"Oleo de soja\",ref:\"SOYA\",src:\"Usuário\",kcal:830.7692,cho:0.0,act:7.6923,acad:7.6923,ptn:0.0,gt:92.3077,gs:16.1538,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 133,
+  "nome": "Orégano",
+  "json": "{n:\"Orégano\",ref:\"Lince\",src:\"Usuário\",kcal:400.0,cho:60.0,act:100.0,acad:100.0,ptn:10.0,gt:10.0,gs:0.0,tr:0.0,fi:40.0,na:20.0}"
+ },
+ {
+  "indice": 134,
+  "nome": "Ovo",
+  "json": "{n:\"Ovo\",ref:\"Tucunduva\",src:\"Usuário\",kcal:149.0,cho:1.23,act:1.0,acad:1.0,ptn:12.5,gt:10.0,gs:3.1,tr:0.0,fi:0.0,na:126.0}"
+ },
+ {
+  "indice": 135,
+  "nome": "Ovo pasteurizado",
+  "json": "{n:\"Ovo pasteurizado\",ref:\"Fleischmann\",src:\"Usuário\",kcal:148.0,cho:1.05,act:1.0,acad:1.0,ptn:11.95,gt:10.2,gs:3.15,tr:0.0,fi:0.0,na:133.0}"
+ },
+ {
+  "indice": 136,
+  "nome": "Palmito",
+  "json": "{n:\"Palmito\",ref:\"-\",src:\"Usuário\",kcal:30.0,cho:3.8,act:2.0,acad:2.0,ptn:2.8,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:750.0}"
+ },
+ {
+  "indice": 137,
+  "nome": "Pamix (pré mistura para panetone)",
+  "json": "{n:\"Pamix (pré mistura para panetone)\",ref:\"Puratos\",src:\"Usuário\",kcal:616.0,cho:53.0,act:1.0,acad:1.0,ptn:0.8,gt:43.0,gs:14.0,tr:13.0,fi:0.5,na:154.0}"
+ },
+ {
+  "indice": 138,
+  "nome": "Pão Sírio",
+  "json": "{n:\"Pão Sírio\",ref:\"Pita Bread\",src:\"Usuário\",kcal:278.0,cho:58.0,act:2.0,acad:2.0,ptn:9.0,gt:1.4,gs:0.0,tr:0.0,fi:2.6,na:440.0}"
+ },
+ {
+  "indice": 139,
+  "nome": "Patinho bovino",
+  "json": "{n:\"Patinho bovino\",ref:\"TACO\",src:\"Usuário\",kcal:150.0,cho:0.0,act:1.0,acad:1.0,ptn:21.0,gt:6.0,gs:2.0,tr:0.0,fi:0.0,na:130.0}"
+ },
+ {
+  "indice": 140,
+  "nome": "Peito de peru light",
+  "json": "{n:\"Peito de peru light\",ref:\"Perdigão\",src:\"Usuário\",kcal:120.0,cho:2.0,act:2.0,acad:2.0,ptn:22.0,gt:2.0,gs:0.0,tr:0.0,fi:2.0,na:720.0}"
+ },
+ {
+  "indice": 141,
+  "nome": "Peito de frango",
+  "json": "{n:\"Peito de frango\",ref:\"TACO\",src:\"Usuário\",kcal:101.0,cho:0.0,act:1.0,acad:1.0,ptn:23.0,gt:1.0,gs:0.0,tr:0.0,fi:0.0,na:56.0}"
+ },
+ {
+  "indice": 142,
+  "nome": "Pimentão verde",
+  "json": "{n:\"Pimentão verde\",ref:\"Tucunduva\",src:\"Usuário\",kcal:27.0,cho:6.44,act:1.0,acad:1.0,ptn:0.89,gt:0.19,gs:0.03,tr:0.0,fi:1.73,na:2.0}"
+ },
+ {
+  "indice": 143,
+  "nome": "Polvilho azedo",
+  "json": "{n:\"Polvilho azedo\",ref:\"Yoki\",src:\"Usuário\",kcal:345.0,cho:85.0,act:5.0,acad:5.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:28.0}"
+ },
+ {
+  "indice": 144,
+  "nome": "Presunto cozido s/ capa",
+  "json": "{n:\"Presunto cozido s/ capa\",ref:\"Sadia\",src:\"Usuário\",kcal:92.5,cho:0.0,act:2.5,acad:2.5,ptn:15.0,gt:3.25,gs:1.0,tr:0.0,fi:0.0,na:1037.5}"
+ },
+ {
+  "indice": 145,
+  "nome": "Pré mistura para bolo capuccino",
+  "json": "{n:\"Pré mistura para bolo capuccino\",ref:\"Festpan\",src:\"Usuário\",kcal:424.0,cho:76.0,act:4.0,acad:4.0,ptn:3.2,gt:12.0,gs:3.2,tr:3.6,fi:0.0,na:80.0}"
+ },
+ {
+  "indice": 146,
+  "nome": "Pré mistura para bolo pé de moleque",
+  "json": "{n:\"Pré mistura para bolo pé de moleque\",ref:\"Festpan\",src:\"Usuário\",kcal:456.0,cho:68.0,act:4.0,acad:4.0,ptn:4.4,gt:19.2,gs:4.4,tr:4.4,fi:2.0,na:92.0}"
+ },
+ {
+  "indice": 147,
+  "nome": "Pré mistura para bolo de coco",
+  "json": "{n:\"Pré mistura para bolo de coco\",ref:\"Festpan\",src:\"Usuário\",kcal:416.0,cho:88.0,act:4.0,acad:4.0,ptn:3.2,gt:11.2,gs:3.2,tr:3.2,fi:0.0,na:76.0}"
+ },
+ {
+  "indice": 148,
+  "nome": "Pré mistura para brownie",
+  "json": "{n:\"Pré mistura para brownie\",ref:\"Festpan\",src:\"Usuário\",kcal:440.0,cho:72.0,act:4.0,acad:4.0,ptn:4.0,gt:16.0,gs:4.4,tr:4.4,fi:2.4,na:88.0}"
+ },
+ {
+  "indice": 149,
+  "nome": "Pré mistura para brioche",
+  "json": "{n:\"Pré mistura para brioche\",ref:\"Emulzint\",src:\"Usuário\",kcal:381.0,cho:73.0,act:1.0,acad:1.0,ptn:8.6,gt:6.0,gs:0.0,tr:0.0,fi:2.3,na:599.0}"
+ },
+ {
+  "indice": 150,
+  "nome": "Pré mistura para panetone Tegral Soft´r",
+  "json": "{n:\"Pré mistura para panetone Tegral Soft´r\",ref:\"Puratos\",src:\"Usuário\",kcal:441.0,cho:68.0,act:1.0,acad:1.0,ptn:7.3,gt:15.0,gs:3.8,tr:3.6,fi:1.7,na:344.0}"
+ },
+ {
+  "indice": 151,
+  "nome": "Pré mistura para pão de fibras",
+  "json": "{n:\"Pré mistura para pão de fibras\",ref:\"Puratos\",src:\"Usuário\",kcal:330.0,cho:64.0,act:1.0,acad:1.0,ptn:14.0,gt:1.5,gs:0.0,tr:0.0,fi:8.0,na:790.0}"
+ },
+ {
+  "indice": 152,
+  "nome": "Pré mistura para pão macio de chocolate",
+  "json": "{n:\"Pré mistura para pão macio de chocolate\",ref:\"Puratos\",src:\"Usuário\",kcal:396.0,cho:74.0,act:2.0,acad:2.0,ptn:9.2,gt:5.8,gs:1.2,tr:0.0,fi:2.8,na:400.0}"
+ },
+ {
+  "indice": 153,
+  "nome": "Pré mistura para pão de batata",
+  "json": "{n:\"Pré mistura para pão de batata\",ref:\"Bonasse\",src:\"Usuário\",kcal:340.0,cho:72.0,act:1.0,acad:1.0,ptn:8.0,gt:6.1,gs:1.6,tr:1.6,fi:2.0,na:590.0}"
+ },
+ {
+  "indice": 154,
+  "nome": "Pré mistura para pão vitaminado",
+  "json": "{n:\"Pré mistura para pão vitaminado\",ref:\"Puratos\",src:\"Usuário\",kcal:375.0,cho:69.0,act:1.0,acad:1.0,ptn:7.9,gt:7.5,gs:3.5,tr:0.0,fi:2.3,na:0.0}"
+ },
+ {
+  "indice": 155,
+  "nome": "Pré mistura Tegral pão macio",
+  "json": "{n:\"Pré mistura Tegral pão macio\",ref:\"Puratos\",src:\"Usuário\",kcal:388.0,cho:73.0,act:1.0,acad:1.0,ptn:8.8,gt:6.0,gs:1.3,tr:1.5,fi:2.3,na:575.0}"
+ },
+ {
+  "indice": 165,
+  "nome": "Ponta de agulha",
+  "json": "{n:\"Ponta de agulha\",ref:\"Wikipedia\",src:\"Usuário\",kcal:218.7,cho:1.15,act:1.0,acad:1.0,ptn:21.43,gt:14.26,gs:6.28,tr:0.0,fi:0.0,na:63.12}"
+ },
+ {
+  "indice": 167,
+  "nome": "Salmão cru",
+  "json": "{n:\"Salmão cru\",ref:\"Tucunduva\",src:\"Usuário\",kcal:116.0,cho:0.0,act:1.0,acad:1.0,ptn:19.9,gt:3.46,gs:0.56,tr:0.0,fi:0.0,na:67.0}"
+ },
+ {
+  "indice": 168,
+  "nome": "Salsinha",
+  "json": "{n:\"Salsinha\",ref:\"Tucunduva\",src:\"Usuário\",kcal:36.0,cho:6.34,act:1.0,acad:1.0,ptn:2.98,gt:0.79,gs:0.13,tr:0.0,fi:4.1,na:56.0}"
+ },
+ {
+  "indice": 169,
+  "nome": "Satin creme cake neutro",
+  "json": "{n:\"Satin creme cake neutro\",ref:\"Puratos\",src:\"Usuário\",kcal:380.0,cho:44.0,act:2.0,acad:2.0,ptn:6.0,gt:20.0,gs:3.0,tr:0.0,fi:2.0,na:280.0}"
+ },
+ {
+  "indice": 170,
+  "nome": "Semente de girassol",
+  "json": "{n:\"Semente de girassol\",ref:\"Jasmine\",src:\"Usuário\",kcal:667.5,cho:20.0,act:2.5,acad:2.5,ptn:17.0,gt:57.5,gs:6.0,tr:0.0,fi:11.25,na:395.0}"
+ },
+ {
+  "indice": 171,
+  "nome": "Shimeji",
+  "json": "{n:\"Shimeji\",ref:\"2 imãos\",src:\"Usuário\",kcal:26.0,cho:3.4,act:2.0,acad:2.0,ptn:5.0,gt:0.0,gs:0.0,tr:0.0,fi:2.4,na:26.0}"
+ },
+ {
+  "indice": 172,
+  "nome": "Shitake",
+  "json": "{n:\"Shitake\",ref:\"2 imãos\",src:\"Usuário\",kcal:38.0,cho:5.6,act:2.0,acad:2.0,ptn:3.6,gt:0.0,gs:0.0,tr:0.0,fi:0.4,na:36.0}"
+ },
+ {
+  "indice": 173,
+  "nome": "Shoyu Sakura tradicional",
+  "json": "{n:\"Shoyu Sakura tradicional\",ref:\"Sakura\",src:\"Usuário\",kcal:60.0,cho:12.0,act:6.6667,acad:6.6667,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:5700.0}"
+ },
+ {
+  "indice": 174,
+  "nome": "Sobrecoxa de frango",
+  "json": "{n:\"Sobrecoxa de frango\",ref:\"TACO\",src:\"Usuário\",kcal:194.0,cho:0.0,act:1.0,acad:1.0,ptn:17.0,gt:14.0,gs:3.5,tr:0.0,fi:0.0,na:82.0}"
+ },
+ {
+  "indice": 175,
+  "nome": "Suco concentrado de goiaba",
+  "json": "{n:\"Suco concentrado de goiaba\",ref:\"Qualitá\",src:\"Usuário\",kcal:24.0,cho:5.0,act:2.0,acad:2.0,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:2.6,na:0.0}"
+ },
+ {
+  "indice": 176,
+  "nome": "Suco concentrado de maracujá",
+  "json": "{n:\"Suco concentrado de maracujá\",ref:\"Qualitá\",src:\"Usuário\",kcal:68.1818,cho:13.6364,act:4.5455,acad:4.5455,ptn:0.0,gt:0.0,gs:0.0,tr:0.0,fi:0.0,na:0.0}"
+ },
+ {
+  "indice": 177,
+  "nome": "Suco de laranja sem açúcar",
+  "json": "{n:\"Suco de laranja sem açúcar\",ref:\"Tucunduva\",src:\"Usuário\",kcal:45.0,cho:10.41,act:1.0,acad:1.0,ptn:0.7,gt:0.2,gs:0.02,tr:0.0,fi:0.2,na:1.0}"
+ },
+ {
+  "indice": 178,
+  "nome": "Suco de limão",
+  "json": "{n:\"Suco de limão\",ref:\"TACO\",src:\"Usuário\",kcal:35.0,cho:5.4,act:1.0,acad:1.0,ptn:0.35,gt:0.1,gs:0.02,tr:0.0,fi:0.1,na:0.5}"
+ },
+ {
+  "indice": 179,
+  "nome": "Tomate salada",
+  "json": "{n:\"Tomate salada\",ref:\"Tucunduva\",src:\"Usuário\",kcal:21.0,cho:5.1,act:1.0,acad:1.0,ptn:0.8,gt:0.0,gs:0.0,tr:0.0,fi:2.3,na:5.0}"
+ },
+ {
+  "indice": 180,
+  "nome": "Tomate seco",
+  "json": "{n:\"Tomate seco\",ref:\"Arco Bello\",src:\"Usuário\",kcal:145.0,cho:19.75,act:2.5,acad:2.5,ptn:6.5,gt:4.5,gs:0.0,tr:0.0,fi:5.25,na:500.0}"
+ },
+ {
+  "indice": 181,
+  "nome": "Trigo em grão",
+  "json": "{n:\"Trigo em grão\",ref:\"-\",src:\"Usuário\",kcal:331.1111,cho:71.1111,act:2.2222,acad:2.2222,ptn:15.5556,gt:1.7778,gs:0.0,tr:0.0,fi:8.6667,na:93.3333}"
+ },
+ {
+  "indice": 182,
+  "nome": "Uva Passa",
+  "json": "{n:\"Uva Passa\",ref:\"Prume\",src:\"Usuário\",kcal:300.0,cho:80.0,act:3.3333,acad:3.3333,ptn:3.3333,gt:0.0,gs:0.0,tr:0.0,fi:4.0,na:0.0}"
+ },
+ {
+  "indice": 183,
+  "nome": "Vagem",
+  "json": "{n:\"Vagem\",ref:\"TACO\",src:\"Usuário\",kcal:25.0,cho:5.2,act:1.0,acad:1.0,ptn:1.8,gt:0.2,gs:0.0,tr:0.0,fi:2.4,na:0.0}"
+ },
+ {
+  "indice": 184,
+  "nome": "Xerém de caju",
+  "json": "{n:\"Xerém de caju\",ref:\"Lince\",src:\"Usuário\",kcal:580.0,cho:0.0,act:10.0,acad:10.0,ptn:20.0,gt:20.0,gs:0.0,tr:0.0,fi:0.0,na:0.0}"
+ }
+]
