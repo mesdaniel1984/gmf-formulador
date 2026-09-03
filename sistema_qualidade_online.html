@@ -914,7 +914,10 @@
       </div>
       <div class="form-row">
         <div class="form-group"><label>Produto/Processo</label><input type="text" id="ncProd"></div>
+        <div class="form-group"><label>Lote</label><input type="text" id="ncLote" placeholder="lote do produto ou da MP"></div>
         <div class="form-group"><label>Responsável</label><input type="text" id="ncResp"></div>
+      </div>
+      <div class="form-row">
         <div class="form-group"><label>Prazo Tratativa</label><input type="date" id="ncPrazo"></div>
       </div>
       <div class="form-row">
@@ -2312,12 +2315,23 @@ function renderNCs(){
       ${n.acao?`<div class="nc-meta">⚙️ Ação: ${n.acao}</div>`:''}
     </div>`).join('')||'<div class="alert info">Nenhuma NC registrada.</div>';
 }
+// B3 — numero baseado no maior ja usado, nao na quantidade de registros.
+// Excluir um registro deixa de liberar um numero para reuso.
+function proximoNum(lista, prefixo){
+  const maior = (lista||[]).reduce((m,o) => {
+    const n = parseInt(String((o && o.num) || '').replace(/\D/g,''), 10);
+    return (isFinite(n) && n > m) ? n : m;
+  }, 0);
+  return prefixo + String(maior + 1).padStart(3,'0');
+}
+
 function openNCModal(n){
   document.getElementById('ncModalTitle').textContent=n?'Editar NC':'Nova Não Conformidade';
   document.getElementById('ncEditId').value=n?n.id:'';
   document.getElementById('ncData').value=n?n.data:today();
   document.getElementById('ncDesc').value=n?n.desc:'';
   document.getElementById('ncProd').value=n?n.prod:'';
+  { const el=document.getElementById('ncLote'); if(el) el.value = n ? (n.lote||'') : ''; }
   document.getElementById('ncResp').value=n?n.resp:'';
   document.getElementById('ncPrazo').value=n?n.prazo:'';
   document.getElementById('ncCausa').value=n?n.causa:'';
@@ -2348,8 +2362,8 @@ function saveNC(){
   ncSeq++;
   const obj={
     id:id||uid(),
-    num:id?(db.ncs.find(n=>n.id===id)||{}).num||('NC-'+String(db.ncs.length+1).padStart(3,'0')):'NC-'+String(db.ncs.length+1).padStart(3,'0'),
-    data:v('ncData'),tipo:v('ncTipoI'),empresa:v('ncEmpresa'),
+    num:id?((db.ncs.find(n=>n.id===id)||{}).num||proximoNum(db.ncs,'NC-')):proximoNum(db.ncs,'NC-'),
+    data:v('ncData'),tipo:v('ncTipoI'),empresa:v('ncEmpresa'),lote:v('ncLote'),
     desc:v('ncDesc'),prod:v('ncProd'),resp:v('ncResp'),prazo:v('ncPrazo'),
     causa:v('ncCausa'),acao:v('ncAcao'),status:v('ncStatusI'),
     qtdReprocesso:parseFloat(document.getElementById('ncQtdReprocesso')?.value)||0,
@@ -2538,7 +2552,7 @@ function saveSAC(){
   var ant=id?db.sac.find(function(s){return s.id===id;}):null;
   var obj={
     id:id||uid(),
-    num:(ant&&ant.num)||('SAC-'+String(db.sac.length+1).padStart(3,'0')),
+    num:(ant&&ant.num)||proximoNum(db.sac,'SAC-'),
     data:v('sData'),cliente:v('sCliente'),prod:v('sProd'),lote:v('sLote'),nf:v('sNF'),
     desc:v('sDesc'),causa:v('sCausa'),tipo:v('sTipo'),origem:v('sOrigem'),empresa:v('sEmpresa'),
     resp:v('sResp'),prazo:v('sPrazo'),acao:v('sAcao'),status:v('sStatus'),
