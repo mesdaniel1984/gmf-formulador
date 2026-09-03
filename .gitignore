@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# copias de seguranca locais (o git ja guarda o historico)
+.sgq_backup_*.html
+*.bak
+
+# saidas de trabalho que nao pertencem ao repositorio
+Claude outputs/
+
+# dependencias de teste
+node_modules/
+test-results/
+playwright-report/
