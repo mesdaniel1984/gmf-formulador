@@ -1319,22 +1319,72 @@ async function loadDB(){
 
 function saveDB(){ clearTimeout(_saveTimer); _saveTimer = setTimeout(pushChanges, 350); }
 
+// ---- B0: nenhuma alteracao e marcada como salva antes do sucesso ----
+let _pendRetry = null;
+let _falhasSave = 0;
+
+function temPendencias(){
+  return Object.keys(db).some(k => _snap[k] !== JSON.stringify(db[k]));
+}
+
+function avisoSync(msg, tipo){
+  let b = document.getElementById('avisoSync');
+  if(!b){
+    b = document.createElement('div');
+    b.id = 'avisoSync';
+    b.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;padding:11px 16px;'
+      + 'font:600 13px/1.4 system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#fff;'
+      + 'text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.25)';
+    document.body.appendChild(b);
+  }
+  b.style.background = (tipo === 'erro') ? '#b91c1c' : '#b45309';
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+function limparAvisoSync(){ const b = document.getElementById('avisoSync'); if(b) b.style.display = 'none'; }
+
+async function sessaoViva(){
+  try{
+    const { data, error } = await sb.auth.getSession();
+    return !error && !!(data && data.session);
+  }catch(e){ return false; }
+}
+
 async function pushChanges(){
   if(!sb) return;
-  const rows = [];
+  const rows = [], novos = {};
   Object.keys(db).forEach(k => {
     const s = JSON.stringify(db[k]);
-    if(_snap[k] !== s){ rows.push({ key:k, data:db[k], updated_at:new Date().toISOString() }); _snap[k] = s; }
+    if(_snap[k] !== s){ rows.push({ key:k, data:db[k], updated_at:new Date().toISOString() }); novos[k] = s; }
   });
   if(!rows.length) return;
   _lastLocalSave = Date.now();
   setConn('saving');
   try{
     const { error } = await sb.from(TABLE).upsert(rows, { onConflict:'key' });
-    setConn(error ? 'error' : 'ok');
-    if(error) console.error('Erro ao salvar:', error);
-  }catch(e){ setConn('error'); console.error(e); }
+    if(error) throw error;
+    Object.keys(novos).forEach(k => { _snap[k] = novos[k]; });
+    _falhasSave = 0;
+    setConn('ok');
+    limparAvisoSync();
+  }catch(e){
+    setConn('error');
+    _falhasSave++;
+    console.error('Erro ao salvar — alteracoes mantidas pendentes:', e);
+    if(await sessaoViva()){
+      avisoSync('Falha ao salvar. Tentando novamente — nao feche esta aba.', 'aviso');
+    } else {
+      avisoSync('Sua sessao expirou. As alteracoes NAO foram salvas. Entre novamente para grava-las.', 'erro');
+      try{ showGate('login', 'Sua sessao expirou. Entre novamente para salvar as alteracoes pendentes.'); }catch(_){}
+    }
+    clearTimeout(_pendRetry);
+    _pendRetry = setTimeout(pushChanges, Math.min(30000, 5000 * _falhasSave));
+  }
 }
+
+window.addEventListener('beforeunload', function(ev){
+  try{ if(temPendencias()){ ev.preventDefault(); ev.returnValue = ''; return ''; } }catch(e){}
+});
 
 function subscribeRealtime(){
   sb.channel('sqmparis_rt')
@@ -1373,6 +1423,7 @@ async function doLoginUI(){
   try{
     const { error } = await sb.auth.signInWithPassword({ email, password:pass });
     if(error){ err.textContent='E-mail ou senha invalidos.'; err.style.display='block'; btn.disabled=false; btn.textContent='Entrar'; return; }
+    if(typeof temPendencias === 'function' && temPendencias()){ await pushChanges(); }
     await startApp();
   }catch(e){ err.textContent='Nao foi possivel conectar ao banco.'; err.style.display='block'; btn.disabled=false; btn.textContent='Entrar'; }
 }
