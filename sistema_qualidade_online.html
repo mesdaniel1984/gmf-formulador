@@ -889,6 +889,7 @@
 <div class="modal-bg" id="ncModal">
   <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
     <h2 id="ncModalTitle">Nova Não Conformidade</h2>
+    <div id="ncAutoria" style="display:none;font-size:12px;color:#64748b;margin:-6px 0 10px"></div>
     <input type="hidden" id="ncEditId">
 
     <!-- Abas -->
@@ -1074,6 +1075,7 @@
 <div class="modal-bg" id="sacModal">
   <div class="modal" style="max-width:680px;max-height:90vh;overflow-y:auto">
     <h2 id="sacModalTitle">Nova Reclamação SAC</h2>
+    <div id="sacAutoria" style="display:none;font-size:12px;color:#64748b;margin:-6px 0 10px"></div>
     <input type="hidden" id="sacEditId">
     <div class="form-row">
       <div class="form-group"><label>Data</label><input type="date" id="sData"></div>
@@ -1355,6 +1357,7 @@ async function sessaoViva(){
 
 async function pushChanges(){
   if(!sb) return;
+  marcarAutoria();
   const rows = [], novos = {};
   Object.keys(db).forEach(k => {
     const s = JSON.stringify(db[k]);
@@ -2315,6 +2318,48 @@ function renderNCs(){
       ${n.acao?`<div class="nc-meta">⚙️ Ação: ${n.acao}</div>`:''}
     </div>`).join('')||'<div class="alert info">Nenhuma NC registrada.</div>';
 }
+// B7 — quem alterou o que. Marcado num unico ponto, antes de cada gravacao:
+// compara cada item com o que ja estava sincronizado e carimba os que mudaram.
+let _usuarioAtual = '';
+
+function _semMarcas(o){
+  const c = Object.assign({}, o);
+  delete c._por; delete c._em;
+  return JSON.stringify(c);
+}
+
+function marcarAutoria(){
+  if(!_usuarioAtual) return;
+  const agora = new Date().toISOString();
+  Object.keys(db).forEach(k => {
+    const atual = db[k];
+    if(!Array.isArray(atual)) return;
+    let anterior = [];
+    try{ const a = JSON.parse(_snap[k] || '[]'); if(Array.isArray(a)) anterior = a; }catch(e){}
+    const antes = {};
+    anterior.forEach(o => { if(o && typeof o === 'object' && o.id != null) antes[o.id] = _semMarcas(o); });
+    atual.forEach(o => {
+      if(!o || typeof o !== 'object') return;
+      if(antes[o.id] !== _semMarcas(o)){ o._por = _usuarioAtual; o._em = agora; }
+    });
+  });
+}
+
+function textoAutoria(o){
+  if(!o || !o._por) return '';
+  let quando = o._em || '';
+  try{ quando = new Date(o._em).toLocaleString('pt-BR'); }catch(e){}
+  return 'Última alteração por ' + o._por + (quando ? ' em ' + quando : '');
+}
+
+function mostrarAutoria(elId, obj){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const t = textoAutoria(obj);
+  el.textContent = t;
+  el.style.display = t ? '' : 'none';
+}
+
 // B3 — numero baseado no maior ja usado, nao na quantidade de registros.
 // Excluir um registro deixa de liberar um numero para reuso.
 function proximoNum(lista, prefixo){
@@ -2327,6 +2372,7 @@ function proximoNum(lista, prefixo){
 
 function openNCModal(n){
   document.getElementById('ncModalTitle').textContent=n?'Editar NC':'Nova Não Conformidade';
+  mostrarAutoria('ncAutoria', n);
   document.getElementById('ncEditId').value=n?n.id:'';
   document.getElementById('ncData').value=n?n.data:today();
   document.getElementById('ncDesc').value=n?n.desc:'';
@@ -2523,6 +2569,7 @@ function sacRenderAcoes(){
 
 function openSACModal(s){
   document.getElementById('sacModalTitle').textContent=s?'Editar Reclamacao':'Nova Reclamacao SAC';
+  mostrarAutoria('sacAutoria', s);
   document.getElementById('sacEditId').value=s?s.id:'';
   document.getElementById('sData').value=s?s.data:today();
   var map={sCliente:'cliente',sProd:'prod',sLote:'lote',sNF:'nf',sDesc:'desc',sCausa:'causa',sResp:'resp',sPrazo:'prazo',sAcao:'acao'};
@@ -2910,7 +2957,7 @@ async function startApp(){
     renderDashboard();
     subscribeRealtime();
     setConn('ok');
-    try{ const { data:{ user } } = await sb.auth.getUser(); const ub=document.getElementById('userBadge'); if(ub&&user) ub.textContent='\uD83D\uDC64 '+(user.email||''); }catch(e){}
+    try{ const { data:{ user } } = await sb.auth.getUser(); _usuarioAtual = (user && user.email) || ''; const ub=document.getElementById('userBadge'); if(ub&&user) ub.textContent='\uD83D\uDC64 '+(user.email||''); }catch(e){}
     const lo=document.getElementById('logoutBtn'); if(lo) lo.style.display='inline-block';
     hideGate();
   }catch(e){
