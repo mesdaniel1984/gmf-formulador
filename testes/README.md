@@ -72,3 +72,16 @@ encerrar em "A apurar" e recusado.
 Este teste encontrou um defeito que ja existia: `openNCModal(null)` nao zerava tipo,
 empresa e status, entao uma NC nova herdava os valores da NC aberta antes. Corrigido
 no mesmo commit.
+
+## central-gestao.js
+
+A Central de Gestao da Qualidade — a tela executiva, construida a partir do painel
+proposto em 06/09. A regra que ela implementa: todo numero sai de dado que existe,
+e indicador sem fonte NAO vira zero — vai para o bloco "o que esta tela ainda nao
+mostra", com o motivo.
+
+23 verificacoes, em dois estados: com a base vazia (cada quadro tem de explicar por
+que esta vazio, em vez de ficar em branco) e com dado real (contagem, ordenacao por
+urgencia e soma de perdas).
+
+    node testes/central-gestao.js

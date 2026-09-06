@@ -225,7 +225,8 @@
 </div>
 
 <div class="nav">
-  <button class="active" onclick="showSection('dashboard')">📊 Dashboard</button>
+  <button class="active" onclick="showSection('central')">🎯 Central de Gestão</button>
+  <button onclick="showSection('dashboard')">📊 Dashboard</button>
   <button onclick="showSection('documentos')">📄 Documentos (POPs/RQs)</button>
   <button onclick="showSection('indicadores')">📈 Indicadores</button>
   <button onclick="showSection('fornecedores')">🏢 Fornecedores</button>
@@ -240,7 +241,38 @@
 <div class="main">
 
 <!-- ===== DASHBOARD ===== -->
-<div class="section active" id="dashboard">
+<div class="section active" id="central">
+  <div class="section-title">Central de Gestão da Qualidade</div>
+  <div class="section-sub" id="centralSub"></div>
+
+  <div class="cards" id="centralCards"></div>
+
+  <div class="panel">
+    <h3>Central de Ação — o que precisa de alguém hoje</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Prioridade</th><th>Tipo</th><th>Referência</th><th>O que é</th><th>Responsável</th><th>Prazo</th></tr></thead>
+      <tbody id="centralAcoes"></tbody>
+    </table></div>
+  </div>
+
+  <div class="charts-grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+    <div class="chart-box"><h4>Conformidade documental</h4><div id="centralCompliance"></div></div>
+    <div class="chart-box"><h4>Onde a falha ocorre</h4><div id="centralEtapas"></div></div>
+    <div class="chart-box"><h4>Perdas registradas nas não conformidades</h4><div id="centralPerdas"></div></div>
+    <div class="chart-box"><h4>Fornecedores</h4><div id="centralForn"></div></div>
+  </div>
+
+  <div class="panel">
+    <h3>O que esta tela ainda não mostra</h3>
+    <div style="font-size:13px;color:var(--text-light);margin-bottom:12px">
+      Cada item abaixo existe no painel proposto e não está aqui porque a fonte ainda não tem dado.
+      Mostrar zero seria dizer que está tudo bem, e não é isso que zero significa.
+    </div>
+    <div id="centralFalta" style="display:grid;gap:8px"></div>
+  </div>
+</div>
+
+<div class="section" id="dashboard">
   <div class="section-title">Dashboard de Qualidade</div>
   <div class="section-sub" id="dashDate"></div>
 
@@ -1612,8 +1644,9 @@ function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav button').forEach((b,i) => b.classList.remove('active'));
-  const idx = ['dashboard','documentos','indicadores','fornecedores','analises','ncs','sac','licencas','treinamentos','planoacao'].indexOf(id);
-  document.querySelectorAll('.nav button')[idx].classList.add('active');
+  const idx = ['central','dashboard','documentos','indicadores','fornecedores','analises','ncs','sac','licencas','treinamentos','planoacao'].indexOf(id);
+  if (idx >= 0) document.querySelectorAll('.nav button')[idx].classList.add('active');
+  if (id === 'central') renderCentral();
   if (id === 'dashboard') renderDashboard();
   if (id === 'documentos') renderDocs();
   if (id === 'indicadores') renderIndicadores();
@@ -1644,6 +1677,176 @@ function docBadge(v) {
 }
 
 // ===== DASHBOARD =====
+// ===================================================================
+// CENTRAL DE GESTAO DA QUALIDADE
+// -------------------------------------------------------------------
+// Regra desta tela: todo numero sai de dado que existe. Indicador sem
+// fonte nao vira zero — vai para o bloco "o que esta tela ainda nao
+// mostra", com o motivo. Zero e "nao temos dado" nao sao a mesma coisa,
+// e um painel todo verde sobre tabela vazia mente para quem olha rapido.
+// ===================================================================
+const CENTRAL_FALTA = [
+  ['Produção, OP, ronda e PCC',       'vivem no sistema de rondas, que ainda não conversa com o SGQ'],
+  ['Custo da não qualidade em reais', 'as quantidades de perda já são gravadas na NC — falta o preço por quilo'],
+  ['Controle estatístico de umidade', 'a ronda mede temperatura, pressão, peso, Brix e pH; umidade não é medida'],
+  ['FPY, yield, scrap e downtime',    'não existe medição de processo em nenhum dos dois sistemas'],
+  ['Tempo até a primeira resposta',   'o SAC guarda o prazo combinado, não a hora do primeiro retorno ao cliente'],
+  ['Score de fornecedor',             'o cadastro existe; a nota e os critérios ainda não foram definidos']
+];
+
+function _cNum(v){ return isFinite(v) ? v : 0; }
+function _cLinha(rot, valor, total, cor){
+  const pct = total ? Math.round(100*valor/total) : 0;
+  return '<div style="margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">'
+    + '<span>'+_sacEsc(rot)+'</span><b>'+valor+(total?' <span style="color:var(--text-light);font-weight:400">de '+total+'</span>':'')+'</b></div>'
+    + '<div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden">'
+    + '<div style="height:100%;width:'+pct+'%;background:'+cor+';border-radius:99px"></div></div></div>';
+}
+function _cVazio(msg){
+  return '<div style="font-size:12.5px;color:var(--text-light);padding:10px 0">'+_sacEsc(msg)+'</div>';
+}
+
+function renderCentral(){
+  const hoje = new Date();
+  document.getElementById('centralSub').textContent =
+    hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+    + ' · MF Paris · DMS · Profi';
+
+  const docs  = db.docs || [], lic = db.licencas || [], trein = db.treinamentos || [];
+  const ncs   = db.ncs || [],  sac = db.sac || [],      pa    = db.planoacao || [];
+
+  // ---------- faixa de saude ----------
+  const docsVenc  = docs.filter(d => d.status!=='Obsoleto' && daysUntil(d.proxRev) <= 30).length;
+  const licVenc   = lic.filter(l => daysUntil(l.venc) <= 60).length;
+  const licVencida= lic.filter(l => daysUntil(l.venc) < 0).length;
+  const treinVenc = trein.filter(t => t.status && t.status !== 'Concluído' && t.status !== 'Concluida').length;
+  const ncAberta  = ncs.filter(n => n.status !== 'Fechada').length;
+  const sacAberto = sac.filter(x => x.status !== 'Encerrada').length;
+  const paAtras   = pa.filter(x => x.status !== 'Concluída' && daysUntil(x.prazo) < 0).length;
+
+  document.getElementById('centralCards').innerHTML = [
+    ['Não conformidades em aberto', ncAberta,  ncAberta>0?'red':'green'],
+    ['Reclamações em aberto',       sacAberto, sacAberto>0?'yellow':'green'],
+    ['Licenças vencidas',           licVencida,licVencida>0?'red':'green'],
+    ['Licenças vencendo em 60d',    licVenc,   licVenc>0?'yellow':'green'],
+    ['Documentos a revisar em 30d', docsVenc,  docsVenc>0?'yellow':'green'],
+    ['Ações do plano atrasadas',    paAtras,   paAtras>0?'red':'green']
+  ].map(function(c){
+    return '<div class="card '+c[2]+'"><div class="num">'+c[1]+'</div><div class="lbl">'+c[0]+'</div></div>';
+  }).join('');
+
+  // ---------- central de acao ----------
+  const itens = [];
+  const push = (dias, tipo, ref, oque, quem, prazo, ir) => itens.push({dias,tipo,ref,oque,quem,prazo,ir});
+
+  lic.forEach(function(l){
+    const d = daysUntil(l.venc);
+    if(d <= 60) push(d,'Licença', l.doc+' · '+l.empresa,
+      d<0 ? 'Vencida há '+Math.abs(d)+' dias' : 'Vence em '+d+' dias',
+      l.orgao||'—', l.venc, 'licencas');
+  });
+  docs.forEach(function(dc){
+    if(dc.status==='Obsoleto') return;
+    const d = daysUntil(dc.proxRev);
+    if(d <= 30) push(d,'Documento', (dc.codigo||'')+' · '+(dc.titulo||''),
+      d<0 ? 'Revisão vencida há '+Math.abs(d)+' dias' : 'Revisão vence em '+d+' dias',
+      dc.responsavel||'—', dc.proxRev, 'documentos');
+  });
+  pa.forEach(function(x){
+    const d = daysUntil(x.prazo);
+    if(x.status!=='Concluída' && d <= 7) push(d,'Ação', x.origem||'Plano de ação',
+      x.oque||'—', x.quem||'—', x.prazo, 'planoacao');
+  });
+  ncs.forEach(function(n){
+    if(n.status==='Fechada') return;
+    const d = n.prazo ? daysUntil(n.prazo) : 999;
+    if(d <= 7 || !n.etapa || n.etapa==='A apurar')
+      push(d,'NC', n.num||'NC',
+        (!n.etapa || n.etapa==='A apurar') ? 'Etapa da falha ainda não apurada'
+          : (d<0 ? 'Tratativa vencida há '+Math.abs(d)+' dias' : 'Tratativa vence em '+d+' dias'),
+        n.resp||'—', n.prazo, 'ncs');
+  });
+  sac.forEach(function(x){
+    if(x.status==='Encerrada') return;
+    const d = x.prazo ? daysUntil(x.prazo) : 999;
+    if(d <= 7 || !x.etapa || x.etapa==='A apurar')
+      push(d,'SAC', x.num||'SAC',
+        (!x.etapa || x.etapa==='A apurar') ? 'Etapa da falha ainda não apurada'
+          : (d<0 ? 'Resposta vencida há '+Math.abs(d)+' dias' : 'Resposta vence em '+d+' dias'),
+        x.resp||'—', x.prazo, 'sac');
+  });
+
+  itens.sort(function(a,b){ return a.dias - b.dias; });
+  document.getElementById('centralAcoes').innerHTML = itens.length
+    ? itens.slice(0,25).map(function(i){
+        const p = i.dias < 0 ? ['Crítico','red'] : i.dias <= 7 ? ['Alta','warn'] : ['Média','gray'];
+        return '<tr>'
+          + '<td><span class="badge '+(p[1]==='red'?'danger':p[1])+'">'+p[0]+'</span></td>'
+          + '<td>'+_sacEsc(i.tipo)+'</td>'
+          + '<td><a href="#" onclick="showSection(\''+i.ir+'\');return false" style="color:var(--primary);font-weight:600">'+_sacEsc(i.ref)+'</a></td>'
+          + '<td>'+_sacEsc(i.oque)+'</td>'
+          + '<td style="color:var(--text-light)">'+_sacEsc(i.quem)+'</td>'
+          + '<td>'+(i.prazo?fmtDate(i.prazo):'—')+'</td>'
+          + '</tr>';
+      }).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--text-light);padding:22px">Nada vencendo nos próximos dias.</td></tr>';
+
+  // ---------- conformidade documental ----------
+  document.getElementById('centralCompliance').innerHTML =
+      _cLinha('Documentos em dia', docs.filter(function(d){return d.status!=='Obsoleto' && daysUntil(d.proxRev)>30;}).length, docs.length, 'var(--green)')
+    + _cLinha('Licenças em dia',   lic.filter(function(l){return daysUntil(l.venc)>60;}).length, lic.length, 'var(--green)')
+    + _cLinha('Treinamentos concluídos', trein.length - treinVenc, trein.length, 'var(--green)')
+    + (docs.length+lic.length+trein.length===0 ? _cVazio('Nenhum documento, licença ou treinamento cadastrado ainda.') : '');
+
+  // ---------- onde a falha ocorre ----------
+  const porEtapa = {};
+  ncs.concat(sac).forEach(function(r){ const e = r.etapa || 'A apurar'; porEtapa[e] = (porEtapa[e]||0)+1; });
+  const totEt = ncs.length + sac.length;
+  const chaves = Object.keys(porEtapa).sort(function(a,b){ return porEtapa[b]-porEtapa[a]; });
+  document.getElementById('centralEtapas').innerHTML = totEt
+    ? chaves.map(function(k){
+        return _cLinha(k, porEtapa[k], totEt, k==='A apurar' ? 'var(--yellow)' : 'var(--primary)');
+      }).join('')
+      + (porEtapa['A apurar'] === totEt
+          ? '<div style="font-size:12px;color:var(--text-light);margin-top:6px">O campo é novo. Este gráfico só passa a dizer alguma coisa quando a Qualidade classificar os registros na análise.</div>'
+          : '')
+    : _cVazio('Nenhuma NC ou reclamação registrada ainda.');
+
+  // ---------- perdas ----------
+  const soma = function(campo){ return ncs.reduce(function(t,n){ return t + (parseFloat(n[campo])||0); },0); };
+  const reproc = soma('qtdReprocesso'), descarte = soma('qtdDescarte'), emb = soma('qtdPerdaEmb');
+  document.getElementById('centralPerdas').innerHTML = (reproc+descarte+emb) > 0
+    ? '<div style="display:grid;gap:14px">'
+      + '<div><div style="font-size:26px;font-weight:700">'+descarte.toLocaleString('pt-BR')+' <span style="font-size:14px;font-weight:400;color:var(--text-light)">kg</span></div><div style="font-size:12px;color:var(--text-light)">produto descartado</div></div>'
+      + '<div><div style="font-size:26px;font-weight:700">'+reproc.toLocaleString('pt-BR')+' <span style="font-size:14px;font-weight:400;color:var(--text-light)">kg</span></div><div style="font-size:12px;color:var(--text-light)">reprocesso</div></div>'
+      + '<div><div style="font-size:26px;font-weight:700">'+emb.toLocaleString('pt-BR')+' <span style="font-size:14px;font-weight:400;color:var(--text-light)">un</span></div><div style="font-size:12px;color:var(--text-light)">embalagem perdida</div></div>'
+      + '<div style="font-size:12px;color:var(--text-light);border-top:1px solid var(--border);padding-top:8px">O valor em reais entra quando houver preço por kg cadastrado. A quantidade já é registrada em cada NC.</div>'
+      + '</div>'
+    : _cVazio('Nenhuma perda registrada em NC até agora. Os campos de reprocesso, descarte e embalagem existem no formulário da não conformidade.');
+
+  // ---------- fornecedores ----------
+  const forn = {};
+  sac.forEach(function(x){ if(x.fornecedor) forn[x.fornecedor] = (forn[x.fornecedor]||0)+1; });
+  ncs.forEach(function(n){ if(n.tipo==='Externa Fornecedor' && n.prod) forn[n.prod] = (forn[n.prod]||0)+1; });
+  const fk = Object.keys(forn).sort(function(a,b){ return forn[b]-forn[a]; });
+  const totForn = (db.fornecedores||[]).length;
+  document.getElementById('centralForn').innerHTML =
+      '<div style="font-size:26px;font-weight:700">'+totForn+'</div>'
+    + '<div style="font-size:12px;color:var(--text-light);margin-bottom:14px">fornecedores cadastrados</div>'
+    + (fk.length
+        ? '<div style="font-size:12.5px;font-weight:600;margin-bottom:8px">Com ocorrência registrada</div>'
+          + fk.slice(0,6).map(function(k){ return _cLinha(k, forn[k], fk.reduce(function(t,x){return t+forn[x];},0), 'var(--red)'); }).join('')
+        : _cVazio('Nenhuma ocorrência ligada a fornecedor ainda. O campo de fornecedor no SAC é novo — ele é o que passa a permitir esta contagem.'));
+
+  // ---------- o que falta ----------
+  document.getElementById('centralFalta').innerHTML = CENTRAL_FALTA.map(function(x){
+    return '<div style="display:flex;gap:10px;align-items:baseline;font-size:13px">'
+      + '<span style="color:var(--text-light);flex:none">—</span>'
+      + '<span><b>'+_sacEsc(x[0])+'</b> <span style="color:var(--text-light)">· '+_sacEsc(x[1])+'</span></span></div>';
+  }).join('');
+}
+
 function renderDashboard() {
   const now = new Date();
   document.getElementById('dashDate').textContent = now.toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -3106,6 +3309,7 @@ async function startApp(){
     await loadDB();
     await seedOnce();
     patchAnalPlanos();
+    renderCentral();
     renderDashboard();
     subscribeRealtime();
     setConn('ok');
