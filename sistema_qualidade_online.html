@@ -560,7 +560,7 @@
       <table>
         <thead>
           <tr><th>Nº</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Descrição</th>
-          <th>Tipo</th><th>Origem</th><th>Responsável</th><th>Prazo</th><th>Status</th><th>Ações</th></tr>
+          <th>Tipo</th><th>Etapa da falha</th><th>NC</th><th>Origem</th><th>Responsável</th><th>Prazo</th><th>Status</th><th>Ações</th></tr>
         </thead>
         <tbody id="sacTable"></tbody>
       </table>
@@ -920,6 +920,8 @@
       </div>
       <div class="form-row">
         <div class="form-group"><label>Prazo Tratativa</label><input type="date" id="ncPrazo"></div>
+        <div class="form-group"><label>Etapa da falha</label><select id="ncEtapa"></select></div>
+        <div class="form-group"><label>SAC vinculado</label><select id="ncSacId"></select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Qtd. Reprocesso (kg/un)</label><input type="number" step="0.01" id="ncQtdReprocesso" placeholder="0"></div>
@@ -1111,6 +1113,24 @@
     </div>
     <div class="form-row">
       <div class="form-group" style="grid-column:1/-1"><label>Causa Raiz</label><textarea id="sCausa" rows="2" placeholder="Descreva a causa raiz identificada..."></textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Etapa da falha</label>
+        <select id="sEtapa"></select>
+        <div style="font-size:11px;color:#64748b;margin-top:3px">Onde a falha ocorreu. Quem preenche &eacute; a Qualidade, na an&aacute;lise.</div>
+      </div>
+      <div class="form-group"><label>Fornecedor</label>
+        <input type="text" id="sFornecedor" placeholder="s&oacute; se a falha veio da mat&eacute;ria-prima">
+      </div>
+      <div class="form-group"><label>NC vinculada</label>
+        <select id="sNcId"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <button type="button" class="btn btn-outline" onclick="abrirNCdoSAC()">Abrir NC a partir deste SAC</button>
+        <span id="sNcAviso" style="font-size:12px;color:#64748b;margin-left:10px"></span>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Prazo Resposta</label><input type="date" id="sPrazo"></div>
@@ -2362,6 +2382,66 @@ function mostrarAutoria(elId, obj){
 
 // B3 — numero baseado no maior ja usado, nao na quantidade de registros.
 // Excluir um registro deixa de liberar um numero para reuso.
+// ===== ETAPA DA FALHA (B4) =====
+// Lista fechada em 06/09/2026 com a direcao. Responde uma pergunta so: ONDE a falha
+// aconteceu — nao o que aconteceu, nao de quem e a culpa.
+// "Ficha tecnica / especificacao" existe separada de "Processo / producao" porque a
+// producao executa exatamente a ficha do OMIE: fica errada la e a linha reproduz o erro.
+// Os donos sao papeis, nao pessoas — pessoa muda de funcao, papel nao.
+const ETAPAS_FALHA = [
+  'A apurar',
+  'Recebimento de MP',
+  'Armazenagem de MP',
+  'Ficha t\u00e9cnica / especifica\u00e7\u00e3o',
+  'Processo / produ\u00e7\u00e3o',
+  'Envase e embalagem',
+  'Rotulagem e cadastro',
+  'Armazenagem de produto acabado',
+  'Expedi\u00e7\u00e3o e transporte',
+  'Manuseio no cliente'
+];
+const ETAPA_DONO = {
+  'Recebimento de MP':'Qualidade',
+  'Armazenagem de MP':'Log\u00edstica',
+  'Ficha t\u00e9cnica / especifica\u00e7\u00e3o':'Qualidade',
+  'Processo / produ\u00e7\u00e3o':'Produ\u00e7\u00e3o',
+  'Envase e embalagem':'Produ\u00e7\u00e3o',
+  'Rotulagem e cadastro':'Qualidade',
+  'Armazenagem de produto acabado':'Log\u00edstica',
+  'Expedi\u00e7\u00e3o e transporte':'Log\u00edstica',
+  'Manuseio no cliente':'Comercial + Qualidade'
+};
+function preencherSelectEtapas(idSel, valor){
+  var el=document.getElementById(idSel); if(!el) return;
+  el.innerHTML = ETAPAS_FALHA.map(function(e){
+    var dono = ETAPA_DONO[e] ? ' \u2014 ' + ETAPA_DONO[e] : '';
+    return '<option value="'+_sacEsc(e)+'">'+_sacEsc(e+dono)+'</option>';
+  }).join('');
+  el.value = (valor && ETAPAS_FALHA.indexOf(valor)>-1) ? valor : 'A apurar';
+}
+
+// ===== VINCULO SAC <-> NC (B6) =====
+// O parentesco passa a existir no dado, nao so na cabeca de quem abriu. Gravado nos
+// dois sentidos e mantido consistente: um SAC aponta para no maximo uma NC e vice-versa.
+function vincularSACNC(sacId, ncId){
+  (db.sac||[]).forEach(function(x){ if(ncId && x.ncId===ncId && x.id!==sacId) x.ncId=''; });
+  (db.ncs||[]).forEach(function(x){ if(sacId && x.sacId===sacId && x.id!==ncId) x.sacId=''; });
+  var s=(db.sac||[]).filter(function(x){return x.id===sacId;})[0];
+  if(s) s.ncId = ncId||'';
+  var n=(db.ncs||[]).filter(function(x){return x.id===ncId;})[0];
+  if(n) n.sacId = sacId||'';
+}
+function preencherSelectVinculo(idSel, lista, valor, rotuloVazio){
+  var el=document.getElementById(idSel); if(!el) return;
+  var ops = ['<option value="">'+rotuloVazio+'</option>'];
+  (lista||[]).slice().reverse().forEach(function(o){
+    var t = (o.num||'?') + ' \u00b7 ' + String(o.desc||o.prod||'').slice(0,45);
+    ops.push('<option value="'+_sacEsc(o.id)+'">'+_sacEsc(t)+'</option>');
+  });
+  el.innerHTML = ops.join('');
+  el.value = valor || '';
+}
+
 function proximoNum(lista, prefixo){
   const maior = (lista||[]).reduce((m,o) => {
     const n = parseInt(String((o && o.num) || '').replace(/\D/g,''), 10);
@@ -2398,6 +2478,17 @@ function openNCModal(n){
   ['método','máquina','mão-de-obra','material','meio-ambiente','medição'].forEach(cat=>{const el=document.getElementById('nc-ishikawa-'+cat);if(el)el.value=n&&n.ishikawa?n.ishikawa[cat]||'':'';});
   const brain=document.getElementById('ncBrainstorming');if(brain)brain.value=n?n.brainstorming||'':'';
   if(n){document.getElementById('ncTipoI').value=n.tipo;document.getElementById('ncEmpresa').value=n.empresa;document.getElementById('ncStatusI').value=n.status;}
+  else{
+    // Achado pelo teste do B4/B6: a NC nova herdava tipo, empresa e status da NC
+    // aberta antes. O modal do SAC ja zerava; o da NC nao. Com a regra nova de
+    // "nao fecha em A apurar", um status 'Fechada' herdado faz o salvar recusar
+    // sem que a pessoa entenda por que.
+    document.getElementById('ncTipoI').selectedIndex=0;
+    document.getElementById('ncEmpresa').selectedIndex=0;
+    document.getElementById('ncStatusI').selectedIndex=0;
+  }
+  preencherSelectEtapas('ncEtapa', n ? n.etapa : '');
+  preencherSelectVinculo('ncSacId', db.sac, n ? n.sacId : '', 'nenhum');
   ncTab('geral');
   document.getElementById('ncModal').classList.add('open');
 }
@@ -2405,6 +2496,11 @@ function editNC(id){openNCModal(db.ncs.find(n=>n.id===id));}
 function delNC(id){if(confirm('Excluir NC?')){db.ncs=db.ncs.filter(n=>n.id!==id);saveDB();renderNCs();}}
 function saveNC(){
   const id=document.getElementById('ncEditId').value;
+  // Mesma regra do SAC: nao bloqueia registrar, bloqueia FECHAR.
+  if(v('ncStatusI')==='Fechada' && v('ncEtapa')==='A apurar'){
+    alert('Para fechar, informe a etapa da falha. Uma NC nao fecha em "A apurar".');
+    return;
+  }
   ncSeq++;
   const obj={
     id:id||uid(),
@@ -2412,6 +2508,8 @@ function saveNC(){
     data:v('ncData'),tipo:v('ncTipoI'),empresa:v('ncEmpresa'),lote:v('ncLote'),
     desc:v('ncDesc'),prod:v('ncProd'),resp:v('ncResp'),prazo:v('ncPrazo'),
     causa:v('ncCausa'),acao:v('ncAcao'),status:v('ncStatusI'),
+    etapa:v('ncEtapa')||'A apurar',
+    sacId:(id?((db.ncs.find(n=>n.id===id)||{}).sacId||''):''),
     qtdReprocesso:parseFloat(document.getElementById('ncQtdReprocesso')?.value)||0,
     qtdPerdaEmb:parseFloat(document.getElementById('ncQtdPerdaEmb')?.value)||0,
     qtdDescarte:parseFloat(document.getElementById('ncQtdDescarte')?.value)||0,
@@ -2421,6 +2519,7 @@ function saveNC(){
     brainstorming:document.getElementById('ncBrainstorming')?.value||'',
   };
   if(id){const i=db.ncs.findIndex(n=>n.id===id);db.ncs[i]=obj;}else{db.ncs.push(obj);}
+  vincularSACNC(v('ncSacId'), obj.id);
   saveDB();closeModal('ncModal');renderNCs();
 }
 
@@ -2446,6 +2545,8 @@ function renderSAC(){
       +'<td>'+(s.prod||'')+'</td>'
       +'<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(s.desc||'')+foto+'</td>'
       +'<td><span class="badge blue">'+(s.tipo||'')+'</span></td>'
+      +'<td>'+etapaBadge(s.etapa)+'</td>'
+      +'<td>'+ncDoSAC(s)+'</td>'
       +'<td>'+(s.origem||'')+'</td>'
       +'<td>'+(s.resp||'—')+'</td>'
       +'<td>'+fmtDate(s.prazo)+'</td>'
@@ -2453,7 +2554,17 @@ function renderSAC(){
       +'<td><button class="btn btn-sm btn-outline" onclick="editSAC(\''+s.id+'\')">✏️</button>'
       +'<button class="btn btn-sm btn-danger" onclick="delSAC(\''+s.id+'\')">🗑</button></td>'
     +'</tr>';
-  }).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--text-light);padding:24px">Nenhuma reclamacao registrada.</td></tr>';
+  }).join('')||'<tr><td colspan="13" style="text-align:center;color:var(--text-light);padding:24px">Nenhuma reclamacao registrada.</td></tr>';
+}
+function etapaBadge(e){
+  if(!e || e==='A apurar') return '<span class="badge warn">A apurar</span>';
+  return '<span class="badge blue" title="Dono: '+_sacEsc(ETAPA_DONO[e]||'')+'">'+_sacEsc(e)+'</span>';
+}
+function ncDoSAC(s){
+  if(!s || !s.ncId) return '<span style="color:#94a3b8">\u2014</span>';
+  var n=(db.ncs||[]).filter(function(x){return x.id===s.ncId;})[0];
+  if(!n) return '<span style="color:#94a3b8">\u2014</span>';
+  return '<a href="#" onclick="showSection(\'ncs\');editNC(\''+n.id+'\');return false" style="color:#1e3a8a;font-weight:700">'+_sacEsc(n.num||'NC')+'</a>';
 }
 // ---- helpers SAC ----
 let _sacFotos = [];
@@ -2585,6 +2696,11 @@ function openSACModal(s){
     document.getElementById('sTipo').selectedIndex=0;
     document.getElementById('sStatus').selectedIndex=0;
   }
+  preencherSelectEtapas('sEtapa', s ? s.etapa : '');
+  { var elF=document.getElementById('sFornecedor'); if(elF) elF.value = s ? (s.fornecedor||'') : ''; }
+  preencherSelectVinculo('sNcId', db.ncs, s ? s.ncId : '', 'nenhuma');
+  { var av=document.getElementById('sNcAviso');
+    if(av) av.textContent = s ? '' : 'Salve o SAC antes de abrir uma NC a partir dele.'; }
   _sacFotos = (s && Array.isArray(s.fotos)) ? s.fotos.slice() : (s && s.foto ? [{nome:'foto',data:s.foto}] : []);
   _sacAcoes = (s && Array.isArray(s.acoes)) ? JSON.parse(JSON.stringify(s.acoes)) : [];
   sacRenderFotos(); sacRenderAcoes();
@@ -2596,6 +2712,12 @@ function saveSAC(){
   var id=document.getElementById('sacEditId').value;
   var pend=_sacAcoes.filter(function(a){return a.status!=='Concluida';}).length;
   if(v('sStatus')==='Encerrada' && pend>0 && !confirm('Existem '+pend+' acao(oes) do plano nao concluida(s). Encerrar mesmo assim?')) return;
+  // Regra 4 da lista de etapas: nao bloqueia registrar, bloqueia ENCERRAR.
+  // Um SAC que fecha em "A apurar" e um SAC que nunca respondeu onde a falha ocorreu.
+  if(v('sStatus')==='Encerrada' && v('sEtapa')==='A apurar'){
+    alert('Para encerrar, informe a etapa da falha. Um SAC nao fecha em "A apurar".');
+    return;
+  }
   var ant=id?db.sac.find(function(s){return s.id===id;}):null;
   var obj={
     id:id||uid(),
@@ -2603,11 +2725,41 @@ function saveSAC(){
     data:v('sData'),cliente:v('sCliente'),prod:v('sProd'),lote:v('sLote'),nf:v('sNF'),
     desc:v('sDesc'),causa:v('sCausa'),tipo:v('sTipo'),origem:v('sOrigem'),empresa:v('sEmpresa'),
     resp:v('sResp'),prazo:v('sPrazo'),acao:v('sAcao'),status:v('sStatus'),
+    etapa:v('sEtapa')||'A apurar', fornecedor:v('sFornecedor'),
+    ncId:(ant&&ant.ncId)||'',
     fotos:_sacFotos.slice(), acoes:JSON.parse(JSON.stringify(_sacAcoes))
   };
   if(id){var i=db.sac.findIndex(function(s){return s.id===id;});db.sac[i]=obj;}else{db.sac.push(obj);}
+  vincularSACNC(obj.id, v('sNcId'));
   saveDB();closeModal('sacModal');renderSAC();
 }
+
+// Encaminhamento assistido: abre a NC ja preenchida com o que o SAC sabe, e deixa a
+// decisao de gravar com a pessoa. Nao abre NC sozinho — isso e regra do pipeline.
+function abrirNCdoSAC(){
+  var id=document.getElementById('sacEditId').value;
+  if(!id){ alert('Salve o SAC primeiro. A NC precisa de um SAC gravado para apontar de volta.'); return; }
+  var s=db.sac.filter(function(x){return x.id===id;})[0];
+  if(!s) return;
+  if(s.ncId && db.ncs.filter(function(n){return n.id===s.ncId;})[0]){
+    if(!confirm('Este SAC ja tem NC vinculada. Abrir a NC existente?')) return;
+    closeModal('sacModal');
+    ncTabSecao(); openNCModal(db.ncs.filter(function(n){return n.id===s.ncId;})[0]);
+    return;
+  }
+  closeModal('sacModal');
+  ncTabSecao();
+  openNCModal(null);
+  document.getElementById('ncTipoI').value='Externa Cliente';
+  document.getElementById('ncEmpresa').value=s.empresa||'DMS';
+  document.getElementById('ncDesc').value='[SAC '+(s.num||'')+'] '+(s.desc||'');
+  document.getElementById('ncProd').value=s.prod||'';
+  { var el=document.getElementById('ncLote'); if(el) el.value=s.lote||''; }
+  document.getElementById('ncResp').value=s.resp||'';
+  preencherSelectEtapas('ncEtapa', s.etapa||'A apurar');
+  preencherSelectVinculo('ncSacId', db.sac, s.id, 'nenhum');
+}
+function ncTabSecao(){ try{ showSection('ncs'); }catch(e){} }
 
 // ===== LICENÇAS =====
 function renderLic(){

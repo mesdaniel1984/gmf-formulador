@@ -56,3 +56,19 @@ O banco e simulado. O teste prova a logica de "nao marcar como salvo antes do su
 aviso ao usuario; nao prova o comportamento contra a rede real. Vale repetir uma vez o
 roteiro manual depois de publicar: logar, rodar `await sb.auth.signOut()` no console,
 editar algo e salvar.
+
+## b4b6-etapa-e-vinculo.js
+
+B4 — campo "etapa da falha" no SAC e na NC, com a lista fechada com a direcao em
+06/09/2026, e campo de fornecedor separado da etapa.
+B6 — vinculo SAC <-> NC nos dois sentidos, e o encaminhamento assistido que abre a
+NC preenchida a partir do SAC sem gravar sozinho.
+
+27 verificacoes. A que mais importa e a regra acordada: registrar nunca e bloqueado,
+encerrar em "A apurar" e recusado.
+
+    node testes/b4b6-etapa-e-vinculo.js
+
+Este teste encontrou um defeito que ja existia: `openNCModal(null)` nao zerava tipo,
+empresa e status, entao uma NC nova herdava os valores da NC aberta antes. Corrigido
+no mesmo commit.
