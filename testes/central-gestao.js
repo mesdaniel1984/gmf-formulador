@@ -78,8 +78,8 @@ const dias = n => { const d = new Date(); d.setDate(d.getDate()+n); return d.toI
     db.docs=[]; db.licencas=[]; db.treinamentos=[]; db.ncs=[]; db.sac=[]; db.planoacao=[]; db.fornecedores=[];
     renderCentral();
     return {
-      cards: document.querySelectorAll('#centralCards .card').length,
-      zeros: Array.from(document.querySelectorAll('#centralCards .num')).every(e => e.textContent==='0'),
+      cards: document.querySelectorAll('#centralCards .c-tile').length,
+      zeros: Array.from(document.querySelectorAll('#centralCards .c-val')).every(e => e.textContent==='0'),
       acoes: document.getElementById('centralAcoes').textContent,
       etapas: document.getElementById('centralEtapas').textContent,
       perdas: document.getElementById('centralPerdas').textContent,
@@ -122,39 +122,45 @@ const dias = n => { const d = new Date(); d.setDate(d.getDate()+n); return d.toI
     db.fornecedores = [{id:'f1'},{id:'f2'},{id:'f3'}];
     renderCentral();
 
-    const nums = Array.from(document.querySelectorAll('#centralCards .card')).map(c => ({
-      lbl: c.querySelector('.lbl').textContent, n: c.querySelector('.num').textContent }));
+    const nums = Array.from(document.querySelectorAll('#centralCards .c-tile')).map(c => ({
+      lbl: c.querySelector('.c-cap').textContent, n: c.querySelector('.c-val').textContent }));
+    const rec = Array.from(document.querySelectorAll('#centralRec .c-rec')).map(r => r.textContent);
     const linhas = Array.from(document.querySelectorAll('#centralAcoes tr'));
     return {
       nums,
       qtdAcoes: linhas.length,
       primeira: linhas.length ? linhas[0].textContent : '',
-      criticos: document.querySelectorAll('#centralAcoes .badge.danger').length,
+      criticos: document.querySelectorAll('#centralAcoes .c-chip.crit').length,
+      classificar: document.querySelectorAll('#centralAcoes .c-chip.alto').length,
       etapas: document.getElementById('centralEtapas').textContent,
       perdas: document.getElementById('centralPerdas').textContent,
-      forn: document.getElementById('centralForn').textContent
+      forn: document.getElementById('centralForn').textContent,
+      rec: rec
     };
   }, {menos30:dias(-30),menos10:dias(-10),menos5:dias(-5),menos2:dias(-2),
       mais3:dias(3),mais20:dias(20),mais30:dias(30),mais40:dias(40),mais200:dias(200),mais400:dias(400)});
 
-  const card = t => (cheia.nums.find(x => x.lbl.indexOf(t) > -1)||{}).n;
-  check(card('Não conformidades') === '2', 'NCs em aberto conta 2 e ignora a fechada (deu ' + card('Não conformidades') + ')');
-  check(card('Reclamações') === '2', 'reclamacoes em aberto conta 2 e ignora a encerrada (deu ' + card('Reclamações') + ')');
-  check(card('vencidas') === '1', 'licenca vencida conta 1 (deu ' + card('vencidas') + ')');
-  check(card('60d') === '2', 'licencas vencendo em 60d conta a vencida e a de 40 dias (deu ' + card('60d') + ')');
-  check(card('Documentos') === '1', 'documento a revisar conta 1 (deu ' + card('Documentos') + ')');
-  check(card('Ações') === '1', 'acao atrasada conta 1 (deu ' + card('Ações') + ')');
+  const card = t => (cheia.nums.find(x => x.lbl.toUpperCase().indexOf(t.toUpperCase()) > -1)||{}).n;
+  check(card('NÃO CONFORMIDADES') === '2', 'NCs em aberto conta 2 e ignora a fechada (deu ' + card('NÃO CONFORMIDADES') + ')');
+  check(card('RECLAMAÇÕES') === '2', 'reclamacoes em aberto conta 2 e ignora a encerrada (deu ' + card('RECLAMAÇÕES') + ')');
+  check(card('RISCO REGULATÓRIO') === '2', 'risco regulatorio soma licenca vencida + documento vencido (deu ' + card('RISCO REGULATÓRIO') + ')');
+  check(card('VENCENDO') === '1', 'vencendo em 60d conta a licenca de 40 dias (deu ' + card('VENCENDO') + ')');
+  check(card('SEM ANÁLISE') === '1', 'registro sem etapa da falha conta 1 (deu ' + card('SEM ANÁLISE') + ')');
+  check(card('AÇÕES ATRASADAS') === '1', 'acao atrasada conta 1 (deu ' + card('AÇÕES ATRASADAS') + ')');
 
   check(cheia.qtdAcoes >= 6, 'a Central de Acao juntou itens de licenca, documento, plano, NC e SAC (' + cheia.qtdAcoes + ' linhas)');
   check(/Alvara Sanitario|Alvará/.test(cheia.primeira), 'o mais vencido aparece primeiro — a licenca de 30 dias atras');
-  check(cheia.criticos >= 3, 'os vencidos vem marcados como Critico (' + cheia.criticos + ')');
+  check(cheia.criticos >= 3, 'os vencidos vem marcados como Agir agora (' + cheia.criticos + ')');
+  check(cheia.classificar >= 1, 'o registro sem etapa recebe chip proprio de Classificar, nao Agir agora');
+  check(cheia.rec.length >= 3, 'a tela escreve o que fazer na semana, em ordem (' + cheia.rec.length + ' recomendacoes)');
+  check(/licen/i.test(cheia.rec[0]||''), 'a licenca vencida e a primeira recomendacao — e a unica que pode parar a fabrica');
 
   check(/Recebimento de MP/.test(cheia.etapas) && /A apurar/.test(cheia.etapas),
         'o grafico de etapa mostra as etapas reais e separa "A apurar"');
   check(/45,5/.test(cheia.perdas) || /45.5/.test(cheia.perdas), 'descarte soma 45,5 kg (leu: ' + cheia.perdas.slice(0,40) + ')');
-  check(/preço por kg|preco por kg/.test(cheia.perdas), 'perdas explica que falta o preco para virar reais');
+  check(/pre[çc]o por (kg|quilo)/i.test(cheia.perdas), 'perdas explica que falta o preco para virar reais');
   check(/Fornecedor Alfa/.test(cheia.forn), 'fornecedor com ocorrencia aparece — campo novo do SAC');
-  check(/^3/.test(cheia.forn.trim()), 'total de fornecedores cadastrados = 3');
+  check(/de 3 cadastrados/.test(cheia.forn), 'mostra as ocorrencias contra o total de 3 fornecedores cadastrados');
 
   console.log('\nA regra da tela');
   // Verifica o CONCEITO, nao a frase: texto de tela muda, a regra nao.
