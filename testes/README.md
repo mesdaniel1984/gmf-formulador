@@ -85,3 +85,47 @@ que esta vazio, em vez de ficar em branco) e com dado real (contagem, ordenacao 
 urgencia e soma de perdas).
 
     node testes/central-gestao.js
+
+## ponte-ronda-nc.js
+
+Protege **a ponte** — o caminho pelo qual um desvio detectado na ronda
+(`qualidade-alimentos`) vira uma NC aqui.
+
+Decidido em 08/09/2026: a NC oficial vive **so no SGQ**. O sistema de rondas
+detecta; quem transforma desvio em nao conformidade e uma pessoa, nesta tela.
+A ponte chega por parametro de URL (`?abrir=nc&desc=...&prod=...`) e faz
+exatamente o que o `abrirNCdoSAC` ja fazia: **preenche e para**.
+
+O que o teste garante:
+
+| # | Verificacao |
+|---|---|
+| 1 | sem `?abrir=nc`, a tela nao muda de comportamento |
+| 2 | com o parametro, o modal abre preenchido e **nenhuma NC e gravada** (comparado contra a mesma tela sem parametro, nao contra zero) |
+| 3 | so depois do Salvar a NC existe, e recebe numero da sequencia do SGQ |
+| 4 | valor que o `<select>` nao tem **nao apaga o campo em silencio** |
+| 5 | a URL e limpa: F5 nao reabre o rascunho e nao gera NC duplicada |
+
+## sac-sla.js
+
+Protege o **item 11.7** — os seis estados do SAC e os cinco campos de prazo do
+DOC-SAC-001 rev. 02 (secoes 3, 4 e 5). Prazos aprovados em 08/09/2026:
+**1 dia util** para o primeiro retorno, **7 dias corridos** para a conclusao,
+**30 dias** quando ha laudo.
+
+| # | Verificacao |
+|---|---|
+| 1 | os 6 estados existem, e o estado antigo gravado nao some da tela |
+| 2 | `abertoEm` e carimbado uma vez e nunca reescrito |
+| 3 | "Aguardando cliente" **pausa** o relogio, e a pausa empurra o prazo de conclusao |
+| 4 | com laudo o prazo vai a 30 dias, e desmarcar depois **nao encolhe** prazo ja prometido |
+| 5 | nao se encerra sem o primeiro retorno registrado (regra 4.5) |
+| 6 | "Aguardando laudo / acao" exige pessoa e data (regra 4.4) |
+| 7 | `conclusaoEm` e carimbado ao encerrar e **sai** se o SAC for reaberto |
+
+Registro anterior a esta versao nao tem `abertoEm`: aparece como **"sem SLA"** na
+lista, e continua podendo ser encerrado pela regra antiga. Prazo inventado para
+tras seria historico fabricado.
+
+Feriado nao entra no calculo do dia util — so sabado e domingo. Uma tabela de
+feriados mantida a mao e, desatualizada, daria prazo errado com cara de certo.

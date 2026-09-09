@@ -146,14 +146,28 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
     const recusou = db.sac[0].status !== 'Encerrada' && window.__avisos.length === 1;
 
     document.getElementById('sEtapa').value = 'Manuseio no cliente';
+    saveSAC();                                   // ainda recusa: falta o 1o retorno
+    // MUDANCA DE 09/09/2026 (DOC-SAC-001 rev. 02, regra 4.5): encerrar passou a
+    // exigir DUAS coisas — a etapa da falha E a resposta enviada ao cliente.
+    // Ate aqui o teste terminava na etapa; hoje isso seria encerrar um SAC que
+    // o cliente nunca soube que existiu.
+    const soEtapa = db.sac[0].status !== 'Encerrada';
+    const avisoRetorno = window.__avisos[window.__avisos.length-1] || '';
+
+    editSAC(db.sac[0].id);
+    sacRegistrarPrimeiroRetorno();
+    document.getElementById('sEtapa').value = 'Manuseio no cliente';
+    document.getElementById('sStatus').value = 'Encerrada';
     saveSAC();                                   // agora aceita
     const aceitou = db.sac[0].status === 'Encerrada' && db.sac[0].etapa === 'Manuseio no cliente';
-    return { registrou, recusou, aceitou, aviso: window.__avisos[0] || '' };
+    return { registrou, recusou, aceitou, soEtapa, avisoRetorno, aviso: window.__avisos[0] || '' };
   });
   check(bloqueio.registrou, 'registra normalmente com a etapa em "A apurar"');
   check(bloqueio.recusou, 'RECUSA encerrar enquanto a etapa for "A apurar"');
   check(/A apurar/.test(bloqueio.aviso), 'o aviso explica o motivo (disse: "' + bloqueio.aviso + '")');
-  check(bloqueio.aceitou, 'encerra depois que a etapa e informada');
+  check(bloqueio.soEtapa, 'a etapa sozinha JA NAO encerra — regra 4.5 pede tambem a resposta ao cliente');
+  check(/4\.5/.test(bloqueio.avisoRetorno), 'o segundo aviso explica a regra 4.5 (disse: "' + bloqueio.avisoRetorno + '")');
+  check(bloqueio.aceitou, 'encerra com a etapa informada E o primeiro retorno registrado');
 
   const bloqNC = await p.evaluate(() => {
     window.__avisos = [];

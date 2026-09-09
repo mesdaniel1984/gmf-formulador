@@ -704,8 +704,14 @@
     <select id="sacStatus" onchange="renderSAC()" style="padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
       <option value="">Todos</option>
       <option value="Aberta">Aberta</option>
-      <option value="Em tratativa">Em tratativa</option>
+      <option value="Aguardando cliente">Aguardando cliente</option>
+      <option value="Em análise">Em análise</option>
+      <option value="Aguardando laudo / ação">Aguardando laudo / ação</option>
+      <option value="Resposta preparada">Resposta preparada</option>
       <option value="Encerrada">Encerrada</option>
+      <!-- Estado antigo. Fica na lista para que os SAC ja gravados com ele
+           continuem encontraveis pelo filtro. Nao usar em registro novo. -->
+      <option value="Em tratativa">Em tratativa (antigo)</option>
     </select>
     <button class="btn btn-primary" onclick="openSACModal()">+ Nova Reclamação</button>
   </div>
@@ -1044,6 +1050,7 @@
 <div class="modal-bg" id="ncModal">
   <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
     <h2 id="ncModalTitle">Nova Não Conformidade</h2>
+    <div id="ncPonteAviso" style="display:none;background:#fff7ed;border:1.5px solid #fdba74;color:#7c2d12;border-radius:8px;padding:10px 12px;font-size:13px;margin:0 0 12px"></div>
     <div id="ncAutoria" style="display:none;font-size:12px;color:#64748b;margin:-6px 0 10px"></div>
     <input type="hidden" id="ncEditId">
 
@@ -1288,10 +1295,37 @@
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Prazo Resposta</label><input type="date" id="sPrazo"></div>
+      <div class="form-group"><label>Prazo combinado (uso interno)</label><input type="date" id="sPrazo"></div>
       <div class="form-group"><label>Status</label>
-        <select id="sStatus"><option>Aberta</option><option>Em tratativa</option><option>Encerrada</option></select>
+        <select id="sStatus" onchange="sacPintarSLA()">
+          <option>Aberta</option>
+          <option>Aguardando cliente</option>
+          <option>Em an&aacute;lise</option>
+          <option>Aguardando laudo / a&ccedil;&atilde;o</option>
+          <option>Resposta preparada</option>
+          <option>Encerrada</option>
+        </select>
       </div>
+    </div>
+
+    <!-- ================= PRAZOS (DOC-SAC-001, se&ccedil;&otilde;es 3, 4 e 5) =================
+         Os cinco campos existem para que o painel mostre DESEMPENHO e n&atilde;o
+         promessa. Sem `primeiro_retorno_em` e `conclusao_em`, o sistema sabe
+         quando o prazo vence e nunca sabe se foi cumprido.
+         Nenhum deles &eacute; digit&aacute;vel: s&atilde;o carimbos e c&aacute;lculos. -->
+    <div style="margin-top:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px">
+      <div style="font-weight:700;font-size:13px;color:#1e3a8a;margin-bottom:10px">Prazos</div>
+      <div id="sacSLAGrade" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;font-size:12.5px"></div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+        <button type="button" id="sacBtnRetorno" class="btn btn-outline" style="font-size:12px;padding:5px 12px"
+                onclick="sacRegistrarPrimeiroRetorno()">Registrar primeiro retorno agora</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#374151;cursor:pointer">
+          <input type="checkbox" id="sComLaudo" onchange="sacPintarSLA()">
+          Depende de an&aacute;lise laboratorial (prazo de conclus&atilde;o passa a 30 dias &mdash; regra 5.3)
+        </label>
+      </div>
+      <div id="sacSLANota" style="margin-top:8px;font-size:12px;color:#64748b"></div>
+      <input type="hidden" id="sPrimeiroRetornoEm">
     </div>
 
     <!-- Plano de Ações -->
@@ -2936,6 +2970,205 @@ function saveNC(){
 }
 
 // ===== SAC =====
+
+/* ===========================================================================
+ * PRAZOS DO SAC — DOC-SAC-001 rev. 02, secoes 3, 4 e 5.
+ *
+ * Os numeros abaixo sao os aprovados pela direcao em 08/09/2026. Ficam aqui, em
+ * um lugar so, porque prazo espalhado pelo codigo vira prazo diferente em cada
+ * tela.
+ * ======================================================================== */
+var SAC_SLA = {
+  primeiroRetornoDiasUteis: 1,   // 5.1 — nao e a resposta; e o aviso de que tem gente olhando
+  conclusaoDiasCorridos:    7,   // 5.2 — o caso que se resolve com OP, ronda e lote
+  conclusaoComLaudoDias:   30,   // 5.3 — com analise laboratorial
+  semRetornoClienteDias:   15    // 4.3 — encerra como "sem retorno do cliente"
+};
+
+// Quem tem a bola, e se o relogio corre. O estado "Aguardando cliente" pausa o
+// prazo: sem ele, a Qualidade aparece atrasada em caso onde ja fez a parte dela.
+var SAC_RELOGIO = {
+  'Aberta':                  'correndo',
+  'Aguardando cliente':      'pausado',
+  'Em an\u00e1lise':             'correndo',
+  'Aguardando laudo / a\u00e7\u00e3o': 'correndo',
+  'Resposta preparada':      'correndo',
+  'Encerrada':               'parado',
+  'Em tratativa':            'correndo'   // estado antigo, ainda em registro gravado
+};
+
+var UM_DIA_MS = 86400000;
+
+/* Dia util = pula sabado e domingo. Feriado NAO entra no calculo.
+ * Modelar feriado exigiria uma tabela mantida a mao; uma tabela desatualizada
+ * daria prazo errado com cara de certo, e ninguem perceberia. Fica declarado:
+ * o prazo de 1 dia util ignora feriado. */
+function sacSomaDiasUteis(iso, n){
+  var d = new Date(iso);
+  var faltam = n;
+  while(faltam > 0){
+    d = new Date(d.getTime() + UM_DIA_MS);
+    var s = d.getDay();
+    if(s !== 0 && s !== 6) faltam--;
+  }
+  return d.toISOString();
+}
+function sacSomaDias(iso, n){ return new Date(new Date(iso).getTime() + n*UM_DIA_MS).toISOString(); }
+function sacDia(iso){ return iso ? String(iso).slice(0,10) : ''; }
+function sacQuando(iso){
+  if(!iso) return '\u2014';
+  var d = new Date(iso);
+  if(isNaN(d)) return '\u2014';
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* Quanto tempo a bola ficou com o cliente. Pausa ainda aberta conta ate agora —
+ * senao o prazo voltaria a correr sozinho enquanto ninguem mexe no registro. */
+function sacPausaMs(s){
+  var lista = (s && Array.isArray(s.pausas)) ? s.pausas : [];
+  var t = 0, agora = Date.now();
+  lista.forEach(function(p){
+    if(!p || !p.de) return;
+    var de = new Date(p.de).getTime();
+    var ate = p.ate ? new Date(p.ate).getTime() : agora;
+    if(isFinite(de) && isFinite(ate) && ate > de) t += (ate - de);
+  });
+  return t;
+}
+
+/* O prazo de conclusao nasce de aberto_em e ANDA PARA A FRENTE com a pausa e
+ * com o laudo. Nunca anda para tras: um prazo ja prometido ao cliente nao
+ * encolhe porque alguem desmarcou uma caixa. */
+function sacPrazoConclusao(s){
+  if(!s || !s.abertoEm) return '';
+  var dias = s.comLaudo ? SAC_SLA.conclusaoComLaudoDias : SAC_SLA.conclusaoDiasCorridos;
+  var calc = new Date(new Date(s.abertoEm).getTime() + dias*UM_DIA_MS + sacPausaMs(s)).toISOString();
+  if(s.prazoConclusao && new Date(s.prazoConclusao).getTime() > new Date(calc).getTime()) return s.prazoConclusao;
+  return calc;
+}
+function sacPrazoPrimeiroRetorno(s){
+  if(!s || !s.abertoEm) return '';
+  return s.prazoPrimeiroRetorno || sacSomaDiasUteis(s.abertoEm, SAC_SLA.primeiroRetornoDiasUteis);
+}
+
+/* A situacao de um prazo, medida contra o carimbo quando ele existe, e contra o
+ * relogio quando nao existe. "Cumprido" so sai quando ha carimbo. */
+function sacSituacao(prazoIso, carimboIso, relogio){
+  if(!prazoIso) return { rot:'\u2014', cor:'#94a3b8', classe:'' };
+  var prazo = new Date(prazoIso).getTime();
+  if(carimboIso){
+    var q = new Date(carimboIso).getTime();
+    return q <= prazo ? { rot:'no prazo', cor:'#059669', classe:'ok' }
+                      : { rot:'fora do prazo', cor:'#dc2626', classe:'danger' };
+  }
+  if(relogio === 'pausado') return { rot:'pausado', cor:'#2563eb', classe:'blue' };
+  if(relogio === 'parado')  return { rot:'\u2014', cor:'#94a3b8', classe:'' };
+  var faltam = Math.ceil((prazo - Date.now()) / UM_DIA_MS);
+  if(faltam < 0)  return { rot:'vencido h\u00e1 '+Math.abs(faltam)+'d', cor:'#dc2626', classe:'danger' };
+  if(faltam === 0) return { rot:'vence hoje', cor:'#d97706', classe:'warn' };
+  return { rot:'faltam '+faltam+'d', cor:faltam<=1?'#d97706':'#059669', classe:faltam<=1?'warn':'ok' };
+}
+
+/* A celula da lista. Mostra o prazo que manda AGORA: enquanto nao houve
+ * primeiro retorno, quem manda e o de 1 dia util; depois, o de conclusao. */
+function sacCelulaPrazo(s){
+  if(!s || !s.abertoEm){
+    // Registro anterior a esta versao: nao tem carimbo de abertura, e inventar
+    // um seria fabricar historico. Mostra o prazo manual, como sempre mostrou.
+    return fmtDate(s && s.prazo) + '<div style="font-size:10.5px;color:#94a3b8">sem SLA</div>';
+  }
+  var rel = SAC_RELOGIO[s.status] || 'correndo';
+  var qual = s.primeiroRetornoEm ? 'conclus\u00e3o' : '1\u00ba retorno';
+  var prazo = s.primeiroRetornoEm ? sacPrazoConclusao(s) : sacPrazoPrimeiroRetorno(s);
+  var carimbo = s.primeiroRetornoEm ? s.conclusaoEm : s.primeiroRetornoEm;
+  var st = sacSituacao(prazo, carimbo, rel);
+  return '<div style="font-size:11px;color:#64748b">'+qual+'</div>'
+       + '<div>'+fmtDate(sacDia(prazo))+'</div>'
+       + '<span class="badge '+(st.classe||'blue')+'" style="font-size:10px">'+st.rot+'</span>';
+}
+
+/* Um <select> so mostra o que tem. Registro gravado com estado antigo abriria
+ * com o campo em branco e, ao salvar, mudaria de estado sem ninguem pedir. */
+function sacGarantirOpcao(id, valor){
+  if(!valor) return;
+  var el = document.getElementById(id); if(!el) return;
+  for(var i=0;i<el.options.length;i++) if(el.options[i].value === valor) return;
+  var o = document.createElement('option');
+  o.value = valor; o.text = valor + ' (estado antigo)';
+  el.appendChild(o);
+}
+
+/* Desenha o quadro de prazos do modal a partir do que esta na tela agora —
+ * inclusive antes de salvar, para que a pessoa veja o efeito do que escolheu. */
+function sacPintarSLA(){
+  var grade = document.getElementById('sacSLAGrade');
+  var nota  = document.getElementById('sacSLANota');
+  if(!grade) return;
+  var id = document.getElementById('sacEditId').value;
+  var ant = id ? (db.sac||[]).filter(function(x){return x.id===id;})[0] : null;
+
+  var previa = {
+    abertoEm: (ant && ant.abertoEm) || '',
+    prazoPrimeiroRetorno: ant && ant.prazoPrimeiroRetorno,
+    primeiroRetornoEm: document.getElementById('sPrimeiroRetornoEm').value || '',
+    prazoConclusao: ant && ant.prazoConclusao,
+    conclusaoEm: (ant && ant.conclusaoEm) || '',
+    comLaudo: document.getElementById('sComLaudo').checked,
+    pausas: (ant && ant.pausas) || [],
+    status: v('sStatus')
+  };
+
+  if(!previa.abertoEm){
+    grade.innerHTML = '<div style="grid-column:1/-1;color:#64748b">'
+      + 'O rel\u00f3gio come\u00e7a a contar quando este SAC for salvo pela primeira vez.</div>';
+    nota.textContent = 'Primeiro retorno: 1 dia \u00fatil. Conclus\u00e3o: 7 dias corridos, ou 30 com laudo.';
+    document.getElementById('sacBtnRetorno').disabled = true;
+    return;
+  }
+
+  var rel = SAC_RELOGIO[previa.status] || 'correndo';
+  var pR  = sacPrazoPrimeiroRetorno(previa);
+  var pC  = sacPrazoConclusao(previa);
+  var sR  = sacSituacao(pR, previa.primeiroRetornoEm, rel);
+  var sC  = sacSituacao(pC, previa.conclusaoEm, rel);
+
+  function bloco(rot, valor, sit){
+    return '<div><div style="color:#64748b;font-size:11px">'+rot+'</div>'
+         + '<div style="font-weight:700">'+valor+'</div>'
+         + (sit ? '<div style="color:'+sit.cor+';font-size:11px">'+sit.rot+'</div>' : '') + '</div>';
+  }
+  grade.innerHTML =
+      bloco('Aberto em',            sacQuando(previa.abertoEm), null)
+    + bloco('Prazo do 1\u00ba retorno',  fmtDate(sacDia(pR)), sR)
+    + bloco('1\u00ba retorno em',        sacQuando(previa.primeiroRetornoEm), null)
+    + bloco('Prazo de conclus\u00e3o',   fmtDate(sacDia(pC)), sC)
+    + bloco('Conclu\u00eddo em',         sacQuando(previa.conclusaoEm), null);
+
+  var msPausa = sacPausaMs(previa);
+  var partes = [];
+  if(rel === 'pausado') partes.push('O rel\u00f3gio est\u00e1 PAUSADO: a bola est\u00e1 com o cliente.');
+  if(msPausa > 0) partes.push('Tempo j\u00e1 pausado: ' + (msPausa/UM_DIA_MS).toFixed(1) + ' dia(s) \u2014 somado ao prazo de conclus\u00e3o.');
+  if(previa.comLaudo) partes.push('Com laudo: conclus\u00e3o em ' + SAC_SLA.conclusaoComLaudoDias + ' dias.');
+  if(!previa.primeiroRetornoEm) partes.push('Sem primeiro retorno registrado, este SAC n\u00e3o pode ser encerrado (regra 4.5).');
+  nota.innerHTML = partes.join(' ') || 'Prazos correndo normalmente.';
+
+  var btn = document.getElementById('sacBtnRetorno');
+  btn.disabled = !!previa.primeiroRetornoEm;
+  btn.textContent = previa.primeiroRetornoEm ? 'Primeiro retorno j\u00e1 registrado' : 'Registrar primeiro retorno agora';
+}
+
+/* Carimbo explicito. Nao deduzimos "respondeu" de mudanca de status: mudar de
+ * estado e trabalho interno; responder ao cliente e outra coisa, e so quem
+ * respondeu sabe que respondeu. O carimbo so vira dado ao salvar. */
+function sacRegistrarPrimeiroRetorno(){
+  if(!document.getElementById('sacEditId').value){
+    alert('Salve o SAC primeiro. O carimbo precisa de um registro gravado.'); return;
+  }
+  if(!confirm('Confirmar que o cliente J\u00c1 recebeu o primeiro retorno?\n\nEste carimbo mede o cumprimento do prazo de 1 dia \u00fatil e n\u00e3o deve ser marcado antes de a resposta sair.')) return;
+  document.getElementById('sPrimeiroRetornoEm').value = new Date().toISOString();
+  sacPintarSLA();
+}
+
 function renderSAC(){
   var search=(document.getElementById('sacSearch').value||'').toLowerCase();
   var status=document.getElementById('sacStatus').value;
@@ -2961,7 +3194,7 @@ function renderSAC(){
       +'<td>'+ncDoSAC(s)+'</td>'
       +'<td>'+(s.origem||'')+'</td>'
       +'<td>'+(s.resp||'—')+'</td>'
-      +'<td>'+fmtDate(s.prazo)+'</td>'
+      +'<td>'+sacCelulaPrazo(s)+'</td>'
       +'<td>'+statusBadge(s.status)+plano+'</td>'
       +'<td><button class="btn btn-sm btn-outline" onclick="editSAC(\''+s.id+'\')">✏️</button>'
       +'<button class="btn btn-sm btn-danger" onclick="delSAC(\''+s.id+'\')">🗑</button></td>'
@@ -3113,6 +3346,11 @@ function openSACModal(s){
   preencherSelectVinculo('sNcId', db.ncs, s ? s.ncId : '', 'nenhuma');
   { var av=document.getElementById('sNcAviso');
     if(av) av.textContent = s ? '' : 'Salve o SAC antes de abrir uma NC a partir dele.'; }
+  sacGarantirOpcao('sStatus', s && s.status);
+  if(s) document.getElementById('sStatus').value = s.status || 'Aberta';
+  document.getElementById('sPrimeiroRetornoEm').value = (s && s.primeiroRetornoEm) || '';
+  document.getElementById('sComLaudo').checked = !!(s && s.comLaudo);
+  sacPintarSLA();
   _sacFotos = (s && Array.isArray(s.fotos)) ? s.fotos.slice() : (s && s.foto ? [{nome:'foto',data:s.foto}] : []);
   _sacAcoes = (s && Array.isArray(s.acoes)) ? JSON.parse(JSON.stringify(s.acoes)) : [];
   sacRenderFotos(); sacRenderAcoes();
@@ -3131,9 +3369,62 @@ function saveSAC(){
     return;
   }
   var ant=id?db.sac.find(function(s){return s.id===id;}):null;
+
+  /* ---------------- PRAZOS (DOC-SAC-001, secoes 4 e 5) ----------------
+   * As duas travas abaixo nao impedem REGISTRAR nada — impedem declarar
+   * concluido o que nao foi, e impedem "esta com o laboratorio" virar estado
+   * sem dono nem data, que e onde a informacao se perde (regra 4.4). */
+  var _statusNovo = v('sStatus');
+  var _agora = new Date().toISOString();
+  var _pRetorno = document.getElementById('sPrimeiroRetornoEm').value || '';
+
+  // A trava vale para o SAC que nasceu sob esta regra — o que tem `abertoEm`.
+  // Registro anterior a esta versao nunca teve onde carimbar o primeiro retorno;
+  // exigir o carimbo dele deixaria os SAC antigos impossiveis de encerrar para
+  // sempre, o que e pior do que a falta que a regra quer corrigir.
+  if(_statusNovo==='Encerrada' && !_pRetorno && ant && ant.abertoEm){
+    alert('Regra 4.5: encerrar exige a resposta enviada ao cliente.\n\nClique em "Registrar primeiro retorno agora" antes de encerrar.');
+    return;
+  }
+  if(_statusNovo==='Aguardando laudo / a\u00e7\u00e3o' && (!v('sResp') || !v('sPrazo'))){
+    alert('Regra 4.4: "Aguardando laudo / a\u00e7\u00e3o" exige nome de pessoa e data combinada.\n\nPreencha Respons\u00e1vel e Prazo combinado.');
+    return;
+  }
+
+  // aberto_em e carimbado UMA vez, na primeira gravacao, e nunca reescrito:
+  // e dele que todo prazo nasce.
+  var _abertoEm = (ant && ant.abertoEm) || _agora;
+
+  // A pausa do relogio: entra ao virar "Aguardando cliente", fecha ao sair.
+  // Pausa sem hora de entrada e de saida registrada vira desculpa (regra 4.2).
+  var _pausas = (ant && Array.isArray(ant.pausas)) ? JSON.parse(JSON.stringify(ant.pausas)) : [];
+  var _statusAnt = ant ? ant.status : '';
+  var _aberta = _pausas.length && !_pausas[_pausas.length-1].ate;
+  if(_statusNovo==='Aguardando cliente' && !_aberta) _pausas.push({ de:_agora, ate:'' });
+  if(_statusNovo!=='Aguardando cliente' && _aberta)  _pausas[_pausas.length-1].ate = _agora;
+
+  var _comLaudo = !!document.getElementById('sComLaudo').checked
+               || _statusNovo==='Aguardando laudo / a\u00e7\u00e3o';
+
+  // conclusao_em segue o estado: some se o SAC for reaberto, porque um registro
+  // aberto que guarda data de conclusao mente para o indicador.
+  var _conclusaoEm = _statusNovo==='Encerrada'
+    ? ((ant && ant.conclusaoEm) || _agora)
+    : '';
+
+  var _base = { abertoEm:_abertoEm, comLaudo:_comLaudo, pausas:_pausas,
+                prazoConclusao: ant && ant.prazoConclusao };
+
   var obj={
     id:id||uid(),
     num:(ant&&ant.num)||proximoNum(db.sac,'SAC-'),
+    abertoEm:_abertoEm,
+    prazoPrimeiroRetorno: (ant && ant.prazoPrimeiroRetorno) || sacSomaDiasUteis(_abertoEm, SAC_SLA.primeiroRetornoDiasUteis),
+    primeiroRetornoEm:_pRetorno,
+    prazoConclusao: sacPrazoConclusao(_base),
+    conclusaoEm:_conclusaoEm,
+    comLaudo:_comLaudo,
+    pausas:_pausas,
     data:v('sData'),cliente:v('sCliente'),prod:v('sProd'),lote:v('sLote'),nf:v('sNF'),
     desc:v('sDesc'),causa:v('sCausa'),tipo:v('sTipo'),origem:v('sOrigem'),empresa:v('sEmpresa'),
     resp:v('sResp'),prazo:v('sPrazo'),acao:v('sAcao'),status:v('sStatus'),
@@ -3172,6 +3463,90 @@ function abrirNCdoSAC(){
   preencherSelectVinculo('ncSacId', db.sac, s.id, 'nenhum');
 }
 function ncTabSecao(){ try{ showSection('ncs'); }catch(e){} }
+
+/* ===========================================================================
+ * A PONTE — a ronda do qualidade-alimentos chega aqui como NC pre-preenchida.
+ *
+ * Decisao de 08/09/2026: a NC oficial vive SO no SGQ. O sistema de rondas
+ * detecta o desvio; quem transforma desvio em nao conformidade e uma pessoa,
+ * nesta tela. Entao a ponte faz exatamente o que o `abrirNCdoSAC` ja fazia e
+ * foi testado: PREENCHE E PARA. Nao grava, nao numera, nao fecha.
+ *
+ * Um robo que abrisse NC sozinho faria a estatistica medir o robo — e o
+ * indicador de causa raiz do SGQ deixaria de dizer alguma coisa.
+ *
+ * Contrato da URL (tudo opcional menos `abrir`):
+ *   ?abrir=nc
+ *   &desc=...      texto da nao conformidade
+ *   &prod=...      produto
+ *   &lote=...      lote
+ *   &empresa=DMS|MFPARIS|PROFI
+ *   &tipo=...      precisa casar com uma opcao do select; senao ignora
+ *   &resp=...      responsavel sugerido
+ *   &data=AAAA-MM-DD
+ *   &origem=...    de onde veio (ex.: "ronda 1841 / OP 2026/02388")
+ *
+ * A URL e limpa depois de aplicada: um F5 nao pode reabrir o mesmo rascunho e
+ * fazer alguem registrar a mesma NC duas vezes.
+ * ======================================================================== */
+function _pontePor(id, valor){
+  var el = document.getElementById(id);
+  if(el && valor) el.value = valor;
+}
+// Um <select> so aceita valor que ele tem. Passar 'Externa Cliente' para um
+// select que nao tem essa opcao deixa o campo VAZIO em silencio — e a NC
+// nasceria sem tipo. Aqui: se nao existe, nao mexe, e avisa no console.
+function _ponteSelect(id, valor){
+  if(!valor) return;
+  var el = document.getElementById(id);
+  if(!el) return;
+  var alvo = String(valor).trim().toLowerCase();
+  for(var i=0;i<el.options.length;i++){
+    if(String(el.options[i].value||el.options[i].text).trim().toLowerCase()===alvo){
+      el.selectedIndex = i; return;
+    }
+  }
+  console.warn('ponte: "'+valor+'" nao e uma opcao de #'+id+'. Campo deixado como estava.');
+}
+
+function aplicarParametrosDaURL(){
+  var q;
+  try{ q = new URLSearchParams(window.location.search); }catch(e){ return; }
+  var abrir = (q.get('abrir')||'').toLowerCase();
+  if(abrir !== 'nc') return;
+
+  var desc   = q.get('desc')   || '';
+  var origem = q.get('origem') || '';
+
+  ncTabSecao();
+  openNCModal(null);
+
+  // O texto da NC guarda de onde veio. Sem isso, daqui a tres meses ninguem
+  // sabe se a NC nasceu de uma ronda, de um cliente ou de uma auditoria.
+  var corpo = desc;
+  if(origem) corpo = (corpo ? corpo + '\n\n' : '') + '[origem: ' + origem + ']';
+  _pontePor('ncDesc', corpo);
+  _pontePor('ncProd', q.get('prod'));
+  _pontePor('ncLote', q.get('lote'));
+  _pontePor('ncResp', q.get('resp'));
+  _pontePor('ncData', q.get('data'));
+  _pontePor('ncCausa', q.get('causa'));
+  _ponteSelect('ncEmpresa', q.get('empresa'));
+  // Desvio de ronda e nao conformidade INTERNA. 'Interna' e o valor que o
+  // select realmente tem — conferido no HTML, nao suposto.
+  _ponteSelect('ncTipoI',  q.get('tipo') || 'Interna');
+
+  var av = document.getElementById('ncPonteAviso');
+  if(av){
+    av.style.display = '';
+    av.innerHTML = '<b>Rascunho vindo do sistema de rondas.</b> Nada foi gravado ainda. '
+      + 'Confira, complete a causa e a acao, e clique em Salvar — ou feche, e nenhuma NC e criada.'
+      + (origem ? '<br><span style="opacity:.8">Origem: ' + _sacEsc(origem) + '</span>' : '');
+  }
+
+  // Limpa a URL: F5 nao pode reabrir o rascunho e gerar NC duplicada.
+  try{ history.replaceState(null, '', window.location.pathname); }catch(e){}
+}
 
 // ===== LICENÇAS =====
 function renderLic(){
@@ -3525,6 +3900,9 @@ async function startApp(){
     try{ const { data:{ user } } = await sb.auth.getUser(); _usuarioAtual = (user && user.email) || ''; const ub=document.getElementById('userBadge'); if(ub&&user) ub.textContent='\uD83D\uDC64 '+(user.email||''); }catch(e){}
     const lo=document.getElementById('logoutBtn'); if(lo) lo.style.display='inline-block';
     hideGate();
+    // A ponte so pode agir depois que os dados existem. Antes de loadDB, db.ncs
+    // esta vazio e o modal abriria com selects sem opcao nenhuma.
+    try{ aplicarParametrosDaURL(); }catch(e){ console.error('ponte:', e); }
   }catch(e){
     console.error(e);
     showGate('config','Nao foi possivel carregar os dados. Verifique a configuracao do banco.');
