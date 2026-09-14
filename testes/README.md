@@ -129,3 +129,59 @@ tras seria historico fabricado.
 
 Feriado nao entra no calculo do dia util — so sabado e domingo. Uma tabela de
 feriados mantida a mao e, desatualizada, daria prazo errado com cara de certo.
+
+## b8-concorrencia-e-numero.js
+
+Protege **o numero de protocolo do SAC** e, mais importante, a gravacao com duas
+pessoas usando o sistema ao mesmo tempo.
+
+**Como o defeito apareceu.** Em 14/09/2026 a tela do SAC mostrava **dois "SAC-003"**
+e **nenhum "SAC-001"**. A primeira hipotese era cosmetica — a tela usava
+`s.num || 'SAC-'+(i+1)`, isto e, inventava numero a partir da posicao da linha.
+O console descartou: os quatro numeros estavam gravados. O defeito era mais fundo,
+e eram dois empilhados:
+
+1. `proximoNum` devolvia **maior+1 da lista que aquela aba tinha na memoria**.
+   Lista velha, numero repetido.
+2. Cada chave de `ARRAY_KEYS` e **um array inteiro em uma unica linha** de
+   `app_state`, e `pushChanges` faz `upsert` dessa linha. Salvar nao "adicionava o
+   meu": **trocava a lista do servidor pela lista daquela aba**. Se a aba estava
+   dormindo — notebook fechado, realtime caido —, o SAC que a outra pessoa
+   registrou nesse meio-tempo **sumia, sem erro nenhum na tela**.
+
+A (2) nao e numeracao. E reclamacao de cliente que desaparece sem ninguem saber que
+existiu — e num canal de WhatsApp com SIF isso e o pior defeito da lista.
+
+**O remedio.** `pushChanges` passa a reler e **juntar** antes de gravar, com merge de
+tres vias. A base do merge e `_snap[k]`, o retrato do servidor que a aba viu pela
+ultima vez. So com a base da para distinguir as duas coisas que, sem ela, sao
+identicas: *"sumiu da minha lista porque EU apaguei"* (apaga mesmo) e *"nao esta na
+minha lista porque eu NUNCA vi"* (mantem). Empate: quem mexeu, ganha.
+
+| # | Verificacao |
+|---|---|
+| 1 | a aba que dormiu **nao apaga** o registro criado por outra pessoa, e o numero novo sai do maior que existe **no servidor** |
+| 2 | apagar aqui continua apagando la — o merge nao ressuscita registro |
+| 3 | duas pessoas editando registros **diferentes**: as duas edicoes sobrevivem |
+| 4 | `proximoNum` nunca devolve numero que ja existe (e B3 continua valendo: maior+1, nao quantidade) |
+| 5 | a tela **nao inventa numero pela posicao da linha** — registro sem numero mostra `s/n`, e numero repetido ganha marca vermelha |
+| 6 | numero carimbado uma vez e nunca recalculado: editar um SAC nao troca o protocolo dele |
+| 7 | clique duplo no Salvar gera **um** registro, nao dois |
+
+    node testes/b8-concorrencia-e-numero.js
+
+**Rodar contra a versao anterior** para ver o defeito acontecer:
+
+    git show 43e65f6:sistema_qualidade_online.html > /tmp/antes.html
+    node testes/b8-concorrencia-e-numero.js /tmp/antes.html
+
+Na versao anterior o cenario 1 mostra o registro da outra pessoa desaparecendo do
+servidor e o numero dela sendo reemitido — exatamente o que produziu os dois
+SAC-003 em producao.
+
+## Limite conhecido deste teste
+
+O merge resolve **lista contra lista**. Duas pessoas editando o **mesmo** registro ao
+mesmo tempo continua sendo ultimo-a-salvar-vence — mas ai o que se perde e um campo
+de um registro, nao a lista inteira. Resolver isso exigiria gravar cada SAC em sua
+propria linha, o que e uma mudanca de esquema, nao um patch.

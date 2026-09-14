@@ -75,7 +75,7 @@ const linha = (ok, txt) => console.log((ok ? '  PASSOU  ' : '  FALHOU  ') + txt)
   const check = (ok, txt) => { console.log((ok ? '  ok    ' : '  FALHA ') + txt); if (!ok) falhas++; };
 
   console.log('B3 — numeracao que nao repete');
-  const n = await p.evaluate(() => {
+  const n = await p.evaluate(async () => {
     const antigo = l => 'NC-' + String(l.length + 1).padStart(3,'0');
     const tres = [{id:'a',num:'NC-001'},{id:'b',num:'NC-002'},{id:'c',num:'NC-003'}];
     const aposExcluir = tres.filter(x => x.id !== 'b');
@@ -98,31 +98,31 @@ const linha = (ok, txt) => console.log((ok ? '  PASSOU  ' : '  FALHOU  ') + txt)
   check(n.foraDeOrdem === 'NC-011', 'usa o MAIOR numero, nao o ultimo da lista (deu ' + n.foraDeOrdem + ')');
 
   console.log('\nB5 — campo lote na nao conformidade');
-  const campoExiste = await p.evaluate(() => !!document.getElementById('ncLote'));
+  const campoExiste = await p.evaluate(async () => !!document.getElementById('ncLote'));
   check(campoExiste, 'o campo de lote existe no formulario da NC');
 
-  const salvou = await p.evaluate(() => {
+  const salvou = await p.evaluate(async () => {
     db.ncs = [];
     openNCModal(null);
     document.getElementById('ncData').value = '2026-09-03';
     document.getElementById('ncDesc').value = 'Teste B5';
     document.getElementById('ncProd').value = 'Produto X';
     document.getElementById('ncLote').value = 'L260831-04';
-    saveNC();
+    await saveNC();
     const nc = db.ncs[db.ncs.length - 1];
     return { lote: nc && nc.lote, num: nc && nc.num, total: db.ncs.length };
   });
   check(salvou.lote === 'L260831-04', 'o lote e gravado na NC (gravou "' + salvou.lote + '")');
   check(salvou.num === 'NC-001', 'a NC nova recebeu NC-001 (recebeu ' + salvou.num + ')');
 
-  const reabriu = await p.evaluate(() => {
+  const reabriu = await p.evaluate(async () => {
     const nc = db.ncs[db.ncs.length - 1];
     openNCModal(nc);
     return document.getElementById('ncLote').value;
   });
   check(reabriu === 'L260831-04', 'ao reabrir a NC, o lote continua preenchido (leu "' + reabriu + '")');
 
-  const limpou = await p.evaluate(() => { openNCModal(null); return document.getElementById('ncLote').value; });
+  const limpou = await p.evaluate(async () => { openNCModal(null); return document.getElementById('ncLote').value; });
   check(limpou === '', 'ao abrir uma NC nova, o campo vem vazio (leu "' + limpou + '")');
 
   console.log('\nerros de pagina:', erros.length ? erros : 'nenhum');

@@ -80,7 +80,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   const check = (ok, txt) => { console.log((ok ? '  ok    ' : '  FALHA ') + txt); if (!ok) falhas++; };
 
   console.log('B4 — a lista de etapas');
-  const lista = await p.evaluate(() => ({
+  const lista = await p.evaluate(async () => ({
     total: ETAPAS_FALHA.length,
     primeira: ETAPAS_FALHA[0],
     temFicha: ETAPAS_FALHA.indexOf('Ficha t\u00e9cnica / especifica\u00e7\u00e3o') > -1,
@@ -99,7 +99,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(lista.campoForn, 'o campo de fornecedor existe, separado da etapa');
 
   console.log('\nB4 — valor inicial e gravacao');
-  const inicial = await p.evaluate(() => {
+  const inicial = await p.evaluate(async () => {
     db.sac = []; db.ncs = [];
     openSACModal(null);
     return { etapa: document.getElementById('sEtapa').value,
@@ -108,7 +108,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(inicial.etapa === 'A apurar', 'SAC novo nasce em "A apurar" (nasceu "' + inicial.etapa + '")');
   check(inicial.opcoes === 10, 'o select foi preenchido com as 10 opcoes (deu ' + inicial.opcoes + ')');
 
-  const gravou = await p.evaluate(() => {
+  const gravou = await p.evaluate(async () => {
     document.getElementById('sData').value = '2026-09-06';
     document.getElementById('sCliente').value = 'Cliente Teste';
     document.getElementById('sProd').value = 'Leite em Po';
@@ -116,14 +116,14 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
     document.getElementById('sDesc').value = 'Produto empedrado';
     document.getElementById('sEtapa').value = 'Recebimento de MP';
     document.getElementById('sFornecedor').value = 'Fornecedor Alfa';
-    saveSAC();
+    await saveSAC();
     const s = db.sac[db.sac.length - 1];
     return { etapa: s.etapa, fornecedor: s.fornecedor, num: s.num, id: s.id };
   });
   check(gravou.etapa === 'Recebimento de MP', 'a etapa e gravada (gravou "' + gravou.etapa + '")');
   check(gravou.fornecedor === 'Fornecedor Alfa', 'o fornecedor e gravado em campo proprio (gravou "' + gravou.fornecedor + '")');
 
-  const reabriu = await p.evaluate(() => {
+  const reabriu = await p.evaluate(async () => {
     editSAC(db.sac[db.sac.length - 1].id);
     return { etapa: document.getElementById('sEtapa').value,
              forn: document.getElementById('sFornecedor').value };
@@ -132,21 +132,21 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(reabriu.forn === 'Fornecedor Alfa', 'ao reabrir, o fornecedor continua (leu "' + reabriu.forn + '")');
 
   console.log('\nB4 — a regra que importa: nao bloqueia registrar, bloqueia encerrar');
-  const bloqueio = await p.evaluate(() => {
+  const bloqueio = await p.evaluate(async () => {
     window.__avisos = [];
     db.sac = []; db.ncs = [];
     openSACModal(null);
     document.getElementById('sDesc').value = 'Sem etapa ainda';
-    saveSAC();                                   // registra em "A apurar"
+    await saveSAC();                                   // registra em "A apurar"
     const registrou = db.sac.length === 1 && db.sac[0].etapa === 'A apurar';
 
     editSAC(db.sac[0].id);
     document.getElementById('sStatus').value = 'Encerrada';
-    saveSAC();                                   // deve recusar
+    await saveSAC();                                   // deve recusar
     const recusou = db.sac[0].status !== 'Encerrada' && window.__avisos.length === 1;
 
     document.getElementById('sEtapa').value = 'Manuseio no cliente';
-    saveSAC();                                   // ainda recusa: falta o 1o retorno
+    await saveSAC();                                   // ainda recusa: falta o 1o retorno
     // MUDANCA DE 09/09/2026 (DOC-SAC-001 rev. 02, regra 4.5): encerrar passou a
     // exigir DUAS coisas — a etapa da falha E a resposta enviada ao cliente.
     // Ate aqui o teste terminava na etapa; hoje isso seria encerrar um SAC que
@@ -158,7 +158,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
     sacRegistrarPrimeiroRetorno();
     document.getElementById('sEtapa').value = 'Manuseio no cliente';
     document.getElementById('sStatus').value = 'Encerrada';
-    saveSAC();                                   // agora aceita
+    await saveSAC();                                   // agora aceita
     const aceitou = db.sac[0].status === 'Encerrada' && db.sac[0].etapa === 'Manuseio no cliente';
     return { registrou, recusou, aceitou, soEtapa, avisoRetorno, aviso: window.__avisos[0] || '' };
   });
@@ -169,33 +169,33 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(/4\.5/.test(bloqueio.avisoRetorno), 'o segundo aviso explica a regra 4.5 (disse: "' + bloqueio.avisoRetorno + '")');
   check(bloqueio.aceitou, 'encerra com a etapa informada E o primeiro retorno registrado');
 
-  const bloqNC = await p.evaluate(() => {
+  const bloqNC = await p.evaluate(async () => {
     window.__avisos = [];
     db.ncs = [];
     openNCModal(null);
     document.getElementById('ncDesc').value = 'NC sem etapa';
     document.getElementById('ncStatusI').value = 'Fechada';
-    saveNC();
+    await saveNC();
     const recusou = db.ncs.length === 0 && window.__avisos.length === 1;
     document.getElementById('ncEtapa').value = 'Processo / produ\u00e7\u00e3o';
-    saveNC();
+    await saveNC();
     return { recusou, gravou: db.ncs.length === 1, etapa: db.ncs[0] && db.ncs[0].etapa };
   });
   check(bloqNC.recusou, 'a NC tambem recusa fechar em "A apurar"');
   check(bloqNC.gravou && bloqNC.etapa === 'Processo / produ\u00e7\u00e3o', 'a NC fecha depois que a etapa e informada');
 
   console.log('\nB6 — vinculo nos dois sentidos');
-  const vinc = await p.evaluate(() => {
+  const vinc = await p.evaluate(async () => {
     db.sac = []; db.ncs = [];
     // duas NCs e um SAC
-    openNCModal(null); document.getElementById('ncDesc').value='NC um'; saveNC();
-    openNCModal(null); document.getElementById('ncDesc').value='NC dois'; saveNC();
+    openNCModal(null); document.getElementById('ncDesc').value='NC um'; await saveNC();
+    openNCModal(null); document.getElementById('ncDesc').value='NC dois'; await saveNC();
     const nc1 = db.ncs[0].id, nc2 = db.ncs[1].id;
 
     openSACModal(null);
     document.getElementById('sDesc').value = 'SAC vinculado';
     document.getElementById('sNcId').value = nc1;
-    saveSAC();
+    await saveSAC();
     const sacId = db.sac[0].id;
     const ida  = db.sac[0].ncId === nc1;
     const volta = db.ncs.filter(n=>n.id===nc1)[0].sacId === sacId;
@@ -203,14 +203,14 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
     // troca o vinculo para a outra NC
     editSAC(sacId);
     document.getElementById('sNcId').value = nc2;
-    saveSAC();
+    await saveSAC();
     const trocou   = db.sac[0].ncId === nc2 && db.ncs.filter(n=>n.id===nc2)[0].sacId === sacId;
     const limpouNC1 = db.ncs.filter(n=>n.id===nc1)[0].sacId === '';
 
     // desfaz o vinculo
     editSAC(sacId);
     document.getElementById('sNcId').value = '';
-    saveSAC();
+    await saveSAC();
     const desfez = db.sac[0].ncId === '' && db.ncs.filter(n=>n.id===nc2)[0].sacId === '';
 
     return { ida, volta, trocou, limpouNC1, desfez, sacId, nc1, nc2 };
@@ -221,21 +221,21 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(vinc.limpouNC1, 'a NC antiga deixa de apontar para o SAC (nao fica orfa apontando)');
   check(vinc.desfez, 'desfazer o vinculo limpa os dois lados');
 
-  const peloLadoNC = await p.evaluate(() => {
+  const peloLadoNC = await p.evaluate(async () => {
     db.sac = []; db.ncs = [];
-    openSACModal(null); document.getElementById('sDesc').value='SAC alvo'; saveSAC();
+    openSACModal(null); document.getElementById('sDesc').value='SAC alvo'; await saveSAC();
     const sacId = db.sac[0].id;
     openNCModal(null);
     document.getElementById('ncDesc').value = 'NC que escolhe o SAC';
     document.getElementById('ncSacId').value = sacId;
-    saveNC();
+    await saveNC();
     const ncId = db.ncs[0].id;
     return { naNC: db.ncs[0].sacId === sacId, noSAC: db.sac[0].ncId === ncId };
   });
   check(peloLadoNC.naNC && peloLadoNC.noSAC, 'vincular pelo lado da NC preenche os dois lados tambem');
 
   console.log('\nB6 — encaminhamento assistido');
-  const assistido = await p.evaluate(() => {
+  const assistido = await p.evaluate(async () => {
     window.__avisos = [];
     db.sac = []; db.ncs = [];
     openSACModal(null);            // SAC ainda nao salvo
@@ -246,7 +246,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
     document.getElementById('sProd').value = 'Okey Lac 25kg';
     document.getElementById('sLote').value = 'L2422-24';
     document.getElementById('sEtapa').value = 'Envase e embalagem';
-    saveSAC();
+    await saveSAC();
     editSAC(db.sac[0].id);
     abrirNCdoSAC();                // agora abre a NC preenchida
 

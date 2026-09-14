@@ -84,7 +84,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   const check = (ok, txt) => { console.log((ok ? '  ok    ' : '  FALHA ') + txt); if (!ok) falhas++; };
 
   console.log('1 — os seis estados');
-  const est = await p.evaluate(() => {
+  const est = await p.evaluate(async () => {
     db.sac = []; db.ncs = [];
     openSACModal(null);
     const el = document.getElementById('sStatus');
@@ -100,7 +100,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
         'os prazos aprovados: 1 dia util / 7 corridos / 30 com laudo');
 
   console.log('\n2 — estado antigo gravado nao some da tela');
-  const antigo = await p.evaluate(() => {
+  const antigo = await p.evaluate(async () => {
     db.sac = [{ id:'velho', num:'SAC-001', data:'2026-08-01', status:'Em tratativa', etapa:'A apurar', desc:'antigo' }];
     editSAC('velho');
     return { valor: document.getElementById('sStatus').value,
@@ -110,14 +110,14 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(antigo.celula.indexOf('sem SLA') > -1, 'registro sem aberto_em e marcado "sem SLA" em vez de ganhar prazo inventado');
 
   console.log('\n3 — aberto_em carimba uma vez');
-  const nasceu = await p.evaluate(() => {
+  const nasceu = await p.evaluate(async () => {
     db.sac = [];
     openSACModal(null);
     document.getElementById('sData').value = '2026-09-09';
     document.getElementById('sCliente').value = 'Cliente A';
     document.getElementById('sDesc').value = 'corpo estranho';
     document.getElementById('sEtapa').value = 'Envase e embalagem';
-    saveSAC();
+    await saveSAC();
     const s = db.sac[0];
     return { abertoEm: s.abertoEm, pR: s.prazoPrimeiroRetorno, pC: s.prazoConclusao,
              ret: s.primeiroRetornoEm, conc: s.conclusaoEm, id: s.id };
@@ -128,16 +128,16 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   const dif = (new Date(nasceu.pC) - new Date(nasceu.abertoEm)) / 86400000;
   check(Math.abs(dif - 7) < 0.01, 'prazo de conclusao = 7 dias corridos (deu ' + dif.toFixed(2) + ')');
 
-  const naoReescreve = await p.evaluate((id) => {
+  const naoReescreve = await p.evaluate(async (id) => {
     editSAC(id);
     document.getElementById('sDesc').value = 'corpo estranho (corrigido)';
-    saveSAC();
+    await saveSAC();
     return db.sac[0].abertoEm;
   }, nasceu.id);
   check(naoReescreve === nasceu.abertoEm, 'aberto_em NAO foi reescrito ao editar');
 
   console.log('\n4 — nao encerra sem primeiro retorno (regra 4.5)');
-  const bloqueou = await p.evaluate((id) => {
+  const bloqueou = await p.evaluate(async (id) => {
     window.__avisos = [];
     editSAC(id);
     // A etapa vai preenchida de proposito: a trava que este passo mede e a do
@@ -145,7 +145,7 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
     // ordem dos ifs.
     document.getElementById('sEtapa').value = 'Envase e embalagem';
     document.getElementById('sStatus').value = 'Encerrada';
-    saveSAC();
+    await saveSAC();
     return { status: db.sac[0].status, avisos: window.__avisos.slice(),
              etapa: document.getElementById('sEtapa').value };
   }, nasceu.id);
@@ -154,30 +154,30 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(bloqueou.avisos.some(a => a.indexOf('4.5') > -1), 'a tela explica a regra 4.5 (' + JSON.stringify(bloqueou.avisos) + ')');
 
   console.log('\n5 — "Aguardando laudo / acao" exige pessoa e data (regra 4.4)');
-  const semDono = await p.evaluate((id) => {
+  const semDono = await p.evaluate(async (id) => {
     window.__avisos = [];
     editSAC(id);
     document.getElementById('sResp').value = '';
     document.getElementById('sPrazo').value = '';
     document.getElementById('sStatus').value = 'Aguardando laudo / ação';
-    saveSAC();
+    await saveSAC();
     return { status: db.sac[0].status, avisos: window.__avisos.slice() };
   }, nasceu.id);
   check(semDono.status !== 'Aguardando laudo / ação', '"esta com o laboratorio" sem dono nao passa');
   check(semDono.avisos.some(a => a.indexOf('4.4') > -1), 'a tela explica a regra 4.4');
 
   console.log('\n6 — a pausa empurra o prazo de conclusao');
-  const pausou = await p.evaluate((id) => {
+  const pausou = await p.evaluate(async (id) => {
     editSAC(id);
     document.getElementById('sStatus').value = 'Aguardando cliente';
-    saveSAC();
+    await saveSAC();
     const s = db.sac[0];
     // Recua a entrada da pausa em 3 dias para medir o efeito sem esperar 3 dias.
     s.pausas[0].de = new Date(Date.now() - 3*86400000).toISOString();
     const antes = s.prazoConclusao;
     editSAC(id);
     document.getElementById('sStatus').value = 'Em análise';
-    saveSAC();
+    await saveSAC();
     const d = db.sac[0];
     return { pausas: d.pausas.length, temFim: !!d.pausas[0].ate,
              antes, depois: d.prazoConclusao,
@@ -187,14 +187,14 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(pausou.ganho > 2.9 && pausou.ganho < 3.2, 'o prazo de conclusao andou ~3 dias para a frente (andou ' + pausou.ganho.toFixed(2) + ')');
 
   console.log('\n7 — laudo estica para 30 dias, e desmarcar nao encolhe');
-  const laudo = await p.evaluate((id) => {
+  const laudo = await p.evaluate(async (id) => {
     editSAC(id);
     document.getElementById('sComLaudo').checked = true;
-    saveSAC();
+    await saveSAC();
     const comLaudo = db.sac[0].prazoConclusao;
     editSAC(id);
     document.getElementById('sComLaudo').checked = false;
-    saveSAC();
+    await saveSAC();
     const semLaudo = db.sac[0].prazoConclusao;
     return { comLaudo, semLaudo,
              dias: (new Date(comLaudo) - new Date(db.sac[0].abertoEm)) / 86400000 };
@@ -203,17 +203,17 @@ Object.defineProperty(window, 'supabase', { value: { createClient: mk }, writabl
   check(laudo.semLaudo === laudo.comLaudo, 'desmarcar o laudo NAO encolhe um prazo ja prometido');
 
   console.log('\n8 — o carimbo de retorno e explicito, e conclusao_em segue o estado');
-  const fim = await p.evaluate((id) => {
+  const fim = await p.evaluate(async (id) => {
     editSAC(id);
     sacRegistrarPrimeiroRetorno();
     document.getElementById('sStatus').value = 'Encerrada';
     document.getElementById('sEtapa').value = 'Envase e embalagem';
-    saveSAC();
+    await saveSAC();
     const enc = db.sac[0];
     const r1 = { ret: !!enc.primeiroRetornoEm, conc: !!enc.conclusaoEm, status: enc.status };
     editSAC(id);
     document.getElementById('sStatus').value = 'Em análise';
-    saveSAC();
+    await saveSAC();
     const re = db.sac[0];
     return { r1, reabriu: { ret: !!re.primeiroRetornoEm, conc: re.conclusaoEm } };
   }, nasceu.id);

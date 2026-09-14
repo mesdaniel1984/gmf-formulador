@@ -85,7 +85,7 @@ async function abrir(query){
   console.log('1 — sem parametro, a tela nao muda de comportamento');
   {
     const { b, p, erros } = await abrir('');
-    const r = await p.evaluate(() => ({
+    const r = await p.evaluate(async () => ({
       modalAberto: document.getElementById('ncModal').classList.contains('open'),
       ncs: db.ncs.length,
       upserts: window.__T.upserts,
@@ -110,7 +110,7 @@ async function abrir(query){
       + '&data=2026-09-08'
       + '&origem=' + encodeURIComponent('ronda 1841 / OP 2026/02388 / PCC-04');
     const { b, p, erros } = await abrir(q);
-    const r = await p.evaluate(() => ({
+    const r = await p.evaluate(async () => ({
       modalAberto: document.getElementById('ncModal').classList.contains('open'),
       desc:  document.getElementById('ncDesc').value,
       prod:  document.getElementById('ncProd').value,
@@ -147,9 +147,9 @@ async function abrir(query){
     check(erros.length === 0, 'sem erro de pagina (' + JSON.stringify(erros) + ')');
 
     console.log('\n3 — so depois de a pessoa clicar em Salvar a NC existe');
-    const dep = await p.evaluate(() => {
+    const dep = await p.evaluate(async () => {
       document.getElementById('ncEtapa').value = 'Envase e fechamento';
-      saveNC();
+      await saveNC();
       return { ncs: db.ncs.length, num: (db.ncs[0]||{}).num, prod: (db.ncs[0]||{}).prod };
     });
     check(dep.ncs === 1, 'depois do Salvar existe 1 NC');
@@ -161,7 +161,7 @@ async function abrir(query){
   console.log('\n4 — valor que o select nao tem nao apaga o campo em silencio');
   {
     const { b, p } = await abrir('?abrir=nc&empresa=EMPRESA_QUE_NAO_EXISTE&desc=teste');
-    const r = await p.evaluate(() => ({
+    const r = await p.evaluate(async () => ({
       empresa: document.getElementById('ncEmpresa').value,
       opcoes: Array.from(document.getElementById('ncEmpresa').options).map(o => o.value)
     }));
