@@ -157,8 +157,20 @@ const dias = n => { const d = new Date(); d.setDate(d.getDate()+n); return d.toI
   check(/ABRIR|ANALISAR|CLASSIFICAR/.test(cheia.primeira), 'cada item tem botao de acao, nao so texto');
   check(/para agir agora/.test(cheia.nota), 'o cabecalho conta quantos sao para agir agora (' + cheia.nota + ')');
 
-  check(/aguardando análise da Qualidade/.test(cheia.sac), 'o painel de SAC separa quem espera analise de quem espera resposta');
-  check(/ainda medindo/.test(cheia.sac), 'tempo medio de resposta aparece como "ainda medindo", nao como numero inventado');
+  // MUDANCA DE 14/09/2026 — DOC-SAC-001 secao 9: o card do SAC virou FILA.
+  //
+  // Antes ele separava "aguardando analise" de "aguardando resposta" e dizia
+  // "ainda medindo", porque nao havia carimbo de hora. Com os cinco campos de
+  // prazo, ele mostra estado por estado e mede o 1o retorno de verdade.
+  //
+  // A INTENCAO das duas verificacoes antigas continua aqui, mais forte: os
+  // tres SAC plantados sao de ANTES dos carimbos (nao tem abertoEm), entao o
+  // card nao pode inventar media nenhuma para eles — e tem de dizer por que.
+  check(/em aberto/.test(cheia.sac), 'o card abre com quantos estao em aberto');
+  check(/com prazo vencido/.test(cheia.sac), 'a linha de prazo vencido aparece sempre, ate zerada — e a que se olha primeiro');
+  check(/nenhum carimbado ainda/.test(cheia.sac), 'sem retorno carimbado, o card DIZ isso em vez de mostrar um numero');
+  check(!/retorno em \d/.test(cheia.sac), 'e nao mostra media nenhuma (deu: "' + (cheia.sac||'').slice(0,90) + '")');
+  check(/antes dos carimbos de prazo/.test(cheia.sac), 'os registros antigos aparecem contados a parte, com o motivo');
   check(/sem tipo informado/.test(cheia.nc) || /internas/.test(cheia.nc), 'a quebra da NC fecha com o total de abertas');
   check(/2 vencidos/.test(cheia.conf), 'conformidade resume os vencidos em vez de so mostrar percentual');
 

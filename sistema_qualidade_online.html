@@ -1989,13 +1989,54 @@ function renderCentral(){
     ? (_cFilaAberta?'Mostrar só o crítico ↑':'Ver fila completa ('+fila.length+') →') : '';
 
   // ---------- SAC e NC ----------
+  /* ---------- O CARD DO SAC vira FILA (DOC-SAC-001, secao 9) ----------
+   * "Fila com cor e a unica forma de o cartao responder a segunda pergunta
+   * do painel: o que preciso fazer agora?"
+   *
+   * A ordem das linhas e a ordem de urgencia, nao a de conveniencia: o que
+   * estourou vem primeiro, o que espera terceiro vem por ultimo. Quem nao
+   * tem contagem some da lista — linha zerada e ruido, nao informacao.    */
+  var fSac = sacFilaDaCentral(sac);
+
+  var linhas = [
+    { n:fSac.vencido,            rot:'com prazo vencido',      tom:T.crit, sempre:true },
+    { n:fSac.semPrimeiroRetorno, rot:'sem o 1\u00ba retorno',      tom:T.alto },
+    { n:fSac.emAnalise,          rot:'em an\u00e1lise',            tom:T.dim },
+    { n:fSac.respostaPreparada,  rot:'resposta preparada',     tom:T.dim },
+    { n:fSac.aguardandoLaudo,    rot:'aguardando laudo',       tom:T.dim },
+    { n:fSac.aguardandoCliente,  rot:'aguardando cliente',     tom:T.dim }
+  ].filter(function(l){ return l.n > 0 || l.sempre; });
+
+  var medida = fSac.primeiroRetornoMedioH != null
+    ? '<b>1\u00ba retorno em ' + sacTempoCurto(fSac.primeiroRetornoMedioH) + '</b> em m\u00e9dia'
+      + ' <span style="opacity:.75">(' + fSac.medidosNoRetorno + ' medido'
+      + (fSac.medidosNoRetorno > 1 ? 's' : '') + ')</span>'
+    // Nao dizer "0h" nem "sem atraso": nenhum retorno carimbado ainda nao e
+    // desempenho, e um numero aqui seria inventado.
+    : '<b>1\u00ba retorno</b> \u2014 nenhum carimbado ainda. Sai no primeiro que a Qualidade registrar.';
+
+  var lote = fSac.comLotePct != null
+    ? '<b>' + fSac.comLotePct + '% com lote</b>'
+      + (fSac.comLotePct < 70 ? ' <span style="opacity:.75">(corte experimental: 70%)</span>' : '')
+    : '';
+
   document.getElementById('cSac').innerHTML=
       '<div class="x-lista">'
-    + '<div class="x-item"><b>'+sacAb.length+'</b><span>abertas</span></div>'
-    + '<div class="x-item"><b>'+sacSemAn.length+'</b><span>aguardando análise da Qualidade</span></div>'
-    + '<div class="x-item"><b>'+sacSemResp+'</b><span>aguardando resposta ao cliente</span></div></div>'
-    + '<div class="x-nota"><b>Tempo médio de resposta</b> — ainda medindo. O SAC guarda o prazo combinado, não a hora do primeiro retorno.'
-    + (sacT.length<=5?'<br><br>São '+sacT.length+' reclamações no histórico inteiro. O número diz mais sobre o canal do que sobre o produto.':'')
+    + '<div class="x-item"><b>'+fSac.aberto+'</b><span>em aberto</span></div>'
+    + linhas.map(function(l){
+        return '<div class="x-item" style="--tone:'+l.tom+'">'
+             + '<b style="color:'+l.tom+'">'+l.n+'</b><span>'+l.rot+'</span></div>';
+      }).join('')
+    + '</div>'
+    + '<div class="x-nota">' + medida + (lote ? ' &nbsp;·&nbsp; ' + lote : '')
+    + (fSac.semSla
+        ? '<br><br>' + fSac.semSla + ' registro' + (fSac.semSla>1?'s':'')
+          + ' de antes dos carimbos de prazo. N\u00e3o entra' + (fSac.semSla>1?'m':'')
+          + ' nas m\u00e9dias \u2014 prazo calculado para tr\u00e1s seria hist\u00f3rico inventado.'
+        : '')
+    + (sacT.length<=5
+        ? '<br><br>S\u00e3o '+sacT.length+' reclama\u00e7\u00f5es no hist\u00f3rico inteiro. O n\u00famero diz mais sobre o canal do que sobre o produto.'
+        : '')
     + '</div>';
 
   const ncInt=ncAb.filter(function(n){return n.tipo==='Interna';}).length;
@@ -2970,6 +3011,82 @@ function saveNC(){
 }
 
 // ===== SAC =====
+
+/* ===========================================================================
+ * A FILA DO SAC PARA A CENTRAL — DOC-SAC-001, secao 9.
+ *
+ * O card do SAC mostrava um numero e uma frase honesta: "tempo medio de
+ * resposta — ainda medindo. O SAC guarda o prazo combinado, nao a hora do
+ * primeiro retorno". Isso era verdade ate os cinco campos existirem. Agora
+ * existem, e a frase pode virar numero.
+ *
+ * O documento chamou isso de "desenhar o mostrador de um relogio sem
+ * mecanismo" e mandou construir a tela DEPOIS dos campos. Esta e a hora.
+ *
+ * O que esta funcao NAO faz: inventar media. Media de tempo de retorno so
+ * sai de SAC que TEM carimbo — os antigos, sem `abertoEm`, ficam de fora da
+ * conta e aparecem contados a parte. Diluir o indicador com registro que
+ * nunca teve relogio daria um numero bonito e falso.
+ * ======================================================================== */
+function sacFilaDaCentral(lista){
+  var f = {
+    total:0, aberto:0, vencido:0, emAnalise:0, aguardandoCliente:0,
+    aguardandoLaudo:0, respostaPreparada:0,
+    semSla:0, comLote:0, comLotePct:null,
+    primeiroRetornoMedioH:null, medidosNoRetorno:0,
+    semPrimeiroRetorno:0
+  };
+  var horas = [], comSla = 0;
+
+  (lista||[]).forEach(function(s){
+    f.total++;
+    if(s.lote && String(s.lote).trim()) f.comLote++;
+
+    var encerrado = s.status === 'Encerrada';
+    if(!encerrado) f.aberto++;
+
+    if(s.status === 'Em an\u00e1lise')             f.emAnalise++;
+    if(s.status === 'Aguardando cliente')      f.aguardandoCliente++;
+    if(s.status === 'Aguardando laudo / a\u00e7\u00e3o') f.aguardandoLaudo++;
+    if(s.status === 'Resposta preparada')      f.respostaPreparada++;
+
+    // Registro anterior aos carimbos: nao entra em media nenhuma.
+    if(!s.abertoEm){ f.semSla++; return; }
+    comSla++;
+
+    if(s.primeiroRetornoEm){
+      var h = (new Date(s.primeiroRetornoEm) - new Date(s.abertoEm)) / 3600000;
+      if(isFinite(h) && h >= 0) horas.push(h);
+    }else if(!encerrado){
+      f.semPrimeiroRetorno++;
+    }
+
+    // VENCIDO e so o que esta com a Qualidade e estourou. Relogio pausado
+    // (bola com o cliente) nao conta como atraso — foi para isso que o
+    // estado "Aguardando cliente" existe.
+    if(encerrado) return;
+    var rel = SAC_RELOGIO[s.status] || 'correndo';
+    if(rel !== 'correndo') return;
+    var prazo = s.primeiroRetornoEm ? sacPrazoConclusao(s) : sacPrazoPrimeiroRetorno(s);
+    var carimbo = s.primeiroRetornoEm ? s.conclusaoEm : s.primeiroRetornoEm;
+    if(prazo && !carimbo && new Date(prazo).getTime() < Date.now()) f.vencido++;
+  });
+
+  if(f.total) f.comLotePct = Math.round(100 * f.comLote / f.total);
+  if(horas.length){
+    f.medidosNoRetorno = horas.length;
+    f.primeiroRetornoMedioH = horas.reduce(function(a,b){return a+b;},0) / horas.length;
+  }
+  f.comSla = comSla;
+  return f;
+}
+
+function sacTempoCurto(h){
+  if(h == null) return '\u2014';
+  if(h < 1)  return Math.round(h*60) + 'min';
+  if(h < 48) return (h < 10 ? h.toFixed(1) : Math.round(h)) + 'h';
+  return (h/24).toFixed(1).replace('.', ',') + 'd';
+}
 
 /* ===========================================================================
  * PRAZOS DO SAC — DOC-SAC-001 rev. 02, secoes 3, 4 e 5.
