@@ -111,7 +111,9 @@
     var st=currentStage();
     document.querySelectorAll('[data-i2-life]').forEach(function(b){
       var n=Number(b.getAttribute('data-i2-life'));
-      b.classList.toggle('active',n===st);
+      var active=n===st;
+      b.classList.toggle('active',active);
+      if(active)b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');
     });
   }
 
@@ -174,6 +176,7 @@
 
     var wrap=document.createElement('section');wrap.className='i2-workspace';wrap.id='i2Workspace';
     wrap.setAttribute('aria-label','Contexto do produto');
+    wrap.setAttribute('role','region');
     wrap.innerHTML='<div class="i2-life" aria-label="Ciclo de vida do produto">'
       +'<button type="button" data-i2-life="0" data-i2-step="0"><b>01</b><span>Portfólio</span></button>'
       +'<button type="button" data-i2-life="1" data-i2-step="1"><b>02</b><span>Produto & revisão</span></button>'
@@ -211,6 +214,8 @@
       var n=Number(b.getAttribute('data-i2-step'));
       if(isFinite(n))go(n);
     });
+    var health=el('i2wsHealthDetail');if(health)health.setAttribute('aria-live','polite');
+    var nextLive=el('i2wsNextTitle');if(nextLive)nextLive.setAttribute('aria-live','polite');
     var h=el('i2wsHistory');if(h)h.addEventListener('click',openHistory);
     var save=el('i2wsSave');if(save)save.addEventListener('click',function(){try{if(typeof salvarProdutoAtual==='function')salvarProdutoAtual();}catch(e){console.error(e);}});
 
