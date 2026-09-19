@@ -101,6 +101,12 @@
     return null;
   }
 
+  function syncMode(){
+    var st=currentStage(),wrap=el('i2Workspace'),ctx=document.querySelector('.i2-context');
+    if(wrap)wrap.classList.toggle('i2-catalog-mode',st===6);
+    if(ctx)ctx.classList.toggle('i2-catalog-mode',st===6);
+  }
+
   function syncLifecycle(){
     var st=currentStage();
     document.querySelectorAll('[data-i2-life]').forEach(function(b){
@@ -154,6 +160,7 @@
     if(nextBtn)nextBtn.setAttribute('data-i2-step',String(next.step));
 
     syncLifecycle();
+    syncMode();
   }
 
   function go(n){try{if(typeof goStep==='function')goStep(n);}catch(e){}}
@@ -163,6 +170,7 @@
     if(el('i2Workspace')||!el('wizardNav'))return;
     renameNavigation();
     enhancePortfolio();
+    var nativeNav=el('wizardNav');if(nativeNav)nativeNav.classList.add('i2-native-wizard');
 
     var wrap=document.createElement('section');wrap.className='i2-workspace';wrap.id='i2Workspace';
     wrap.setAttribute('aria-label','Contexto do produto');
@@ -208,7 +216,7 @@
 
     document.addEventListener('input',syncState,true);
     document.addEventListener('change',syncState,true);
-    var targets=['recTabela','conformidadeWarning','prodLista','wizardNav'].map(el).filter(Boolean);
+    var targets=['recTabela','conformidadeWarning','prodLista','wizardNav','step6'].map(el).filter(Boolean);
     if(window.MutationObserver) targets.forEach(function(t){new MutationObserver(syncState).observe(t,{childList:true,subtree:true,attributes:true});});
     syncState();setInterval(syncState,2000);
   }
