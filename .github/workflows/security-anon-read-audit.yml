@@ -28,8 +28,8 @@ jobs:
           python3 - <<'PY' > /tmp/supa.env
           import re
           text=open('login.html',encoding='utf-8').read()
-          url=re.search(r"const URL_\\s*=\\s*'([^']+)'",text)
-          key=re.search(r"const KEY_\\s*=\\s*'([^']+)'",text)
+          url=re.search(r"const URL_ = '([^']+)'",text)
+          key=re.search(r"const KEY_ = '([^']+)'",text)
           if not url or not key:
               raise SystemExit('Supabase config not found')
           print('SUPA_URL='+url.group(1))
