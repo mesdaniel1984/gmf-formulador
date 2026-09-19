@@ -227,7 +227,12 @@ declare
   v_id uuid;
 begin
   v_actor := auth.uid();
-  v_id := coalesce(new.id, old.id);
+
+  if tg_op = 'DELETE' then
+    v_id := old.id;
+  else
+    v_id := new.id;
+  end if;
 
   insert into public.audit_log(
     entity_type,
@@ -248,9 +253,13 @@ begin
     'db_trigger'
   );
 
-  return coalesce(new, old);
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+
+  return new;
 end;
-$$;
+$;
 
 drop trigger if exists trg_produto_revisao_audit on public.produto_revisoes;
 create trigger trg_produto_revisao_audit
