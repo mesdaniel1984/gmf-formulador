@@ -122,7 +122,11 @@ as $fn$
 declare
   v_id text;
 begin
-  v_id := coalesce(new.user_id,old.user_id)::text || ':' || coalesce(new.role,old.role);
+  if tg_op='DELETE' then
+    v_id := old.user_id::text || ':' || old.role;
+  else
+    v_id := new.user_id::text || ':' || new.role;
+  end if;
 
   insert into public.audit_log(
     entity_type,entity_id,action,before_data,after_data,actor_id,origin
