@@ -62,7 +62,8 @@ create table if not exists public.produto_revisoes (
     ),
 
   -- Snapshot completo da especificação/fórmula daquela revisão.
-  snapshot jsonb not null,
+  snapshot jsonb not null
+    check (jsonb_typeof(snapshot) = 'object'),
 
   motivo_alteracao text,
 
@@ -104,7 +105,10 @@ create table if not exists public.produto_revisoes (
   check (
     (status = 'LEGADO' and revisao_codigo is null)
     or
-    (status <> 'LEGADO' and revisao_codigo is not null)
+    (
+      status <> 'LEGADO'
+      and nullif(btrim(revisao_codigo),'') is not null
+    )
   ),
 
   check (
