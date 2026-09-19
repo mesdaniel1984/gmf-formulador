@@ -107,6 +107,7 @@ A F4.2 deverá criar o modelo de papéis e RPCs/policies explícitas antes de li
 - `phase4/001_product_revision_foundation.sql`
 - `phase4/002_legacy_snapshot.sql`
 - `phase4/003_validation_queries.sql`
+- `phase4/004_harden_revision_functions_and_indexes.sql`
 
 ## Portões antes de aplicar
 
@@ -143,3 +144,31 @@ Depois que F4.2 começar a gravar revisões, rollback deixa de ser simples DROP 
 - migração de `app_state`;
 - integração CQ → SGQ;
 - SSO.
+
+
+## Resultado da aplicação controlada em 19/09/2026
+
+A F4.1 foi aplicada de forma aditiva no Supabase após CI verde.
+
+Resultado observado:
+
+- produtos: 43;
+- revisões totais: 43;
+- LEGADO: 43;
+- revisões controladas: 0;
+- LEGADO sem texto de revisão original: 28;
+- registros com aprovação/vigência: 0;
+- eventos de audit trail de revisão: 43;
+- laudos preservados: 101;
+- app_state preservado: 12.
+
+Hardening pós-advisor:
+
+- EXECUTE revogado de `produto_revisao_audit()` para frontend;
+- EXECUTE revogado de `produto_revisao_guard()` para frontend;
+- índices adicionados para `criado_por`, `aprovado_por` e `rejeitada_por`.
+
+Advisories restantes:
+
+- RLS sem policy nas duas tabelas novas: **intencional**, porque F4.1 ainda não expõe acesso ao frontend;
+- Leaked Password Protection: pendência de Auth separada da F4.1.
