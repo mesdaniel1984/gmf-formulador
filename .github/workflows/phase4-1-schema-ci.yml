@@ -49,6 +49,9 @@ jobs:
       - name: Aplicar fundação F4.1
         run: psql -v ON_ERROR_STOP=1 -f phase4/001_product_revision_foundation.sql
 
+      - name: Aplicar hardening F4.1
+        run: psql -v ON_ERROR_STOP=1 -f phase4/004_harden_revision_functions_and_indexes.sql
+
       - name: Rodar asserts do ciclo de vida
         run: psql -v ON_ERROR_STOP=1 -f phase4/test/assertions.sql
 
