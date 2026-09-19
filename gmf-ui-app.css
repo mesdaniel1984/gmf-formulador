@@ -434,3 +434,6 @@ body.interface-2 .badge{
   body.interface-2 .toolbar .btn-primary{margin-left:0}
   body.interface-2 .modal{max-width:calc(100vw - 18px)!important;max-height:calc(100vh - 18px)!important}
 }
+
+.i2-logout{height:25px;padding:0 8px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:transparent;color:#b8cbd8;font:800 9px/1 Inter,system-ui,sans-serif;cursor:pointer}.i2-logout:hover{background:rgba(255,255,255,.08);color:#fff}
+@media(max-width:520px){.i2-state{display:none!important}.i2-logout{padding:0 7px}}
