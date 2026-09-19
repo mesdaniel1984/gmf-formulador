@@ -18,6 +18,38 @@
     b.setAttribute('aria-label',label);
   }
 
+
+  function enhancePortfolio(){
+    var step=el('step0');if(!step||el('i2PortfolioTools'))return;
+    var card=step.querySelector('.card');if(!card)return;
+    var title=card.querySelector('.card-title');if(!title)return;
+    var actions=title.children[1];if(!actions)return;
+
+    var tools=document.createElement('details');tools.id='i2PortfolioTools';tools.className='i2-portfolio-tools';
+    tools.innerHTML='<summary>Ferramentas <span>▾</span></summary><div class="i2-portfolio-menu"></div>';
+    var menu=tools.querySelector('.i2-portfolio-menu');
+
+    var selectors=['exportarJSON()','abrirRevisaoMassa()','migrarProdutosMassa()'];
+    Array.prototype.slice.call(actions.querySelectorAll('button')).forEach(function(b){
+      var oc=String(b.getAttribute('onclick')||'');
+      var isImport=oc.indexOf("importJsonInput")>-1;
+      var move=isImport||selectors.some(function(x){return oc.indexOf(x)>-1;});
+      if(move){
+        b.classList.add('i2-admin-tool');
+        if(oc.indexOf('migrarProdutosMassa')>-1){
+          b.classList.add('danger');
+          b.setAttribute('title','Ação em massa. Revise antes de executar.');
+        }
+        menu.appendChild(b);
+      }
+    });
+    actions.insertBefore(tools,actions.firstChild);
+
+    var note=document.createElement('div');note.className='i2-portfolio-note';note.id='i2PortfolioNote';
+    note.innerHTML='<span class="i2-portfolio-dot"></span><div><strong>Portfólio técnico</strong><span>Novo produto fica como ação principal. Importação, revisão e correções em massa ficam separadas para reduzir clique acidental.</span></div>';
+    card.insertBefore(note,title.nextSibling);
+  }
+
   function renameNavigation(){
     setButtonLabel('s0btn','Portfólio');
     setButtonLabel('s1btn','Produto & revisão');
@@ -130,6 +162,7 @@
   function create(){
     if(el('i2Workspace')||!el('wizardNav'))return;
     renameNavigation();
+    enhancePortfolio();
 
     var wrap=document.createElement('section');wrap.className='i2-workspace';wrap.id='i2Workspace';
     wrap.setAttribute('aria-label','Contexto do produto');
