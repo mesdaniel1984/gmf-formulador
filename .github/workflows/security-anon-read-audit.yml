@@ -1,0 +1,81 @@
+name: Security Gate — anonymous read audit
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  anonymous-read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static secret guard
+        run: |
+          set -euo pipefail
+          if grep -RniE 'service_role|SUPABASE_SERVICE_ROLE_KEY' --include='*.html' --include='*.js' .; then
+            echo "Service-role reference found in frontend."
+            exit 1
+          fi
+          echo "No service-role reference in frontend assets."
+
+      - name: Verify anonymous SELECT does not expose rows
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY' > /tmp/supa.env
+          import re
+          text=open('login.html',encoding='utf-8').read()
+          url=re.search(r"const URL_\s*=\s*'([^']+)'",text)
+          key=re.search(r"const KEY_\s*=\s*'([^']+)'",text)
+          if not url or not key:
+              raise SystemExit('Supabase config not found in login.html')
+          print('SUPA_URL='+url.group(1))
+          print('SUPA_KEY='+key.group(1))
+          PY
+
+          source /tmp/supa.env
+          echo "::add-mask::$SUPA_KEY"
+
+          FAILED=0
+          for TABLE in produtos ingredientes_custom laudos perfis app_state; do
+            BODY="/tmp/${TABLE}.json"
+            CODE=$(curl -sS --max-time 20 -o "$BODY" -w "%{http_code}" \
+              -H "apikey: $SUPA_KEY" \
+              -H "Authorization: Bearer $SUPA_KEY" \
+              "$SUPA_URL/rest/v1/$TABLE?select=*&limit=1")
+
+            RESULT=$(python3 - "$BODY" "$CODE" <<'PY'
+          import json,sys
+          path,code=sys.argv[1],sys.argv[2]
+          try:
+              data=json.load(open(path,encoding='utf-8'))
+          except Exception:
+              print('UNPARSEABLE')
+              raise SystemExit
+          if code in ('401','403'):
+              print('PROTECTED')
+          elif code == '200' and isinstance(data,list):
+              print('EXPOSED' if len(data)>0 else 'EMPTY_OR_RLS')
+          elif code == '404':
+              print('NOT_FOUND')
+          else:
+              print('OTHER')
+          PY
+            )
+
+            echo "$TABLE: HTTP $CODE / $RESULT"
+            if [ "$RESULT" = "EXPOSED" ]; then
+              FAILED=1
+            fi
+          done
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "Anonymous SELECT exposed at least one row."
+            exit 1
+          fi
+
+          echo "Anonymous read audit passed: no row exposure detected."
