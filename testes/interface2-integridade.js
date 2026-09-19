@@ -94,6 +94,8 @@ check(sgq.includes('gmf-ui-app.css') && sgq.includes('gmf-interface-2.js') && sg
 check(idx.includes('gmf_formulador_wizard.html') && idx.includes('sistema_qualidade_online.html') &&
       idx.includes('qualidade-alimentos-production.up.railway.app'),
       'Central mantem os tres destinos');
+check(idx.includes('gmf-central.js') && fs.existsSync('gmf-central.js'),
+      'busca local da Central esta ligada ao asset previsto');
 check(fs.existsSync('gmf-ui.css') && fs.existsSync('gmf-ui-app.css') &&
       fs.existsSync('gmf-interface-2.js') && fs.existsSync('gmf-workspace.js') &&
       fs.existsSync('sgq-workspace.js'),
