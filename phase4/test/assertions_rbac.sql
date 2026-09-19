@@ -110,7 +110,7 @@ declare
 begin
   select status,aprovado_por into v_status,v_approver
   from public.produto_revisoes
-  where id=:'revision_id'::uuid;
+  where produto_id=1 and revisao_codigo='020';
 
   if v_status <> 'VIGENTE' then
     raise exception 'revisão não ficou vigente: %',v_status;
@@ -161,11 +161,17 @@ select public.criar_revisao_produto(
 ) as revision2_id \gset
 
 -- Lock incorreto falha.
-do $$
-declare v_failed boolean := false;
+do $
+declare
+  v_failed boolean := false;
+  v_id uuid;
 begin
+  select id into v_id
+  from public.produto_revisoes
+  where produto_id=2 and revisao_codigo='002';
+
   begin
-    perform public.iniciar_revisao(:'revision2_id'::uuid,999);
+    perform public.iniciar_revisao(v_id,999);
   exception
     when others then
       if position('REVISION_CONFLICT' in sqlerrm)>0 then
@@ -187,17 +193,18 @@ select set_config(
   false
 );
 
-do $$
+do $
 declare
   v_failed boolean := false;
   v_lock integer;
+  v_id uuid;
 begin
-  select lock_version into v_lock
+  select id,lock_version into v_id,v_lock
   from public.produto_revisoes
-  where id=:'revision2_id'::uuid;
+  where produto_id=2 and revisao_codigo='002';
 
   begin
-    perform public.atualizar_snapshot_revisao(:'revision2_id'::uuid,v_lock);
+    perform public.atualizar_snapshot_revisao(v_id,v_lock);
   exception
     when others then
       if position('FORBIDDEN' in sqlerrm)>0 then
