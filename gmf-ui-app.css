@@ -155,3 +155,54 @@ body.interface-2 .ok,body.interface-2 .success{background:var(--i2-green-soft)!i
   .i2-ws-metrics{grid-template-columns:1fr 1fr}.i2-ws-metric:nth-child(2){border-right:0}
   .i2-ws-metric:nth-child(-n+2){border-bottom:1px solid var(--i2-border)}
 }
+
+/* === SGQ WORKSPACE ======================================================= */
+body.interface-2 .topbar{
+  background:linear-gradient(90deg,var(--i2-navy),var(--i2-navy2))!important;
+  min-height:62px;height:62px!important;padding:0 22px!important
+}
+body.interface-2 .topbar .logo{font-size:16px!important;letter-spacing:-.01em}
+body.interface-2 .topbar .subtitle{font-size:10.5px!important;opacity:.72!important}
+body.interface-2 .nav{
+  background:#fff!important;border-bottom:1px solid var(--i2-border)!important;
+  gap:3px!important;padding:7px 14px!important;box-shadow:0 2px 8px rgba(25,45,65,.035)
+}
+body.interface-2 .nav button{
+  color:#607484!important;border:1px solid transparent!important;border-bottom:1px solid transparent!important;
+  border-radius:8px!important;padding:8px 11px!important;font-size:11px!important;font-weight:650!important
+}
+body.interface-2 .nav button:hover{color:var(--i2-navy)!important;background:#f4f7f9!important}
+body.interface-2 .nav button.active{
+  color:var(--i2-blue)!important;background:var(--i2-blue-soft)!important;border-color:#d7e8f5!important;font-weight:800!important
+}
+body.interface-2 .main{max-width:1440px!important;padding:22px 26px 42px!important}
+body.interface-2 .panel{border:1px solid var(--i2-border)!important;border-radius:12px!important;box-shadow:var(--i2-shadow)!important}
+body.interface-2 .card{border:1px solid var(--i2-border)!important;border-left:4px solid var(--primary)!important;box-shadow:var(--i2-shadow)!important;border-radius:12px!important}
+body.interface-2 .section-title{color:var(--i2-text)!important;font-size:22px!important;letter-spacing:-.025em}
+body.interface-2 .section-sub{color:var(--i2-muted)!important;font-size:11.5px!important}
+body.interface-2 .toolbar{background:#fff;border:1px solid var(--i2-border);border-radius:11px;padding:10px;margin-bottom:12px!important}
+body.interface-2 .toolbar input[type=text],body.interface-2 .toolbar select{min-height:36px;border-color:#cfdbe2!important;border-radius:8px!important}
+body.interface-2 .btn{border-radius:8px!important}
+body.interface-2 .btn-primary{background:var(--i2-blue)!important}
+body.interface-2 .nc-card{border:1px solid var(--i2-border)!important;border-left:4px solid var(--i2-red)!important;border-radius:10px!important;box-shadow:0 2px 10px rgba(25,45,65,.04)!important}
+
+/* Contexto de trabalho do módulo */
+.i2-qms-context{max-width:1440px;margin:16px auto 0;padding:0 26px}
+.i2-qms-context-inner{background:#fff;border:1px solid var(--i2-border);border-radius:12px;box-shadow:var(--i2-shadow);display:flex;align-items:center;gap:16px;padding:13px 16px}
+.i2-qms-module{min-width:0;flex:1}
+.i2-qms-kicker{font:800 9px/1.2 Inter,ui-sans-serif,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--i2-green)}
+.i2-qms-title{font:800 15px/1.25 Inter,ui-sans-serif,system-ui,sans-serif;color:var(--i2-text);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.i2-qms-meta{display:flex;gap:8px;flex-wrap:wrap}
+.i2-qms-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 9px;border:1px solid var(--i2-border);border-radius:999px;color:var(--i2-muted);font:700 9.5px/1 Inter,ui-sans-serif,system-ui,sans-serif;background:#fbfcfd}
+.i2-qms-chip b{color:var(--i2-text);font-weight:800}
+.i2-qms-chip .dot{width:6px;height:6px;border-radius:50%;background:#94a3b8}
+.i2-qms-chip .dot.ok{background:var(--i2-green)}
+.i2-qms-action{height:32px;padding:0 11px;border:0;border-radius:8px;background:var(--i2-green);color:#fff;font:800 10px/1 Inter,ui-sans-serif,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.i2-qms-action:hover{filter:brightness(.96)}
+.i2-qms-action[hidden]{display:none}
+@media(max-width:760px){
+  body.interface-2 .topbar{height:auto!important;min-height:58px;padding:8px 10px!important}
+  body.interface-2 .nav{padding:5px!important}.i2-qms-context{padding:0 10px;margin-top:10px}
+  .i2-qms-context-inner{display:block;padding:12px}.i2-qms-meta{margin-top:9px}.i2-qms-action{margin-top:9px}
+  body.interface-2 .main{padding:12px 10px 30px!important}
+}
