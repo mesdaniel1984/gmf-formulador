@@ -261,7 +261,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public, pg_temp
-as $$
+as $audit$
 declare
   v_actor uuid;
   v_id uuid;
@@ -299,7 +299,7 @@ begin
 
   return new;
 end;
-$;
+$audit$;
 
 drop trigger if exists trg_produto_revisao_audit on public.produto_revisoes;
 create trigger trg_produto_revisao_audit
