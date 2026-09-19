@@ -54,10 +54,8 @@
       var pos=String(a.style&&a.style.position||'').toLowerCase();
       if(tx.indexOf('central de sistemas')>-1 && pos==='fixed')a.style.display='none';
     });
-    if(appKey()==='gmf'){
-      var h=document.querySelector('.app-header h1');
-      if(h && /gmf\s*lab/i.test(h.textContent||''))h.textContent='GMF Formulador';
-    }
+    var h=document.querySelector('.app-header h1');
+    if(h && /gmf\s*lab/i.test(h.textContent||''))h.textContent='GMF Formulador';
   }
 
   function enhanceSemantics(){
