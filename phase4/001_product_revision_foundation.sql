@@ -168,9 +168,45 @@ begin
     raise exception 'produto_id da revisão é imutável';
   end if;
 
-  if old.status in ('LEGADO','APROVADA','VIGENTE','OBSOLETA','CANCELADA')
+  if new.revisao_codigo is distinct from old.revisao_codigo then
+    raise exception 'revisao_codigo é imutável';
+  end if;
+
+  if new.legacy_revision_text is distinct from old.legacy_revision_text then
+    raise exception 'legacy_revision_text é imutável';
+  end if;
+
+  if new.origem is distinct from old.origem then
+    raise exception 'origem da revisão é imutável';
+  end if;
+
+  if new.criado_por is distinct from old.criado_por
+     or new.criado_em is distinct from old.criado_em then
+    raise exception 'autoria original da revisão é imutável';
+  end if;
+
+  -- Não permite alterar conteúdo já congelado nem alterar conteúdo
+  -- no mesmo comando que promove a revisão a um estado controlado.
+  if (
+       old.status in ('LEGADO','APROVADA','VIGENTE','OBSOLETA','CANCELADA')
+       or new.status in ('APROVADA','VIGENTE','OBSOLETA')
+     )
      and new.snapshot is distinct from old.snapshot then
-    raise exception 'snapshot imutável no status %', old.status;
+    raise exception 'snapshot imutável na promoção/estado % -> %', old.status, new.status;
+  end if;
+
+  -- Metadados de aprovação já registrados não podem ser reescritos.
+  if old.status in ('APROVADA','VIGENTE','OBSOLETA')
+     and (
+       new.aprovado_por is distinct from old.aprovado_por
+       or new.aprovado_em is distinct from old.aprovado_em
+     ) then
+    raise exception 'metadados de aprovação são imutáveis após aprovação';
+  end if;
+
+  if old.status in ('VIGENTE','OBSOLETA')
+     and new.vigente_desde is distinct from old.vigente_desde then
+    raise exception 'vigente_desde é imutável após vigência';
   end if;
 
   if old.status = 'LEGADO' and new.status is distinct from old.status then
