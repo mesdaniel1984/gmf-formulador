@@ -68,6 +68,21 @@ for(const path of Object.keys(critical)){
   }
 }
 
+
+// Portao mais forte: fora das tres tags de assets, os dois HTMLs operacionais
+// devem continuar INTEIROS iguais a baseline. Isso captura exportadores,
+// templates e funcoes que uma lista manual poderia esquecer.
+function semUi2(path,src){
+  if(path==='gmf_formulador_wizard.html'){
+    return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="gmf-workspace.js"></script>\n','');
+  }
+  return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="sgq-workspace.js"></script>\n','');
+}
+for(const path of ['gmf_formulador_wizard.html','sistema_qualidade_online.html']){
+  check(semUi2(path,currentFile(path))===baseFile(path),
+        path+' difere da baseline somente pelas tags da Interface 2.0');
+}
+
 console.log('\nAssets visuais');
 const gmf=currentFile('gmf_formulador_wizard.html');
 const sgq=currentFile('sistema_qualidade_online.html');
