@@ -1,0 +1,37 @@
+:root{
+  --a-navy:#102a43;--a-blue:#1769aa;--a-green:#19734b;--a-bg:#f4f7f9;
+  --a-text:#17212b;--a-muted:#667786;--a-border:#dfe7ec;
+}
+*{box-sizing:border-box}
+body.i2-auth{margin:0!important;background:var(--a-bg)!important;min-height:100vh!important;display:block!important;padding:0!important;color:var(--a-text)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+.i2-auth-layout{min-height:100vh;display:grid;grid-template-columns:minmax(360px,.82fr) minmax(460px,1.18fr)}
+.i2-auth-brand{background:linear-gradient(145deg,#0c2235 0%,#102a43 55%,#173f5f 100%);color:#fff;padding:54px 52px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.i2-auth-brand:after{content:"";position:absolute;width:420px;height:420px;border-radius:50%;border:1px solid rgba(255,255,255,.08);right:-210px;bottom:-120px;box-shadow:0 0 0 80px rgba(255,255,255,.025),0 0 0 160px rgba(255,255,255,.018)}
+.i2-auth-logo{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.i2-auth-mark{width:42px;height:42px;border-radius:12px;background:#fff;color:var(--a-navy);display:grid;place-items:center;font-weight:900;font-size:12px;letter-spacing:-.03em}
+.i2-auth-logo strong{font-size:14px;display:block}.i2-auth-logo span{font-size:10px;opacity:.65;display:block;margin-top:2px}
+.i2-auth-copy{margin:auto 0;max-width:470px;position:relative;z-index:1}
+.i2-auth-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.13em;font-weight:850;color:#85bde5;margin-bottom:12px}
+.i2-auth-copy h2{font-size:34px;line-height:1.08;letter-spacing:-.04em;margin:0 0 16px;max-width:430px}
+.i2-auth-copy p{font-size:13px;line-height:1.65;color:#c8d6df;margin:0;max-width:440px}
+.i2-auth-mods{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:26px;max-width:440px}
+.i2-auth-mod{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);border-radius:10px;padding:10px 11px}
+.i2-auth-mod strong{font-size:10px;display:block}.i2-auth-mod span{font-size:9px;color:#a9bdca;display:block;margin-top:3px;line-height:1.35}
+.i2-auth-foot{position:relative;z-index:1;font-size:10px;color:#8ca4b4}
+.i2-auth-main{display:flex;align-items:center;justify-content:center;padding:44px 28px;background:linear-gradient(180deg,#f8fafb,#f4f7f9)}
+body.i2-auth .card{background:#fff!important;border-radius:16px!important;padding:34px!important;width:100%!important;max-width:430px!important;box-shadow:0 18px 55px rgba(24,49,70,.10)!important;border:1px solid var(--a-border)!important}
+body.i2-auth .logo-icon{background:var(--a-navy)!important;border-radius:13px!important;width:54px!important;height:54px!important;font-size:21px!important}
+body.i2-auth h1{color:var(--a-text)!important;font-size:20px!important;letter-spacing:-.025em!important}
+body.i2-auth p{color:var(--a-muted)!important}
+body.i2-auth .tabs{background:#f2f6f8!important;border-radius:9px!important}
+body.i2-auth .tab{border-radius:7px!important;color:#71828f!important}
+body.i2-auth .tab.on{color:var(--a-blue)!important}
+body.i2-auth label{color:#526574!important;font-size:10px!important;letter-spacing:.07em!important}
+body.i2-auth input{height:44px!important;border-color:#cfdbe2!important;border-radius:8px!important;background:#fff!important}
+body.i2-auth input:focus{border-color:#6da3cb!important;box-shadow:0 0 0 3px rgba(23,105,170,.10)!important}
+body.i2-auth .btn{height:44px!important;background:var(--a-blue)!important;border-radius:8px!important}
+body.i2-auth .btn2{background:#fff!important;color:var(--a-blue)!important;border-color:#9bbdd6!important}
+body.i2-auth .link a{color:var(--a-blue)!important}
+.i2-auth-central{display:inline-flex;margin-top:16px;font-size:11px;color:var(--a-muted);text-decoration:none;font-weight:700}
+.i2-auth-central:hover{color:var(--a-blue)}
+@media(max-width:900px){.i2-auth-layout{grid-template-columns:1fr}.i2-auth-brand{display:none}.i2-auth-main{min-height:100vh;padding:24px 16px}}
