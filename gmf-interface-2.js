@@ -38,10 +38,36 @@
       +'<span class="i2-context-chip"><strong>Princípio</strong> dado ausente ≠ zero</span>';
     header.insertAdjacentElement('afterend',d);
   }
+  function enhanceSemantics(){
+    var current=document.querySelector('.i2-switch a.active');
+    if(current) current.setAttribute('aria-current','page');
+
+    var conn=document.getElementById('connBadge');
+    if(conn) conn.setAttribute('aria-live','polite');
+
+    var warning=document.getElementById('conformidadeWarning');
+    if(warning){warning.setAttribute('role','alert');warning.setAttribute('aria-live','assertive');}
+
+    document.querySelectorAll('.modal-bg .modal').forEach(function(m,i){
+      m.setAttribute('role','dialog');
+      m.setAttribute('aria-modal','true');
+      var h=m.querySelector('h2');
+      if(h){
+        if(!h.id) h.id='i2-modal-title-'+i;
+        m.setAttribute('aria-labelledby',h.id);
+      }
+    });
+
+    document.querySelectorAll('table').forEach(function(t){
+      if(!t.getAttribute('role')) t.setAttribute('role','table');
+    });
+  }
+
   function boot(){
     document.body.classList.add('interface-2');
     addCorpBar();
     addContext();
+    enhanceSemantics();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
   else boot();
