@@ -61,3 +61,10 @@ jobs:
           done
       - name: Smoke visual UI2
         run: node testes/interface2-visual-smoke.js
+      - name: Upload evidencias visuais
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interface2-uat-gmf-sgq
+          path: ui2-screens
+          if-no-files-found: error
