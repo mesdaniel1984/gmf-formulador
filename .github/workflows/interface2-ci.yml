@@ -25,6 +25,7 @@ jobs:
           node --check gmf-workspace.js
           node --check sgq-workspace.js
           node --check gmf-auth.js
+          node --check gmf-central.js
       - name: HTML operacional igual à baseline
         run: node testes/interface2-integridade.js
 
