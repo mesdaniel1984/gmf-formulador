@@ -89,3 +89,9 @@ body.gmf-ui{margin:0;background:var(--gmf-bg);color:var(--gmf-text);font-family:
 .gmf-thread-step strong{display:block;font-size:12px;margin-bottom:3px}.gmf-thread-step span{display:block;font-size:10px;color:var(--gmf-muted);line-height:1.4}
 .gmf-thread-arrow{display:grid;place-items:center;color:#8ba1b0;font-size:17px}
 @media(max-width:1050px){.gmf-thread-flow{grid-template-columns:1fr}.gmf-thread-arrow{height:24px;transform:rotate(90deg)}}
+
+/* === CENTRAL SEARCH 3.0 =================================================== */
+.gmf-search{position:relative}.gmf-search input{padding-right:96px!important}.gmf-sr-status{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:750;color:var(--gmf-muted);pointer-events:none}
+body.gmf-searching .gmf-module[hidden]{display:none!important}
+body.gmf-searching .gmf-modules{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:1050px){body.gmf-searching .gmf-modules{grid-template-columns:1fr}}
