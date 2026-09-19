@@ -22,6 +22,32 @@ jobs:
           fi
           echo "No service-role reference in frontend assets."
 
+      - name: Read Auth public settings
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > /tmp/supa.env
+          import re
+          text=open('login.html',encoding='utf-8').read()
+          url=re.search(r"const URL_\\s*=\\s*'([^']+)'",text)
+          key=re.search(r"const KEY_\\s*=\\s*'([^']+)'",text)
+          if not url or not key:
+              raise SystemExit('Supabase config not found')
+          print('SUPA_URL='+url.group(1))
+          print('SUPA_KEY='+key.group(1))
+          PY
+          source /tmp/supa.env
+          echo "::add-mask::$SUPA_KEY"
+          curl -fsS --max-time 20 -H "apikey: $SUPA_KEY" "$SUPA_URL/auth/v1/settings" -o /tmp/auth-settings.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/auth-settings.json',encoding='utf-8'))
+          print('disable_signup=',d.get('disable_signup','missing'))
+          print('mailer_autoconfirm=',d.get('mailer_autoconfirm','missing'))
+          ext=d.get('external') or {}
+          if isinstance(ext,dict):
+              print('email_provider=', ext.get('email','missing'))
+          PY
+
       - name: Verify anonymous SELECT does not expose rows
         run: |
           set -euo pipefail
