@@ -227,3 +227,22 @@ body.interface-2 #gate input{
 body.interface-2 #gate button{
   min-height:42px;border-radius:8px!important
 }
+
+/* === GMF LIFECYCLE 2.1 =================================================== */
+.i2-life{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;background:#fff;border:1px solid var(--i2-border);border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 3px 14px rgba(25,45,65,.045)}
+.i2-life button{min-width:0;border:0;border-right:1px solid var(--i2-border);background:#fff;padding:10px 9px;display:flex;align-items:center;gap:7px;cursor:pointer;color:#667786;text-align:left}
+.i2-life button:last-child{border-right:0}.i2-life button:hover{background:#f7fafb;color:var(--i2-navy)}.i2-life button.active{background:var(--i2-blue-soft);color:var(--i2-blue)}
+.i2-life button b{display:grid;place-items:center;width:22px;height:22px;flex:0 0 auto;border-radius:50%;background:#edf2f5;color:#667786;font:800 8px/1 Inter,system-ui,sans-serif}
+.i2-life button.active b{background:var(--i2-blue);color:#fff}.i2-life button span{font:750 9.5px/1.2 Inter,system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.i2-ws-progress{border-top:1px solid var(--i2-border);padding:14px 16px}
+.i2-ws-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.i2-ws-progress-head>div{display:flex;align-items:center;gap:8px}.i2-ws-progress-head span{font:750 10px/1.2 Inter,system-ui,sans-serif;color:var(--i2-text)}
+.i2-ws-progress-head strong{font:850 10px/1 Inter,system-ui,sans-serif;color:var(--i2-blue)}.i2-ws-progress-head small{font:600 9.5px/1.2 Inter,system-ui,sans-serif;color:var(--i2-muted)}
+.i2-progress-track{height:6px;border-radius:999px;background:#e9eff3;overflow:hidden}.i2-progress-track span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--i2-blue),#4b93c6);border-radius:999px;transition:width .25s ease}
+.i2-checklist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.i2-check{height:27px;border:1px solid var(--i2-border);background:#fff;border-radius:999px;padding:0 9px 0 6px;display:inline-flex;align-items:center;gap:5px;font:700 9px/1 Inter,system-ui,sans-serif;color:#657988;cursor:pointer}
+.i2-check:hover{border-color:#b9cad4}.i2-check-dot{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;background:#edf2f5;color:#7a8e9d}.i2-check.ok{color:var(--i2-green);border-color:#d4e8dd;background:#fbfefc}.i2-check.ok .i2-check-dot{background:var(--i2-green-soft);color:var(--i2-green)}.i2-check.miss{color:var(--i2-amber);background:#fffdf8}
+.i2-next{display:flex;align-items:center;gap:16px;padding:13px 16px;background:#fbfcfd;border-top:1px solid var(--i2-border)}.i2-next>div{min-width:0;flex:1}.i2-next span{display:block;font:750 8.5px/1.2 Inter,system-ui,sans-serif;color:var(--i2-muted);text-transform:uppercase;letter-spacing:.09em}.i2-next strong{display:block;font:800 11px/1.25 Inter,system-ui,sans-serif;color:var(--i2-text);margin-top:3px}.i2-next small{display:block;font:600 9.5px/1.4 Inter,system-ui,sans-serif;color:var(--i2-muted);margin-top:2px}
+body.interface-2 #wizardNav{position:relative}
+body.interface-2 #wizardNav .step-btn{font-size:10.5px!important}
+@media(max-width:980px){.i2-life{grid-template-columns:repeat(4,1fr)}.i2-life button:nth-child(4){border-right:0}.i2-life button:nth-child(-n+4){border-bottom:1px solid var(--i2-border)}}
+@media(max-width:720px){.i2-life{display:flex;overflow-x:auto;scroll-snap-type:x proximity}.i2-life button{min-width:132px;scroll-snap-align:start}.i2-ws-progress-head{align-items:flex-start;flex-direction:column;gap:3px}.i2-next{align-items:flex-start;flex-direction:column}.i2-next .i2-ws-btn{width:100%}}
