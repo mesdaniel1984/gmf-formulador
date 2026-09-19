@@ -1,0 +1,109 @@
+name: Security Gate
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-auth:
+    name: Frontend auth guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validar superfície de autenticação
+        run: node testes/security-auth-ui.js
+
+  supabase-boundary:
+    name: Supabase anonymous boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Obter configuração pública do projeto
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > /tmp/supa.env
+          import re
+          text=open('login.html',encoding='utf-8').read()
+          url=re.search(r"const URL_ = '([^']+)'",text)
+          key=re.search(r"const KEY_ = '([^']+)'",text)
+          if not url or not key:
+              raise SystemExit('Supabase public config not found in login.html')
+          print('SUPA_URL='+url.group(1))
+          print('SUPA_KEY='+key.group(1))
+          PY
+
+      - name: Exigir signup fechado no servidor
+        run: |
+          set -euo pipefail
+          source /tmp/supa.env
+          echo "::add-mask::$SUPA_KEY"
+          curl -fsS --max-time 20             -H "apikey: $SUPA_KEY"             "$SUPA_URL/auth/v1/settings"             -o /tmp/settings.json
+
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/settings.json',encoding='utf-8'))
+          disabled=d.get('disable_signup')
+          print('disable_signup=',disabled)
+          if disabled is not True:
+              raise SystemExit('P0: Supabase Auth ainda permite novos signups')
+          PY
+
+      - name: Exigir zero exposição anônima
+        run: |
+          set -euo pipefail
+          source /tmp/supa.env
+          echo "::add-mask::$SUPA_KEY"
+
+          FAILED=0
+          for TABLE in produtos ingredientes_custom laudos perfis app_state; do
+            BODY="/tmp/${TABLE}.json"
+            CODE=$(curl -sS --max-time 20 -o "$BODY" -w "%{http_code}"               -H "apikey: $SUPA_KEY"               -H "Authorization: Bearer $SUPA_KEY"               "$SUPA_URL/rest/v1/$TABLE?select=*&limit=1")
+
+            RESULT=$(python3 - "$BODY" "$CODE" <<'PY'
+          import json,sys
+          path,code=sys.argv[1],sys.argv[2]
+          try:
+              data=json.load(open(path,encoding='utf-8'))
+          except Exception:
+              data=None
+          if code in ('401','403'):
+              print('PROTECTED')
+          elif code == '200' and isinstance(data,list):
+              print('EXPOSED' if data else 'EMPTY_OR_RLS')
+          elif code == '404':
+              print('NOT_FOUND')
+          else:
+              print('OTHER')
+          PY
+            )
+
+            echo "$TABLE: HTTP $CODE / $RESULT"
+            if [ "$RESULT" = "EXPOSED" ]; then FAILED=1; fi
+          done
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "P0: pelo menos uma tabela expõe linhas para anon."
+            exit 1
+          fi
+
+  no-service-role:
+    name: No frontend service role
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Procurar segredo privilegiado em assets públicos
+        run: |
+          set -euo pipefail
+          if grep -RniE 'service_role|SUPABASE_SERVICE_ROLE_KEY'             --include='*.html' --include='*.js'             --exclude='security-auth-ui.js' .; then
+            echo "P0: referência a service-role em frontend."
+            exit 1
+          fi
+          echo "OK: nenhuma referência de service-role em frontend."
