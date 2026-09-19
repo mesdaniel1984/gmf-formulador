@@ -1,4 +1,12 @@
 (function(){
+  function cleanupLegacyCentral(){
+    document.querySelectorAll('a[href="index.html"]').forEach(function(x){
+      if(x.classList.contains('i2-auth-central'))return;
+      var tx=String(x.textContent||'').toLowerCase();
+      var pos=String(x.style&&x.style.position||'').toLowerCase();
+      if(tx.indexOf('central de sistemas')>-1 && pos==='fixed')x.style.display='none';
+    });
+  }
   function boot(){
     if(document.querySelector('.i2-auth-layout'))return;
     var card=document.querySelector('.card');if(!card)return;
@@ -13,6 +21,8 @@
       +'<div class="i2-auth-foot">Ambiente interno · acesso sujeito às permissões do sistema de origem</div>';
     var main=document.createElement('main');main.className='i2-auth-main';
     card.parentNode.insertBefore(layout,card);layout.appendChild(brand);layout.appendChild(main);main.appendChild(card);
+    cleanupLegacyCentral();
+    setTimeout(cleanupLegacyCentral,250);
     if(!card.querySelector('.i2-auth-central')){
       var a=document.createElement('a');a.className='i2-auth-central';a.href='index.html';a.textContent='← Voltar à Central de Sistemas';card.appendChild(a);
     }
