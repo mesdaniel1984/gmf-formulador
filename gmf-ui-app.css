@@ -1,0 +1,117 @@
+/* Grupo MF Paris — Interface 2.0 overlay
+   Esta folha deve alterar APENAS apresentação. Nenhuma regra de negócio depende dela. */
+
+body.interface-2{
+  --i2-navy:#102a43;
+  --i2-navy2:#173f5f;
+  --i2-blue:#1769aa;
+  --i2-blue-soft:#eaf3fb;
+  --i2-green:#19734b;
+  --i2-green-soft:#eaf6ef;
+  --i2-amber:#a15c00;
+  --i2-amber-soft:#fff5df;
+  --i2-red:#b42318;
+  --i2-red-soft:#fff0ee;
+  --i2-bg:#f4f7f9;
+  --i2-surface:#fff;
+  --i2-text:#17212b;
+  --i2-muted:#667786;
+  --i2-border:#dfe7ec;
+  --i2-shadow:0 8px 26px rgba(25,45,65,.08);
+  --i2-radius:12px;
+  background:var(--i2-bg)!important;
+  color:var(--i2-text)!important;
+}
+
+/* Barra corporativa */
+.i2-corpbar{
+  height:38px;background:#0c2235;color:#dce8f1;display:flex;align-items:center;
+  padding:0 18px;gap:12px;font:600 11px/1.2 Inter,ui-sans-serif,system-ui,sans-serif;
+  letter-spacing:.01em;position:relative;z-index:10001;border-bottom:1px solid rgba(255,255,255,.08)
+}
+.i2-corpbar .i2-home{color:#fff;text-decoration:none;display:flex;align-items:center;gap:7px;font-weight:800}
+.i2-corpbar .i2-home:hover{text-decoration:underline}
+.i2-corpbar .i2-sep{width:1px;height:16px;background:rgba(255,255,255,.18)}
+.i2-corpbar .i2-app{opacity:.85}
+.i2-corpbar .i2-right{margin-left:auto;display:flex;align-items:center;gap:9px}
+.i2-corpbar .i2-state{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.08)}
+.i2-corpbar .i2-state:before{content:"";width:6px;height:6px;border-radius:50%;background:#49c98a}
+
+/* GMF */
+body.interface-2 .app-header{
+  background:linear-gradient(90deg,var(--i2-navy),var(--i2-navy2))!important;
+  padding:14px 24px!important;min-height:72px;box-shadow:none!important;border-bottom:1px solid rgba(255,255,255,.08)
+}
+body.interface-2 .app-header img{height:42px!important;width:42px!important;border-radius:10px!important}
+body.interface-2 .app-header h1{font-size:18px!important;letter-spacing:-.02em}
+body.interface-2 .app-header p{font-size:11px!important;opacity:.72!important}
+body.interface-2 .wizard-steps{
+  background:#fff!important;border-bottom:1px solid var(--i2-border);padding:0 24px!important;
+  box-shadow:0 2px 8px rgba(25,45,65,.03)
+}
+body.interface-2 .step-btn{color:#6b7d8b!important;border-bottom-width:2px!important;padding:13px 15px!important}
+body.interface-2 .step-btn.active{color:var(--i2-blue)!important;border-bottom-color:var(--i2-blue)!important;background:var(--i2-blue-soft)}
+body.interface-2 .step-btn.done{color:var(--i2-green)!important}
+body.interface-2 .step-num{background:#edf2f5!important;color:#506575!important}
+body.interface-2 .step-btn.active .step-num{background:var(--i2-blue)!important;color:#fff!important}
+body.interface-2 .step-btn.done .step-num{background:var(--i2-green)!important;color:#fff!important}
+body.interface-2 .panel{max-width:1180px!important;padding:26px 24px!important}
+body.interface-2 .card{
+  border-color:var(--i2-border)!important;border-radius:var(--i2-radius)!important;
+  box-shadow:var(--i2-shadow)!important;padding:19px 20px!important
+}
+body.interface-2 .card-title{color:var(--i2-navy)!important;font-size:13px!important;letter-spacing:-.01em}
+body.interface-2 input,body.interface-2 select,body.interface-2 textarea{
+  border-color:#cfdbe2!important;border-radius:8px!important;min-height:38px
+}
+body.interface-2 input:focus,body.interface-2 select:focus,body.interface-2 textarea:focus{
+  outline:none!important;border-color:#6da3cb!important;box-shadow:0 0 0 3px rgba(23,105,170,.11)!important
+}
+body.interface-2 .btn{border-radius:8px!important;font-weight:650!important}
+body.interface-2 .btn-primary{background:var(--i2-blue)!important;border-color:var(--i2-blue)!important}
+body.interface-2 .btn-success{background:var(--i2-green)!important;border-color:var(--i2-green)!important}
+body.interface-2 .prod-card{border-color:var(--i2-border)!important;border-radius:11px!important;box-shadow:0 2px 8px rgba(25,45,65,.035)}
+body.interface-2 .prod-card:hover{border-color:#8db6d5!important;box-shadow:var(--i2-shadow)!important}
+body.interface-2 .metric{background:#f8fafb!important;border-color:var(--i2-border)!important;border-radius:9px!important}
+body.interface-2 th{background:#f7f9fa;color:#536775!important;font-size:10px!important;letter-spacing:.06em}
+body.interface-2 td{border-color:#e7edf1!important}
+body.interface-2 tr:hover td{background:#fbfcfd}
+
+/* SGQ — reconhece estrutura existente sem alterar IDs/classes funcionais */
+body.interface-2 .sidebar{background:var(--i2-navy)!important}
+body.interface-2 .sidebar-header{background:#0c2235!important;border-bottom-color:rgba(255,255,255,.08)!important}
+body.interface-2 .nav-item{border-radius:8px!important;margin:2px 8px!important}
+body.interface-2 .nav-item.active{background:rgba(255,255,255,.12)!important}
+body.interface-2 .main-content{background:var(--i2-bg)!important}
+body.interface-2 .topbar{background:#fff!important;border-bottom:1px solid var(--i2-border)!important;box-shadow:none!important}
+body.interface-2 .section{background:transparent}
+body.interface-2 .section-header h1,body.interface-2 .section-header h2{color:var(--i2-text)!important;letter-spacing:-.025em}
+body.interface-2 .kpi-card,body.interface-2 .dash-card,body.interface-2 .panel-card{
+  border-radius:var(--i2-radius)!important;border-color:var(--i2-border)!important;box-shadow:var(--i2-shadow)!important
+}
+body.interface-2 table{border-color:var(--i2-border)!important}
+body.interface-2 table th{background:#f7f9fa!important;color:#536775!important}
+body.interface-2 .modal-content{border-radius:14px!important;box-shadow:0 24px 70px rgba(20,42,60,.20)!important}
+
+/* Ações e semântica visual */
+body.interface-2 .danger,body.interface-2 .badge.danger{background:var(--i2-red-soft)!important;color:var(--i2-red)!important}
+body.interface-2 .warn,body.interface-2 .badge.warn{background:var(--i2-amber-soft)!important;color:var(--i2-amber)!important}
+body.interface-2 .ok,body.interface-2 .success{background:var(--i2-green-soft)!important;color:var(--i2-green)!important}
+
+/* Transparência: carimbo puramente informativo */
+.i2-context{
+  max-width:1180px;margin:18px auto -8px;padding:0 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap
+}
+.i2-context-chip{
+  display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--i2-border);
+  color:var(--i2-muted);border-radius:999px;padding:6px 9px;font:650 10px/1.2 Inter,ui-sans-serif,system-ui,sans-serif
+}
+.i2-context-chip strong{color:var(--i2-text);font-weight:800}
+@media(max-width:768px){
+  .i2-corpbar{padding:0 10px}.i2-corpbar .i2-state{display:none}
+  body.interface-2 .app-header{padding:10px 12px!important}
+  body.interface-2 .wizard-steps{padding:0 5px!important}
+  body.interface-2 .panel{padding:14px 10px!important}
+  .i2-context{padding:0 10px;margin-top:12px}
+}
+@media(prefers-reduced-motion:reduce){body.interface-2 *{transition:none!important}}
