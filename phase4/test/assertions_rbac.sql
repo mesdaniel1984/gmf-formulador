@@ -161,7 +161,7 @@ select public.criar_revisao_produto(
 ) as revision2_id \gset
 
 -- Lock incorreto falha.
-do $
+do $lock$
 declare
   v_failed boolean := false;
   v_id uuid;
@@ -184,7 +184,8 @@ begin
   if not v_failed then
     raise exception 'lock incorreto não foi bloqueado';
   end if;
-end $$;
+end;
+$lock$;
 
 -- Quality não ganha permissão de edição só por ser aprovador.
 select set_config(
@@ -193,7 +194,7 @@ select set_config(
   false
 );
 
-do $
+do $quality_edit$
 declare
   v_failed boolean := false;
   v_lock integer;
@@ -217,7 +218,8 @@ begin
   if not v_failed then
     raise exception 'quality editou rascunho de outro usuário';
   end if;
-end $$;
+end;
+$quality_edit$;
 
 -- Audit trail precisa conter atribuição de papel e ações de revisão.
 do $$
