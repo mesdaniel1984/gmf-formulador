@@ -1,0 +1,54 @@
+name: Post-deploy GMF SGQ smoke
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  production-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar GitHub Pages em producao
+        env:
+          BASE: https://mesdaniel1984.github.io/gmf-formulador
+        run: |
+          set -euo pipefail
+
+          echo "Aguardando Pages..."
+          for i in $(seq 1 18); do
+            if curl -fsS --max-time 15 "$BASE/" -o /tmp/index.html; then
+              if grep -Fq "Qualidade conectada ao ciclo de vida do produto" /tmp/index.html; then
+                break
+              fi
+            fi
+            if [ "$i" -eq 18 ]; then
+              echo "Central nova nao apareceu no Pages dentro da janela."
+              exit 1
+            fi
+            sleep 10
+          done
+
+          grep -Fq 'gmf-ui.css' /tmp/index.html
+          grep -Fq 'gmf-central.js' /tmp/index.html
+
+          curl -fsS --max-time 15 "$BASE/gmf_formulador_wizard.html" -o /tmp/gmf.html
+          grep -Fq 'gmf-ui-app.css' /tmp/gmf.html
+          grep -Fq 'gmf-interface-2.js' /tmp/gmf.html
+          grep -Fq 'gmf-workspace.js' /tmp/gmf.html
+
+          curl -fsS --max-time 15 "$BASE/sistema_qualidade_online.html" -o /tmp/sgq.html
+          grep -Fq 'gmf-ui-app.css' /tmp/sgq.html
+          grep -Fq 'gmf-interface-2.js' /tmp/sgq.html
+          grep -Fq 'sgq-workspace.js' /tmp/sgq.html
+
+          curl -fsS --max-time 15 "$BASE/login.html" -o /tmp/login.html
+          grep -Fq 'gmf-auth.css' /tmp/login.html
+          grep -Fq 'gmf-auth.js' /tmp/login.html
+
+          curl -fsS --max-time 15 "$BASE/gmf-ui-app.css" -o /tmp/ui.css
+          grep -Fq "PRODUCTION POLISH 3.0" /tmp/ui.css
+
+          echo "PRODUCAO GMF/SGQ OK — Pages servindo Interface 2.0"
