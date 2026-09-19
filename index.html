@@ -2,71 +2,147 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sistema de Qualidade Total — Grupo MF Paris</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;
-    background:linear-gradient(135deg,#0f3d7a 0%,#1a56a0 45%,#0ea5e9 100%);
-    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 18px}
-  .top{text-align:center;color:#fff;margin:18px 0 30px}
-  .brandtag{font-size:13px;letter-spacing:3px;text-transform:uppercase;opacity:.85;font-weight:600}
-  .top h1{font-size:34px;font-weight:800;margin:8px 0 6px;text-shadow:0 2px 10px rgba(0,0,0,.2)}
-  .top p{font-size:15px;opacity:.92}
-  .sif{display:inline-block;margin-top:10px;font-size:12px;background:rgba(255,255,255,.18);
-    padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.25)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;
-    width:100%;max-width:1020px}
-  .card{background:#fff;border-radius:16px;padding:26px 24px;text-decoration:none;color:inherit;
-    box-shadow:0 16px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;
-    transition:transform .15s ease,box-shadow .15s ease;border-top:5px solid var(--ac)}
-  .card:hover{transform:translateY(-6px);box-shadow:0 24px 54px rgba(0,0,0,.30)}
-  .ico{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-    font-size:30px;background:var(--bg);margin-bottom:16px}
-  .card h2{font-size:20px;color:#0f3d7a;margin-bottom:6px}
-  .card .desc{font-size:14px;color:#475569;line-height:1.5;flex:1}
-  .go{margin-top:18px;display:inline-flex;align-items:center;gap:8px;font-weight:700;
-    color:#fff;background:var(--ac);padding:11px 16px;border-radius:10px;font-size:14px;align-self:flex-start}
-  .card:hover .go{filter:brightness(1.06)}
-  .foot{margin-top:38px;color:rgba(255,255,255,.85);font-size:12.5px;text-align:center;line-height:1.7}
-  .foot a{color:#fff}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Central de Sistemas — Grupo MF Paris</title>
+<meta name="description" content="Central corporativa dos sistemas de formulação, gestão da qualidade e controle de qualidade do Grupo MF Paris.">
+<link rel="stylesheet" href="gmf-ui.css">
 </head>
-<body>
-  <div class="top">
-    <img src="logo_gmf.png" alt="Grupo MF Paris" onerror="this.style.display='none'" style="height:90px;width:auto;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.18)">
-    <div class="brandtag">Grupo MF Paris Alimentos</div>
-    <h1>Sistema de Qualidade Total</h1>
-    <p>Escolha um sistema para começar.</p>
-    <span class="sif">SIF 5460 · MF Paris · DMS · Profi</span>
+<body class="gmf-ui">
+<header class="gmf-topbar">
+  <div class="gmf-brand">
+    <div class="gmf-brandmark" aria-hidden="true">GMF</div>
+    <div class="gmf-brandtext">
+      <strong>Grupo MF Paris</strong>
+      <span>Qualidade · P&D · Operações</span>
+    </div>
+  </div>
+  <div class="gmf-search">
+    <input id="gmfCentralSearch" aria-label="Pesquisar sistemas e capacidades" placeholder="Pesquisar sistema, módulo ou capacidade…" autocomplete="off"><span id="gmfSearchStatus" class="gmf-sr-status" aria-live="polite"></span>
+  </div>
+  <div class="gmf-top-actions">
+    <span class="gmf-pill"><span class="gmf-dot" style="color:#19734b"></span> Central online</span>
+    <div class="gmf-avatar" aria-label="Ambiente interno">MF</div>
+  </div>
+</header>
+
+<main class="gmf-page">
+  <div class="gmf-title-row">
+    <div class="gmf-title">
+      <div class="gmf-eyebrow">Central corporativa</div>
+      <h1>Qualidade conectada ao ciclo de vida do produto</h1>
+      <p>Uma porta de entrada para formulação, gestão da qualidade e controle operacional. Cada sistema mantém sua fonte de verdade e suas regras próprias.</p>
+    </div>
+    <div class="gmf-statusline" aria-label="Estado da plataforma">
+      <span class="gmf-status"><span class="gmf-dot" style="color:#1769aa"></span>SIF 5460</span>
+      <span class="gmf-status"><span class="gmf-dot" style="color:#19734b"></span>MF Paris · DMS · Profi</span>
+    </div>
   </div>
 
-  <div class="grid">
-    <a class="card" style="--ac:#1a56a0;--bg:#e7f0fb" href="gmf_formulador_wizard.html">
-      <div class="ico">🧪</div>
-      <h2>GMF Lab</h2>
-      <div class="desc">Formulador nutricional, fichas técnicas, ingredientes e laudos. Após o login você escolhe Formulador ou Ingredientes.</div>
-      <span class="go">Abrir &rarr;</span>
+  <section class="gmf-modules" aria-label="Sistemas">
+    <a class="gmf-module" style="--module:#1769aa;--module-soft:#eaf3fb" href="gmf_formulador_wizard.html">
+      <div class="gmf-module-head">
+        <div class="gmf-module-icon" aria-hidden="true">F</div>
+        <span class="gmf-badge">P&D / PLM</span>
+      </div>
+      <h2>GMF Formulador</h2>
+      <p>Desenvolvimento técnico do produto: fórmula, especificação, nutrição, conformidade regulatória e laudos.</p>
+      <div class="gmf-capabilities">
+        <span>Produtos e formulações</span>
+        <span>Ingredientes e especificações</span>
+        <span>Tabela nutricional</span>
+        <span>Ficha técnica</span>
+        <span>Regras regulatórias</span>
+        <span>Laudos técnicos</span>
+      </div>
+      <div class="gmf-open">Abrir ambiente <b>→</b></div>
     </a>
 
-    <a class="card" style="--ac:#16a34a;--bg:#e7f7ee" href="sistema_qualidade_online.html">
-      <div class="ico">✅</div>
-      <h2>Sistema de Gestão da Qualidade</h2>
-      <div class="desc">POPs, indicadores, fornecedores, não conformidades, licenças e planos de ação — multiusuário, em tempo real.</div>
-      <span class="go">Abrir &rarr;</span>
+    <a class="gmf-module" style="--module:#19734b;--module-soft:#eaf6ef" href="sistema_qualidade_online.html">
+      <div class="gmf-module-head">
+        <div class="gmf-module-icon" aria-hidden="true">Q</div>
+        <span class="gmf-badge">eQMS</span>
+      </div>
+      <h2>SGQ — Gestão da Qualidade</h2>
+      <p>Tratamento da qualidade em circuito fechado: documentos, ocorrências, análise, ações, fornecedores e conformidade.</p>
+      <div class="gmf-capabilities">
+        <span>Central de ação</span>
+        <span>NC e análise de causa</span>
+        <span>SAC e SLA</span>
+        <span>CAPA / planos de ação</span>
+        <span>Fornecedores</span>
+        <span>Documentos e treinamentos</span>
+      </div>
+      <div class="gmf-open">Abrir ambiente <b>→</b></div>
     </a>
 
-    <a class="card" style="--ac:#7c3aed;--bg:#efe7fb" href="https://qualidade-alimentos-production.up.railway.app/" target="_blank" rel="noopener">
-      <div class="ico">📦</div>
-      <h2>Controle de Qualidade — NF-e &amp; Produção</h2>
-      <div class="desc">Entrada de notas fiscais (NF-e) e acompanhamento de produção. Acesso com login próprio.</div>
-      <span class="go">Abrir &rarr;</span>
+    <a class="gmf-module" style="--module:#6651a4;--module-soft:#f2effa" href="https://qualidade-alimentos-production.up.railway.app/" target="_blank" rel="noopener">
+      <div class="gmf-module-head">
+        <div class="gmf-module-icon" aria-hidden="true">C</div>
+        <span class="gmf-badge">Chão de fábrica</span>
+      </div>
+      <h2>CQ — Produção e Recebimento</h2>
+      <p>Evidência operacional do que aconteceu: recebimento, NF-e, produção, inspeções e controles executados.</p>
+      <div class="gmf-capabilities">
+        <span>Entrada de NF-e</span>
+        <span>Recebimento e inspeção</span>
+        <span>Produção</span>
+        <span>Controle em processo</span>
+        <span>Rastreabilidade</span>
+        <span>Desvios para o SGQ</span>
+      </div>
+      <div class="gmf-open">Abrir ambiente <b>↗</b></div>
     </a>
-  </div>
+  </section>
 
-  <div class="foot">
-    Grupo MF Paris Alimentos — Plataforma interna de sistemas.<br>
-    Em caso de dúvida de acesso, contate a Qualidade / TI.
-  </div>
+
+  <section class="gmf-thread" aria-label="Fio digital da qualidade">
+    <div class="gmf-thread-head">
+      <div><h3>Fio digital da qualidade</h3><p>Cada sistema responde uma pergunta diferente; a rastreabilidade nasce da conexão entre elas.</p></div>
+      <small>sem duplicar a fonte de verdade</small>
+    </div>
+    <div class="gmf-thread-flow">
+      <div class="gmf-thread-step"><b>GMF · Definir</b><strong>Como o produto deve ser</strong><span>Fórmula, especificação, nutrição e requisitos técnicos.</span></div>
+      <div class="gmf-thread-arrow" aria-hidden="true">→</div>
+      <div class="gmf-thread-step"><b>OMIE · Identificar</b><strong>O que existe comercialmente</strong><span>Produto, fornecedor, documento fiscal e ordem de produção.</span></div>
+      <div class="gmf-thread-arrow" aria-hidden="true">→</div>
+      <div class="gmf-thread-step"><b>CQ · Evidenciar</b><strong>O que aconteceu</strong><span>Recebimento, lote, produção, inspeção e desvio observado.</span></div>
+      <div class="gmf-thread-arrow" aria-hidden="true">→</div>
+      <div class="gmf-thread-step"><b>SGQ · Tratar</b><strong>O que precisa mudar</strong><span>SAC, NC, causa, ação, prazo, eficácia e documentação.</span></div>
+    </div>
+  </section>
+
+  <section class="gmf-info-grid">
+    <div class="gmf-panel">
+      <div class="gmf-panel-head">
+        <h3>Princípios da Interface 2.0</h3>
+        <small>padrão corporativo</small>
+      </div>
+      <div class="gmf-principles">
+        <div class="gmf-principle"><strong>Gestão por exceção</strong><span>O que exige ação aparece antes do que está normal.</span></div>
+        <div class="gmf-principle"><strong>Fonte visível</strong><span>Zero medido é diferente de dado inexistente.</span></div>
+        <div class="gmf-principle"><strong>Rastreabilidade</strong><span>Produto, lote, ocorrência, ação e evidência permanecem conectados.</span></div>
+        <div class="gmf-principle"><strong>Humano no controle</strong><span>O sistema orienta; decisões críticas continuam explícitas.</span></div>
+      </div>
+    </div>
+
+    <div class="gmf-panel">
+      <div class="gmf-panel-head">
+        <h3>Acesso atual</h3>
+        <small>sem fingir SSO</small>
+      </div>
+      <div class="gmf-access">
+        <div class="gmf-access-row"><strong>GMF</strong><span>Supabase Auth</span></div>
+        <div class="gmf-access-row"><strong>SGQ</strong><span>autenticação própria</span></div>
+        <div class="gmf-access-row"><strong>CQ</strong><span>login Railway</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="gmf-foot">
+  <span>Grupo MF Paris Alimentos · Central interna de sistemas</span>
+  <span>Interface 2.0 · dados e permissões permanecem nos sistemas de origem</span>
+</footer>
+<script src="gmf-central.js"></script>
 </body>
 </html>

@@ -1,0 +1,70 @@
+name: Interface 2.0 CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integrity:
+    name: Integridade e sintaxe
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Sintaxe dos assets UI2
+        run: |
+          node --check gmf-interface-2.js
+          node --check gmf-workspace.js
+          node --check sgq-workspace.js
+          node --check gmf-auth.js
+          node --check gmf-central.js
+      - name: HTML operacional igual à baseline
+        run: node testes/interface2-integridade.js
+
+  sgq-regression:
+    name: Regressão SGQ
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Rodar suíte SGQ
+        run: |
+          for f in \
+            testes/b0-sessao-expirada.js \
+            testes/b3b5-numeracao-e-lote.js \
+            testes/b4b6-etapa-e-vinculo.js \
+            testes/b7-autoria.js \
+            testes/b8-concorrencia-e-numero.js \
+            testes/central-gestao.js \
+            testes/ponte-ronda-nc.js \
+            testes/sac-fila-central.js \
+            testes/sac-sla.js
+          do
+            echo "=== $f ==="
+            node "$f"
+          done
+      - name: Smoke visual UI2
+        run: node testes/interface2-visual-smoke.js
+      - name: Upload evidencias visuais
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interface2-uat-gmf-sgq
+          path: ui2-screens
+          if-no-files-found: error
