@@ -3,70 +3,299 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sistema de Qualidade Total — Grupo MF Paris</title>
+<meta name="theme-color" content="#123458">
+<title>Central Corporativa — Grupo MF Paris</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;
-    background:linear-gradient(135deg,#0f3d7a 0%,#1a56a0 45%,#0ea5e9 100%);
-    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 18px}
-  .top{text-align:center;color:#fff;margin:18px 0 30px}
-  .brandtag{font-size:13px;letter-spacing:3px;text-transform:uppercase;opacity:.85;font-weight:600}
-  .top h1{font-size:34px;font-weight:800;margin:8px 0 6px;text-shadow:0 2px 10px rgba(0,0,0,.2)}
-  .top p{font-size:15px;opacity:.92}
-  .sif{display:inline-block;margin-top:10px;font-size:12px;background:rgba(255,255,255,.18);
-    padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.25)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;
-    width:100%;max-width:1020px}
-  .card{background:#fff;border-radius:16px;padding:26px 24px;text-decoration:none;color:inherit;
-    box-shadow:0 16px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;
-    transition:transform .15s ease,box-shadow .15s ease;border-top:5px solid var(--ac)}
-  .card:hover{transform:translateY(-6px);box-shadow:0 24px 54px rgba(0,0,0,.30)}
-  .ico{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-    font-size:30px;background:var(--bg);margin-bottom:16px}
-  .card h2{font-size:20px;color:#0f3d7a;margin-bottom:6px}
-  .card .desc{font-size:14px;color:#475569;line-height:1.5;flex:1}
-  .go{margin-top:18px;display:inline-flex;align-items:center;gap:8px;font-weight:700;
-    color:#fff;background:var(--ac);padding:11px 16px;border-radius:10px;font-size:14px;align-self:flex-start}
-  .card:hover .go{filter:brightness(1.06)}
-  .foot{margin-top:38px;color:rgba(255,255,255,.85);font-size:12.5px;text-align:center;line-height:1.7}
-  .foot a{color:#fff}
+:root{
+  --navy:#123458;--navy-2:#0b2947;--navy-3:#1d4f7a;
+  --blue:#1769aa;--blue-soft:#edf6fd;
+  --green:#1f7a4d;--green-soft:#edf8f2;
+  --amber:#9a6700;--amber-soft:#fff7df;
+  --violet:#6e55a3;--violet-soft:#f4f0fb;
+  --ink:#142033;--muted:#607087;--muted-2:#8996a8;
+  --line:#dfe6ee;--line-2:#edf1f5;--bg:#f4f7fa;--card:#fff;
+  --radius:16px;--radius-sm:10px;
+  --shadow:0 12px 34px rgba(18,52,88,.09);
+  --shadow-hover:0 18px 42px rgba(18,52,88,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+button,a{font:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid rgba(23,105,170,.32);outline-offset:3px}
+
+.topbar{
+  min-height:70px;background:linear-gradient(112deg,var(--navy-2),var(--navy));
+  color:#fff;display:flex;align-items:center;padding:10px clamp(16px,3vw,42px);
+  gap:18px;position:sticky;top:0;z-index:20;box-shadow:0 3px 16px rgba(5,25,45,.18)
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:250px}
+.monogram{
+  width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#d9b45b,#b88727);color:#102a43;
+  font-size:16px;font-weight:900;letter-spacing:-.8px;box-shadow:inset 0 1px rgba(255,255,255,.45)
+}
+.brand strong{display:block;font-size:15px;letter-spacing:.02em}
+.brand small{display:block;margin-top:2px;color:#c8d6e4;font-size:10px;letter-spacing:.13em;text-transform:uppercase}
+.top-tagline{flex:1;text-align:center;font-size:13px;color:#e5edf5}
+.top-meta{min-width:250px;display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.env{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:7px 10px;border-radius:999px;font-size:11px;color:#eaf2f8}
+.home-wrap{max-width:1240px;margin:0 auto;padding:clamp(22px,4vw,50px) clamp(16px,3vw,32px) 48px}
+
+.hero{
+  display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,.6fr);gap:24px;align-items:stretch;margin-bottom:24px
+}
+.hero-main{
+  background:linear-gradient(135deg,#fff 0%,#f8fbfd 100%);border:1px solid var(--line);
+  border-radius:var(--radius);padding:clamp(24px,4vw,40px);box-shadow:var(--shadow)
+}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:var(--blue);margin-bottom:12px}
+.hero h1{font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-.035em;margin:0;max-width:780px}
+.hero p{margin:16px 0 0;color:var(--muted);font-size:15px;line-height:1.65;max-width:760px}
+.hero-side{
+  border-radius:var(--radius);padding:24px;background:var(--navy);color:#fff;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;justify-content:space-between
+}
+.hero-side .label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#a9bfd2;font-weight:800}
+.hero-side h2{font-size:18px;margin:8px 0 12px}
+.hero-side p{color:#d4e0ea;font-size:12.5px;line-height:1.55;margin:0}
+.rule-list{margin:20px 0 0;padding:0;list-style:none;display:grid;gap:9px}
+.rule-list li{font-size:12px;display:flex;gap:8px;align-items:flex-start;color:#edf4f9}
+.rule-list li::before{content:"";width:7px;height:7px;border-radius:50%;background:#6fd0a1;margin-top:5px;flex:0 0 auto}
+
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:32px 0 14px}
+.section-head h2{font-size:18px;margin:0;letter-spacing:-.01em}
+.section-head p{font-size:12px;color:var(--muted);margin:0}
+
+.apps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.app-card{
+  --accent:var(--blue);--soft:var(--blue-soft);
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:360px;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease
+}
+.app-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:#cbd8e5}
+.app-card.sgq{--accent:var(--green);--soft:var(--green-soft)}
+.app-card.cq{--accent:var(--amber);--soft:var(--amber-soft)}
+.app-band{height:5px;background:var(--accent)}
+.app-body{padding:22px;display:flex;flex-direction:column;flex:1}
+.app-top{display:flex;align-items:flex-start;gap:13px}
+.app-icon{
+  width:46px;height:46px;border-radius:13px;background:var(--soft);color:var(--accent);
+  display:grid;place-items:center;flex:0 0 auto
+}
+.app-icon svg{width:24px;height:24px}
+.app-title{min-width:0;flex:1}
+.app-title .kicker{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:var(--accent)}
+.app-title h3{font-size:20px;line-height:1.1;margin:4px 0 5px}
+.app-title p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.45}
+.capabilities{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0}
+.capabilities span{font-size:10.5px;padding:5px 8px;border:1px solid var(--line);background:#fbfcfd;border-radius:999px;color:#4b5c72}
+.owner{
+  margin-top:auto;background:#f8fafc;border:1px solid var(--line-2);border-radius:11px;padding:12px;
+  display:grid;grid-template-columns:auto 1fr;gap:9px 10px;align-items:start
+}
+.owner svg{width:16px;height:16px;color:var(--accent);margin-top:1px}
+.owner b{font-size:11px;display:block}
+.owner span{font-size:10.5px;color:var(--muted);line-height:1.45;display:block;margin-top:2px}
+.app-actions{display:flex;gap:8px;margin-top:14px}
+.open{
+  flex:1;text-decoration:none;text-align:center;padding:10px 14px;border-radius:9px;
+  background:var(--accent);color:#fff;font-weight:800;font-size:12px;transition:filter .15s ease
+}
+.open:hover{filter:brightness(1.06)}
+.external-note{font-size:10px;color:var(--muted-2);display:flex;align-items:center}
+
+.flow{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fff;border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden
+}
+.flow-item{padding:18px;position:relative;min-height:138px}
+.flow-item:not(:last-child){border-right:1px solid var(--line)}
+.flow-item:not(:last-child)::after{
+  content:"";position:absolute;right:-6px;top:50%;width:10px;height:10px;background:#fff;
+  border-top:1px solid var(--line);border-right:1px solid var(--line);transform:translateY(-50%) rotate(45deg);z-index:2
+}
+.flow-num{font-size:10px;color:var(--muted-2);font-weight:800;letter-spacing:.08em}
+.flow-item h3{font-size:14px;margin:7px 0 5px}
+.flow-item p{font-size:11.5px;line-height:1.5;color:var(--muted);margin:0}
+.flow-item strong{color:var(--navy)}
+
+.principles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.principle{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px}
+.principle .p-icon{width:32px;height:32px;border-radius:9px;background:#eef4f8;color:var(--navy);display:grid;place-items:center;margin-bottom:12px}
+.principle svg{width:17px;height:17px}
+.principle h3{font-size:12px;margin:0 0 5px}
+.principle p{font-size:10.8px;color:var(--muted);line-height:1.5;margin:0}
+
+.footer{
+  margin-top:36px;border-top:1px solid var(--line);padding:18px 2px 4px;display:flex;gap:16px;
+  justify-content:space-between;align-items:center;color:var(--muted);font-size:10.5px
+}
+.footer strong{color:var(--navy)}
+.footer .baseline{font-variant-numeric:tabular-nums}
+
+@media(max-width:980px){
+  .top-tagline{display:none}.top-meta{min-width:auto}.brand{min-width:0;flex:1}
+  .hero{grid-template-columns:1fr}.apps{grid-template-columns:1fr 1fr}.app-card.cq{grid-column:1/-1}
+  .flow{grid-template-columns:1fr 1fr}.flow-item:nth-child(2){border-right:0}.flow-item:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .flow-item::after{display:none}.principles{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  .topbar{padding:9px 14px}.brand small{display:none}.env{display:none}
+  .home-wrap{padding:20px 12px 36px}.hero-main,.hero-side{padding:20px}
+  .apps{grid-template-columns:1fr}.app-card.cq{grid-column:auto}.app-card{min-height:0}
+  .flow{grid-template-columns:1fr}.flow-item{border-right:0!important;border-bottom:1px solid var(--line)}
+  .flow-item:last-child{border-bottom:0}.principles{grid-template-columns:1fr}
+  .section-head{align-items:start;flex-direction:column;gap:4px}
+  .footer{align-items:flex-start;flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
-  <div class="top">
-    <img src="logo_gmf.png" alt="Grupo MF Paris" onerror="this.style.display='none'" style="height:90px;width:auto;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.18)">
-    <div class="brandtag">Grupo MF Paris Alimentos</div>
-    <h1>Sistema de Qualidade Total</h1>
-    <p>Escolha um sistema para começar.</p>
-    <span class="sif">SIF 5460 · MF Paris · DMS · Profi</span>
+<header class="topbar">
+  <div class="brand">
+    <div class="monogram" aria-hidden="true">MF</div>
+    <div>
+      <strong>GRUPO MF PARIS</strong>
+      <small>Sistemas corporativos</small>
+    </div>
+  </div>
+  <div class="top-tagline">Qualidade em cada etapa. Evidência em cada decisão.</div>
+  <div class="top-meta">
+    <span class="env">Ambiente interno</span>
+  </div>
+</header>
+
+<main class="home-wrap">
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="hero-main">
+      <div class="eyebrow">Central Corporativa · Qualidade & Produto</div>
+      <h1 id="heroTitle">Um ponto de entrada. Três sistemas. Responsabilidades claras.</h1>
+      <p>A Central organiza o acesso ao GMF, ao SGQ e ao Controle de Qualidade sem misturar suas responsabilidades. Cada sistema mantém sua fonte de verdade; a interface passa a falar a mesma língua.</p>
+    </div>
+    <aside class="hero-side" aria-label="Regra de governança">
+      <div>
+        <div class="label">Princípio operacional</div>
+        <h2>O dado precisa explicar de onde veio.</h2>
+        <p>Números sem fonte não viram KPI oficial. Alterações críticas precisam deixar histórico. Decisões de Qualidade continuam humanas.</p>
+      </div>
+      <ul class="rule-list">
+        <li>Sem indicador inventado</li>
+        <li>Histórico preservado</li>
+        <li>Responsabilidade por domínio</li>
+      </ul>
+    </aside>
+  </section>
+
+  <div class="section-head">
+    <div><h2>Sistemas</h2><p>Escolha o ambiente de trabalho.</p></div>
+    <p>Mesma linguagem visual · regras preservadas</p>
   </div>
 
-  <div class="grid">
-    <a class="card" style="--ac:#1a56a0;--bg:#e7f0fb" href="gmf_formulador_wizard.html">
-      <div class="ico">🧪</div>
-      <h2>GMF Lab</h2>
-      <div class="desc">Formulador nutricional, fichas técnicas, ingredientes e laudos. Após o login você escolhe Formulador ou Ingredientes.</div>
-      <span class="go">Abrir &rarr;</span>
-    </a>
+  <section class="apps" aria-label="Sistemas corporativos">
+    <article class="app-card">
+      <div class="app-band"></div>
+      <div class="app-body">
+        <div class="app-top">
+          <div class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6M10 3v5l-5.7 9.3A2.4 2.4 0 0 0 6.3 21h11.4a2.4 2.4 0 0 0 2-3.7L14 8V3"/><path d="M7.7 15h8.6"/></svg>
+          </div>
+          <div class="app-title">
+            <div class="kicker">Produto & P&D</div>
+            <h3>GMF Formulador</h3>
+            <p>Desenvolvimento técnico do produto e sua especificação.</p>
+          </div>
+        </div>
+        <div class="capabilities">
+          <span>Formulações</span><span>Ingredientes</span><span>Nutrição</span><span>Fichas técnicas</span><span>Laudos</span>
+        </div>
+        <div class="owner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div><b>Fonte técnica</b><span>O GMF diz como o produto deve ser: formulação, especificação e documentação técnica.</span></div>
+        </div>
+        <div class="app-actions"><a class="open" href="gmf_formulador_wizard.html">Abrir GMF</a></div>
+      </div>
+    </article>
 
-    <a class="card" style="--ac:#16a34a;--bg:#e7f7ee" href="sistema_qualidade_online.html">
-      <div class="ico">✅</div>
-      <h2>Sistema de Gestão da Qualidade</h2>
-      <div class="desc">POPs, indicadores, fornecedores, não conformidades, licenças e planos de ação — multiusuário, em tempo real.</div>
-      <span class="go">Abrir &rarr;</span>
-    </a>
+    <article class="app-card sgq">
+      <div class="app-band"></div>
+      <div class="app-body">
+        <div class="app-top">
+          <div class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-5"/></svg>
+          </div>
+          <div class="app-title">
+            <div class="kicker">Gestão da Qualidade</div>
+            <h3>SGQ</h3>
+            <p>Tratamento formal das ocorrências, conformidade e melhoria.</p>
+          </div>
+        </div>
+        <div class="capabilities">
+          <span>NC</span><span>SAC</span><span>CAPA</span><span>Documentos</span><span>Treinamentos</span><span>Fornecedores</span>
+        </div>
+        <div class="owner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div><b>Fonte da tratativa</b><span>O SGQ registra como a Qualidade analisou, decidiu, tratou e verificou a eficácia.</span></div>
+        </div>
+        <div class="app-actions"><a class="open" href="sistema_qualidade_online.html">Abrir SGQ</a></div>
+      </div>
+    </article>
 
-    <a class="card" style="--ac:#7c3aed;--bg:#efe7fb" href="https://qualidade-alimentos-production.up.railway.app/" target="_blank" rel="noopener">
-      <div class="ico">📦</div>
-      <h2>Controle de Qualidade — NF-e &amp; Produção</h2>
-      <div class="desc">Entrada de notas fiscais (NF-e) e acompanhamento de produção. Acesso com login próprio.</div>
-      <span class="go">Abrir &rarr;</span>
-    </a>
+    <article class="app-card cq">
+      <div class="app-band"></div>
+      <div class="app-body">
+        <div class="app-top">
+          <div class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V10l5 3V8l5 3V5h4v16"/><path d="M8 17h2M13 17h2M18 17h1"/></svg>
+          </div>
+          <div class="app-title">
+            <div class="kicker">Operação & Evidência</div>
+            <h3>CQ · Produção</h3>
+            <p>O que aconteceu no recebimento, processo, lote e liberação.</p>
+          </div>
+        </div>
+        <div class="capabilities">
+          <span>NF-e</span><span>Produção</span><span>Lotes</span><span>Rastreabilidade</span><span>Controle em processo</span>
+        </div>
+        <div class="owner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div><b>Fonte da evidência operacional</b><span>O CQ registra o recebido e o produzido. Desvio pode ser sinalizado; abertura de NC permanece humana no SGQ.</span></div>
+        </div>
+        <div class="app-actions">
+          <a class="open" href="https://qualidade-alimentos-production.up.railway.app/" target="_blank" rel="noopener noreferrer">Abrir CQ</a>
+          <span class="external-note">Acesso próprio</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <div class="section-head">
+    <div><h2>Fonte da verdade</h2><p>Evita cadastro duplicado e conflito entre sistemas.</p></div>
   </div>
+  <section class="flow" aria-label="Mapa de responsabilidade dos dados">
+    <div class="flow-item"><div class="flow-num">01 · COMERCIAL / FISCAL</div><h3>OMIE</h3><p><strong>Identidade fiscal e comercial:</strong> fornecedor, produto comercial e documentos fiscais.</p></div>
+    <div class="flow-item"><div class="flow-num">02 · ESPECIFICAÇÃO</div><h3>GMF</h3><p><strong>Definição técnica:</strong> como o produto deve ser e qual revisão está vigente.</p></div>
+    <div class="flow-item"><div class="flow-num">03 · EVIDÊNCIA</div><h3>CQ</h3><p><strong>Execução real:</strong> o que aconteceu no recebimento, processo e lote.</p></div>
+    <div class="flow-item"><div class="flow-num">04 · TRATATIVA</div><h3>SGQ</h3><p><strong>Decisão da Qualidade:</strong> ocorrência, NC, CAPA, conformidade e eficácia.</p></div>
+  </section>
 
-  <div class="foot">
-    Grupo MF Paris Alimentos — Plataforma interna de sistemas.<br>
-    Em caso de dúvida de acesso, contate a Qualidade / TI.
+  <div class="section-head">
+    <div><h2>Padrão de qualidade da nova interface</h2><p>Princípios que serão aplicados progressivamente aos três ambientes.</p></div>
   </div>
+  <section class="principles">
+    <article class="principle"><div class="p-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h5l2-7 4 14 2-7h5"/></svg></div><h3>Exceção primeiro</h3><p>A primeira tela prioriza atraso, risco, bloqueio e próximo passo — não KPI decorativo.</p></article>
+    <article class="principle"><div class="p-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg></div><h3>Dado explicável</h3><p>Fonte, data, responsável e método ficam visíveis quando forem relevantes para a decisão.</p></article>
+    <article class="principle"><div class="p-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Histórico preservado</h3><p>Revisões e mudanças críticas devem mostrar antes/depois sem apagar o estado anterior.</p></article>
+    <article class="principle"><div class="p-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 12 5 5L20 6"/></svg></div><h3>Humano no controle</h3><p>Automação apoia triagem e análise. Aprovações e decisões de Qualidade permanecem explícitas.</p></article>
+  </section>
+
+  <footer class="footer">
+    <div><strong>Grupo MF Paris Alimentos</strong> · Plataforma interna de sistemas</div>
+    <div class="baseline">UI v1 · baseline edab6d1 · SIF 5460</div>
+  </footer>
+</main>
 </body>
 </html>
