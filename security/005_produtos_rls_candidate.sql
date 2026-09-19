@@ -1,0 +1,18 @@
+-- CANDIDATO — NÃO APLICADO AINDA
+-- SECURITY GATE: habilitar RLS em public.produtos.
+--
+-- Motivo:
+-- o advisor do Supabase detecta RLS desabilitado nesta tabela.
+--
+-- Estado já confirmado antes deste passo:
+-- - papel anon SEM grants em public.produtos;
+-- - authenticated mantém SELECT/INSERT/UPDATE/DELETE;
+-- - políticas para authenticated já existem;
+-- - frontend usa sessão autenticada para acessar produtos.
+--
+-- Mudança mínima proposta:
+alter table public.produtos enable row level security;
+--
+-- Nenhuma policy é removida nesta etapa.
+-- Depois de validar produção, as policies duplicadas antigas podem ser
+-- consolidadas em uma etapa própria, com testes de CRUD autenticado.
