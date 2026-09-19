@@ -23,8 +23,17 @@
       +'<a href="gmf_formulador_wizard.html" class="'+(k==='gmf'?'active':'')+'">GMF</a>'
       +'<a href="sistema_qualidade_online.html" class="'+(k==='sgq'?'active':'')+'">SGQ</a>'
       +'<a href="https://qualidade-alimentos-production.up.railway.app/" class="">CQ ↗</a>'
-      +'</nav><span class="i2-right"><span class="i2-state">Interface 2.0</span></span>';
+      +'</nav><span class="i2-right"><span class="i2-state">Interface 2.0</span>'
+      +'<button type="button" class="i2-logout" id="i2Logout">Sair</button></span>';
     document.body.insertBefore(bar,document.body.firstChild);
+    var out=document.getElementById('i2Logout');
+    if(out)out.addEventListener('click',function(){
+      try{
+        if(k==='gmf'&&typeof window._logout==='function')return window._logout();
+        if(k==='gmf'&&typeof window.fazerLogout==='function')return window.fazerLogout();
+        if(k==='sgq'&&typeof window.doLogout==='function')return window.doLogout();
+      }catch(e){console.error(e);}
+    });
   }
   function addContext(){
     if(document.querySelector('.i2-context')) return;
