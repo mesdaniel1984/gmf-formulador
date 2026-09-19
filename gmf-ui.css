@@ -79,3 +79,13 @@ body.gmf-ui{margin:0;background:var(--gmf-bg);color:var(--gmf-text);font-family:
 @media(max-width:1050px){.gmf-modules{grid-template-columns:1fr}.gmf-module{min-height:0}.gmf-info-grid{grid-template-columns:1fr}.gmf-principles{grid-template-columns:1fr 1fr}.gmf-search{display:none}}
 @media(max-width:660px){.gmf-topbar{height:60px;padding:0 14px}.gmf-brand{min-width:0}.gmf-brandtext span{display:none}.gmf-pill{display:none}.gmf-page{padding:24px 14px 40px}.gmf-title-row{display:block}.gmf-statusline{justify-content:flex-start;margin-top:14px}.gmf-title h1{font-size:24px}.gmf-modules{gap:12px}.gmf-module{padding:18px}.gmf-capabilities{grid-template-columns:1fr}.gmf-principles{grid-template-columns:1fr}.gmf-foot{padding:0 14px 20px;display:block}.gmf-foot span{display:block;margin-top:6px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+.gmf-thread{background:#fff;border:1px solid var(--gmf-border);border-radius:var(--gmf-radius);box-shadow:var(--gmf-shadow);padding:18px 20px;margin-bottom:18px}
+.gmf-thread-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:15px}
+.gmf-thread-head h3{font-size:14px;margin:0}.gmf-thread-head p{font-size:10.5px;color:var(--gmf-muted);margin:3px 0 0;line-height:1.45}
+.gmf-thread-flow{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr 34px 1fr;align-items:stretch}
+.gmf-thread-step{border:1px solid var(--gmf-border);background:var(--gmf-surface-2);border-radius:11px;padding:12px}
+.gmf-thread-step b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--gmf-blue);margin-bottom:5px}
+.gmf-thread-step strong{display:block;font-size:12px;margin-bottom:3px}.gmf-thread-step span{display:block;font-size:10px;color:var(--gmf-muted);line-height:1.4}
+.gmf-thread-arrow{display:grid;place-items:center;color:#8ba1b0;font-size:17px}
+@media(max-width:1050px){.gmf-thread-flow{grid-template-columns:1fr}.gmf-thread-arrow{height:24px;transform:rotate(90deg)}}
