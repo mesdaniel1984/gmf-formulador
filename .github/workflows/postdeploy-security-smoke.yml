@@ -1,0 +1,113 @@
+name: Post-deploy Security smoke
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  production-security-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar hotfix publicado no GitHub Pages
+        env:
+          BASE: https://mesdaniel1984.github.io/gmf-formulador
+        run: |
+          set -euo pipefail
+
+          echo "Aguardando hotfix no Pages..."
+          for i in $(seq 1 24); do
+            if curl -fsS --max-time 15 "$BASE/login.html" -o /tmp/login.html; then
+              if grep -Fq 'shouldCreateUser:false' /tmp/login.html                  && ! grep -Fq 'Criar conta' /tmp/login.html                  && ! grep -Fq '.auth.signUp(' /tmp/login.html; then
+                break
+              fi
+            fi
+            if [ "$i" -eq 24 ]; then
+              echo "Hotfix de login nao apareceu no Pages dentro da janela."
+              exit 1
+            fi
+            sleep 10
+          done
+
+          echo "Validando register.html fechado..."
+          curl -fsS --max-time 15 "$BASE/register.html" -o /tmp/register.html
+          grep -Fq 'Cadastro de contas desativado' /tmp/register.html
+          if grep -Fq 'supabase-js' /tmp/register.html; then
+            echo "register.html ainda carrega SDK Supabase."
+            exit 1
+          fi
+          if grep -Fq 'createClient(' /tmp/register.html; then
+            echo "register.html ainda cria cliente Supabase."
+            exit 1
+          fi
+
+          echo "Extraindo configuracao publica do Supabase..."
+          python3 - <<'PY' > /tmp/supa.env
+          import re
+          text=open('/tmp/login.html',encoding='utf-8').read()
+          url=re.search(r"const URL_ = '([^']+)'",text)
+          key=re.search(r"const KEY_ = '([^']+)'",text)
+          if not url or not key:
+              raise SystemExit('Supabase public config not found')
+          print('SUPA_URL='+url.group(1))
+          print('SUPA_KEY='+key.group(1))
+          PY
+
+          source /tmp/supa.env
+          echo "::add-mask::$SUPA_KEY"
+
+          echo "Validando signup server-side..."
+          curl -fsS --max-time 20 -H "apikey: $SUPA_KEY"             "$SUPA_URL/auth/v1/settings" -o /tmp/settings.json
+
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/settings.json',encoding='utf-8'))
+          print('disable_signup=',d.get('disable_signup'))
+          if d.get('disable_signup') is not True:
+              raise SystemExit('Signup ainda esta aberto')
+          PY
+
+          echo "Validando fronteira anon..."
+          FAILED=0
+          for TABLE in produtos ingredientes_custom laudos perfis app_state; do
+            BODY="/tmp/${TABLE}.json"
+            CODE=$(curl -sS --max-time 20 -o "$BODY" -w "%{http_code}"               -H "apikey: $SUPA_KEY"               -H "Authorization: Bearer $SUPA_KEY"               "$SUPA_URL/rest/v1/$TABLE?select=*&limit=1")
+
+            RESULT=$(python3 - "$BODY" "$CODE" <<'PY'
+          import json,sys
+          path,code=sys.argv[1],sys.argv[2]
+          try:
+              data=json.load(open(path,encoding='utf-8'))
+          except Exception:
+              data=None
+          if code in ('401','403'):
+              print('PROTECTED')
+          elif code == '200' and isinstance(data,list):
+              print('EXPOSED' if data else 'EMPTY_OR_RLS')
+          else:
+              print('OTHER')
+          PY
+            )
+            echo "$TABLE: HTTP $CODE / $RESULT"
+            if [ "$RESULT" = "EXPOSED" ]; then FAILED=1; fi
+          done
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "P0: linha anonima exposta em producao."
+            exit 1
+          fi
+
+          echo "Validando que Interface 2.0 continua servida..."
+          curl -fsS --max-time 15 "$BASE/" -o /tmp/index.html
+          grep -Fq 'gmf-ui.css' /tmp/index.html
+          grep -Fq 'gmf-central.js' /tmp/index.html
+
+          curl -fsS --max-time 15 "$BASE/gmf_formulador_wizard.html" -o /tmp/gmf.html
+          grep -Fq 'gmf-workspace.js' /tmp/gmf.html
+
+          curl -fsS --max-time 15 "$BASE/sistema_qualidade_online.html" -o /tmp/sgq.html
+          grep -Fq 'sgq-workspace.js' /tmp/sgq.html
+
+          echo "PRODUCAO SECURITY OK — signup fechado, anon fechado, UI2 intacta"
