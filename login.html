@@ -27,7 +27,6 @@ input:focus{border-color:#1e3a8a}
 .msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;display:none}
 .err{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;display:block}
 .ok{background:#f0fdf4;color:#166534;border:1px solid #86efac;display:block}
-#cad{display:none}
 </style>
 <link rel="stylesheet" href="gmf-auth.css">
 <script defer src="gmf-auth.js"></script>
@@ -39,9 +38,8 @@ input:focus{border-color:#1e3a8a}
     <h1>GMF Formulador Nutricional</h1>
     <p>Grupo MF Paris Alimentos · SIF 5460</p>
   </div>
-  <div class="tabs">
-    <button class="tab on" onclick="aba('login')">Entrar</button>
-    <button class="tab" onclick="aba('cad')">Criar conta</button>
+  <div class="tabs" style="display:block;text-align:center;padding:9px 12px">
+    <span style="font-size:12px;font-weight:700;color:#526574">Acesso interno · contas provisionadas pela administração</span>
   </div>
   <div id="login">
     <div class="fg"><label>E-mail</label><input id="le" type="email" placeholder="seu@email.com"></div>
@@ -49,14 +47,6 @@ input:focus{border-color:#1e3a8a}
     <button class="btn" onclick="entrar()">Entrar</button>
     <div class="msg" id="ml"></div>
     <button class="btn btn2" onclick="magico()">📧 Receber link por e-mail</button>
-  </div>
-  <div id="cad">
-    <div class="fg"><label>Nome</label><input id="cn" type="text" placeholder="Seu nome completo"></div>
-    <div class="fg"><label>Cargo</label><input id="cc" type="text" placeholder="Ex: Analista de Qualidade"></div>
-    <div class="fg"><label>E-mail</label><input id="ce" type="email" placeholder="seu@email.com"></div>
-    <div class="fg"><label>Senha (mín. 6 caracteres)</label><input id="cs" type="password" placeholder="Crie uma senha"></div>
-    <button class="btn" onclick="cadastrar()">Criar conta</button>
-    <div class="msg" id="mc"></div>
   </div>
 </div>
 <script>
@@ -68,11 +58,6 @@ sb.auth.getSession().then(({data})=>{ if(data.session) go(); });
 
 function go(){ location.href='gmf_formulador_wizard.html'; }
 function msg(id,t,c){const e=document.getElementById(id);e.textContent=t;e.className='msg '+c;}
-function aba(t){
-  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',(i===0&&t==='login')||(i===1&&t==='cad')));
-  document.getElementById('login').style.display=t==='login'?'':'none';
-  document.getElementById('cad').style.display=t==='cad'?'':'none';
-}
 document.getElementById('ls').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
 
 async function entrar(){
@@ -87,21 +72,9 @@ async function entrar(){
 async function magico(){
   const e=document.getElementById('le').value.trim();
   if(!e){msg('ml','Digite seu e-mail acima.','err');return;}
-  const {error}=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.href}});
+  const {error}=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.href,shouldCreateUser:false}});
   if(error)msg('ml',error.message,'err');
   else msg('ml','📧 Link enviado! Verifique seu e-mail.','ok');
-}
-
-async function cadastrar(){
-  const n=document.getElementById('cn').value.trim();
-  const c=document.getElementById('cc').value.trim();
-  const e=document.getElementById('ce').value.trim();
-  const s=document.getElementById('cs').value;
-  if(!n||!e||!s){msg('mc','Preencha todos os campos.','err');return;}
-  if(s.length<6){msg('mc','Senha mínimo 6 caracteres.','err');return;}
-  const {error}=await sb.auth.signUp({email:e,password:s,options:{data:{nome:n,cargo:c}}});
-  if(error)msg('mc',error.message,'err');
-  else msg('mc','✅ Conta criada! Você já pode entrar.','ok');
 }
 
 if(location.hash.includes('access_token')){
