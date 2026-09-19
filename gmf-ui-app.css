@@ -268,3 +268,7 @@ body.interface-2 #wizardNav .step-btn{font-size:10.5px!important}
 /* === CORPORATE SYSTEM SWITCHER ============================================ */
 .i2-switch{display:flex;align-items:center;gap:3px;margin-left:auto}.i2-switch a{height:25px;min-width:38px;padding:0 8px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:#b8cbd8;text-decoration:none;font:800 9px/1 Inter,system-ui,sans-serif;border:1px solid transparent}.i2-switch a:hover{color:#fff;background:rgba(255,255,255,.08)}.i2-switch a.active{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.10)}.i2-corpbar .i2-right{margin-left:0}
 @media(max-width:700px){.i2-switch{margin-left:auto}.i2-switch a{min-width:34px;padding:0 6px}.i2-corpbar .i2-app{display:none}.i2-corpbar .i2-sep{display:none}}
+
+/* === GMF SINGLE NAV 2.1 ================================================== */
+body.interface-2 #wizardNav.i2-native-wizard{display:none!important}
+.i2-workspace.i2-catalog-mode,.i2-context.i2-catalog-mode{display:none!important}
