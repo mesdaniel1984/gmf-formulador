@@ -95,3 +95,10 @@ body.gmf-ui{margin:0;background:var(--gmf-bg);color:var(--gmf-text);font-family:
 body.gmf-searching .gmf-module[hidden]{display:none!important}
 body.gmf-searching .gmf-modules{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:1050px){body.gmf-searching .gmf-modules{grid-template-columns:1fr}}
+
+/* === UAT MOBILE POLISH ==================================================== */
+@media(max-width:660px){
+  .gmf-thread-head{display:block}
+  .gmf-thread-head small{display:none}
+  .gmf-thread-head p{max-width:none}
+}
