@@ -246,3 +246,15 @@ body.interface-2 #wizardNav{position:relative}
 body.interface-2 #wizardNav .step-btn{font-size:10.5px!important}
 @media(max-width:980px){.i2-life{grid-template-columns:repeat(4,1fr)}.i2-life button:nth-child(4){border-right:0}.i2-life button:nth-child(-n+4){border-bottom:1px solid var(--i2-border)}}
 @media(max-width:720px){.i2-life{display:flex;overflow-x:auto;scroll-snap-type:x proximity}.i2-life button{min-width:132px;scroll-snap-align:start}.i2-ws-progress-head{align-items:flex-start;flex-direction:column;gap:3px}.i2-next{align-items:flex-start;flex-direction:column}.i2-next .i2-ws-btn{width:100%}}
+
+/* === SGQ EXCEPTION STRIP 2.1 ============================================= */
+.i2-qms-context-inner{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.i2-qms-stats{display:grid;grid-template-columns:150px 150px 170px 1fr;background:#fff;border:1px solid var(--i2-border);border-top:0;border-radius:0 0 12px 12px;box-shadow:var(--i2-shadow);overflow:hidden}
+.i2-qms-stats[hidden]{display:none}.i2-qms-stat{border:0;border-right:1px solid var(--i2-border);background:#fff;padding:11px 13px;text-align:left;cursor:default}
+.i2-qms-stat span{display:block;font:700 8.5px/1.25 Inter,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:var(--i2-muted)}
+.i2-qms-stat strong{display:block;font:850 20px/1.15 Inter,system-ui,sans-serif;color:var(--i2-text);margin-top:3px}
+.i2-qms-stat.warn strong{color:var(--i2-amber)}.i2-qms-stat.danger strong{color:var(--i2-red)}.i2-qms-stat.ok strong{color:var(--i2-green)}
+.i2-qms-rule{padding:10px 14px;display:flex;align-items:flex-start;justify-content:center;flex-direction:column;min-width:0}.i2-qms-rule b{font:800 9px/1.2 Inter,system-ui,sans-serif;color:var(--i2-text);text-transform:uppercase;letter-spacing:.05em}.i2-qms-rule span{font:600 9.5px/1.4 Inter,system-ui,sans-serif;color:var(--i2-muted);margin-top:2px}
+.i2-qms-action.secondary{background:#fff;color:var(--i2-blue);border:1px solid #c9dcea}
+@media(max-width:900px){.i2-qms-stats{grid-template-columns:repeat(3,1fr)}.i2-qms-rule{grid-column:1/-1;border-top:1px solid var(--i2-border)}}
+@media(max-width:620px){.i2-qms-stats{grid-template-columns:1fr 1fr}.i2-qms-stat:nth-child(2){border-right:0}.i2-qms-stat:nth-child(3){grid-column:1/-1;border-top:1px solid var(--i2-border);border-right:0}.i2-qms-rule{grid-column:1/-1}.i2-qms-context-inner{gap:8px}}
