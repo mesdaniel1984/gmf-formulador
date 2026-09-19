@@ -1,0 +1,75 @@
+name: Phase 4.1 schema CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'phase4/**'
+      - 'docs/FASE4_1_PRODUCT_LIFECYCLE.md'
+      - '.github/workflows/phase4-1-schema-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar cliente PostgreSQL
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Bootstrap Supabase mínimo
+        run: psql -v ON_ERROR_STOP=1 -f phase4/test/bootstrap.sql
+
+      - name: Aplicar fundação F4.1
+        run: psql -v ON_ERROR_STOP=1 -f phase4/001_product_revision_foundation.sql
+
+      - name: Aplicar hardening F4.1
+        run: psql -v ON_ERROR_STOP=1 -f phase4/004_harden_revision_functions_and_indexes.sql
+
+      - name: Rodar asserts do ciclo de vida
+        run: psql -v ON_ERROR_STOP=1 -f phase4/test/assertions.sql
+
+      - name: Frontend não pode acessar tabelas novas
+        run: |
+          set -euo pipefail
+          if psql -v ON_ERROR_STOP=1 -c "set role authenticated; select count(*) from public.produto_revisoes;" >/tmp/auth.out 2>/tmp/auth.err; then
+            echo "ERRO: authenticated conseguiu ler produto_revisoes antes da F4.2"
+            cat /tmp/auth.out
+            exit 1
+          fi
+          grep -qi "permission denied" /tmp/auth.err
+
+          if psql -v ON_ERROR_STOP=1 -c "set role authenticated; select count(*) from public.audit_log;" >/tmp/audit.out 2>/tmp/audit.err; then
+            echo "ERRO: authenticated conseguiu ler audit_log"
+            cat /tmp/audit.out
+            exit 1
+          fi
+          grep -qi "permission denied" /tmp/audit.err
+
+          echo "F4.1 permissions OK"
