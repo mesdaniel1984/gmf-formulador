@@ -30,6 +30,7 @@ input:focus{border-color:#1e3a8a}
 #cad{display:none}
 </style>
 <link rel="stylesheet" href="gmf-auth.css">
+<script defer src="gmf-auth.js"></script>
 </head>
 <body>
 <div class="card">
@@ -107,6 +108,5 @@ if(location.hash.includes('access_token')){
   sb.auth.getSession().then(({data})=>{ if(data.session) go(); });
 }
 </script>
-<script src="gmf-auth.js"></script>
 </body>
 </html>
