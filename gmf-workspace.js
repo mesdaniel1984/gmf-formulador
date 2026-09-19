@@ -44,6 +44,10 @@
       }
     });
     actions.insertBefore(tools,actions.firstChild);
+    Array.prototype.slice.call(actions.querySelectorAll('button')).forEach(function(b){
+      var oc=String(b.getAttribute('onclick')||'');
+      if(oc.indexOf('mostrarMenuInicial')>-1)b.style.display='none';
+    });
 
     var note=document.createElement('div');note.className='i2-portfolio-note';note.id='i2PortfolioNote';
     note.innerHTML='<span class="i2-portfolio-dot"></span><div><strong>Portfólio técnico</strong><span>Novo produto fica como ação principal. Importação, revisão e correções em massa ficam separadas para reduzir clique acidental.</span></div>';
@@ -190,6 +194,7 @@
       +'<div class="i2-ws-title"><strong id="i2wsName">Novo produto</strong><span class="i2-ws-rev" id="i2wsRev">REV 00</span></div>'
       +'<div class="i2-ws-meta" id="i2wsMeta"></div></div>'
       +'<div class="i2-ws-actions"><button class="i2-ws-btn" type="button" data-i2-step="0">Portfólio</button>'
+      +'<button class="i2-ws-btn" type="button" id="i2wsIngredients">Ingredientes</button>'
       +'<button class="i2-ws-btn" type="button" data-i2-step="2">Fórmula</button>'
       +'<button class="i2-ws-btn" type="button" data-i2-step="4">Ficha técnica</button>'
       +'<button class="i2-ws-btn primary" type="button" id="i2wsSave">Salvar produto</button></div></div>'
@@ -216,6 +221,7 @@
     });
     var health=el('i2wsHealthDetail');if(health)health.setAttribute('aria-live','polite');
     var nextLive=el('i2wsNextTitle');if(nextLive)nextLive.setAttribute('aria-live','polite');
+    var ing=el('i2wsIngredients');if(ing)ing.addEventListener('click',function(){try{if(typeof irParaIngredientes==='function')irParaIngredientes();}catch(e){console.error(e);}});
     var h=el('i2wsHistory');if(h)h.addEventListener('click',openHistory);
     var save=el('i2wsSave');if(save)save.addEventListener('click',function(){try{if(typeof salvarProdutoAtual==='function')salvarProdutoAtual();}catch(e){console.error(e);}});
 
