@@ -45,8 +45,19 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Rodar suíte SGQ
         run: |
-          for f in             testes/b0-sessao-expirada.js             testes/b3b5-numeracao-e-lote.js             testes/b4b6-etapa-e-vinculo.js             testes/b7-autoria.js             testes/b8-concorrencia-e-numero.js             testes/central-gestao.js             testes/ponte-ronda-nc.js             testes/sac-fila-central.js             testes/sac-sla.js
+          for f in \
+            testes/b0-sessao-expirada.js \
+            testes/b3b5-numeracao-e-lote.js \
+            testes/b4b6-etapa-e-vinculo.js \
+            testes/b7-autoria.js \
+            testes/b8-concorrencia-e-numero.js \
+            testes/central-gestao.js \
+            testes/ponte-ronda-nc.js \
+            testes/sac-fila-central.js \
+            testes/sac-sla.js
           do
             echo "=== $f ==="
             node "$f"
           done
+      - name: Smoke visual UI2
+        run: node testes/interface2-visual-smoke.js
