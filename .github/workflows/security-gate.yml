@@ -63,7 +63,7 @@ jobs:
           echo "::add-mask::$SUPA_KEY"
 
           FAILED=0
-          for TABLE in produtos ingredientes_custom laudos perfis app_state; do
+          for TABLE in produtos ingredientes_custom laudos perfis app_state produtos_view; do
             BODY="/tmp/${TABLE}.json"
             CODE=$(curl -sS --max-time 20 -o "$BODY" -w "%{http_code}"               -H "apikey: $SUPA_KEY"               -H "Authorization: Bearer $SUPA_KEY"               "$SUPA_URL/rest/v1/$TABLE?select=*&limit=1")
 
@@ -90,9 +90,19 @@ jobs:
           done
 
           if [ "$FAILED" -ne 0 ]; then
-            echo "P0: pelo menos uma tabela expõe linhas para anon."
+            echo "P0: pelo menos uma tabela/view expõe linhas para anon."
             exit 1
           fi
+
+      - name: Exigir signup fechado no final
+        run: |
+          set -euo pipefail
+          STATE=$(cat /tmp/signup_state 2>/dev/null || echo open)
+          if [ "$STATE" != "ok" ]; then
+            echo "P0: Supabase Auth ainda permite novos signups."
+            exit 1
+          fi
+          echo "Signup fechado no servidor."
 
   no-service-role:
     name: No frontend service role
