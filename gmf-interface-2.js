@@ -47,6 +47,19 @@
       +'<span class="i2-context-chip"><strong>Princípio</strong> dado ausente ≠ zero</span>';
     header.insertAdjacentElement('afterend',d);
   }
+  function cleanupLegacyChrome(){
+    document.querySelectorAll('a[href="index.html"]').forEach(function(a){
+      if(a.classList.contains('i2-home')||a.classList.contains('i2-auth-central'))return;
+      var tx=String(a.textContent||'').toLowerCase();
+      var pos=String(a.style&&a.style.position||'').toLowerCase();
+      if(tx.indexOf('central de sistemas')>-1 && pos==='fixed')a.style.display='none';
+    });
+    if(appKey()==='gmf'){
+      var h=document.querySelector('.app-header h1');
+      if(h && /gmf\s*lab/i.test(h.textContent||''))h.textContent='GMF Formulador';
+    }
+  }
+
   function enhanceSemantics(){
     var current=document.querySelector('.i2-switch a.active');
     if(current) current.setAttribute('aria-current','page');
@@ -76,7 +89,9 @@
     document.body.classList.add('interface-2');
     addCorpBar();
     addContext();
+    cleanupLegacyChrome();
     enhanceSemantics();
+    setTimeout(cleanupLegacyChrome,250);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
   else boot();
