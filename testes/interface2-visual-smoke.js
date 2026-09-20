@@ -59,6 +59,8 @@ const path=require('path');
     check(await p.locator('#i2wsHistory').count()===1,'historico aparece como etapa separada');
     check(await p.locator('#wizardNav').evaluate(el=>getComputedStyle(el).display)==='none','wizard legado fica oculto na Interface 2.0');
     check(await p.locator('a[href="index.html"]:visible').count()===1,'GMF nao mostra link duplicado da Central');
+    await p.waitForTimeout(350);
+    check(await p.locator('#i2wsRevisions').count()===1,'botao de Revisoes aparece no workspace GMF');
     await p.screenshot({path:path.join(shots,'05-gmf-workspace.png'),fullPage:true});
     await p.close();
 

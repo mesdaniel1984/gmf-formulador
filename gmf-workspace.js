@@ -231,5 +231,19 @@
     if(window.MutationObserver) targets.forEach(function(t){new MutationObserver(syncState).observe(t,{childList:true,subtree:true,attributes:true});});
     syncState();setInterval(syncState,2000);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',create);else create();
+  function loadRevisionsModule(){
+    if(document.getElementById('i2RevisionsScript'))return;
+    var script=document.createElement('script');
+    script.id='i2RevisionsScript';
+    script.src='gmf-revisions.js';
+    script.defer=true;
+    document.body.appendChild(script);
+  }
+
+  function boot(){
+    create();
+    loadRevisionsModule();
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

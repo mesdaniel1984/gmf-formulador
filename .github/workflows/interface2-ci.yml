@@ -23,6 +23,7 @@ jobs:
         run: |
           node --check gmf-interface-2.js
           node --check gmf-workspace.js
+          node --check gmf-revisions.js
           node --check sgq-workspace.js
           node --check gmf-auth.js
           node --check gmf-central.js
@@ -30,6 +31,8 @@ jobs:
         run: node testes/interface2-integridade.js
       - name: Security auth UI
         run: node testes/security-auth-ui.js
+      - name: Interface de revisões controladas
+        run: node testes/phase4-2-revisions-ui.js
 
   sgq-regression:
     name: Regressão SGQ
