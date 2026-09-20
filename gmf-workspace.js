@@ -244,7 +244,7 @@
     if(document.getElementById('i2SandboxScript'))return;
     var script=document.createElement('script');
     script.id='i2SandboxScript';
-    script.src='gmf-sandbox.js';
+    script.src='gmf-sandbox.js?v=20260920.2';
     script.defer=true;
     document.body.appendChild(script);
   }
