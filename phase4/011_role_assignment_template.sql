@@ -1,0 +1,20 @@
+-- FASE 4.2 — atribuição explícita de papéis
+-- NÃO EXECUTAR COM IDs INVENTADOS.
+--
+-- Consulte os usuários/perfis existentes e escolha humanamente quem terá cada papel.
+--
+-- Exemplo de uso, após substituir os UUIDs reais:
+--
+-- insert into public.app_user_roles(user_id,role,assigned_by)
+-- values
+--   ('<UUID_USUARIO>','admin','<UUID_RESPONSAVEL>'),
+--   ('<UUID_USUARIO>','quality','<UUID_RESPONSAVEL>');
+--
+-- Papéis disponíveis:
+-- admin, rd, quality, regulatory, procurement, production, auditor, executive
+--
+-- Regras importantes:
+-- - não inferir papel a partir do campo cargo;
+-- - não promover todos os usuários a admin;
+-- - aprovação requer quality/regulatory/admin;
+-- - vigência requer quality/admin.

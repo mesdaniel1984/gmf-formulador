@@ -1,0 +1,169 @@
+name: Phase 4.2 RBAC CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'phase4/010_rbac_revision_workflow.sql'
+      - 'phase4/011_role_assignment_template.sql'
+      - 'phase4/test/bootstrap_rbac.sql'
+      - 'phase4/test/assertions_rbac.sql'
+      - 'docs/FASE4_2_RBAC_REVISIONS.md'
+      - '.github/workflows/phase4-2-rbac-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rbac-workflow:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar cliente PostgreSQL
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Bootstrap F4.1
+        run: |
+          psql -v ON_ERROR_STOP=1 -f phase4/test/bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f phase4/test/bootstrap_rbac.sql
+
+      - name: Aplicar F4.1
+        run: |
+          psql -v ON_ERROR_STOP=1 -f phase4/001_product_revision_foundation.sql
+          psql -v ON_ERROR_STOP=1 -f phase4/004_harden_revision_functions_and_indexes.sql
+
+      - name: Aplicar F4.2
+        run: psql -v ON_ERROR_STOP=1 -f phase4/010_rbac_revision_workflow.sql
+
+      - name: Testar workflow e segregação
+        run: psql -v ON_ERROR_STOP=1 -f phase4/test/assertions_rbac.sql
+
+      - name: Testar RLS de papéis
+        run: |
+          set -euo pipefail
+
+          COUNT=$(psql -Atqc "
+            select set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',false);
+            set role authenticated;
+            select count(*) from public.app_user_roles;
+          " | tail -1)
+          test "$COUNT" = "0"
+
+          COUNT=$(psql -Atqc "
+            select set_config('request.jwt.claim.sub','22222222-2222-2222-2222-222222222222',false);
+            set role authenticated;
+            select count(*) from public.app_user_roles;
+          " | tail -1)
+          test "$COUNT" = "1"
+
+      - name: Bloquear escrita direta
+        run: |
+          set -euo pipefail
+
+          if psql -v ON_ERROR_STOP=1 -c "
+            select set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',false);
+            set role authenticated;
+            update public.produto_revisoes set motivo_alteracao='direto';
+          " >/tmp/write.out 2>/tmp/write.err; then
+            echo "ERRO: authenticated atualizou produto_revisoes diretamente"
+            exit 1
+          fi
+          grep -qi "permission denied" /tmp/write.err
+
+          if psql -v ON_ERROR_STOP=1 -c "
+            select set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',false);
+            set role authenticated;
+            insert into public.app_user_roles(user_id,role)
+            values('11111111-1111-1111-1111-111111111111','admin');
+          " >/tmp/role.out 2>/tmp/role.err; then
+            echo "ERRO: usuário atribuiu papel diretamente"
+            exit 1
+          fi
+          grep -qi "permission denied" /tmp/role.err
+
+      - name: Anon não executa RPC
+        run: |
+          set -euo pipefail
+          if psql -v ON_ERROR_STOP=1 -c "
+            set role anon;
+            select public.criar_revisao_produto(1,'999','anon');
+          " >/tmp/anon.out 2>/tmp/anon.err; then
+            echo "ERRO: anon executou RPC"
+            exit 1
+          fi
+          grep -qi "permission denied" /tmp/anon.err
+
+          echo "F4.2 RBAC permissions OK"
+
+      - name: Allowlist SECURITY DEFINER
+        run: |
+          set -euo pipefail
+
+          ALLOWED=$(psql -Atqc "
+            select count(*)
+            from pg_proc p
+            join pg_namespace n on n.oid=p.pronamespace
+            where n.nspname='public'
+              and p.proname in (
+                'criar_revisao_produto',
+                'atualizar_snapshot_revisao',
+                'iniciar_revisao',
+                'submeter_revisao_aprovacao',
+                'aprovar_revisao_produto',
+                'rejeitar_revisao_produto',
+                'reabrir_revisao_produto',
+                'colocar_revisao_vigente'
+              )
+              and p.prosecdef
+              and has_function_privilege('authenticated',p.oid,'EXECUTE')
+              and not has_function_privilege('anon',p.oid,'EXECUTE')
+              and coalesce(array_to_string(p.proconfig,','),'') like '%search_path=%';
+          ")
+          test "$ALLOWED" = "8"
+
+          EXTRA=$(psql -Atqc "
+            select count(*)
+            from pg_proc p
+            join pg_namespace n on n.oid=p.pronamespace
+            where n.nspname='public'
+              and p.prosecdef
+              and has_function_privilege('authenticated',p.oid,'EXECUTE')
+              and p.proname not in (
+                'criar_revisao_produto',
+                'atualizar_snapshot_revisao',
+                'iniciar_revisao',
+                'submeter_revisao_aprovacao',
+                'aprovar_revisao_produto',
+                'rejeitar_revisao_produto',
+                'reabrir_revisao_produto',
+                'colocar_revisao_vigente'
+              );
+          ")
+          test "$EXTRA" = "0"
+
+          echo "SECURITY DEFINER allowlist OK"
