@@ -39,6 +39,7 @@
     var raw=String((error&&error.message)||error||'Erro desconhecido');
     var map=[
       ['AUTH_REQUIRED','Sua sessão expirou. Entre novamente.'],
+      ['PRODUCT_NOT_FOUND','Selecione um produto cadastrado antes de abrir o Sandbox.'],
       ['READONLY_USER','Seu perfil é somente leitura.'],
       ['SANDBOX_ROLE_REQUIRED','Esta ação exige papel de P&D ou Admin.'],
       ['SANDBOX_CONFLICT','O cenário foi alterado por outra sessão. A lista foi recarregada.'],
@@ -153,7 +154,8 @@
     editSnapshot:null,
     compareA:null,
     compareB:'current',
-    promotionId:null
+    promotionId:null,
+    missingProduct:false
   };
 
   function ensureUi(){
@@ -278,11 +280,24 @@
     var o=el('i2SandboxOverlay');o.hidden=false;state.open=true;state.tab='scenarios';
     setMessage(null);setLoading(true);
     try{
+      var selected=product();
+      if(!selected||selected.id==null){
+        state.missingProduct=true;
+        state.ctx=await loadContext();
+        state.productId=null;state.sandboxes=[];state.revisions=[];state.currentSnapshot=null;
+        var missingSubtitle=el('i2SbSubtitle');
+        if(missingSubtitle)missingSubtitle.textContent='Selecione um produto salvo para consultar cenários experimentais.';
+        render();
+        setMessage('Selecione um produto cadastrado antes de abrir o Sandbox.','info');
+        return;
+      }
+      state.missingProduct=false;
       await loadAll();
       var p=product(),sub=el('i2SbSubtitle');
       if(sub)sub.textContent=(p&&p.nome?p.nome:'Produto')+' · cenários isolados do registro oficial';
       render();
     }catch(e){
+      state.missingProduct=false;
       state.ctx=null;state.sandboxes=[];state.revisions=[];state.currentSnapshot=null;
       render();setMessage(errorText(e),'danger');
     }
@@ -312,6 +327,10 @@
   function render(){
     renderIdentity();syncTabs();
     var c=el('i2SbContent');if(!c)return;
+    if(state.missingProduct){
+      c.innerHTML='<div class="i2-sb-empty"><strong>Nenhum produto selecionado</strong><span>Feche este painel e escolha um item em Produtos cadastrados. O Sandbox só trabalha com produtos já salvos.</span></div>';
+      return;
+    }
     if(state.editId){c.innerHTML=renderEditor();return;}
     if(state.promotionId){c.innerHTML=renderPromotion();return;}
     c.innerHTML=state.tab==='compare'?renderCompare():renderScenarios();
