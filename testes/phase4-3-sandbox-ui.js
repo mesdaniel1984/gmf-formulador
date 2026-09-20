@@ -11,7 +11,7 @@ function check(v,msg){
   v?pass++:fail++;
 }
 
-check(workspace.includes("script.src='gmf-sandbox.js'"),'workspace carrega gmf-sandbox.js');
+check(workspace.includes("script.src='gmf-sandbox.js?v=20260920.2'"),'workspace carrega versão atual do gmf-sandbox.js');
 check(src.includes(".from('produto_sandboxes')"),'UI lê produto_sandboxes');
 check(src.includes(".from('produto_revisoes')"),'UI lê revisões para comparação/base');
 check(src.includes(".from('app_user_roles')"),'UI lê papéis do usuário');
