@@ -45,6 +45,8 @@ check(src.includes("if(base==='current'&&dirty())"),'criação baseada no produt
 check(src.includes("hasRole(ctx,'rd')||hasRole(ctx,'admin')"),'manutenção exige P&D/Admin');
 check(src.includes("hasRole(ctx,'quality')||hasRole(ctx,'regulatory')"),'consulta contempla Qualidade/Regulatório');
 check(src.includes("Sandbox não representa aprovação, vigência ou fórmula oficial."),'UI declara natureza não oficial');
+check(src.includes("Selecione um produto cadastrado antes de abrir o Sandbox."),'UI orienta quando nenhum produto salvo está selecionado');
+check(src.includes("if(!selected||selected.id==null)"),'UI intercepta novo produto antes de consultar o banco');
 
 check(src.includes("Math.abs(formulaTotal(snapshot)-1000)<=0.001"),'baseline atual de 1000 é calculado como alerta');
 check(!/formulaBalanced\([^)]*\)\s*\{?\s*return/.test(src.split("promover_sandbox_revisao")[0].slice(-1200)),'promoção não é implicitamente bloqueada pelo total');
