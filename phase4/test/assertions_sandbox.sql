@@ -29,7 +29,7 @@ begin
   select status,criado_por,jsonb_typeof(snapshot)
     into v_status,v_owner,v_type
   from public.produto_sandboxes
-  where id=:'sandbox_id'::uuid;
+  where nome='Cenário A';
 
   if v_status <> 'ATIVO' then
     raise exception 'sandbox não iniciou ATIVO';
@@ -60,7 +60,7 @@ declare
 begin
   select lock_version,nome into v_lock,v_name
   from public.produto_sandboxes
-  where id=:'sandbox_id'::uuid;
+  where nome='Cenário A v2';
 
   if v_lock <= 1 then
     raise exception 'lock_version não avançou';
@@ -172,7 +172,7 @@ begin
   into v_sb_status,v_rev_status,v_origin,v_equal
   from public.produto_sandboxes s
   join public.produto_revisoes r on r.id=s.promovido_para_revisao_id
-  where s.id=:'sandbox_id'::uuid;
+  where s.nome='Cenário A v2';
 
   if v_sb_status <> 'PROMOVIDO' then
     raise exception 'sandbox não ficou PROMOVIDO';
@@ -198,7 +198,7 @@ begin
   begin
     update public.produto_sandboxes
     set descricao='tentativa indevida'
-    where id=:'sandbox_id'::uuid;
+    where nome='Cenário A v2';
   exception when others then
     if position('SANDBOX_TERMINAL_IMMUTABLE' in sqlerrm)>0 then
       v_failed:=true;
@@ -231,7 +231,7 @@ declare
 begin
   select status into v_status
   from public.produto_sandboxes
-  where id=:'sandbox2_id'::uuid;
+  where nome='Cenário B';
 
   if v_status <> 'ARQUIVADO' then
     raise exception 'sandbox não foi arquivado';
