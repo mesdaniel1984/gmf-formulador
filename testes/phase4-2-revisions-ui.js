@@ -12,7 +12,7 @@ function check(v,msg){
 }
 
 check(workspace.includes("script.src='gmf-revisions.js'"),'workspace carrega gmf-revisions.js');
-check(src.includes(".from('produto_revisoes').select("),'UI lê produto_revisoes');
+check(/\.from\(['"]produto_revisoes['"]\)\s*\.select\(/s.test(src),'UI lê produto_revisoes');
 check(src.includes(".from('app_user_roles').select("),'UI lê apenas os próprios papéis');
 check(src.includes(".from('perfis').select('readonly')"),'UI lê readonly do perfil');
 
@@ -32,9 +32,11 @@ const allowed=[
   'colocar_revisao_vigente'
 ];
 
-const rpcMatches=[...src.matchAll(/\.rpc\(['"]([^'"]+)['"]/g)].map(m=>m[1]);
+const rpcMatches=[...src.matchAll(/callRpc\(['"]([^'"]+)['"]/g)].map(m=>m[1]);
+check((src.match(/\.rpc\(/g)||[]).length===1,'UI possui um único ponto genérico de chamada RPC');
+check(/\.rpc\(name,args\|\|\{\}\)/.test(src),'wrapper RPC recebe somente nome e argumentos');
 check(rpcMatches.length>=7,'UI usa RPCs controladas');
-check(rpcMatches.every(x=>allowed.includes(x)),'UI só chama RPCs da allowlist');
+check(rpcMatches.every(x=>allowed.includes(x)),'UI só liga ações a RPCs da allowlist');
 for(const rpc of allowed)check(rpcMatches.includes(rpc),'RPC '+rpc+' está ligada à UI');
 
 check(src.includes("if(!state.productId||dirty())return"),'criação bloqueia produto sem origem ou com alteração local');
