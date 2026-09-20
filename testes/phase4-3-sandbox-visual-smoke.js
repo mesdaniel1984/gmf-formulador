@@ -37,6 +37,10 @@ const preview="<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n<meta charset=\"u
     let p=await open('rd',1440,900,'Sandbox P&D');
     check(await p.locator('#i2SbCreateForm').count()===1,'P&D vê formulário de criação');
     check(await p.getByText('Redução de ingrediente A',{exact:true}).count()===1,'P&D vê cenário existente');
+    await p.click('[data-sb-action="edit"][data-sb-id="sb-1"]');
+    await p.waitForTimeout(100);
+    check(await p.locator('[data-sb-qty]').count()===2,'editor P&D mostra quantidades dos ingredientes');
+    check((await p.locator('#i2SbFormulaTotal').textContent()).includes('1.000'),'editor P&D mostra total da fórmula 1000');
     await p.click('[data-sb-action="compare"][data-sb-id="sb-1"]');
     await p.waitForTimeout(100);
     check(await p.getByText('Comparação de snapshots',{exact:true}).count()===1,'P&D abre comparação');
