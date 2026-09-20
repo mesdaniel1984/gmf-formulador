@@ -109,3 +109,37 @@ Criação, alteração, promoção e arquivamento geram eventos em `audit_log` c
 - publicação automática;
 - alteração do produto oficial;
 - atribuição de papel.
+
+
+## Resultado da aplicação controlada em 20/09/2026
+
+A migration F4.3 foi aplicada no Supabase após CI isolado 100% verde.
+
+Estado após aplicação:
+
+- sandboxes permanentes: 0;
+- revisões controladas criadas pela aplicação: 0;
+- papéis reais preservados: 4;
+- RLS em `produto_sandboxes`: ativo;
+- `anon`: sem acesso à tabela e sem EXECUTE nas RPCs;
+- `authenticated`: somente SELECT condicionado por RLS;
+- mutações: somente pelas 4 RPCs allowlisted.
+
+Teste transacional no Supabase real:
+
+- P&D criou sandbox: OK;
+- P&D alterou sandbox com lock: OK;
+- Qualidade consultou sandbox: OK;
+- Qualidade não criou sandbox: OK;
+- equipe sem papel não visualizou sandbox: OK;
+- promoção para revisão RASCUNHO: OK;
+- origem `sandbox_promotion`: OK;
+- snapshot promovido idêntico: OK;
+- rollback final: OK;
+- registros de teste remanescentes: 0.
+
+Advisories:
+
+- as RPCs `SECURITY DEFINER` são intencionais, estão em allowlist, com `anon` bloqueado e `search_path` endurecido;
+- `audit_log` permanece sem policy frontend por desenho;
+- Leaked Password Protection continua como pendência separada de Auth.
