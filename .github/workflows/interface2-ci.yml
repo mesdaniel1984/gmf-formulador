@@ -24,6 +24,7 @@ jobs:
           node --check gmf-interface-2.js
           node --check gmf-workspace.js
           node --check gmf-revisions.js
+          node --check gmf-sandbox.js
           node --check sgq-workspace.js
           node --check gmf-auth.js
           node --check gmf-central.js
@@ -33,6 +34,8 @@ jobs:
         run: node testes/security-auth-ui.js
       - name: Interface de revisões controladas
         run: node testes/phase4-2-revisions-ui.js
+      - name: Interface Sandbox F4.3
+        run: node testes/phase4-3-sandbox-ui.js
 
   sgq-regression:
     name: Regressão SGQ
@@ -66,6 +69,8 @@ jobs:
           done
       - name: Smoke visual UI2
         run: node testes/interface2-visual-smoke.js
+      - name: Smoke visual Sandbox F4.3
+        run: node testes/phase4-3-sandbox-visual-smoke.js
       - name: Upload evidencias visuais
         if: always()
         uses: actions/upload-artifact@v4
