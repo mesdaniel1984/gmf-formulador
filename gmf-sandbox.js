@@ -114,7 +114,7 @@
       return;
     }
     if(Array.isArray(value)){
-      out[prefix||'(raiz)']='[array:'+value.length+']';
+      out[prefix||'(raiz)']=JSON.stringify(value);
       return;
     }
     Object.keys(value).sort().forEach(function(k){
