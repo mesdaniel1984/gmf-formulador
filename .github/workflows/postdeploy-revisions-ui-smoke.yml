@@ -1,0 +1,52 @@
+name: Post-deploy Revisions UI smoke
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  production-revisions-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar painel de revisões no GitHub Pages
+        env:
+          BASE: https://mesdaniel1984.github.io/gmf-formulador
+        run: |
+          set -euo pipefail
+
+          echo "Aguardando publicação..."
+          for i in $(seq 1 24); do
+            if curl -fsS --max-time 15 "$BASE/gmf-revisions.js" -o /tmp/revisions.js               && grep -Fq "Ciclo de vida controlado" /tmp/revisions.js; then
+              break
+            fi
+
+            if [ "$i" -eq 24 ]; then
+              echo "gmf-revisions.js não apareceu no Pages dentro da janela."
+              exit 1
+            fi
+            sleep 10
+          done
+
+          echo "Validando loader no workspace..."
+          curl -fsS --max-time 15 "$BASE/gmf-workspace.js" -o /tmp/workspace.js
+          grep -Fq "gmf-revisions.js" /tmp/workspace.js
+
+          echo "Validando regras da UI publicada..."
+          grep -Fq "app_user_roles" /tmp/revisions.js
+          grep -Fq "produto_revisoes" /tmp/revisions.js
+          grep -Fq "criar_revisao_produto" /tmp/revisions.js
+          grep -Fq "aprovar_revisao_produto" /tmp/revisions.js
+          grep -Fq "colocar_revisao_vigente" /tmp/revisions.js
+          grep -Fq "REVISION_CONFLICT" /tmp/revisions.js
+          grep -Fq "Papéis vêm do banco e não são inferidos pelo cargo." /tmp/revisions.js
+
+          echo "Validando Interface 2.0..."
+          curl -fsS --max-time 15 "$BASE/gmf_formulador_wizard.html" -o /tmp/gmf.html
+          grep -Fq "gmf-workspace.js" /tmp/gmf.html
+          curl -fsS --max-time 15 "$BASE/gmf-ui-app.css" -o /tmp/ui.css
+          grep -Fq "CONTROLLED REVISIONS UI 4.2" /tmp/ui.css
+
+          echo "PRODUCAO REVISIONS UI OK"
