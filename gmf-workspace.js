@@ -240,9 +240,19 @@
     document.body.appendChild(script);
   }
 
+  function loadSandboxModule(){
+    if(document.getElementById('i2SandboxScript'))return;
+    var script=document.createElement('script');
+    script.id='i2SandboxScript';
+    script.src='gmf-sandbox.js';
+    script.defer=true;
+    document.body.appendChild(script);
+  }
+
   function boot(){
     create();
     loadRevisionsModule();
+    loadSandboxModule();
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
