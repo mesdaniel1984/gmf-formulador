@@ -115,9 +115,7 @@ begin
   end if;
 
   if old.status in ('PROMOVIDO','ARQUIVADO') then
-    if new is distinct from old then
-      raise exception 'SANDBOX_TERMINAL_IMMUTABLE';
-    end if;
+    raise exception 'SANDBOX_TERMINAL_IMMUTABLE';
   end if;
 
   if old.status='ATIVO' and new.status in ('ATIVO','PROMOVIDO','ARQUIVADO') then
