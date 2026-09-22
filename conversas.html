@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Conversas do WhatsApp — SGQ MF Paris</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Lora:ital,wght@0,400;1,400&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ---------------------------------------------------------------------------
+   Conversas do WhatsApp — atendimento humano do SAC.
+
+   Por que esta tela existe: o número do SAC está na Cloud API e, por isso,
+   não funciona mais no aplicativo do WhatsApp. Quem escreve algo que não é
+   manifestação de consumidor (quer comprar, é representante, ligou errado)
+   não vira registro de qualidade — e não tem mais "zap" onde cair. Cai aqui.
+
+   Mesma paleta e mesmas fontes do resto do sistema.
+--------------------------------------------------------------------------- */
+:root{
+  --papel:#FFFFFF; --fundo:#F3F5F4;
+  --tinta:#16181A; --grafite:#5A6068; --risca:#DCDFE3; --campo:#F7F9F8;
+  --selo:#1B5E4A; --selo-fundo:#EAF3EF;
+  --realce:#B4541C; --realce-fundo:#FBF2E9;
+  --alerta:#9C3025; --alerta-fundo:#FBEEEC;
+  --balao-nosso:#EAF3EF; --balao-deles:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --papel:#15191B; --fundo:#0E1214;
+    --tinta:#E9ECEE; --grafite:#9AA2AA; --risca:#2B3136; --campo:#1B2025;
+    --selo:#6FC3A3; --selo-fundo:#16261F;
+    --realce:#E2925C; --realce-fundo:#2A2015;
+    --alerta:#E08478; --alerta-fundo:#2A1917;
+    --balao-nosso:#16261F; --balao-deles:#1B2025;
+  }
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; height:100%; }
+body{
+  background:var(--fundo); color:var(--tinta);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; min-height:100vh;
+}
+header{
+  background:var(--papel); border-bottom:1px solid var(--risca);
+  padding:calc(12px + env(safe-area-inset-top,0px)) 18px 12px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.marca{ font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+        color:var(--selo); }
+h1{ font-size:19px; font-weight:700; letter-spacing:-.01em; margin:0; }
+.topo-dir{ margin-left:auto; display:flex; align-items:center; gap:14px;
+           font-size:12.5px; color:var(--grafite); }
+.papel-selo{ font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+             background:var(--selo-fundo); color:var(--selo); border-radius:5px; padding:3px 8px; }
+.pisca{ width:7px; height:7px; border-radius:50%; background:var(--selo); display:inline-block; }
+
+main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
+@media (max-width:820px){
+  main{ grid-template-columns:1fr; }
+  .painel{ display:none; }
+  body.abriu .fila{ display:none; }
+  body.abriu .painel{ display:flex; }
+}
+.fila{ border-right:1px solid var(--risca); background:var(--papel);
+       overflow-y:auto; min-height:0; }
+.fila-topo{ padding:12px 16px; border-bottom:1px solid var(--risca);
+            font-size:11px; font-weight:700; letter-spacing:.1em;
+            text-transform:uppercase; color:var(--grafite);
+            display:flex; justify-content:space-between; align-items:center; }
+.aba{ background:none; border:none; font:inherit; color:var(--grafite); cursor:pointer;
+      padding:2px 6px; border-radius:5px; letter-spacing:.06em; }
+.aba[aria-pressed="true"]{ background:var(--selo-fundo); color:var(--selo); }
+.item{ width:100%; text-align:left; background:none; border:none; font:inherit;
+       color:inherit; cursor:pointer; padding:13px 16px;
+       border-bottom:1px solid var(--risca); display:block; }
+.item:hover{ background:var(--campo); }
+.item[aria-current="true"]{ background:var(--selo-fundo);
+                            box-shadow:inset 3px 0 0 var(--selo); }
+.item .quem{ font-weight:600; display:flex; align-items:baseline; gap:8px; }
+.item .fone{ font-size:12px; color:var(--grafite); font-weight:400; }
+.item .previa{ font-size:13px; color:var(--grafite); margin-top:3px;
+               overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.item .quando{ font-size:11.5px; color:var(--grafite); margin-top:4px; }
+.item .lapis{ font-size:11.5px; color:var(--realce); margin-top:3px; }
+.vazio{ padding:28px 18px; color:var(--grafite); font-family:Lora,Georgia,serif; }
+
+.painel{ display:flex; flex-direction:column; min-height:0; background:var(--fundo); }
+.painel-topo{ background:var(--papel); border-bottom:1px solid var(--risca);
+              padding:11px 18px; display:flex; align-items:center; gap:12px; }
+.voltar{ display:none; background:none; border:1px solid var(--risca); border-radius:6px;
+         font:inherit; color:var(--tinta); padding:4px 9px; cursor:pointer; }
+@media (max-width:820px){ .voltar{ display:inline-block; } }
+.painel-topo .nome{ font-weight:600; }
+.painel-topo .fone{ font-size:12.5px; color:var(--grafite); }
+.painel-acoes{ margin-left:auto; display:flex; gap:8px; }
+.btn{ font:inherit; font-size:13px; border-radius:7px; padding:6px 12px; cursor:pointer;
+      border:1px solid var(--risca); background:var(--papel); color:var(--tinta); }
+.btn:hover:not(:disabled){ background:var(--campo); }
+.btn-forte{ background:var(--selo); border-color:var(--selo); color:#fff; font-weight:600; }
+.btn-forte:hover:not(:disabled){ filter:brightness(1.08); }
+.btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+.conversa{ flex:1; overflow-y:auto; padding:18px; min-height:0;
+           display:flex; flex-direction:column; gap:9px; }
+.balao{ max-width:min(560px, 76%); padding:9px 13px; border-radius:11px;
+        border:1px solid var(--risca); white-space:pre-wrap; word-break:break-word; }
+.balao.deles{ background:var(--balao-deles); align-self:flex-start;
+              border-bottom-left-radius:3px; }
+.balao.nosso{ background:var(--balao-nosso); align-self:flex-end;
+              border-bottom-right-radius:3px; }
+.balao .hora{ display:block; font-size:11px; color:var(--grafite); margin-top:5px; }
+.balao .anexo{ font-style:italic; color:var(--grafite); }
+.dia{ align-self:center; font-size:11px; font-weight:600; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--grafite); margin:8px 0 2px; }
+.mais{ align-self:center; margin-bottom:6px; }
+
+.resposta{ background:var(--papel); border-top:1px solid var(--risca); padding:12px 18px
+           calc(12px + env(safe-area-inset-bottom,0px)); }
+.resposta textarea{ width:100%; min-height:62px; max-height:190px; resize:vertical;
+  font:inherit; color:var(--tinta); background:var(--campo);
+  border:1px solid var(--risca); border-radius:8px; padding:10px 12px; }
+.resposta textarea:focus{ outline:2px solid var(--selo); outline-offset:-1px; }
+.resposta textarea:disabled{ opacity:.6; }
+.resposta-baixo{ display:flex; align-items:center; gap:12px; margin-top:9px; }
+.dica{ font-size:12px; color:var(--grafite); }
+.janela{ background:var(--realce-fundo); border:1px solid var(--realce);
+         border-radius:8px; padding:11px 13px; font-size:13px; color:var(--tinta);
+         margin-bottom:9px; }
+.janela b{ color:var(--realce); }
+.recado{ margin:9px 0 0; padding:10px 14px; font-size:13px; border-radius:8px; }
+.recado.erro{ background:var(--alerta-fundo); border:1px solid var(--alerta); }
+.recado.ok{ background:var(--selo-fundo); border:1px solid var(--selo); }
+
+.portao{ max-width:480px; margin:64px auto; background:var(--papel);
+         border:1px solid var(--risca); border-radius:10px; padding:26px 24px; }
+.portao h2{ margin:0 0 10px; font-size:19px; }
+.portao p{ font-family:Lora,Georgia,serif; color:var(--grafite); margin:0 0 16px; }
+a{ color:var(--selo); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="marca">SGQ · Grupo MF Paris</div>
+    <h1>Conversas do WhatsApp</h1>
+  </div>
+  <div class="topo-dir">
+    <span id="quem"></span>
+    <span class="papel-selo" id="papelSelo" hidden></span>
+    <span><span class="pisca" id="pisca"></span> <span id="atualizado">—</span></span>
+  </div>
+</header>
+
+<main id="tela" hidden>
+  <section class="fila" aria-label="Fila de atendimento">
+    <div class="fila-topo">
+      <span id="contador">carregando…</span>
+      <span>
+        <button class="aba" id="abaAberto"    aria-pressed="true">Abertos</button>
+        <button class="aba" id="abaResolvido" aria-pressed="false">Resolvidos</button>
+      </span>
+    </div>
+    <div id="lista"></div>
+  </section>
+
+  <section class="painel" aria-label="Conversa">
+    <div class="painel-topo">
+      <button class="voltar" id="voltar">← Fila</button>
+      <div>
+        <div class="nome" id="pNome">—</div>
+        <div class="fone" id="pFone"></div>
+      </div>
+      <div class="painel-acoes">
+        <button class="btn" id="btnResolver" disabled>Marcar como resolvido</button>
+      </div>
+    </div>
+
+    <div class="conversa" id="conversa">
+      <p class="vazio">Escolha uma conversa na lista ao lado.</p>
+    </div>
+
+    <div class="resposta" id="caixaResposta" hidden>
+      <div id="avisoJanela"></div>
+      <textarea id="texto" placeholder="Escreva a resposta…" maxlength="4000"></textarea>
+      <div class="resposta-baixo">
+        <button class="btn btn-forte" id="btnEnviar">Enviar pelo WhatsApp</button>
+        <span class="dica" id="dica"></span>
+      </div>
+      <p class="recado erro" id="erro" hidden></p>
+    </div>
+  </section>
+</main>
+
+<div class="portao" id="portao" hidden>
+  <h2 id="portaoTitulo">Entre no sistema primeiro</h2>
+  <p id="portaoTexto">Esta tela usa o mesmo login do sistema de qualidade. Abra o
+     sistema, entre com seu e-mail e senha, e volte para cá.</p>
+  <p><a href="sistema_qualidade_online.html">Abrir o sistema de qualidade →</a></p>
+</div>
+
+<script>
+'use strict';
+/* ---------------------------------------------------------------------------
+   Como esta tela conversa com o resto:
+
+   LER   -> direto do Supabase, com a sessão de quem está logado no SGQ. As
+            tabelas wa_atendimento e wa_mensagem só abrem para quem está em
+            sac_perfil: login válido não é autorização.
+   ESCREVER (mensagem) -> nunca direto na Meta. Vai para o servidor do SAC,
+            que é quem tem o token do WhatsApp e quem confere o perfil de
+            novo, do lado dele. Token dentro de navegador é token publicado.
+
+   O que esta tela NÃO faz de propósito:
+   - não confia no próprio julgamento sobre permissão (só usa para habilitar
+     botão; quem decide é o banco e a rota);
+   - não grava mensagem no histórico (só o servidor grava, e só o que saiu).
+--------------------------------------------------------------------------- */
+
+const CFG_KEY    = 'sqmparis_supabase';       // mesma chave do SGQ
+const SAC_KEY    = 'sqmparis_sac_servidor';   // permite trocar sem editar o arquivo
+const SAC_PADRAO = 'https://sac-whatsapp-mfparis-production.up.railway.app';
+const PAGINA     = 40;                        // mensagens por carga
+const INTERVALO  = 20000;
+
+function cfg(){
+  try{ const c = JSON.parse(localStorage.getItem(CFG_KEY)); if(c && c.url && c.key) return c; }catch(e){}
+  return { url:'https://ailzblgrxtdakpkchstl.supabase.co',
+           key:'sb_publishable_WLhtMnPB4ZF0CFMvKthjCQ_xLjalDz4' };
+}
+function servidorSac(){
+  try{ return localStorage.getItem(SAC_KEY) || SAC_PADRAO; }catch(e){ return SAC_PADRAO; }
+}
+
+const c  = cfg();
+const sb = supabase.createClient(c.url, c.key);
+const $  = id => document.getElementById(id);
+
+/* ---------------------------------------------------------------------------
+   Estado. Um objeto só, para que "encerrar" seja uma coisa e não cinco.
+
+   `seq` é o número da consulta em curso. Toda resposta do banco carrega o
+   número da consulta que a pediu; se o número mudou no meio do caminho --
+   porque a pessoa trocou de conversa ou saiu --, a resposta é descartada.
+   Sem isso, a resposta lenta de uma conversa antiga chega depois e pinta a
+   tela da conversa nova com o conteúdo errado.
+--------------------------------------------------------------------------- */
+const est = {
+  sessao:null, email:null, papel:null, podeResponder:false,
+  aberta:null,              // telefone da conversa aberta
+  situacaoAba:'ABERTO',
+  rascunhos:new Map(),      // telefone -> texto ainda não enviado
+  seq:0,
+  enviando:false,
+  relogio:null,
+  encerrada:false,
+  maisAntiga:null,          // criado_em da mensagem mais antiga já carregada
+  temAnteriores:false,
+  ultimaEntrada:null        // criado_em da última mensagem RECEBIDA (janela 24h)
+};
+
+/* ------------------------------------------------------------- formatação */
+function fone(t){
+  const n = String(t || '').replace(/\D/g,'');
+  const m = n.match(/^55(\d{2})(\d{4,5})(\d{4})$/);
+  return m ? '(' + m[1] + ') ' + m[2] + '-' + m[3] : (t || '');
+}
+function hora(iso){
+  return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function dia(iso){
+  const d = new Date(iso), hoje = new Date();
+  const mesmo = (a,b) => a.toDateString() === b.toDateString();
+  if(mesmo(d,hoje)) return 'Hoje';
+  const ontem = new Date(hoje); ontem.setDate(hoje.getDate()-1);
+  if(mesmo(d,ontem)) return 'Ontem';
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long'});
+}
+function faz(iso){
+  const min = Math.round((Date.now() - new Date(iso)) / 60000);
+  if(min < 1)  return 'agora';
+  if(min < 60) return 'há ' + min + ' min';
+  const h = Math.round(min/60);
+  if(h < 24)   return 'há ' + h + ' h';
+  return 'há ' + Math.round(h/24) + ' dias';
+}
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function chaveEnvio(){
+  try{ if(crypto && crypto.randomUUID) return crypto.randomUUID().replace(/-/g,''); }catch(e){}
+  return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2,12);
+}
+
+/* ---------------------------------------------------------------------------
+   Sessão e perfil
+--------------------------------------------------------------------------- */
+function mostrarPortao(titulo, texto){
+  $('tela').hidden = true;
+  $('portao').hidden = false;
+  $('portaoTitulo').textContent = titulo;
+  $('portaoTexto').textContent  = texto;
+}
+
+async function entrar(){
+  const { data } = await sb.auth.getSession();
+  est.sessao = (data && data.session) || null;
+  if(!est.sessao){
+    mostrarPortao('Entre no sistema primeiro',
+      'Esta tela usa o mesmo login do sistema de qualidade. Abra o sistema, entre com seu e-mail e senha, e volte para cá.');
+    return false;
+  }
+  est.email = (est.sessao.user && est.sessao.user.email) || '';
+  $('quem').textContent = est.email;
+
+  // Quem sou eu no SAC. Pergunta ao servidor porque é ele quem decide.
+  try{
+    const r = await fetch(servidorSac() + '/atendimento/eu', {
+      headers:{ Authorization:'Bearer ' + est.sessao.access_token } });
+    if(r.status === 401){ return await encerrar('sessao'); }
+    const corpo = await r.json();
+    est.papel = corpo.papel;
+    est.podeResponder = !!corpo.podeResponder;
+  }catch(err){
+    // Servidor fora do ar não deve virar "você não tem permissão". A leitura
+    // ainda funciona (o banco decide), só o envio fica bloqueado.
+    est.papel = null; est.podeResponder = false;
+  }
+
+  if(!est.papel){
+    // Pode ser falta de perfil OU servidor inacessível. O banco desempata:
+    // se a leitura também for negada, é falta de perfil.
+    const { error } = await sb.from('wa_atendimento').select('telefone').limit(1);
+    if(error){
+      mostrarPortao('Seu usuário não tem acesso ao SAC',
+        'Entrar no sistema de qualidade não dá acesso às conversas do SAC. '
+        + 'Peça para a Qualidade cadastrar seu usuário no perfil do SAC.');
+      return false;
+    }
+  }
+
+  if(est.papel){
+    $('papelSelo').hidden = false;
+    $('papelSelo').textContent = est.papel;
+  }
+  $('tela').hidden = false;
+  return true;
+}
+
+/* Sair, ou sessão expirada: apaga o que está na tela, para o relógio e
+   trava as ações. Deixar a fila na tela depois do logout seria vazar
+   conversa de consumidor para quem estiver na frente do computador. */
+async function encerrar(motivo){
+  if(est.encerrada) return false;
+  est.encerrada = true;
+  est.seq++;                       // invalida qualquer consulta em voo
+  if(est.relogio){ clearInterval(est.relogio); est.relogio = null; }
+
+  est.sessao = null; est.papel = null; est.podeResponder = false;
+  est.aberta = null; est.rascunhos.clear(); est.enviando = false;
+  est.ultimaEntrada = null; est.maisAntiga = null;
+
+  $('lista').innerHTML = '';
+  $('conversa').innerHTML = '';
+  $('texto').value = '';
+  $('contador').textContent = '';
+  $('quem').textContent = '';
+  $('papelSelo').hidden = true;
+  $('atualizado').textContent = '—';
+  $('caixaResposta').hidden = true;
+  $('btnEnviar').disabled = true;
+  $('btnResolver').disabled = true;
+  $('texto').disabled = true;
+  document.body.classList.remove('abriu');
+
+  mostrarPortao(
+    motivo === 'saiu' ? 'Você saiu do sistema' : 'Sua sessão expirou',
+    'Por segurança, as conversas foram retiradas da tela. Entre de novo no '
+    + 'sistema de qualidade para continuar.');
+  return false;
+}
+
+/* ---------------------------------------------------------------------------
+   Botões — um lugar só decide o que fica habilitado.
+   A atualização automática chama isto; por isso ela não pode reabilitar o
+   botão no meio de um envio: `est.enviando` manda mais que tudo.
+--------------------------------------------------------------------------- */
+function atualizarBotoes(){
+  const temConversa = !!est.aberta;
+  const janelaAberta = !!est.ultimaEntrada &&
+                       (Date.now() - new Date(est.ultimaEntrada)) < 24*3600*1000;
+
+  $('btnEnviar').disabled = est.enviando || est.encerrada || !temConversa
+                            || !est.podeResponder || !janelaAberta
+                            || !$('texto').value.trim();
+  $('texto').disabled = est.enviando || est.encerrada || !temConversa
+                        || !est.podeResponder || !janelaAberta;
+  $('btnEnviar').textContent = est.enviando ? 'Enviando…' : 'Enviar pelo WhatsApp';
+}
+
+/* ---------------------------------------------------------------------------
+   Fila
+--------------------------------------------------------------------------- */
+async function carregarFila(){
+  const minha = est.seq;
+  const { data, error } = await sb.from('wa_atendimento')
+    .select('telefone, nome, motivo, situacao, resumo, aberto_em, atualizado_em, resolvido_em, resolvido_por')
+    .eq('situacao', est.situacaoAba)
+    .order('aberto_em', { ascending: est.situacaoAba === 'ABERTO' })
+    .limit(200);
+
+  if(minha !== est.seq || est.encerrada) return;      // consulta velha: descarta
+
+  const lista = $('lista');
+  if(error){
+    lista.innerHTML = '<p class="vazio">Não consegui ler a fila: ' + esc(error.message) + '</p>';
+    return;
+  }
+
+  $('contador').textContent = data.length
+    ? data.length + (est.situacaoAba === 'ABERTO' ? ' aguardando' : ' resolvidos')
+    : (est.situacaoAba === 'ABERTO' ? 'Nada aguardando' : 'Nenhum resolvido');
+
+  if(!data.length){
+    lista.innerHTML = '<p class="vazio">' + (est.situacaoAba === 'ABERTO'
+      ? 'Ninguém na fila. Tudo que chegou virou manifestação e foi para o SAC.'
+      : 'Ainda não há conversas resolvidas.') + '</p>';
+    return;
+  }
+
+  lista.innerHTML = '';
+  for(const a of data){
+    const rascunho = est.rascunhos.get(a.telefone);
+    const b = document.createElement('button');
+    b.className = 'item';
+    b.type = 'button';
+    b.dataset.telefone = a.telefone;
+    if(est.aberta === a.telefone) b.setAttribute('aria-current','true');
+    b.innerHTML =
+      '<span class="quem">' + esc(a.nome || 'Sem nome') +
+        '<span class="fone">' + fone(a.telefone) + '</span></span>' +
+      '<span class="previa">' + esc(a.resumo || '—') + '</span>' +
+      '<span class="quando">' + faz(a.atualizado_em) + '</span>' +
+      (rascunho ? '<span class="lapis">rascunho não enviado</span>' : '');
+    b.onclick = () => abrir(a);
+    lista.appendChild(b);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Abrir conversa — guardando o rascunho da anterior
+--------------------------------------------------------------------------- */
+function guardarRascunho(){
+  if(!est.aberta) return;
+  const t = $('texto').value;
+  if(t && t.trim()) est.rascunhos.set(est.aberta, t);
+  else              est.rascunhos.delete(est.aberta);
+}
+
+async function abrir(a){
+  if(est.enviando){
+    recado('Espere o envio terminar antes de trocar de conversa.');
+    return;
+  }
+  guardarRascunho();
+
+  est.seq++;                      // tudo que estava em voo deixa de valer
+  est.aberta = a.telefone;
+  est.maisAntiga = null;
+  est.temAnteriores = false;
+  est.ultimaEntrada = null;
+
+  document.body.classList.add('abriu');
+  $('pNome').textContent = a.nome || 'Sem nome';
+  $('pFone').textContent = fone(a.telefone) + ' · ' +
+                           (a.motivo === 'PEDIU_HUMANO' ? 'pediu para falar com alguém'
+                                                        : 'não é manifestação de SAC');
+  $('texto').value = est.rascunhos.get(a.telefone) || '';
+  $('erro').hidden = true;
+  $('caixaResposta').hidden = false;
+
+  mostrarResolver(a);
+  await carregarConversa();
+  atualizarBotoes();
+  carregarFila();
+}
+
+function mostrarResolver(a){
+  const aberto = a.situacao === 'ABERTO';
+  $('btnResolver').disabled = !aberto || !est.podeResponder || est.enviando || est.encerrada;
+  $('btnResolver').textContent = aberto
+    ? 'Marcar como resolvido'
+    : 'Resolvido' + (a.resolvido_por ? ' por ' + a.resolvido_por : '');
+}
+
+/* ---------------------------------------------------------------------------
+   Conversa — carrega as MAIS RECENTES; as anteriores vêm sob demanda.
+
+   A janela de 24 horas é medida pela última mensagem RECEBIDA, buscada à
+   parte. Se dependesse do que está carregado na tela, bastaria a conversa
+   ser longa para o cálculo mudar de acordo com a rolagem.
+--------------------------------------------------------------------------- */
+async function ultimaEntradaDoBanco(telefone){
+  const { data, error } = await sb.from('wa_mensagem')
+    .select('criado_em').eq('telefone', telefone).eq('direcao','ENTRADA')
+    .order('criado_em', { ascending:false }).limit(1);
+  if(error) return null;
+  return (data && data[0]) ? data[0].criado_em : null;
+}
+
+async function carregarConversa(anteriores){
+  const minha = est.seq;
+  const telefone = est.aberta;
+  if(!telefone) return;
+
+  let q = sb.from('wa_mensagem')
+    .select('direcao, tipo, texto, criado_em, protocolo')
+    .eq('telefone', telefone)
+    .order('criado_em', { ascending:false })
+    .limit(PAGINA + 1);
+  if(anteriores && est.maisAntiga) q = q.lt('criado_em', est.maisAntiga);
+
+  const [{ data, error }, ultima] = await Promise.all([ q, ultimaEntradaDoBanco(telefone) ]);
+
+  if(minha !== est.seq || est.encerrada || est.aberta !== telefone) return;  // descarta
+
+  if(error){
+    $('conversa').innerHTML = '<p class="vazio">Não consegui ler a conversa: '
+                              + esc(error.message) + '</p>';
+    return;
+  }
+
+  est.ultimaEntrada = ultima;
+  const veio = data.slice(0, PAGINA).reverse();       // do mais antigo ao mais novo
+  est.temAnteriores = data.length > PAGINA;
+  if(veio.length) est.maisAntiga = veio[0].criado_em;
+
+  if(anteriores) desenharAntes(veio);
+  else           desenhar(veio);
+
+  avisarJanela();
+  atualizarBotoes();
+}
+
+function baloes(mensagens, ultimoDiaInicial){
+  const pedaco = document.createDocumentFragment();
+  let ultimoDia = ultimoDiaInicial || '';
+  for(const m of mensagens){
+    const d = dia(m.criado_em);
+    if(d !== ultimoDia){
+      const sep = document.createElement('div');
+      sep.className = 'dia'; sep.textContent = d;
+      pedaco.appendChild(sep); ultimoDia = d;
+    }
+    const b = document.createElement('div');
+    b.className = 'balao ' + (m.direcao === 'ENTRADA' ? 'deles' : 'nosso');
+    const corpo = m.tipo === 'imagem' ? '<span class="anexo">[foto enviada pelo consumidor]</span>'
+                : m.tipo === 'outro'  ? '<span class="anexo">[áudio, vídeo ou anexo não suportado]</span>'
+                : esc(m.texto || '');
+    b.innerHTML = corpo + '<span class="hora">' + hora(m.criado_em) +
+                  (m.protocolo ? ' · ' + esc(m.protocolo) : '') + '</span>';
+    pedaco.appendChild(b);
+  }
+  return pedaco;
+}
+
+function botaoAnteriores(){
+  if(!est.temAnteriores) return null;
+  const b = document.createElement('button');
+  b.className = 'btn mais'; b.type = 'button'; b.id = 'btnAnteriores';
+  b.textContent = 'Ver mensagens anteriores';
+  b.onclick = async () => { b.disabled = true; await carregarConversa(true); };
+  return b;
+}
+
+function desenhar(mensagens){
+  const alvo = $('conversa');
+  alvo.innerHTML = '';
+  const b = botaoAnteriores();
+  if(b) alvo.appendChild(b);
+  alvo.appendChild(baloes(mensagens));
+  alvo.scrollTop = alvo.scrollHeight;
+}
+
+function desenharAntes(mensagens){
+  const alvo = $('conversa');
+  const alturaAntes = alvo.scrollHeight;
+  const antigo = $('btnAnteriores');
+  if(antigo) antigo.remove();
+  const pedaco = baloes(mensagens);
+  alvo.insertBefore(pedaco, alvo.firstChild);
+  const b = botaoAnteriores();
+  if(b) alvo.insertBefore(b, alvo.firstChild);
+  // Mantém a leitura no mesmo ponto em vez de pular para o topo.
+  alvo.scrollTop = alvo.scrollHeight - alturaAntes;
+}
+
+function avisarJanela(){
+  const caixa = $('avisoJanela');
+  if(!est.podeResponder){
+    caixa.innerHTML = '<div class="janela"><b>Somente leitura.</b> Seu perfil no SAC '
+      + 'não permite responder. Quem responde é quem tem perfil de atendente.</div>';
+    return;
+  }
+  if(!est.ultimaEntrada){
+    caixa.innerHTML = '<div class="janela"><b>Sem mensagem do consumidor.</b> Não dá '
+      + 'para iniciar conversa por aqui — o WhatsApp só permite responder a quem escreveu.</div>';
+    return;
+  }
+  const horas = (Date.now() - new Date(est.ultimaEntrada)) / 3600000;
+  if(horas >= 24){
+    caixa.innerHTML = '<div class="janela"><b>Janela de 24 horas fechada.</b> A última '
+      + 'mensagem desta pessoa foi ' + faz(est.ultimaEntrada) + '. O WhatsApp não deixa '
+      + 'mais responder por texto livre; é preciso ligar ou usar outro canal.</div>';
+    $('dica').textContent = '';
+  } else {
+    caixa.innerHTML = '';
+    const restam = Math.floor(24 - horas);
+    $('dica').textContent = restam >= 1
+      ? 'Restam cerca de ' + restam + ' h para responder.'
+      : 'Menos de 1 h para responder.';
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Enviar
+--------------------------------------------------------------------------- */
+function recado(msg){
+  $('erro').textContent = msg;
+  $('erro').hidden = false;
+}
+
+async function enviar(){
+  if(est.enviando || est.encerrada) return;          // trava contra clique duplo
+  const destino = est.aberta;                        // fixa o destinatário AGORA
+  const texto = $('texto').value.trim();
+  if(!destino || !texto || !est.podeResponder) return;
+
+  est.enviando = true;
+  atualizarBotoes();
+  $('erro').hidden = true;
+
+  const chave = chaveEnvio();                        // a mesma em qualquer retentativa
+
+  try{
+    const { data } = await sb.auth.getSession();
+    const token = data && data.session && data.session.access_token;
+    if(!token) return await encerrar('sessao');
+
+    const r = await fetch(servidorSac() + '/atendimento/responder', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
+      body: JSON.stringify({ telefone: destino, texto, chave })
+    });
+
+    if(r.status === 401) return await encerrar('sessao');
+    const corpo = await r.json().catch(() => ({}));
+
+    if(r.status === 409){
+      // O servidor já tinha esta chave: a mensagem saiu, a resposta é que se
+      // perdeu. Tratar como sucesso evita mandar de novo.
+      est.rascunhos.delete(destino);
+      if(est.aberta === destino) $('texto').value = '';
+    } else if(!r.ok){
+      throw new Error(corpo.erro || ('o servidor respondeu ' + r.status));
+    } else {
+      est.rascunhos.delete(destino);
+      if(est.aberta === destino) $('texto').value = '';
+    }
+
+    // Só repinta se a pessoa ainda estiver na mesma conversa.
+    if(est.aberta === destino) await carregarConversa();
+    carregarFila();
+  }catch(err){
+    recado('Não enviei: ' + err.message + ' O texto continua aqui.');
+    est.rascunhos.set(destino, texto);
+  }finally{
+    est.enviando = false;
+    atualizarBotoes();
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Resolver — só mostra "Resolvido" depois que o banco confirmar a linha certa
+--------------------------------------------------------------------------- */
+async function resolver(){
+  if(!est.aberta || est.enviando || est.encerrada) return;
+  const destino = est.aberta;
+  $('btnResolver').disabled = true;
+  $('erro').hidden = true;
+
+  // Autoria e horário NÃO vão daqui: o gatilho do banco carimba. Mandamos só
+  // a situação, e pedimos a linha de volta para conferir.
+  const { data, error } = await sb.from('wa_atendimento')
+    .update({ situacao:'RESOLVIDO' })
+    .eq('telefone', destino)
+    .eq('situacao', 'ABERTO')
+    .select('telefone, situacao, resolvido_em, resolvido_por');
+
+  if(error){
+    recado('Não consegui marcar como resolvido: ' + error.message);
+    $('btnResolver').disabled = false;
+    return;
+  }
+  if(!data || !data.length){
+    // Zero linhas: ou outra pessoa resolveu antes, ou seu perfil não permite.
+    recado('Nada foi alterado. Ou alguém já resolveu esta conversa, ou seu '
+         + 'perfil não permite resolver. A fila foi recarregada.');
+    await carregarFila();
+    $('btnResolver').disabled = false;
+    return;
+  }
+  const linha = data[0];
+  if(linha.telefone !== destino || linha.situacao !== 'RESOLVIDO'){
+    recado('O banco devolveu um resultado inesperado. Não mudei a tela.');
+    $('btnResolver').disabled = false;
+    return;
+  }
+
+  if(est.aberta === destino){
+    $('btnResolver').textContent = 'Resolvido por ' + (linha.resolvido_por || '—')
+                                 + ' · ' + hora(linha.resolvido_em);
+    $('btnResolver').disabled = true;
+  }
+  carregarFila();
+}
+
+/* ---------------------------------------------------------------------------
+   Ciclo
+--------------------------------------------------------------------------- */
+function marcarHora(){
+  $('atualizado').textContent = 'atualizado ' +
+    new Date().toLocaleTimeString('pt-BR',{ hour:'2-digit', minute:'2-digit' });
+}
+
+async function tique(){
+  if(est.encerrada) return;
+  if(est.enviando) return;      // não mexe na tela no meio de um envio
+  await carregarFila();
+  if(est.aberta) await carregarConversa();
+  atualizarBotoes();
+  marcarHora();
+}
+
+function trocarAba(s){
+  est.situacaoAba = s;
+  est.seq++;
+  $('abaAberto').setAttribute('aria-pressed', String(s === 'ABERTO'));
+  $('abaResolvido').setAttribute('aria-pressed', String(s === 'RESOLVIDO'));
+  carregarFila();
+}
+
+$('btnEnviar').onclick   = enviar;
+$('btnResolver').onclick = resolver;
+$('voltar').onclick = () => { guardarRascunho(); document.body.classList.remove('abriu'); };
+$('abaAberto').onclick    = () => trocarAba('ABERTO');
+$('abaResolvido').onclick = () => trocarAba('RESOLVIDO');
+$('texto').addEventListener('input', () => { guardarRascunho(); atualizarBotoes(); });
+$('texto').addEventListener('keydown', e => {
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){
+    e.preventDefault();
+    if(!est.enviando) enviar();          // teclado usa a mesma trava do botão
+  }
+});
+window.addEventListener('beforeunload', guardarRascunho);
+
+// Sessão que cai em outra aba tem de derrubar esta também.
+sb.auth.onAuthStateChange((evento, sessao) => {
+  if(est.encerrada) return;
+  if(evento === 'SIGNED_OUT' || !sessao) encerrar(evento === 'SIGNED_OUT' ? 'saiu' : 'sessao');
+});
+
+(async function(){
+  if(!(await entrar())) return;
+  await tique();
+  est.relogio = setInterval(tique, INTERVALO);
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible') tique();
+  });
+})();
+</script>
+</body>
+</html>
