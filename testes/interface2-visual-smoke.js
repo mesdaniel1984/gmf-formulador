@@ -13,6 +13,11 @@ const path=require('path');
   const browser=await chromium.launch({headless:true});
   let fail=0,pass=0;
   function check(v,msg){console.log((v?'  ok    ':'  FALHA ')+msg);v?pass++:fail++;}
+  async function checkDestinations(p,label){
+    const expected=['https://mesdaniel1984.github.io/painel-pd/','gmf_formulador_wizard.html','sistema_qualidade_online.html','https://qualidade-alimentos-production.up.railway.app/'].sort();
+    const actual=await p.locator('.gmf-module').evaluateAll(els=>els.map(el=>el.getAttribute('href')).sort());
+    check(JSON.stringify(actual)===JSON.stringify(expected),label+' preserva os quatro destinos');
+  }
   async function pageCheck(path,width,height,label){
     const p=await browser.newPage({viewport:{width,height}});
     const errors=[];
@@ -28,16 +33,16 @@ const path=require('path');
     await new Promise(r=>setTimeout(r,700));
 
     let p=await pageCheck('index.html',1440,900,'Central desktop');
-    check(await p.locator('.gmf-module').count()===3,'Central mostra os tres sistemas');
+    await checkDestinations(p,'Central desktop');
     await p.screenshot({path:path.join(shots,'01-central-desktop.png'),fullPage:true});
     await p.fill('#gmfCentralSearch','qualidade');
     await p.waitForTimeout(100);
     const vis=await p.locator('.gmf-module:not([hidden])').count();
-    check(vis>=1&&vis<3,'busca da Central filtra modulos');
+    check(vis>=1&&vis<4,'busca da Central filtra modulos');
     await p.close();
 
     p=await pageCheck('index.html',390,844,'Central mobile');
-    check(await p.locator('.gmf-module').count()===3,'Central mobile preserva destinos');
+    await checkDestinations(p,'Central mobile');
     await p.screenshot({path:path.join(shots,'02-central-mobile.png'),fullPage:true});
     await p.close();
 
