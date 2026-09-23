@@ -28,7 +28,7 @@ function boot(){
   const cells=row.querySelectorAll('td');if(!cells.length||row.dataset.referenceShown)return;
   row.dataset.referenceShown='1';
   const name=(cells[0].firstChild?.textContent||cells[0].textContent).trim();
-  const item=typeof DB!=='undefined'?DB.find(d=>d.n===name):null;
+  const item=typeof DB!=='undefined'?DB.find(d=>d.n===name && (!cells[11] || String(d.ref||'—')===cells[11].textContent.trim())):null;
   const note=document.createElement('div');note.style.cssText='font-weight:normal;font-size:11px;white-space:normal;overflow-wrap:anywhere;margin-top:6px';
   const ref=item&&item.referencia;
   if(ref){
