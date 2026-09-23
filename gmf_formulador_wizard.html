@@ -1212,6 +1212,12 @@ async function salvarIngrediente() {
   if (!_currentUser) { alert('Faça login para salvar ingredientes.'); return; }
   const nome = document.getElementById('ing_nome')?.value?.trim();
   if (!nome) { alert('Nome do ingrediente é obrigatório.'); return; }
+  const nomePublico = document.getElementById('ing_rotulo');
+  if (!nomePublico?.value?.trim()) {
+    alert('Informe a denominação pública do ingrediente, sem marca ou código do fornecedor.');
+    nomePublico?.focus();
+    return;
+  }
   const ing = {
     n: nome,
     ref: document.getElementById('ing_ref')?.value?.trim()||'',
@@ -2622,6 +2628,7 @@ function _nomeExibicao(d) {
     'Composto lácteo LM267':'Composto lácteo com gordura vegetal',
     'Mistura Láctea Select 25Kg':'Mistura láctea',
     'Maltodextrina (Manimalto 20)':'Maltodextrina',
+    'WPC34':'Concentrado proteico de soro de leite',
     'CMC 2604A':'Estabilizante carboximetilcelulose',
     'Premix de Nutrientes SMV8150 (Sweetmix)':'Mix de vitaminas e minerais',
     'Polidextrose — Fibra Solúvel (ADC 1119/1097)':'Polidextrose',
@@ -2641,7 +2648,7 @@ function _textoIngredientesPublico(texto) {
   const replacements = [];
   const entries = typeof DB!=='undefined' ? DB : [];
   entries.forEach(d=>{
-    if(!d.n || !/LM\s*267|Select|Manimalto|2604A|SMV8150|Sweetmix|ADC |Ninho|Provincia|Moça|Mesa|Purelac|Alibra|Oila|ALIMENTA|Ramolac|Supreme|Tangará/i.test(d.n))return;
+    if(!d.n || !/LM\s*267|Select|Manimalto|2604A|SMV8150|Sweetmix|ADC |Ninho|Provincia|Moça|Mesa|Purelac|Alibra|Oila|ALIMENTA|Ramolac|Supreme|Tangará|WPC34|gold/i.test(d.n))return;
     const publicName=_nomeExibicao(d);
     if(publicName && publicName.toLocaleLowerCase('pt-BR')!==d.n.toLocaleLowerCase('pt-BR'))
       replacements.push([d.n,publicName]);
@@ -4015,7 +4022,7 @@ _initAuth().then(async()=>{ if (!_currentUser) return; try { await _sincronizarS
       <p style="font-size:13px;color:#6b7280;margin-bottom:20px">Adicione novos ingredientes ao banco. Após salvar ficam disponíveis para todos na tela de Receita.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
         <div class="field" style="grid-column:1/3"><label>Nome do ingrediente *</label><input id="ing_nome" type="text" placeholder="Ex: Leite em Pó Integral"></div>
-        <div class="field"><label>Rótulo (nome na FTP)</label><input id="ing_rotulo" type="text" placeholder="Ex: leite em pó integral"></div>
+        <div class="field"><label>Denominação pública na ficha *</label><input id="ing_rotulo" type="text" required aria-describedby="ing_rotulo_ajuda" placeholder="Ex: composto lácteo"><small id="ing_rotulo_ajuda">Obrigatório. Use o nome genérico, sem marca ou código do fornecedor. Mantenha a identificação do fornecedor nos campos internos.</small></div>
         <div class="field"><label>Fornecedor / Referência</label><input id="ing_ref" type="text" placeholder="Ex: Horizonte (FT 2024)"></div>
         <div class="field"><label>Fonte</label><select id="ing_src"><option value="FT">Ficha Técnica (FT)</option><option value="Usuário">Usuário</option><option value="TACO">TACO</option><option value="IBGE">IBGE</option></select></div>
         <div class="field"><label>Rótulo completo (subingredientes)</label><input id="ing_rotuloCompleto" type="text" placeholder="Ex: leite em pó (ingrediente A, B)"></div>
