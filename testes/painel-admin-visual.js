@@ -16,6 +16,9 @@ const fixture={consultado_em:'2026-09-23T12:00:00Z',fontes:{ncs:{registros:[{num
   await page.locator('#painel').waitFor({state:'visible'});
   assert.equal(await page.locator('.metric').count(),6);
   assert.equal(await page.locator('.analysis-kpi').count(),4);
+  assert.equal(await page.locator('.analysis-alert[data-tone="danger"] strong').innerText(),'1');
+  assert.match(await page.locator('.analysis-state').innerText(),/Prazo vencido/);
+  await page.locator('#volumes summary').click();
   await page.locator('.analysis-kpi').first().click();
   assert.equal(await page.locator('#analise-registros .record').count(),2);
   await page.locator('#fechar-analise').click();

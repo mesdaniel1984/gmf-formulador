@@ -40,6 +40,14 @@
       futureDate:rows.filter(r=>day(r.data)>today).length,unknownStatus:rows.filter(r=>state(r)==='unknown').length,
       unknownAge:open.length-ages.length,withoutDue:open.length-withDue.length,rows};
   }
+  function signal(m){
+    if(!m.available)return {tone:'muted',label:'Fonte indisponível'};
+    if(m.overdue.length)return {tone:'danger',label:'Prazo vencido'};
+    if(m.withoutDue)return {tone:'warning',label:'Definir prazos'};
+    if(m.unknownStatus||m.missingDate||m.futureDate)return {tone:'muted',label:'Revisar dados'};
+    if(!m.rows.length)return {tone:'muted',label:'Sem registros'};
+    return {tone:'success',label:'Sem atrasos identificados'};
+  }
   function render(host,m,onRows){
     const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
     const fmt=n=>n===null?'—':new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1}).format(n);
@@ -47,49 +55,53 @@
     const panel=(title,sub)=>{const s=node('section',undefined,'analysis-panel');s.append(node('h2',title),node('p',sub,'hint'));return s;};
     host.replaceChildren();
     if(!m.available){host.append(node('p','Fonte indisponível. Nenhum indicador foi calculado.','analysis-empty'));return;}
-    const name=m.source==='sac'?'SAC':'NC';
-    const summary=node('div',undefined,'analysis-summary');summary.append(node('span','LEITURA EXECUTIVA','eyebrow'));
-    let message=m.open.length+' '+name+' em aberto hoje. '+m.overdue.length+' com prazo vencido';
-    if(m.withoutDue)message+=' e '+m.withoutDue+' sem prazo válido';
-    message+='.';
-    if(m.ages.length)message+=' A pendência mais antiga tem '+Math.max(...m.ages.map(a=>a.days))+' dias.';
-    summary.append(node('p',message));
-    const priority=m.overdue.length?'Prioridade: revisar os vencidos e negociar responsáveis e prazos.':m.withoutDue?'Prioridade: definir prazos para as pendências sem data.':m.unknownStatus?'Prioridade: classificar os registros sem situação reconhecida.':'Revise a concentração de ocorrências e acompanhe as pendências abertas.';
-    summary.append(node('p',priority,'hint'));host.append(summary);
+    const status=signal(m);
+    const summary=node('div',undefined,'analysis-alerts');
+    const chip=(label,value,tone,rows,definition)=>{
+      const b=click('',rows,definition);b.className='analysis-alert';b.dataset.tone=tone;
+      b.onclick=()=>onRows(label,rows,definition);
+      b.append(node('strong',String(value)),node('span',label));summary.append(b);
+    };
+    chip('Em aberto hoje',m.open.length,'info',m.open,'Pendências atuais, independentemente do período selecionado.');
+    chip('Vencidas',m.overdue.length,m.overdue.length?'danger':'muted',m.overdue,'Prazo anterior a hoje. Consulte os registros para definir a ação.');
+    chip('Sem prazo',m.withoutDue,m.withoutDue?'warning':'muted',m.open.filter(r=>!m.withDue.includes(r)),'Defina um prazo válido no sistema de origem.');
+    const badge=node('div',undefined,'analysis-state');badge.dataset.tone=status.tone;
+    badge.append(node('strong',status.label),node('small','Situação dos registros disponíveis'));
+    summary.append(badge);host.append(summary);
     const kpis=node('div',undefined,'analysis-kpis');
-    const comparison=m.comparison?(m.comparison.previous===0?'Período anterior: 0 · variação percentual não aplicável':(m.comparison.pct>=0?'+':'')+fmt(m.comparison.pct)+'% vs. período anterior ('+m.comparison.previous+')'):'Selecione início e fim até hoje para comparar períodos iguais.';
+    const comparison=m.comparison?(m.comparison.previous===0?'Período anterior: 0 · variação percentual não aplicável':(m.comparison.pct>=0?'+':'')+fmt(m.comparison.pct)+'% vs. período anterior ('+m.comparison.previous+')'):'Volume no período selecionado';
     const cards=[
       ['Ocorrências registradas',m.cohort.length,comparison,m.cohort,'Registros abertos no período selecionado; variação é volume, não taxa de qualidade.'],
-      ['Encerradas na coorte',m.closure===null?'—':fmt(m.closure)+'%',m.closed.length+' de '+m.known.length+' com situação reconhecida',m.closed,'Situação atual dos registros abertos no período. Não mede prazo de resolução nem encerramentos ocorridos no período.'],
+      ['Registros encerrados',m.closure===null?'—':fmt(m.closure)+'%',m.closed.length+' de '+m.known.length+' com situação reconhecida',m.closed,'Situação atual dos registros abertos no período. Não mede prazo de resolução nem encerramentos ocorridos no período.'],
       ['Pendências vencidas',m.lateRate===null?'—':fmt(m.lateRate)+'%',m.overdue.length+' de '+m.withDue.length+' abertas com prazo · '+m.withoutDue+' sem prazo',m.overdue,'Estoque atual, independente do período. Vencido = prazo anterior a hoje; sem prazo não entra no denominador.'],
       ['Idade mediana em aberto',m.medianAge===null?'—':fmt(m.medianAge)+' dias',m.ages.length+' com data válida · '+m.unknownAge+' sem idade calculável',m.ages.map(x=>x.r),'Dias desde a abertura até hoje. Não é tempo de resolução. Estoque atual, independente do período.']
     ];
-    cards.forEach(([label,value,sub,rows,definition])=>{const b=node('button',undefined,'analysis-kpi');b.type='button';b.append(node('span',label),node('strong',String(value)),node('small',sub));b.onclick=()=>onRows(label,rows,definition);kpis.append(b);});host.append(kpis);
+    cards.forEach(([label,value,sub,rows,definition],i)=>{const b=node('button',undefined,'analysis-kpi');b.type='button';b.dataset.tone=i===2?status.tone:'info';b.append(node('span',label),node('strong',String(value)),node('small',sub));b.onclick=()=>onRows(label,rows,definition);kpis.append(b);});host.append(kpis);
     if(m.comparison)host.append(node('p','Comparação: '+m.comparison.previousFrom+' a '+m.comparison.previousTo+' versus o período selecionado.','hint'));
     const charts=node('div',undefined,'analysis-grid');
-    const trend=panel('Evolução das ocorrências','Aberturas por intervalo. Sem filtro: últimos 180 dias. As datas e contagens permanecem acessíveis nos botões.');
+    const trend=panel('Evolução das ocorrências','Aberturas por intervalo · clique para detalhar');
     const max=Math.max(1,...m.trend.map(t=>t.rows.length));
     m.trend.forEach(t=>{const b=node('button',undefined,'analysis-bar');b.type='button';b.setAttribute('aria-label',t.from+' a '+t.to+': '+t.rows.length+' registros');
       b.append(node('span',t.from+' → '+t.to,'bar-label'),node('strong',String(t.rows.length)));
       const track=node('span',undefined,'bar-track'),fill=node('span',undefined,'bar-fill');fill.style.width=(100*t.rows.length/max)+'%';track.append(fill);b.append(track);b.onclick=()=>onRows('Aberturas: '+t.from+' a '+t.to,t.rows,'Somente datas válidas dentro do intervalo.');trend.append(b);
     });charts.append(trend);
-    const pareto=panel('Concentração por produto','Volume de ocorrências no período. Participação e percentual acumulado; não mede defeitos por unidade vendida.');
+    const pareto=panel('Concentração por produto','Participação no volume de ocorrências · Pareto');
     if(!m.pareto.length)pareto.append(node('p','Nenhuma ocorrência no período.','analysis-empty'));
     m.pareto.forEach(p=>{const b=node('button',undefined,'analysis-bar');b.type='button';b.append(node('span',p.label,'bar-label'),node('strong',p.rows.length+' · '+fmt(p.share)+'%'),node('small','Acumulado: '+fmt(p.cumulative)+'%'));
       const track=node('span',undefined,'bar-track'),fill=node('span',undefined,'bar-fill');fill.style.width=p.share+'%';track.append(fill);b.append(track);b.onclick=()=>onRows(p.label,p.rows,'Agrupamento pelo nome registrado. Não comprova recorrência da mesma causa.');pareto.append(b);
     });charts.append(pareto);host.append(charts);
     const management=node('div',undefined,'analysis-grid');
-    const aging=panel('Envelhecimento das pendências','Estoque aberto atual. Clique numa faixa para priorizar a revisão.');
-    m.bins.forEach(b=>{const item=node('div',undefined,'analysis-line');item.append(click(b.label,b.rows,'Idade desde a abertura, em dias corridos.'),node('strong',String(b.rows.length)));aging.append(item);});
-    aging.append(node('p',m.unknownAge+' abertas sem idade calculável (data ausente, inválida ou futura).','hint'));management.append(aging);
-    const owners=panel('Carga e atrasos por responsável','Estoque aberto atual. Ordenação por vencidos, depois por volume.');
+    const aging=panel('Envelhecimento das pendências','Pendências atuais por tempo em aberto');
+    m.bins.forEach(b=>{const item=click('',b.rows,'Idade desde a abertura, em dias corridos.');item.className='analysis-bar';item.onclick=()=>onRows(b.label,b.rows,'Idade desde a abertura, em dias corridos.');item.append(node('span',b.label),node('strong',String(b.rows.length)));const track=node('span',undefined,'bar-track'),fill=node('span',undefined,'bar-fill');fill.style.width=(m.ages.length?100*b.rows.length/m.ages.length:0)+'%';track.append(fill);item.append(track);aging.append(item);});
+    if(m.unknownAge)aging.append(node('p',m.unknownAge+' sem data de abertura utilizável','hint'));management.append(aging);
+    const owners=panel('Carga e atrasos por responsável','Vencidos primeiro · clique no responsável');
     if(!m.owners.length)owners.append(node('p','Nenhuma pendência aberta com situação reconhecida.','analysis-empty'));
-    m.owners.forEach(p=>{const line=node('div',undefined,'analysis-line');line.append(click(p.name,p.rows,'Carga atual de trabalho; não é avaliação de desempenho individual.'),node('span',p.rows.length+' abertas · '+p.overdue+' vencidas · '+p.withoutDue+' sem prazo'));owners.append(line);});management.append(owners);host.append(management);
+    m.owners.forEach(p=>{const line=node('div',undefined,'analysis-line');line.append(click(p.name,p.rows,'Carga atual de trabalho; não é avaliação de desempenho individual.'),node('span',p.rows.length+' abertas'));if(p.overdue){const badge=node('span',p.overdue+' vencidas','analysis-badge');badge.dataset.tone='danger';line.append(badge);}if(p.withoutDue){const badge=node('span',p.withoutDue+' sem prazo','analysis-badge');badge.dataset.tone='warning';line.append(badge);}owners.append(line);});management.append(owners);host.append(management);
     const quality=node('details',undefined,'analysis-quality');quality.append(node('summary','Confiabilidade e limites dos indicadores'));
     quality.append(node('p',m.rows.length+' registros na fonte · '+m.missingDate+' sem data válida · '+m.futureDate+' com data futura · '+m.unknownStatus+' com situação não reconhecida.'));
     quality.append(node('p','SLA de resolução, tempo médio de fechamento, reincidência por causa e SAC por volume vendido ainda não são calculados: exigem histórico de encerramento, causa e denominadores integrados. Metas não foram presumidas.'));
     quality.append(node('p','Última gravação da coleção: '+(m.updated?new Date(m.updated).toLocaleString('pt-BR'):'não informada')+'. Uma consulta recente não significa atualização operacional recente.'));host.append(quality);
   }
-  const api={build,render,offset,distance,median};
+  const api={build,render,offset,distance,median,signal};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.GMFAdminAnalytics=api;
 })(typeof window==='object'?window:globalThis);
