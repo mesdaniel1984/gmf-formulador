@@ -74,6 +74,8 @@ for(const path of Object.keys(critical)){
 // templates e funcoes que uma lista manual poderia esquecer.
 function semUi2(path,src){
   if(path==='gmf_formulador_wizard.html'){
+    // Exceção explícita: entrada direta solicitada; demais bytes seguem protegidos.
+    src = src.replace("_initAuth().then(async()=>{ if (!_currentUser) return; try { await _sincronizarSeeds(); } catch(e){ console.warn('sync erro:',e); } await carregarProdutosAsync(); irParaFormulador(); });","_initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console.warn('sync erro:',e); } await carregarProdutosAsync(); mostrarMenuInicial(); });");
     return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="gmf-workspace.js"></script>\n','');
   }
   return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="sgq-workspace.js"></script>\n','');
