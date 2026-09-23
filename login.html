@@ -57,7 +57,7 @@ const sb = window.supabase.createClient(URL_, KEY_);
 sb.auth.getSession().then(({data})=>{ if(data.session) go(); });
 
 function destinoLogin(search){
-  const destinos = { central:'index.html', formulador:'gmf_formulador_wizard.html',
+  const destinos = { conta:'minha-conta.html', central:'index.html', formulador:'gmf_formulador_wizard.html',
     qualidade:'sistema_qualidade_online.html', sac:'conversas.html', admin:'painel-admin.html' };
   const escolhido = new URLSearchParams(search).get('next');
   return Object.prototype.hasOwnProperty.call(destinos, escolhido)
