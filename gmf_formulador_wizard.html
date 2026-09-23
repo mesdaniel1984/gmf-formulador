@@ -2615,9 +2615,47 @@ function syncNome() {
 // como nome de exibição nas tabelas e composição da receita.
 // Ex: "Composto Lácteo com Gordura Vegetal (soro de leite...)" → "Composto Lácteo com Gordura Vegetal"
 function _nomeExibicao(d) {
-  if (!d.rotulo) return d.n;
-  // Pega tudo antes do primeiro "(" e remove espaços extras
-  return d.rotulo.split('(')[0].trim();
+  if (!d) return '';
+  const aliases = {
+    'Composto Lacteo com LM267':'Composto lácteo com gordura vegetal',
+    'Composto lácteo 267':'Composto lácteo',
+    'Composto lácteo LM267':'Composto lácteo com gordura vegetal',
+    'Mistura Láctea Select 25Kg':'Mistura láctea',
+    'Maltodextrina (Manimalto 20)':'Maltodextrina',
+    'CMC 2604A':'Estabilizante carboximetilcelulose',
+    'Premix de Nutrientes SMV8150 (Sweetmix)':'Mix de vitaminas e minerais',
+    'Polidextrose — Fibra Solúvel (ADC 1119/1097)':'Polidextrose',
+    'Aroma ID Natural Chocolate Branco (ADC 1784/1810)':'Aromatizante idêntico ao natural de chocolate branco',
+    'Leite integral em pó instantâneo (Ninho)':'Leite em pó integral instantâneo',
+    'Leite Condensado Da Provincia':'Leite condensado',
+    'Leite Condensado Ligth Moça':'Leite condensado light',
+    'Gordura Vegetal Hidrogenada Mesa':'Gordura vegetal hidrogenada'
+  };
+  const key=Object.keys(aliases).find(n=>n.toLocaleLowerCase('pt-BR')===String(d.n||'').toLocaleLowerCase('pt-BR'));
+  const canonical=typeof DB!=='undefined'?DB.find(x=>x.n===d.n):null;
+  const rotulo=d.rotulo || canonical?.rotulo;
+  return (key ? aliases[key] : rotulo ? String(rotulo).split('(')[0] : String(d.n||'')).trim();
+}
+
+function _textoIngredientesPublico(texto) {
+  const replacements = [];
+  const entries = typeof DB!=='undefined' ? DB : [];
+  entries.forEach(d=>{
+    if(!d.n || !/LM\s*267|Select|Manimalto|2604A|SMV8150|Sweetmix|ADC |Ninho|Provincia|Moça|Mesa|Purelac|Alibra|Oila|ALIMENTA|Ramolac|Supreme|Tangará/i.test(d.n))return;
+    const publicName=_nomeExibicao(d);
+    if(publicName && publicName.toLocaleLowerCase('pt-BR')!==d.n.toLocaleLowerCase('pt-BR'))
+      replacements.push([d.n,publicName]);
+  });
+  replacements.push(['Composto lácteo 267','Composto lácteo'],['Composto lácteo LM267','Composto lácteo com gordura vegetal']);
+  // Uma passagem: não modifica novamente o texto já substituído.
+  replacements.sort((a,b)=>b[0].length-a[0].length);
+  if(!replacements.length)return String(texto||'');
+  const escaped=replacements.map(([name])=>name.replace(/[.*+?^$(){}|[\]\\]/g,'\\$&'));
+  const pattern=new RegExp('(^|[^\\p{L}\\p{N}])('+escaped.join('|')+')(?=$|[^\\p{L}\\p{N}])','giu');
+  return String(texto||'').replace(pattern,(match,prefix,name)=>{
+    const found=replacements.find(([from])=>from.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'));
+    return prefix+(found?found[1]:name);
+  });
 }
 
 // ── LISTA DE INGREDIENTES PARA RÓTULO ────────────────────────────────────────
@@ -2628,7 +2666,7 @@ function _buildIngredientesList() {
   const _lista = receita
     .slice()
     .sort((a,b) => b.qtde - a.qtde)
-    .map(r => (r.d.rotuloCompleto || r.d.rotulo || r.d.n || '').toLowerCase())
+    .map(r => _textoIngredientesPublico(r.d.rotuloCompleto || r.d.rotulo || _nomeExibicao(r.d)).toLowerCase())
     .join(', ');
   return _lista ? _lista.charAt(0).toUpperCase() + _lista.slice(1) : _lista;
 }
@@ -3114,7 +3152,7 @@ function renderStep4(){
   // Lista de ingredientes para rótulo:
   // usa campo `rotulo` do DB quando disponível (ingredientes compostos com subingredientes)
   // Ordem decrescente de quantidade (legislação RDC 429/2020, Art. 19)
-  const ingList = gv('p_ingredientes_txt') || _buildIngredientesList();
+  const ingList = _textoIngredientesPublico(gv('p_ingredientes_txt') || _buildIngredientesList());
 
   document.getElementById('s4content').innerHTML = `
   <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px">
