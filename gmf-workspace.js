@@ -253,6 +253,11 @@
     create();
     loadRevisionsModule();
     loadSandboxModule();
+    if(!document.getElementById('i2IngredientsScript')){
+      var ingredientsScript=document.createElement('script');
+      ingredientsScript.id='i2IngredientsScript';ingredientsScript.src='gmf-ingredients.js?v=1';
+      document.body.appendChild(ingredientsScript);
+    }
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();

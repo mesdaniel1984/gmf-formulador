@@ -77,6 +77,8 @@ jobs:
             echo "=== $f ==="
             node "$f"
           done
+      - name: Ingredientes — navegação e busca
+        run: node testes/ingredientes-navegacao.js
       - name: Smoke visual UI2
         run: node testes/interface2-visual-smoke.js
       - name: Smoke visual Sandbox F4.3
