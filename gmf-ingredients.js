@@ -23,7 +23,22 @@ function boot(){
  const search=document.createElement('input');search.id='i2IngredientSearch';search.type='search';search.placeholder='Nome ou referência';
  search.style.cssText='width:100%;padding:10px;margin:6px 0 12px;border:1px solid #bccbd5;border-radius:8px;font:inherit';
  const normalize=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- function filter(){const value=normalize(search.value);list.querySelectorAll('tr').forEach(row=>{if(row.querySelector('td'))row.hidden=!normalize(row.textContent).includes(value);});}
+ function annotate(){
+ list.querySelectorAll('tr').forEach(row=>{
+  const cells=row.querySelectorAll('td');if(!cells.length||row.dataset.referenceShown)return;
+  row.dataset.referenceShown='1';
+  const name=cells[0].textContent.trim();
+  const item=typeof DB!=='undefined'?DB.find(d=>d.n===name):null;
+  const note=document.createElement('div');note.style.cssText='font-weight:normal;font-size:11px;white-space:normal;overflow-wrap:anywhere;margin-top:6px';
+  const ref=item&&item.referencia;
+  if(ref){
+   note.textContent=ref.autor+' — '+ref.titulo+' | Consulta: '+ref.consulta+' | '+ref.base+' | '+ref.nota;
+   if(ref.url&&/^https:\/\//.test(ref.url)){const a=document.createElement('a');a.href=ref.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=' Abrir fonte';note.appendChild(a);}
+  }else{note.textContent='Referência documental pendente de conferência. Fonte declarada: '+(item&&item.ref||'não informada');}
+  cells[0].appendChild(note);
+ });
+}
+ function filter(){annotate();const value=normalize(search.value);list.querySelectorAll('tr').forEach(row=>{if(row.querySelector('td'))row.hidden=!normalize(row.textContent).includes(value);});}
  search.addEventListener('input',filter);card.insertBefore(label,list);card.insertBefore(search,list);
  new MutationObserver(filter).observe(list,{childList:true,subtree:true});
 }
