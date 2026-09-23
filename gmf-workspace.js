@@ -255,7 +255,7 @@
     loadSandboxModule();
     if(!document.getElementById('i2IngredientsScript')){
       var ingredientsScript=document.createElement('script');
-      ingredientsScript.id='i2IngredientsScript';ingredientsScript.src='gmf-ingredients.js?v=1';
+      ingredientsScript.id='i2IngredientsScript';ingredientsScript.src='gmf-ingredients.js?v=2';
       document.body.appendChild(ingredientsScript);
     }
   }
