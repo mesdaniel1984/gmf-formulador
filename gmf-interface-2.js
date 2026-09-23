@@ -17,7 +17,7 @@
     var bar=document.createElement('div');
     bar.className='i2-corpbar';
     var k=appKey();
-    bar.innerHTML='<a class="i2-home" href="index.html">GMF <span style="opacity:.65">/</span> Central</a>'
+    bar.innerHTML='<a class="i2-home" href="index.html">← Voltar à Central</a>'
       +'<span class="i2-sep"></span><span class="i2-app">'+txt(appName())+'</span>'
       +'<nav class="i2-switch" aria-label="Trocar sistema">'
       +'<a href="gmf_formulador_wizard.html" class="'+(k==='gmf'?'active':'')+'">GMF</a>'
