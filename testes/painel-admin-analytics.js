@@ -34,3 +34,13 @@ const many=Array.from({length:8},(_,i)=>({id:String(i),titulo:'Produto '+i,data:
 const grouped=build({fontes:{ncs:{registros:many}}},opt,day);assert.equal(grouped.pareto.length,6);assert.equal(grouped.pareto.at(-1).rows.length,3);assert.equal(grouped.pareto.at(-1).cumulative,100);
 assert.equal(grouped.withDue.length,0);assert.equal(grouped.lateRate,null);assert.equal(grouped.withoutDue,8);
 console.log('Análise executiva: denominadores, períodos iguais, mediana, fonte ausente, datas futuras, Pareto e intervalos sem duplicidade passaram.');
+
+const {signal}=require('../painel-admin-analytics');
+const baseSignal={available:true,overdue:[],withoutDue:0,unknownStatus:0,missingDate:0,futureDate:0,rows:[{}]};
+assert.equal(signal({available:false}).tone,'muted');
+assert.equal(signal({...baseSignal,rows:[]}).tone,'muted');
+assert.equal(signal({...baseSignal,withoutDue:2}).tone,'warning');
+for(const key of ['unknownStatus','missingDate','futureDate'])assert.equal(signal({...baseSignal,[key]:1}).tone,'muted');
+assert.equal(signal({...baseSignal,overdue:[{}],withoutDue:2}).tone,'danger');
+assert.equal(signal(baseSignal).tone,'success');
+console.log('Cores: atraso, prazo ausente, dados incompletos e fonte vazia validados.');
