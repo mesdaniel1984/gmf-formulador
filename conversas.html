@@ -200,9 +200,9 @@ a{ color:var(--selo); }
 
 <div class="portao" id="portao" hidden>
   <h2 id="portaoTitulo">Entre no sistema primeiro</h2>
-  <p id="portaoTexto">Esta tela usa o mesmo login do sistema de qualidade. Abra o
-     sistema, entre com seu e-mail e senha, e volte para cá.</p>
-  <p><a href="sistema_qualidade_online.html">Abrir o sistema de qualidade →</a></p>
+  <p id="portaoTexto">Entre com sua conta corporativa para acessar o atendimento.
+     Após o login, você volta diretamente para esta tela.</p>
+  <p><a href="login.html?next=sac">Entrar no SAC →</a></p>
 </div>
 
 <script>
@@ -314,7 +314,7 @@ async function entrar(){
   est.sessao = (data && data.session) || null;
   if(!est.sessao){
     mostrarPortao('Entre no sistema primeiro',
-      'Esta tela usa o mesmo login do sistema de qualidade. Abra o sistema, entre com seu e-mail e senha, e volte para cá.');
+      'Entre com sua conta corporativa. Após o login, você volta diretamente para o atendimento.');
     return false;
   }
   est.email = (est.sessao.user && est.sessao.user.email) || '';
