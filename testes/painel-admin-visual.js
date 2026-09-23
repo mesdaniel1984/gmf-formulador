@@ -8,6 +8,8 @@ const fixture={consultado_em:'2026-09-23T12:00:00Z',fontes:{ncs:{registros:[{num
  const browser=await chromium.launch({headless:true});
  try{
   const page=await browser.newPage();
+  // Fixtures use a fixed business day, independent of UTC / São Paulo midnight.
+  await page.clock.setFixedTime(new Date('2026-09-23T15:00:00Z'));
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.route('https://cdn.jsdelivr.net/**',route=>route.fulfill({contentType:'application/javascript',body:`window.testDenied=false;window.testSignedOut=false;window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:window.testSignedOut?null:{user:{id:'fixture'}}}}),onAuthStateChange:fn=>{window.testAuth=fn;},signOut:async()=>({})},rpc:async()=>window.testDenied?{error:{code:'42501'}}:{data:${JSON.stringify(fixture)}}})};`}));
   await page.goto(pathToFileURL(path.resolve(__dirname,'../painel-admin.html')).href);
