@@ -1,0 +1,614 @@
+{
+  "data": "2026-09-23",
+  "escopo": "Base genérica; cadastros próprios/FT preservados conforme confirmação do usuário.",
+  "fonte": "NEPA/UNICAMP. TACO. 4ª ed. rev. e ampl. Campinas, 2011. Tabela 1.",
+  "url": "https://nepa.unicamp.br/wp-content/uploads/sites/27/2023/10/taco_4_edicao_ampliada_e_revisada.pdf",
+  "limite": "Conferência parcial de 73 campos em 15 registros; 26 valores corrigidos. Não valida açúcares, ácidos graxos ou fibra.",
+  "itens": [
+    {
+      "nome": "Leite de cabra integral",
+      "codigo": 454,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 66,
+          "referencia": 66,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 4.3,
+          "referencia": 5.2,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 3.1,
+          "referencia": 3.1,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 3.8,
+          "referencia": 3.8,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 43,
+          "referencia": 74,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Leite de vaca achocolatado",
+      "codigo": 455,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 83,
+          "referencia": 83,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 13.4,
+          "referencia": 14.2,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 2.1,
+          "referencia": 2.1,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 2.2,
+          "referencia": 2.2,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 50,
+          "referencia": 72,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Leite integral em pó (LIP)",
+      "codigo": 459,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 497,
+          "referencia": 497,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 38.4,
+          "referencia": 39.2,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 25.4,
+          "referencia": 25.4,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 26.9,
+          "referencia": 26.9,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 320,
+          "referencia": 323,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Leite desnatado em pó (LDP)",
+      "codigo": 456,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 362,
+          "referencia": 362,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 52,
+          "referencia": 53,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 34.7,
+          "referencia": 34.7,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 0.9,
+          "referencia": 0.9,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 475,
+          "referencia": 432,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Queijo minas frescal",
+      "codigo": 461,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 264,
+          "referencia": 264,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 1.4,
+          "referencia": 3.2,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 17.4,
+          "referencia": 17.4,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 20.2,
+          "referencia": 20.2,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 250,
+          "referencia": 31,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Queijo mussarela",
+      "codigo": 463,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 330,
+          "referencia": 330,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 0.5,
+          "referencia": 3,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 22.6,
+          "referencia": 22.6,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 25.2,
+          "referencia": 25.2,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 550,
+          "referencia": 581,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Queijo parmesão",
+      "codigo": 464,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 453,
+          "referencia": 453,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 0.6,
+          "referencia": 1.7,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 35.6,
+          "referencia": 35.6,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 33.5,
+          "referencia": 33.5,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 900,
+          "referencia": 1844,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Queijo prato",
+      "codigo": 467,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 360,
+          "referencia": 360,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 0.5,
+          "referencia": 1.9,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 22.7,
+          "referencia": 22.7,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 29.1,
+          "referencia": 29.1,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 610,
+          "referencia": 580,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Requeijão cremoso",
+      "codigo": 468,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 257,
+          "referencia": 257,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 2.4,
+          "referencia": 2.4,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 9.6,
+          "referencia": 9.6,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 22.5,
+          "referencia": 23.4,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 480,
+          "referencia": 558,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Queijo minas padrão (meia cura)",
+      "codigo": 462,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 321,
+          "referencia": 321,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 1,
+          "referencia": 3.6,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 21.2,
+          "referencia": 21.2,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 24.6,
+          "referencia": 24.6,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 530,
+          "referencia": 501,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Queijo ricota",
+      "codigo": 469,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 140,
+          "referencia": 140,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 3.8,
+          "referencia": 3.8,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 12.6,
+          "referencia": 12.6,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 8.1,
+          "referencia": 8.1,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 283,
+          "referencia": 283,
+          "situacao": "COINCIDE"
+        }
+      ]
+    },
+    {
+      "nome": "Manteiga com sal",
+      "codigo": 261,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 726,
+          "referencia": 726,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 0,
+          "referencia": 0.1,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 0.4,
+          "referencia": 0.4,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 82.4,
+          "referencia": 82.4,
+          "situacao": "COINCIDE"
+        }
+      ]
+    },
+    {
+      "nome": "Manteiga sem sal",
+      "codigo": 262,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 726,
+          "referencia": 758,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 0,
+          "referencia": 0,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 0.5,
+          "referencia": 0.4,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 82.4,
+          "referencia": 86,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Iogurte natural desnatado",
+      "codigo": 449,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 41,
+          "referencia": 41,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 4.9,
+          "referencia": 5.8,
+          "situacao": "DIVERGE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 3.8,
+          "referencia": 3.8,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 0.3,
+          "referencia": 0.3,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 54,
+          "referencia": 60,
+          "situacao": "DIVERGE"
+        }
+      ]
+    },
+    {
+      "nome": "Leite condensado integral",
+      "codigo": 453,
+      "campos": [
+        {
+          "campo": "kcal",
+          "unidade": "kcal/100g",
+          "atual": 313,
+          "referencia": 313,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "cho",
+          "unidade": "g/100g",
+          "atual": 57,
+          "referencia": 57,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "ptn",
+          "unidade": "g/100g",
+          "atual": 7.7,
+          "referencia": 7.7,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "gt",
+          "unidade": "g/100g",
+          "atual": 6.7,
+          "referencia": 6.7,
+          "situacao": "COINCIDE"
+        },
+        {
+          "campo": "na",
+          "unidade": "mg/100g",
+          "atual": 94,
+          "referencia": 94,
+          "situacao": "COINCIDE"
+        }
+      ]
+    }
+  ],
+  "adiados": {
+    "Creme de leite UHT": "Tabela não especifica UHT; identidade insuficiente.",
+    "Iogurte natural integral": "CHO TACO 1,9 g conflita com açúcares legados 4 g. Preservado integralmente até fonte compatível para ambos."
+  }
+}

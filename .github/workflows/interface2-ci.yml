@@ -30,6 +30,8 @@ jobs:
           node --check gmf-central.js
           node --check painel-admin.js
           node --check painel-admin-analytics.js
+      - name: Referências genéricas — valores e preservação dos cadastros
+        run: node testes/ingredientes-referencias.js
       - name: HTML operacional igual à baseline
         run: node testes/interface2-integridade.js
       - name: Painel Admin — contagens e datas
