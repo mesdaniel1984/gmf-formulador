@@ -14,7 +14,7 @@ const path=require('path');
   let fail=0,pass=0;
   function check(v,msg){console.log((v?'  ok    ':'  FALHA ')+msg);v?pass++:fail++;}
   async function checkDestinations(p,label){
-    const expected=['conversas.html','painel-admin.html','https://mesdaniel1984.github.io/painel-pd/','gmf_formulador_wizard.html','sistema_qualidade_online.html','https://qualidade-alimentos-production.up.railway.app/'].sort();
+    const expected=['conversas.html','painel-admin.html','https://mesdaniel1984.github.io/painel-pd/','gmf_formulador_wizard.html','sistema_qualidade_online.html','https://qualidade-alimentos-production.up.railway.app/sso/start'].sort();
     const actual=await p.locator('.gmf-module').evaluateAll(els=>els.map(el=>el.getAttribute('href')).sort());
     check(JSON.stringify(actual)===JSON.stringify(expected),label+' oferece os seis destinos diretos');
   }
