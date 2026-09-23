@@ -54,7 +54,13 @@ const URL_ = 'https://ailzblgrxtdakpkchstl.supabase.co';
 const KEY_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
 localStorage.setItem('gmf_supabase_config', JSON.stringify({url:URL_,key:KEY_}));
 const sb = window.supabase.createClient(URL_, KEY_);
-sb.auth.getSession().then(({data})=>{ if(data.session) go(); });
+async function continuarSeAutenticado(){
+  try{
+    const {data,error}=await sb.auth.getUser();
+    if(!error && data && data.user && !data.user.is_anonymous) go();
+  }catch(e){ /* Sem verificação, mantenha o formulário disponível. */ }
+}
+continuarSeAutenticado();
 
 function destinoLogin(search){
   const destinos = { conta:'minha-conta.html', central:'index.html', formulador:'gmf_formulador_wizard.html',
@@ -84,9 +90,7 @@ async function magico(){
   else msg('ml','📧 Link enviado! Verifique seu e-mail.','ok');
 }
 
-if(location.hash.includes('access_token')){
-  sb.auth.getSession().then(({data})=>{ if(data.session) go(); });
-}
+
 </script>
 </body>
 </html>
