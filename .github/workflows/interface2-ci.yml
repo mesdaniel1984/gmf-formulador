@@ -32,6 +32,8 @@ jobs:
           node --check painel-admin-analytics.js
       - name: Referências genéricas — valores e preservação dos cadastros
         run: node testes/ingredientes-referencias.js
+      - name: Fichas — nomes genéricos e preservação de subingredientes
+        run: node testes/ingredientes-nomes-publicos.js
       - name: HTML operacional igual à baseline
         run: node testes/interface2-integridade.js
       - name: Painel Admin — contagens e datas
