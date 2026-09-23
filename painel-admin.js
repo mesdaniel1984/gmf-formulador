@@ -47,14 +47,22 @@
   const el=id=>document.getElementById(id);
   const key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw';
   let sb,data=null,selected='laudos',generation=0;
-  function clear(message){data=null;el('painel').hidden=true;el('indicadores').replaceChildren();el('registros').replaceChildren();el('alertas').replaceChildren();el('mensagem').textContent=message;}
+  function clear(message){data=null;el('painel').hidden=true;el('indicadores').replaceChildren();el('registros').replaceChildren();el('alertas').replaceChildren();el('analise').replaceChildren();el('analise-registros').replaceChildren();el('analise-detalhe').hidden=true;el('mensagem').textContent=message;}
   function row(title,detail){const d=document.createElement('div');d.className='record';const b=document.createElement('strong');b.textContent=title;const s=document.createElement('span');s.textContent=detail;d.append(b,s);return d;}
   function paint(){
     if(!data)return;
     const from=el('inicio').value,to=el('fim').value;
-    if(from&&to&&from>to){el('mensagem').textContent='A data inicial deve ser anterior ou igual à final.';el('indicadores').replaceChildren();el('registros').replaceChildren();return;}
+    el('analise-detalhe').hidden=true;el('analise-registros').replaceChildren();
+    if(from&&to&&from>to){el('mensagem').textContent='A data inicial deve ser anterior ou igual à final.';el('indicadores').replaceChildren();el('registros').replaceChildren();el('analise').replaceChildren();el('alertas').replaceChildren();return;}
     const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
     const m=model(data,from,to,today);
+    root.GMFAdminAnalytics.render(el('analise'),root.GMFAdminAnalytics.build(data,{source:el('analise-fonte').value,from,to,today},day),(title,rows,definition)=>{
+      el('analise-detalhe-titulo').textContent=title;el('analise-definicao').textContent=definition;
+      el('analise-registros').replaceChildren();
+      if(!rows.length)el('analise-registros').textContent='Nenhum registro neste recorte.';
+      rows.forEach(r=>el('analise-registros').append(row([r.numero,r.titulo].filter(Boolean).join(' · ')||'Registro sem identificação',[r.status,r.data?'Abertura '+r.data:null,r.prazo?'Prazo '+r.prazo:null,r.responsavel].filter(Boolean).join(' · '))));
+      el('analise-detalhe').hidden=false;el('analise-detalhe').scrollIntoView({block:'nearest'});
+    });
     el('mensagem').textContent='Acesso Admin validado. Dados consultados nas fontes abaixo.';
     el('indicadores').replaceChildren();
     m.groups.forEach(g=>{const b=document.createElement('button');b.type='button';b.className='metric';b.setAttribute('aria-pressed',String(g.key===selected));
@@ -86,7 +94,9 @@
     }catch(e){if(current===generation)clear('Não foi possível carregar o painel. Verifique a conexão e tente atualizar.');}
     finally{if(current===generation)el('atualizar').disabled=false;}
   }
-  el('atualizar').onclick=load;['inicio','fim'].forEach(id=>el(id).onchange=paint);
+  el('atualizar').onclick=load;['inicio','fim','analise-fonte'].forEach(id=>el(id).onchange=paint);
+  el('fechar-analise').onclick=()=>{el('analise-detalhe').hidden=true;};
+  el('ultimos90').onclick=()=>{const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());el('inicio').value=root.GMFAdminAnalytics.offset(today,-89);el('fim').value=today;paint();};
   el('limpar').onclick=()=>{el('inicio').value='';el('fim').value='';paint();};
   el('sair').onclick=async()=>{++generation;clear('Encerrando sessão…');if(sb){const r=await sb.auth.signOut();if(r.error){clear('Não foi possível encerrar a sessão. Tente novamente.');return;}}location.href='login.html?next=admin';};
   try{sb=root.supabase.createClient('https://ailzblgrxtdakpkchstl.supabase.co',key);
