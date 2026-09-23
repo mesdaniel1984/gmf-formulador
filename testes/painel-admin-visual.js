@@ -3,7 +3,7 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const {pathToFileURL}=require('node:url');
 const path=require('node:path'),fs=require('node:fs');
-const fixture={consultado_em:'2026-09-23T12:00:00Z',fontes:{ncs:{registros:[]},sac:{registros:[]},licencas:{registros:[]}},laudos:[{numero:'L-001',titulo:'<img src=x onerror=alert(1)>',status:'Emitido',data:'2026-09-23'}],entrada_sac:null,atendimento_humano:[]};
+const fixture={consultado_em:'2026-09-23T12:00:00Z',fontes:{ncs:{registros:[{numero:'NC-01',titulo:'Produto de teste com nome longo para verificar o comportamento responsivo',data:'2026-09-20',status:'Aberta',prazo:'2026-09-21',responsavel:'Equipe da Qualidade'},{numero:'NC-02',titulo:'Produto B',data:'2026-09-21',status:'Fechada'}]},sac:{registros:[]},licencas:{registros:[]}},laudos:[{numero:'L-001',titulo:'<img src=x onerror=alert(1)>',status:'Emitido',data:'2026-09-23'}],entrada_sac:null,atendimento_humano:[]};
 (async()=>{
  const browser=await chromium.launch({headless:true});
  try{
@@ -13,6 +13,13 @@ const fixture={consultado_em:'2026-09-23T12:00:00Z',fontes:{ncs:{registros:[]},s
   await page.goto(pathToFileURL(path.resolve(__dirname,'../painel-admin.html')).href);
   await page.locator('#painel').waitFor({state:'visible'});
   assert.equal(await page.locator('.metric').count(),6);
+  assert.equal(await page.locator('.analysis-kpi').count(),4);
+  await page.locator('.analysis-kpi').first().click();
+  assert.equal(await page.locator('#analise-registros .record').count(),2);
+  await page.locator('#fechar-analise').click();
+  await page.locator('#analise-fonte').selectOption('sac');
+  assert.equal(await page.locator('.analysis-kpi strong').first().innerText(),'0');
+  await page.locator('#analise-fonte').selectOption('ncs');
   assert.equal(await page.locator('#registros img').count(),0,'data must remain text');
   assert.match(await page.locator('#registros').innerText(),/onerror/);
   await page.locator('.metric').filter({hasText:'Entradas SAC novas'}).click();
@@ -20,6 +27,11 @@ const fixture={consultado_em:'2026-09-23T12:00:00Z',fontes:{ncs:{registros:[]},s
   await page.locator('#inicio').fill('2026-09-24');await page.locator('#inicio').dispatchEvent('change');
   assert.equal(await page.locator('.metric strong').first().innerText(),'0');
   await page.locator('#limpar').click();assert.equal(await page.locator('.metric strong').first().innerText(),'1');
+  await page.locator('#inicio').fill('2026-09-21');await page.locator('#fim').fill('2026-09-23');await page.locator('#fim').dispatchEvent('change');
+  assert.match(await page.locator('#analise').innerText(),/Comparação:/);
+  await page.locator('#inicio').fill('2026-09-24');await page.locator('#inicio').dispatchEvent('change');
+  assert.equal(await page.locator('.analysis-kpi').count(),0,'invalid range clears analysis');
+  await page.locator('#limpar').click();
   fs.mkdirSync('ui2-screens',{recursive:true});
   for(const width of [1280,390,320]){
    await page.setViewportSize({width,height:900});
@@ -28,6 +40,7 @@ const fixture={consultado_em:'2026-09-23T12:00:00Z',fontes:{ncs:{registros:[]},s
   }
   await page.evaluate(()=>{window.testAuth('SIGNED_OUT');});
   assert.equal(await page.locator('#painel').isVisible(),false);assert.equal(await page.locator('#registros').innerText(),'');
+  assert.equal(await page.locator('#analise').innerText(),'');assert.equal(await page.locator('#analise-registros').innerText(),'');
   await page.evaluate(()=>{window.testDenied=true;});await page.locator('#atualizar').click();
   await page.waitForFunction(()=>document.getElementById('mensagem').textContent.includes('exclusivo'));
   assert.equal(await page.locator('#painel').isVisible(),false);

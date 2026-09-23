@@ -29,10 +29,13 @@ jobs:
           node --check gmf-auth.js
           node --check gmf-central.js
           node --check painel-admin.js
+          node --check painel-admin-analytics.js
       - name: HTML operacional igual à baseline
         run: node testes/interface2-integridade.js
       - name: Painel Admin — contagens e datas
         run: node testes/painel-admin.js
+      - name: Painel Admin — análise executiva
+        run: node testes/painel-admin-analytics.js
       - name: Security auth UI
         run: node testes/security-auth-ui.js
       - name: Interface de revisões controladas
@@ -83,4 +86,3 @@ jobs:
           name: interface2-uat-gmf-sgq
           path: ui2-screens
           if-no-files-found: error
-

@@ -1,5 +1,20 @@
 # Painel gerencial — primeira entrega
 
+## Evolução para análise executiva
+
+O painel agora calcula análises separadas de NC e SAC SGQ sobre a RPC existente, sem alterar banco, permissões ou integrações OMIE.
+
+- Ocorrências no período comparadas com janela anterior do mesmo número de dias (ambos limites necessários; sem comparação de período futuro). Base anterior zero mostra variação percentual não aplicável.
+- Encerradas na coorte: registros atualmente encerrados / registros da coorte com situação reconhecida. Não é SLA nem volume encerrado no período; não há histórico temporal de fechamento na RPC.
+- Percentual vencido: abertas com prazo anterior a hoje / abertas com prazo válido. Estoque atual, independente do período de abertura. Sem prazo aparece separadamente.
+- Idade mediana: mediana de dias corridos desde abertura das pendências atuais com data válida e não futura. Não mede tempo de resolução.
+- Evolução de aberturas: até seis intervalos contíguos sem sobreposição; sem filtro, últimos 180 dias.
+- Pareto por produto registrado: participação no volume da coorte e percentual acumulado. Nomes não são reconciliados por semelhança; inclui produto não informado e agrega excedentes em Demais produtos. Não mede reincidência da mesma causa ou defeitos por volume vendido.
+- Faixas de idade e carga por responsável permitem abrir os registros correspondentes. Não constituem avaliação individual de desempenho.
+- SLA, custos de não qualidade, taxa por unidades vendidas, conformidade de laudos e rondas permanecem dependentes de dados adicionais. Nenhuma meta ou nota global foi inventada.
+
+Todos os dados dinâmicos são inseridos como texto; troca de conta e logout removem também análises e detalhamentos.
+
 Base: gmf-formulador 7b59dbd207b4175f3fddc475a1e5b6d6df1b3433.
 
 ## Fontes e interpretação
