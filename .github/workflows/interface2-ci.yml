@@ -38,6 +38,8 @@ jobs:
         run: node testes/painel-admin-analytics.js
       - name: Sessão compartilhada da Central
         run: node testes/central-session.js
+      - name: Minha conta — troca de senha
+        run: node testes/minha-conta.js
       - name: Security auth UI
         run: node testes/security-auth-ui.js
       - name: Interface de revisões controladas
