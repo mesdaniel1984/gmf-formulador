@@ -1,0 +1,176 @@
+{
+  "data": "2026-09-23",
+  "metodo": "Consulta somente leitura. Contagem por nome exato e produto distinto; não representa volume produzido. Cadastros próprios preservados.",
+  "ingredientes": [
+    {
+      "ingrediente": "Composto Lacteo com LM267",
+      "produtos": 19,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha técnica vigente Alibra LM267, com código e revisão"
+    },
+    {
+      "ingrediente": "Soro",
+      "produtos": 19,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Identificar fabricante e tipo de soro; ficha nutricional e laudo aplicável"
+    },
+    {
+      "ingrediente": "Açúcar Cristal moída",
+      "produtos": 16,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "CMC 2604A",
+      "produtos": 15,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha Denver CMC 2604A, incluindo base de fibras e sódio"
+    },
+    {
+      "ingrediente": "Aroma de leite",
+      "produtos": 11,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Código exato Duas Rodas e ficha correspondente"
+    },
+    {
+      "ingrediente": "Maltodextrina (Manimalto 20)",
+      "produtos": 8,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha INDEMIL Manimalto 20; página pública confirma identidade, não composição completa"
+    },
+    {
+      "ingrediente": "Permeado",
+      "produtos": 8,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Cacau em pó alcalino gold",
+      "produtos": 7,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Cacau em pó alcalino solúvel 100%",
+      "produtos": 7,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "LPI",
+      "produtos": 6,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "LPD",
+      "produtos": 4,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Premix de Nutrientes SMV8150 (Sweetmix)",
+      "produtos": 4,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Dióxido de Titânio Anatase (INS 171)",
+      "produtos": 3,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Sal",
+      "produtos": 3,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Aroma ID Natural Chocolate Branco (ADC 1784/1810)",
+      "produtos": 2,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Leite integral em pó instantâneo (Ninho)",
+      "produtos": 2,
+      "situacao": "Fonte conferida e correção publicada no PR 27",
+      "documento_necessario": "Capturas Nestlé 23/09/2026, registradas no PR27"
+    },
+    {
+      "ingrediente": "Polidextrose — Fibra Solúvel (ADC 1119/1097)",
+      "produtos": 2,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Purelac Pro Mix — Mistura Láctea p/ Sorvetes (FT 2018)",
+      "produtos": 2,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Café solúvel em pó",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "CAFE TORRADO E MOIDO",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Composto Lácteo Supreme 25kg",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Goma xantana",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Leite em pó integral",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Mistura Láctea Select 25Kg",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "Sacarose",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    },
+    {
+      "ingrediente": "WPC34",
+      "produtos": 1,
+      "situacao": "Documento específico pendente de conferência",
+      "documento_necessario": "Ficha/rótulo do fornecedor exato, código, revisão, unidades e data"
+    }
+  ],
+  "fontes_consultadas": [
+    {
+      "autor": "INDEMIL",
+      "titulo": "Maltodextrina INDEMIL",
+      "url": "https://indemil.com.br/produto/maltodextrina/",
+      "escopo": "Identidade da linha Manimalto 20; insuficiente para validar números"
+    },
+    {
+      "autor": "Sooro",
+      "titulo": "Permeado de Whey e suas funcionalidades",
+      "url": "https://sooro.com.br/permeado-de-whey-e-suas-funcionalidades/",
+      "escopo": "Descrição geral; insuficiente para validar composição do SKU utilizado"
+    }
+  ]
+}
