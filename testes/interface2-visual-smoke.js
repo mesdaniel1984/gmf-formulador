@@ -61,6 +61,8 @@ const path=require('path');
     p=await pageCheck('.gmf-preview-smoke.html',1440,900,'GMF workspace desktop');
     await p.waitForTimeout(700);
     check(await p.locator('#i2Workspace').isVisible(),'workspace do GMF visivel no preview isolado');
+    check(await p.locator('.i2-switch a[href="https://qualidade-alimentos-production.up.railway.app/sso/start"]').count()===1,'GMF abre CQ pelo SSO da Central');
+    check(await p.locator('.i2-switch a[href="conversas.html"]').count()===1,'GMF oferece acesso direto ao SAC WhatsApp');
     check(await p.locator('[data-i2-life]').count()===6,'lifecycle principal do GMF possui seis etapas operacionais');
     check(await p.locator('#i2wsHistory').count()===1,'historico aparece como etapa separada');
     check(await p.locator('#wizardNav').evaluate(el=>getComputedStyle(el).display)==='none','wizard legado fica oculto na Interface 2.0');
