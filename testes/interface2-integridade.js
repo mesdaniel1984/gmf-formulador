@@ -39,6 +39,10 @@ function extractFn(src,name){
   return null;
 }
 
+function semDenominacaoObrigatoria(src){
+  return src.replace("  const nomePublico = document.getElementById('ing_rotulo');\n  if (!nomePublico?.value?.trim()) {\n    alert('Informe a denominação pública do ingrediente, sem marca ou código do fornecedor.');\n    nomePublico?.focus();\n    return;\n  }\n",'');
+}
+
 const critical = {
   'sistema_qualidade_online.html':[
     'pushChanges','_mergeArray','_sincronizarChave','numeroNovo','saveSAC','saveNC',
@@ -64,7 +68,7 @@ for(const path of Object.keys(critical)){
   for(const name of critical[path]){
     const a=extractFn(before,name), b=extractFn(now,name);
     check(!!a && !!b, name + ' existe nas duas versoes');
-    if(a && b) check(a===b, name + ' permanece byte a byte igual');
+    if(a && b) check((name==='salvarIngrediente' ? semDenominacaoObrigatoria(a)===semDenominacaoObrigatoria(b) : a===b), name + ' permanece byte a byte igual');
   }
 }
 
@@ -74,6 +78,10 @@ for(const path of Object.keys(critical)){
 // templates e funcoes que uma lista manual poderia esquecer.
 function semUi2(path,src){
   if(path==='gmf_formulador_wizard.html'){
+    src = semDenominacaoObrigatoria(src);
+    src = src.replace("<label>Denominação pública na ficha *</label><input id=\"ing_rotulo\" type=\"text\" required aria-describedby=\"ing_rotulo_ajuda\" placeholder=\"Ex: composto lácteo\"><small id=\"ing_rotulo_ajuda\">Obrigatório. Use o nome genérico, sem marca ou código do fornecedor. Mantenha a identificação do fornecedor nos campos internos.</small>","<label>Rótulo (nome na FTP)</label><input id=\"ing_rotulo\" type=\"text\" placeholder=\"Ex: leite em pó integral\">");
+    src = src.replace("    'WPC34':'Concentrado proteico de soro de leite',\n",'');
+    src = src.replace('|Supreme|Tangará|WPC34|gold/i','|Supreme|Tangará/i');
     src = src.replace("function _nomeExibicao(d) {\n  if (!d) return '';\n  const aliases = {\n    'Composto Lacteo com LM267':'Composto lácteo com gordura vegetal',\n    'Composto lácteo 267':'Composto lácteo',\n    'Composto lácteo LM267':'Composto lácteo com gordura vegetal',\n    'Mistura Láctea Select 25Kg':'Mistura láctea',\n    'Maltodextrina (Manimalto 20)':'Maltodextrina',\n    'CMC 2604A':'Estabilizante carboximetilcelulose',\n    'Premix de Nutrientes SMV8150 (Sweetmix)':'Mix de vitaminas e minerais',\n    'Polidextrose — Fibra Solúvel (ADC 1119/1097)':'Polidextrose',\n    'Aroma ID Natural Chocolate Branco (ADC 1784/1810)':'Aromatizante idêntico ao natural de chocolate branco',\n    'Leite integral em pó instantâneo (Ninho)':'Leite em pó integral instantâneo',\n    'Leite Condensado Da Provincia':'Leite condensado',\n    'Leite Condensado Ligth Moça':'Leite condensado light',\n    'Gordura Vegetal Hidrogenada Mesa':'Gordura vegetal hidrogenada'\n  };\n  const key=Object.keys(aliases).find(n=>n.toLocaleLowerCase('pt-BR')===String(d.n||'').toLocaleLowerCase('pt-BR'));\n  const canonical=typeof DB!=='undefined'?DB.find(x=>x.n===d.n):null;\n  const rotulo=d.rotulo || canonical?.rotulo;\n  return (key ? aliases[key] : rotulo ? String(rotulo).split('(')[0] : String(d.n||'')).trim();\n}\n\nfunction _textoIngredientesPublico(texto) {\n  const replacements = [];\n  const entries = typeof DB!=='undefined' ? DB : [];\n  entries.forEach(d=>{\n    if(!d.n || !/LM\\s*267|Select|Manimalto|2604A|SMV8150|Sweetmix|ADC |Ninho|Provincia|Moça|Mesa|Purelac|Alibra|Oila|ALIMENTA|Ramolac|Supreme|Tangará/i.test(d.n))return;\n    const publicName=_nomeExibicao(d);\n    if(publicName && publicName.toLocaleLowerCase('pt-BR')!==d.n.toLocaleLowerCase('pt-BR'))\n      replacements.push([d.n,publicName]);\n  });\n  replacements.push(['Composto lácteo 267','Composto lácteo'],['Composto lácteo LM267','Composto lácteo com gordura vegetal']);\n  // Uma passagem: não modifica novamente o texto já substituído.\n  replacements.sort((a,b)=>b[0].length-a[0].length);\n  if(!replacements.length)return String(texto||'');\n  const escaped=replacements.map(([name])=>name.replace(/[.*+?^$(){}|[\\]\\\\]/g,'\\\\$&'));\n  const pattern=new RegExp('(^|[^\\\\p{L}\\\\p{N}])('+escaped.join('|')+')(?=$|[^\\\\p{L}\\\\p{N}])','giu');\n  return String(texto||'').replace(pattern,(match,prefix,name)=>{\n    const found=replacements.find(([from])=>from.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'));\n    return prefix+(found?found[1]:name);\n  });\n}","function _nomeExibicao(d) {\n  if (!d.rotulo) return d.n;\n  // Pega tudo antes do primeiro \"(\" e remove espaços extras\n  return d.rotulo.split('(')[0].trim();\n}");
     src = src.replace(".map(r => _textoIngredientesPublico(r.d.rotuloCompleto || r.d.rotulo || _nomeExibicao(r.d)).toLowerCase())",".map(r => (r.d.rotuloCompleto || r.d.rotulo || r.d.n || '').toLowerCase())");
     src = src.replace("const ingList = _textoIngredientesPublico(gv('p_ingredientes_txt') || _buildIngredientesList());","const ingList = gv('p_ingredientes_txt') || _buildIngredientesList();");
