@@ -36,6 +36,8 @@ jobs:
         run: node testes/painel-admin.js
       - name: Painel Admin — análise executiva
         run: node testes/painel-admin-analytics.js
+      - name: Sessão compartilhada da Central
+        run: node testes/central-session.js
       - name: Security auth UI
         run: node testes/security-auth-ui.js
       - name: Interface de revisões controladas

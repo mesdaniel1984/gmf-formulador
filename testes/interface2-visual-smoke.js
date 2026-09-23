@@ -20,6 +20,7 @@ const path=require('path');
   }
   async function pageCheck(path,width,height,label){
     const p=await browser.newPage({viewport:{width,height}});
+    if(path==='index.html')await p.route('https://cdn.jsdelivr.net/**',route=>route.fulfill({contentType:'application/javascript',body:"window.supabase={createClient:()=>({auth:{getUser:async()=>({data:{user:{email:'teste@exemplo.local'}}}),onAuthStateChange:()=>{},signOut:async()=>({})}})};"}));
     const errors=[];
     p.on('pageerror',e=>errors.push(String(e)));
     await p.goto('http://127.0.0.1:4173/'+path,{waitUntil:'domcontentloaded'});

@@ -6,6 +6,8 @@
 <title>Central de Sistemas — Grupo MF Paris</title>
 <meta name="description" content="Central corporativa dos sistemas de formulação, gestão da qualidade e controle de qualidade do Grupo MF Paris.">
 <link rel="stylesheet" href="gmf-ui.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
+<script defer src="central-session.js?v=1"></script>
 </head>
 <body class="gmf-ui">
 <header class="gmf-topbar">
@@ -26,6 +28,11 @@
 </header>
 
 <main class="gmf-page">
+  <section class="gmf-panel" aria-label="Sua sessão" style="padding:16px;margin-bottom:20px">
+    <p id="centralSessionStatus" role="status">Verificando sua sessão…</p>
+    <a id="centralEnter" href="login.html?next=central">Entrar na Central →</a>
+    <button id="centralSignOut" type="button" hidden>Sair neste navegador</button>
+  </section>
   <div class="gmf-title-row">
     <div class="gmf-title">
       <div class="gmf-eyebrow">Central corporativa</div>
@@ -144,13 +151,13 @@
     <div class="gmf-panel">
       <div class="gmf-panel-head">
         <h3>Acesso atual</h3>
-        <small>Use sua conta autorizada em cada sistema</small>
+        <small>Sessão compartilhada e acessos específicos</small>
       </div>
       <div class="gmf-access">
-        <div class="gmf-access-row"><strong>P&D</strong><span>Acesso no painel de P&D</span></div>
-        <div class="gmf-access-row"><strong>Formulador</strong><span>Acesso no Formulador</span></div>
-        <div class="gmf-access-row"><strong>SGQ</strong><span>Acesso na Gestão da Qualidade</span></div>
-        <div class="gmf-access-row"><strong>CQ</strong><span>Acesso no Controle de Qualidade</span></div>
+        <div class="gmf-access-row"><strong>P&D</strong><span>Conta própria · integração em andamento</span></div>
+        <div class="gmf-access-row"><strong>Formulador</strong><span>Mesma sessão da Central</span></div>
+        <div class="gmf-access-row"><strong>SGQ</strong><span>Mesma sessão da Central</span></div>
+        <div class="gmf-access-row"><strong>CQ</strong><span>Conta própria · integração em andamento</span></div>
       </div>
     </div>
   </section>
