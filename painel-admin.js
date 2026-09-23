@@ -70,7 +70,7 @@
     el('registros').replaceChildren();
     if(g.rows===null)el('registros').textContent='Dados indisponíveis. A Administração também precisa de autorização no módulo de origem.';
     else if(!g.rows.length)el('registros').textContent='Nenhum registro atende ao filtro.';
-    else g.rows.forEach(r=>el('registros').append(row([r.numero,r.titulo].filter(Boolean).join(' · ')||'Atendimento humano',[(day(r.data)||'Data não informada'),r.status,r.lote?'Lote '+r.lote:null,r.empresa].filter(Boolean).join(' · '))));
+    else g.rows.forEach(r=>el('registros').append(row([r.numero,r.titulo].filter(Boolean).join(' · ')||'Atendimento humano',[(day(r.data)||'Data não informada'),r.status,r.lote?'Lote '+r.lote:null,r.empresa,day(r.prazo)?'Prazo '+day(r.prazo):null,r.responsavel].filter(Boolean).join(' · '))));
     el('carimbo').textContent='Consulta ao banco: '+new Date(data.consultado_em).toLocaleString('pt-BR')+'. Rondas e OMIE ainda não integrados a este painel.';
   }
   async function load(){
@@ -90,7 +90,10 @@
   el('limpar').onclick=()=>{el('inicio').value='';el('fim').value='';paint();};
   el('sair').onclick=async()=>{++generation;clear('Encerrando sessão…');if(sb){const r=await sb.auth.signOut();if(r.error){clear('Não foi possível encerrar a sessão. Tente novamente.');return;}}location.href='login.html?next=admin';};
   try{sb=root.supabase.createClient('https://ailzblgrxtdakpkchstl.supabase.co',key);
-    sb.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){++generation;clear('Sessão encerrada. Entre novamente.');el('entrar').hidden=false;el('atualizar').disabled=false;}});
+    sb.auth.onAuthStateChange(event=>{
+      if(event==='SIGNED_OUT'){++generation;clear('Sessão encerrada. Entre novamente.');el('entrar').hidden=false;el('atualizar').disabled=false;}
+      if(event==='SIGNED_IN'||event==='USER_UPDATED'){++generation;clear('Revalidando acesso…');setTimeout(load,0);}
+    });
   }catch(e){/* load displays a recoverable failure */}
   load();
 })(typeof window==='object'?window:globalThis);
