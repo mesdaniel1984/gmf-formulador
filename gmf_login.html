@@ -61,7 +61,7 @@ function destinoLogin(search){
     qualidade:'sistema_qualidade_online.html', sac:'conversas.html', admin:'painel-admin.html' };
   const escolhido = new URLSearchParams(search).get('next');
   return Object.prototype.hasOwnProperty.call(destinos, escolhido)
-    ? destinos[escolhido] : destinos.formulador;
+    ? destinos[escolhido] : destinos.central;
 }
 function go(){ location.replace(destinoLogin(location.search)); }
 function msg(id,t,c){const e=document.getElementById(id);e.textContent=t;e.className='msg '+c;}
