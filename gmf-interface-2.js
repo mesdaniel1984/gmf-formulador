@@ -22,7 +22,8 @@
       +'<nav class="i2-switch" aria-label="Trocar sistema">'
       +'<a href="gmf_formulador_wizard.html" class="'+(k==='gmf'?'active':'')+'">GMF</a>'
       +'<a href="sistema_qualidade_online.html" class="'+(k==='sgq'?'active':'')+'">SGQ</a>'
-      +'<a href="https://qualidade-alimentos-production.up.railway.app/" class="">CQ ↗</a>'
+      +'<a href="https://qualidade-alimentos-production.up.railway.app/sso/start">CQ ↗</a>
+      +'<a href="conversas.html">SAC / WhatsApp</a>'
       +'</nav><span class="i2-right"><span class="i2-state">Interface 2.0</span>'
       +'<button type="button" class="i2-logout" id="i2Logout">Sair</button></span>';
     document.body.insertBefore(bar,document.body.firstChild);
