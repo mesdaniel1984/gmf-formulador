@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),cp=require('node:child_process');
-const read=s=>JSON.parse(JSON.stringify(vm.runInNewContext(s.match(/const DB=(\\[[\\s\\S]*?\\n\\]);/)[1])));
+const read=s=>JSON.parse(JSON.stringify(vm.runInNewContext(s.match(/const DB=(\[[\s\S]*?\n\]);/)[1])));
 const before=read(cp.execFileSync('git',['show','96646b39a1b00709f57626cac469a8c952bac8ff:gmf_formulador_wizard.html'],{encoding:'utf8',maxBuffer:2e6}));
 const after=read(fs.readFileSync('gmf_formulador_wizard.html','utf8'));
 assert.equal(before.length,after.length);
