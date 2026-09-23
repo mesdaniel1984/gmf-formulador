@@ -65,6 +65,8 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
+      - name: CQ — origem da passagem entre sistemas
+        run: node testes/cq-origem-post.js
       - name: Rodar suíte SGQ
         run: |
           for f in \
