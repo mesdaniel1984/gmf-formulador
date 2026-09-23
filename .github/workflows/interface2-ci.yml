@@ -28,8 +28,11 @@ jobs:
           node --check sgq-workspace.js
           node --check gmf-auth.js
           node --check gmf-central.js
+          node --check painel-admin.js
       - name: HTML operacional igual à baseline
         run: node testes/interface2-integridade.js
+      - name: Painel Admin — contagens e datas
+        run: node testes/painel-admin.js
       - name: Security auth UI
         run: node testes/security-auth-ui.js
       - name: Interface de revisões controladas
@@ -71,6 +74,8 @@ jobs:
         run: node testes/interface2-visual-smoke.js
       - name: Smoke visual Sandbox F4.3
         run: node testes/phase4-3-sandbox-visual-smoke.js
+      - name: Painel Admin — navegação, sessão e mobile
+        run: node testes/painel-admin-visual.js
       - name: Upload evidencias visuais
         if: always()
         uses: actions/upload-artifact@v4
@@ -78,3 +83,4 @@ jobs:
           name: interface2-uat-gmf-sgq
           path: ui2-screens
           if-no-files-found: error
+
