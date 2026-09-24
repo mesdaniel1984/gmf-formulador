@@ -184,6 +184,7 @@ a{ color:var(--selo); }
         <div class="fone" id="pFone"></div>
       </div>
       <div class="painel-acoes">
+        <button class="btn btn-forte" id="btnAssumir" hidden>Assumir e responder</button>
         <button class="btn" id="btnResolver" disabled>Marcar como resolvido</button>
       </div>
     </div>
@@ -403,6 +404,12 @@ function atualizarBotoes(){
   const temConversa = !!est.aberta;
   const janelaAberta = !!est.ultimaEntrada &&
                        (Date.now() - new Date(est.ultimaEntrada)) < 24*3600*1000;
+
+  $('btnAssumir').hidden = !temConversa || est.situacaoAberta === 'ABERTO'
+                          || !est.podeResponder;
+  $('btnAssumir').disabled = est.enviando || est.encerrada || !janelaAberta;
+  $('btnAssumir').title = janelaAberta ? 'Passar do robô para a equipe da Qualidade'
+                                     : 'A janela de resposta do WhatsApp encerrou';
 
   $('btnEnviar').disabled = est.enviando || est.encerrada || !temConversa
                             || est.situacaoAberta !== 'ABERTO'
@@ -748,6 +755,41 @@ async function enviar(){
   }
 }
 
+async function assumir(){
+  if(est.enviando || est.encerrada || !est.aberta || !est.podeResponder
+     || !est.ultimaEntrada || Date.now() - new Date(est.ultimaEntrada) >= 24*3600*1000) return;
+  const destino = est.aberta;
+  est.enviando = true;
+  atualizarBotoes();
+  try {
+    const { data } = await sb.auth.getSession();
+    const token = data && data.session && data.session.access_token;
+    if(!token) return await encerrar('sessao');
+    const r = await fetch(servidorSac() + '/atendimento/assumir', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
+      body:JSON.stringify({ telefone:destino })
+    });
+    if(r.status === 401) return await encerrar('sessao');
+    const corpo = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(corpo.erro || ('o servidor respondeu ' + r.status));
+    if(est.aberta !== destino) return;
+    est.situacaoAberta = 'ABERTO';
+    $('caixaResposta').hidden = false;
+    $('erro').hidden = true;
+    mostrarResolver({ situacao:'ABERTO' });
+    await carregarFila();
+  } catch(err){
+    if(est.aberta === destino){
+      $('caixaResposta').hidden = false;
+      recado('Não foi possível assumir esta conversa: ' + err.message);
+    }
+  } finally {
+    est.enviando = false;
+    atualizarBotoes();
+  }
+}
+
 /* ---------------------------------------------------------------------------
    Resolver — só mostra "Resolvido" depois que o banco confirmar a linha certa
 --------------------------------------------------------------------------- */
@@ -786,9 +828,12 @@ async function resolver(){
   }
 
   if(est.aberta === destino){
+    est.situacaoAberta = 'RESOLVIDO';
+    $('caixaResposta').hidden = true;
     $('btnResolver').textContent = 'Resolvido por ' + (linha.resolvido_por || '—')
                                  + ' · ' + hora(linha.resolvido_em);
     $('btnResolver').disabled = true;
+    atualizarBotoes();
   }
   carregarFila();
 }
@@ -824,6 +869,7 @@ function trocarAba(s){
 }
 
 $('btnEnviar').onclick   = enviar;
+$('btnAssumir').onclick  = assumir;
 $('btnResolver').onclick = resolver;
 $('voltar').onclick = () => { guardarRascunho(); document.body.classList.remove('abriu'); };
 $('abaTodas').onclick     = () => trocarAba('TODAS');
