@@ -139,6 +139,18 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
 .recado{ margin:9px 0 0; padding:10px 14px; font-size:13px; border-radius:8px; }
 .recado.erro{ background:var(--alerta-fundo); border:1px solid var(--alerta); }
 .recado.ok{ background:var(--selo-fundo); border:1px solid var(--selo); }
+.triagem{ background:var(--papel); border-top:1px solid var(--risca); padding:8px 18px;
+          max-height:48vh; overflow-y:auto; }
+.triagem summary{ cursor:pointer; font-weight:700; color:var(--selo); }
+.triagem-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:12px 0; }
+.triagem label{ display:block; font-size:12px; color:var(--grafite); }
+.triagem select,.triagem textarea{ display:block; width:100%; min-width:0; margin-top:4px;
+  background:var(--campo); color:var(--tinta); border:1px solid var(--risca);
+  border-radius:6px; font:inherit; padding:8px; }
+.triagem textarea{ min-height:56px; resize:vertical; }
+.triagem .acoes{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+@media(max-width:560px){.triagem-grid{grid-template-columns:1fr}.painel-topo{flex-wrap:wrap}
+  .painel-acoes{width:100%;margin-left:0;flex-wrap:wrap}}
 
 .portao{ max-width:480px; margin:64px auto; background:var(--papel);
          border:1px solid var(--risca); border-radius:10px; padding:26px 24px; }
@@ -192,6 +204,45 @@ a{ color:var(--selo); }
     <div class="conversa" id="conversa">
       <p class="vazio">Escolha uma conversa na lista ao lado.</p>
     </div>
+
+    <details class="triagem" id="triagem" hidden>
+      <summary>Classificar e encaminhar <span id="triagemStatus"></span></summary>
+      <div class="triagem-grid">
+        <label>Assunto<select id="triCategoria">
+          <option value="">Selecione</option>
+          <option value="QUALIDADE_PRODUTO">Qualidade do produto</option>
+          <option value="CORPO_ESTRANHO">Corpo estranho</option>
+          <option value="EMBALAGEM">Embalagem</option>
+          <option value="ROTULAGEM">Rotulagem</option>
+          <option value="ENTREGA">Entrega e pedido</option>
+          <option value="ATENDIMENTO">Atendimento</option>
+          <option value="FATURAMENTO">Faturamento</option>
+          <option value="OUTRO">Outro</option>
+        </select></label>
+        <label>Área responsável<select id="triArea">
+          <option value="">Selecione</option>
+          <option value="QUALIDADE">Qualidade</option>
+          <option value="PRODUCAO">Produção</option>
+          <option value="LOGISTICA">Logística</option>
+          <option value="COMERCIAL">Comercial</option>
+          <option value="FINANCEIRO">Financeiro</option>
+          <option value="REGULATORIO">Regulatório</option>
+          <option value="OUTROS">Outros</option>
+        </select></label>
+        <label>Prioridade<select id="triPrioridade"><option value="NORMAL">Normal</option><option value="ALTA">Alta</option></select></label>
+        <label>Não conformidade<select id="triNC">
+          <option value="AVALIAR">Avaliar pela Qualidade</option>
+          <option value="NECESSARIA">Abrir NC no SGQ</option>
+          <option value="NAO_APLICA">Não aplicável</option>
+        </select></label>
+      </div>
+      <label>Resumo interno para a área<textarea id="triObservacao" maxlength="1000" placeholder="Descreva o problema e a ação esperada. Evite dados pessoais."></textarea></label>
+      <div class="acoes" style="margin-top:10px">
+        <button class="btn btn-forte" id="btnSalvarTriagem">Salvar encaminhamento</button>
+        <button class="btn" id="btnAbrirNC" hidden>Abrir rascunho de NC no SGQ ↗</button>
+      </div>
+      <p class="recado erro" id="triErro" hidden></p>
+    </details>
 
     <div class="resposta" id="caixaResposta" hidden>
       <div id="avisoJanela"></div>
@@ -373,6 +424,7 @@ async function encerrar(motivo){
 
   est.sessao = null; est.papel = null; est.podeResponder = false;
   est.aberta = null; est.rascunhos.clear(); est.enviando = false;
+  est.triagemSalva = null;
   est.ultimaEntrada = null; est.maisAntiga = null;
 
   $('lista').innerHTML = '';
@@ -383,6 +435,7 @@ async function encerrar(motivo){
   $('papelSelo').hidden = true;
   $('atualizado').textContent = '—';
   $('caixaResposta').hidden = true;
+  $('triagem').hidden = true;
   $('btnEnviar').disabled = true;
   $('btnResolver').disabled = true;
   $('texto').disabled = true;
@@ -466,6 +519,16 @@ async function carregarFila(){
 
   if(minha !== est.seq || est.encerrada) return;      // consulta velha: descarta
 
+  if(!error && data && data.length){
+    const triagens = await sb.from('wa_triagem')
+      .select('telefone,area,prioridade,nc_decisao').limit(500);
+    if(minha !== est.seq || est.encerrada) return;
+    if(!triagens.error){
+      const porContato=new Map((triagens.data||[]).map(t=>[t.telefone,t]));
+      data=data.map(a=>({...a,triagem:porContato.get(a.telefone)||null}));
+    }
+  }
+
   const lista = $('lista');
   if(error){
     lista.innerHTML = '<p class="vazio">Não consegui ler a fila: ' + esc(error.message) + '</p>';
@@ -514,6 +577,9 @@ async function carregarFila(){
           : a.situacao === 'RESOLVIDO' ? 'Atendimento resolvido'
           : a.protocolo ? 'SAC registrado · robô' : 'Atendimento automático') +
         '</span>' : '') +
+      (a.triagem ? '<span class="situacao">Área: '+esc(a.triagem.area)+
+        (a.triagem.prioridade==='ALTA'?' · prioridade alta':'')+
+        (a.triagem.nc_decisao==='NECESSARIA'?' · NC a abrir':'')+'</span>' : '') +
       (rascunho ? '<span class="lapis">rascunho não enviado</span>' : '');
     b.onclick = () => abrir(a);
     lista.appendChild(b);
@@ -543,6 +609,11 @@ async function abrir(a){
   est.maisAntiga = null;
   est.temAnteriores = false;
   est.ultimaEntrada = null;
+  est.triagemSalva = null;
+  $('triagem').hidden = !est.podeResponder;
+  $('triagem').open = false;
+  $('btnAbrirNC').hidden = true;
+  $('triErro').hidden = true;
 
   document.body.classList.add('abriu');
   $('pNome').textContent = a.nome || 'Sem nome';
@@ -556,6 +627,7 @@ async function abrir(a){
 
   mostrarResolver(a);
   await carregarConversa();
+  await carregarTriagem(a.telefone);
   atualizarBotoes();
   carregarFila();
 }
@@ -567,6 +639,80 @@ function mostrarResolver(a){
     ? 'Marcar como resolvido'
     : 'Resolvido' + (a.resolvido_por ? ' por ' + a.resolvido_por : '');
 }
+
+const AREA_SUGERIDA = {
+  QUALIDADE_PRODUTO:'QUALIDADE', CORPO_ESTRANHO:'QUALIDADE',
+  EMBALAGEM:'PRODUCAO', ROTULAGEM:'REGULATORIO', ENTREGA:'LOGISTICA',
+  ATENDIMENTO:'COMERCIAL', FATURAMENTO:'FINANCEIRO', OUTRO:'OUTROS'
+};
+function triagemAviso(mensagem){
+  $('triErro').textContent = mensagem;
+  $('triErro').hidden = !mensagem;
+}
+async function carregarTriagem(telefone){
+  const minha = est.seq;
+  $('triagemStatus').textContent = '· carregando';
+  $('btnSalvarTriagem').disabled = true;
+  const {data,error} = await sb.from('wa_triagem')
+    .select('telefone,categoria,area,prioridade,nc_decisao,observacao,protocolo,atualizado_em')
+    .eq('telefone',telefone).maybeSingle();
+  if(minha !== est.seq || est.aberta !== telefone || est.encerrada) return;
+  if(error){ triagemAviso('Não consegui ler o encaminhamento: ' + error.message);
+    $('triagemStatus').textContent='· indisponível'; return; }
+  triagemAviso('');
+  est.triagemSalva = data;
+  $('triCategoria').value = data?.categoria || '';
+  $('triArea').value = data?.area || '';
+  $('triPrioridade').value = data?.prioridade || 'NORMAL';
+  $('triNC').value = data?.nc_decisao || 'AVALIAR';
+  $('triObservacao').value = data?.observacao || '';
+  $('triagemStatus').textContent = data ? '· '+data.area+' · salva' : '· pendente';
+  $('btnAbrirNC').hidden = !data || data.nc_decisao !== 'NECESSARIA';
+  $('btnSalvarTriagem').disabled = !est.podeResponder;
+}
+async function salvarTriagem(){
+  const telefone=est.aberta;
+  if(!telefone || !est.podeResponder || est.encerrada || $('btnSalvarTriagem').disabled) return;
+  const categoria=$('triCategoria').value, area=$('triArea').value;
+  if(!categoria || !area){ triagemAviso('Selecione assunto e área responsável.'); return; }
+  $('btnSalvarTriagem').disabled=true;
+  triagemAviso('');
+  const prioridade=$('triPrioridade').value, ncDecisao=$('triNC').value;
+  const observacao=$('triObservacao').value.trim();
+  const {data:entradas}=await sb.from('sac_entrada')
+    .select('protocolo').eq('contato',telefone)
+    .order('criado_em',{ascending:false}).limit(1);
+  if(est.aberta!==telefone || est.encerrada) return;
+  const registro={telefone,categoria,area,prioridade,
+    nc_decisao:ncDecisao,observacao,
+    protocolo:(entradas && entradas[0] && entradas[0].protocolo) || est.triagemSalva?.protocolo || null,
+    atualizado_por:est.sessao.user.id,atualizado_em:new Date().toISOString()};
+  const {data,error}=await sb.from('wa_triagem').upsert(registro,{onConflict:'telefone'})
+    .select('telefone,categoria,area,prioridade,nc_decisao,observacao,protocolo,atualizado_em').single();
+  if(est.aberta!==telefone || est.encerrada) return;
+  $('btnSalvarTriagem').disabled=false;
+  if(error){ triagemAviso('Não salvei o encaminhamento: '+error.message); return; }
+  est.triagemSalva=data;
+  $('triagemStatus').textContent='· '+data.area+' · salva';
+  $('btnAbrirNC').hidden=data.nc_decisao!=='NECESSARIA';
+}
+function abrirNCTriagem(){
+  const t=est.triagemSalva;
+  if(!t || t.telefone!==est.aberta || t.nc_decisao!=='NECESSARIA') return;
+  // A transferência dura somente esta navegação, na mesma origem. Nenhum
+  // contato ou relato do cliente entra na URL, histórico ou analytics.
+  sessionStorage.setItem('sac_nc_rascunho',JSON.stringify({
+    telefone:t.telefone, categoria:t.categoria, area:t.area,
+    observacao:t.observacao, protocolo:t.protocolo || ''
+  }));
+  window.location.href='sistema_qualidade_online.html?abrir=nc&origem=sac';
+}
+$('triCategoria').onchange=()=>{
+  if(!$('triArea').value || $('triArea').value===AREA_SUGERIDA[est.triagemSalva?.categoria])
+    $('triArea').value=AREA_SUGERIDA[$('triCategoria').value] || '';
+};
+$('btnSalvarTriagem').onclick=salvarTriagem;
+$('btnAbrirNC').onclick=abrirNCTriagem;
 
 /* ---------------------------------------------------------------------------
    Conversa — carrega as MAIS RECENTES; as anteriores vêm sob demanda.

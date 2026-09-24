@@ -106,6 +106,13 @@ function semUi2(path,src){
     src = src.replace("_initAuth().then(async()=>{ if (!_currentUser) return; try { await _sincronizarSeeds(); } catch(e){ console.warn('sync erro:',e); } await carregarProdutosAsync(); irParaFormulador(); });","_initAuth().then(async()=>{ try { await _sincronizarSeeds(); } catch(e){ console.warn('sync erro:',e); } await carregarProdutosAsync(); mostrarMenuInicial(); });");
     return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="gmf-workspace.js"></script>\n','');
   }
+  if(path==='sistema_qualidade_online.html'){
+    // Exceção restrita à ponte de rascunho SAC → NC. As demais funções
+    // operacionais devem continuar idênticas à baseline histórica.
+    const antiga=extractFn(baseFile(path),'aplicarParametrosDaURL');
+    const atual=extractFn(src,'aplicarParametrosDaURL');
+    if(atual && antiga) src=src.replace(atual,antiga);
+  }
   return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="sgq-workspace.js"></script>\n','');
 }
 for(const path of ['gmf_formulador_wizard.html','sistema_qualidade_online.html']){
