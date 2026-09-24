@@ -112,6 +112,17 @@ function semUi2(path,src){
     const antiga=extractFn(baseFile(path),'aplicarParametrosDaURL');
     const atual=extractFn(src,'aplicarParametrosDaURL');
     if(atual && antiga) src=src.replace(atual,antiga);
+    // Fiscalizações alteram apenas o calendário, o cadastro de análises e
+    // a navegação. A comparação integral continua protegendo o resto do SGQ.
+    const original=baseFile(path);
+    for(const fn of ['showSection','calcProximas','renderAnalMap','renderAnal','openAnalModal','delAnal','saveAnal','startApp']){
+      const novo=extractFn(src,fn), anterior=extractFn(original,fn);
+      if(novo && anterior)src=src.replace(novo,anterior);
+    }
+    src=src.replace('  <button onclick="showSection(\'fiscalizacoes\')">🏛️ Fiscalizações</button>\n','');
+    src=src.replace(/<!-- FISCALIZAÇÕES: processo oficial separado do registro analítico -->[\s\S]*?(?=<!-- ===== NCS ===== -->)/,'');
+    src=src.replace(/    <div class="form-row">\n      <div class="form-group"><label>Origem<\/label><select id="aOrigem"[\s\S]*?(?=    <div class="form-row">\n      <div class="form-group" style="grid-column:1\/-1"><label>Parâmetros Analisados)/,'');
+    src=src.replace(/<!-- Modal próprio para a fiscalização; o laudo fica em Análises. -->[\s\S]*?<script src="sgq-fiscalizacoes.js"><\/script>\n/,'');
   }
   return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="sgq-workspace.js"></script>\n','');
 }
