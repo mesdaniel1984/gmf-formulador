@@ -38,6 +38,7 @@ function fiscalNovo(id){
   fiEl('fiProcesso').value=f.processo||'';fiEl('fiData').value=f.data_fiscalizacao||today();
   fiEl('fiPrazo').value=f.prazo_resposta||'';fiEl('fiResponsavel').value=f.responsavel||'';
   fiEl('fiSituacao').value=f.situacao||'Aberta';fiEl('fiObs').value=f.observacao||'';
+  fiEl('fiDocumentos').value='';
   fiEl('fiscalModalTitulo').textContent=f.id?'Editar fiscalização':'Registrar fiscalização';
   fiEl('fiscalModal').classList.add('open');
 }
@@ -47,12 +48,17 @@ async function fiscalSalvar(){
   const v={empresa:fiVal('fiEmpresa'),orgao:fiVal('fiOrgao'),orgao_outro:fiVal('fiOrgaoOutro')||null,
     processo:fiVal('fiProcesso'),data_fiscalizacao:fiVal('fiData'),prazo_resposta:fiVal('fiPrazo')||null,
     responsavel:fiVal('fiResponsavel'),situacao:fiVal('fiSituacao'),observacao:fiVal('fiObs')};
-  const id=fiVal('fiId');fiEl('fiSalvar').disabled=true;
+  const id=fiVal('fiId'),files=Array.from(fiEl('fiDocumentos').files||[]);
+  if(files.some(file=>!['application/pdf','image/png','image/jpeg'].includes(file.type)||file.size>10485760))
+    return alert('Cada documento deve ser PDF, PNG ou JPG com até 10 MB.');
+  fiEl('fiSalvar').disabled=true;
   try{
     const r=id?await sb.from('fiscalizacoes').update(v).eq('id',id).select('id').single():
       await sb.from('fiscalizacoes').insert(v).select('id').single();
     if(r.error)throw r.error;
     fiscalSelecionada=r.data.id;closeModal('fiscalModal');await fiscalCarregar();
+    for(const file of files)await fiscalEnviarArquivo(file);
+    if(files.length)await fiscalCarregar();
   }catch(e){fiscalErro(e);}finally{fiEl('fiSalvar').disabled=false;}
 }
 function fiscalAbrir(id){
@@ -71,7 +77,7 @@ function fiscalAbrir(id){
     ${write?`<button class="btn btn-sm btn-outline" onclick="fiscalEditarExigencia()">+ Exigência</button>`:''}
     <h3 style="margin-top:20px">Documentos da fiscalização</h3>
     ${docs.map(d=>`<p><button class="btn btn-sm btn-outline" onclick="fiscalAbrirDocumento('${d.id}')">📎 ${fiEsc(d.nome)}</button></p>`).join('')||'<p>Nenhum documento anexado.</p>'}
-    ${write?`<label>Anexar documento (PDF, PNG ou JPEG até 10 MB) <input type="file" accept=".pdf,.png,.jpg,.jpeg" onchange="fiscalUpload(event)"></label>`:''}
+    ${write?`<label>Adicionar documentos (PDF, PNG ou JPEG até 10 MB cada) <input type="file" accept=".pdf,.png,.jpg,.jpeg" multiple onchange="fiscalUpload(event)"></label>`:''}
     <h3 style="margin-top:20px">Análises oficiais</h3>
     ${analises.map(a=>`<p>${fiEsc(a.produto)} · ${fiEsc(a.laudo||'sem nº de laudo')} · ${fmtDate(a.data)}
       ${eqs.some(e=>e.analise_id===a.id&&!e.revogada_em)?'<span class="badge ok">Equivalência aprovada</span>':'<span class="badge warn">Não dá baixa no plano</span>'}
@@ -100,14 +106,21 @@ async function fiscalSalvarExigencia(id){
   try{const r=id?await sb.from('fiscalizacao_exigencias').update(v).eq('id',id):await sb.from('fiscalizacao_exigencias').insert({...v,fiscalizacao_id:fiscalSelecionada});
     if(r.error)throw r.error;await fiscalCarregar();}catch(e){fiscalErro(e);}
 }
-async function fiscalUpload(ev){
-  const file=ev.target.files&&ev.target.files[0];if(!file||!fiscalSelecionada||!fiscalPodeEscrever)return;
+async function fiscalEnviarArquivo(file){
+  if(!file||!fiscalSelecionada||!fiscalPodeEscrever)throw new Error('Selecione uma fiscalização antes de anexar.');
   const tipos={'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg'};
-  if(!tipos[file.type]||file.size>10485760)return alert('Arquivo inválido. Use PDF, PNG ou JPG com até 10 MB.');
+  if(!tipos[file.type]||file.size>10485760)throw new Error('Arquivo inválido. Use PDF, PNG ou JPG com até 10 MB.');
   const path=`fiscalizacoes/${fiscalSelecionada}/${crypto.randomUUID()}.${tipos[file.type]}`;
-  try{const up=await sb.storage.from('fiscalizacoes').upload(path,file,{contentType:file.type,upsert:false});if(up.error)throw up.error;
-    const row=await sb.from('fiscalizacao_documentos').insert({fiscalizacao_id:fiscalSelecionada,nome:file.name.slice(0,255),caminho:path});
-    if(row.error)throw row.error;await fiscalCarregar();}catch(e){fiscalErro(e);}
+  const up=await sb.storage.from('fiscalizacoes').upload(path,file,{contentType:file.type,upsert:false});if(up.error)throw up.error;
+  const row=await sb.from('fiscalizacao_documentos').insert({fiscalizacao_id:fiscalSelecionada,nome:file.name.slice(0,255),caminho:path});
+  if(row.error)throw row.error;
+}
+async function fiscalUpload(ev){
+  const files=Array.from(ev.target.files||[]);if(!files.length)return;
+  try{
+    for(const file of files)await fiscalEnviarArquivo(file);
+    await fiscalCarregar();
+  }catch(e){fiscalErro(e);}
 }
 async function fiscalAbrirDocumento(id){
   const doc=fiscalDocumentos.find(d=>d.id===id);if(!doc)return;
