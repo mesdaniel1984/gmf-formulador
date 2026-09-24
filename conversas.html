@@ -151,6 +151,23 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
 .triagem .acoes{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 @media(max-width:560px){.triagem-grid{grid-template-columns:1fr}.painel-topo{flex-wrap:wrap}
   .painel-acoes{width:100%;margin-left:0;flex-wrap:wrap}}
+.modo-casos>.fila,.modo-casos>.painel{display:none}
+.casos[hidden]{display:none}
+.casos{grid-column:1/-1;display:grid;grid-template-columns:minmax(280px,340px) minmax(0,1fr);min-height:0}
+.casos-lista{background:var(--papel);border-right:1px solid var(--risca);overflow:auto}
+.casos-detalhe{overflow:auto;padding:20px;min-width:0}
+.casos-detalhe h2{margin:0 0 8px;font-size:20px}
+.casos-filtros{padding:12px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--risca)}
+.casos-filtros select{max-width:100%;padding:7px;background:var(--papel);color:var(--tinta);border:1px solid var(--risca);border-radius:6px}
+.caso-card{background:var(--papel);border:1px solid var(--risca);border-radius:9px;padding:16px;margin-bottom:12px}
+.caso-card p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.caso-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.caso-grid label,.caso-largo{display:block;font-size:13px;font-weight:600;color:var(--grafite)}
+.caso-grid input,.caso-grid select,.caso-grid textarea,.caso-largo textarea{width:100%;min-width:0;margin-top:5px;padding:9px;border:1px solid var(--risca);border-radius:7px;background:var(--campo);color:var(--tinta);font:inherit}
+.caso-largo{margin:12px 0}.caso-largo textarea{min-height:75px}
+.caso-fotos{display:flex;flex-wrap:wrap;gap:12px}
+.caso-fotos img{display:block;max-width:240px;max-height:260px;object-fit:contain;border:1px solid var(--risca);border-radius:7px}
+@media(max-width:750px){.casos{grid-template-columns:1fr}.casos-lista{max-height:35vh}.caso-grid{grid-template-columns:1fr}}
 
 .portao{ max-width:480px; margin:64px auto; background:var(--papel);
          border:1px solid var(--risca); border-radius:10px; padding:26px 24px; }
@@ -167,6 +184,7 @@ a{ color:var(--selo); }
     <h1>Conversas do WhatsApp</h1>
   </div>
   <div class="topo-dir">
+    <button class="btn btn-forte" id="casosAlternar" type="button">Casos SAC</button>
     <a href="index.html" style="color:inherit;font-weight:600;padding:10px 0">← Voltar à Central</a>
     <span id="quem"></span>
     <span class="papel-selo" id="papelSelo" hidden></span>
@@ -253,6 +271,17 @@ a{ color:var(--selo); }
       </div>
       <p class="recado erro" id="erro" hidden></p>
     </div>
+  </section>
+  <section class="casos" id="casosPainel" aria-label="Casos do SAC" hidden>
+    <div class="casos-lista">
+      <div class="fila-topo"><span id="casosTotal">Casos do SAC</span><button class="aba" id="casosRecarregar" type="button">Atualizar</button></div>
+      <div class="casos-filtros">
+        <select id="casosFiltro" aria-label="Situação dos casos"><option value="pendentes">Pendentes</option><option value="todos">Todos</option><option value="concluidos">Concluídos</option></select>
+        <select id="casosAreaFiltro" aria-label="Área responsável"><option value="">Todas as áreas</option><option value="QUALIDADE">Qualidade</option><option value="PRODUCAO">Produção</option><option value="LOGISTICA">Logística</option><option value="COMERCIAL">Comercial</option><option value="FINANCEIRO">Financeiro</option><option value="REGULATORIO">Regulatório</option><option value="OUTROS">Outros</option></select>
+      </div>
+      <div id="casosLista" aria-live="polite"></div>
+    </div>
+    <div class="casos-detalhe" id="casosDetalhe"><p class="vazio">Selecione um protocolo para analisar.</p></div>
   </section>
 </main>
 
@@ -410,6 +439,7 @@ async function entrar(){
     $('papelSelo').textContent = est.papel;
   }
   $('tela').hidden = false;
+  queueMicrotask(() => { if(typeof casosCarregar === 'function') casosCarregar(); });
   return true;
 }
 
@@ -428,6 +458,10 @@ async function encerrar(motivo){
   est.ultimaEntrada = null; est.maisAntiga = null;
 
   $('lista').innerHTML = '';
+  $('casosLista').replaceChildren();
+  $('casosDetalhe').replaceChildren();
+  $('casosPainel').hidden = true;
+  $('tela').classList.remove('modo-casos');
   $('conversa').innerHTML = '';
   $('texto').value = '';
   $('contador').textContent = '';
@@ -1044,6 +1078,177 @@ sb.auth.onAuthStateChange((evento, sessao) => {
     if(document.visibilityState === 'visible') tique();
   });
 })();
+</script>
+<script>
+/* A manifestacao e identificada pelo ID do protocolo, nunca pelo telefone.
+   A conversa continua independente e disponivel no botao Conversas. */
+let casosCache=[], casosTratativas=new Map(), casoSelecionado=null, casoSequencia=0;
+const casoStatus={ENCAMINHADO:'Encaminhado',EM_ANALISE:'Em análise',
+  AGUARDANDO_CLIENTE:'Aguardando cliente',CONCLUIDO:'Concluído'};
+const casoArea={QUALIDADE:'Qualidade',PRODUCAO:'Produção',LOGISTICA:'Logística',
+  COMERCIAL:'Comercial',FINANCEIRO:'Financeiro',REGULATORIO:'Regulatório',OUTROS:'Outros'};
+function casosModo(abrir){
+  $('casosPainel').hidden=!abrir;
+  $('tela').classList.toggle('modo-casos',abrir);
+  $('casosAlternar').textContent=abrir?'← Conversas':'Casos SAC';
+  document.body.classList.remove('abriu');
+  if(abrir)casosCarregar();
+}
+async function casosCarregar(){
+  if(!est.sessao||est.encerrada)return;
+  const minha=++casoSequencia;
+  const [entradas,tratativas]=await Promise.all([
+    sb.from('sac_entrada').select('id,protocolo,nome,contato,produto,tipo,assunto,criado_em,prioridade')
+      .order('criado_em',{ascending:false}).limit(300),
+    sb.from('sac_caso_tratativa').select('caso_id,area,responsavel,prazo,prioridade,situacao,nc_decisao,resumo,retorno,nc_id,nc_numero,atualizado_em').limit(300)
+  ]);
+  if(minha!==casoSequencia||est.encerrada)return;
+  if(entradas.error||tratativas.error){
+    $('casosTotal').textContent='Casos indisponíveis';
+    $('casosLista').innerHTML='<p class="recado erro">Falha ao carregar os protocolos: '+
+      esc((entradas.error||tratativas.error).message)+'</p>';
+    return;
+  }
+  casosCache=entradas.data||[];
+  casosTratativas=new Map((tratativas.data||[]).map(t=>[t.caso_id,t]));
+  const pendentes=casosCache.filter(c=>casosTratativas.get(c.id)?.situacao!=='CONCLUIDO').length;
+  $('casosTotal').textContent=pendentes+' caso'+(pendentes===1?' pendente':'s pendentes');
+  $('casosAlternar').textContent=$('casosPainel').hidden
+    ? 'Casos SAC'+(pendentes?' · '+pendentes:''):'← Conversas';
+  casosDesenharLista();
+}
+function casosDesenharLista(){
+  const lista=$('casosLista');lista.replaceChildren();
+  let dados=casosCache.filter(c=>{
+    const t=casosTratativas.get(c.id), concluido=t?.situacao==='CONCLUIDO';
+    const filtro=$('casosFiltro').value,area=$('casosAreaFiltro').value;
+    return (filtro==='todos'||(filtro==='concluidos'?concluido:!concluido))
+      &&(!area||t?.area===area);
+  });
+  dados.sort((a,b)=>{
+    const ta=casosTratativas.get(a.id),tb=casosTratativas.get(b.id);
+    const pa=(ta?.prioridade==='ALTA'||a.prioridade)?1:0;
+    const pb=(tb?.prioridade==='ALTA'||b.prioridade)?1:0;
+    return pb-pa||new Date(a.criado_em)-new Date(b.criado_em);
+  });
+  if(!dados.length){lista.innerHTML='<p class="vazio">Nenhum protocolo neste filtro.</p>';return;}
+  for(const c of dados){
+    const t=casosTratativas.get(c.id), b=document.createElement('button');
+    b.type='button';b.className='item';b.dataset.casoId=c.id;
+    if(c.id===casoSelecionado)b.setAttribute('aria-current','true');
+    b.innerHTML='<span class="quem">'+esc(c.protocolo||'Sem protocolo')+'</span>'+
+      '<span class="previa">'+esc(c.tipo||'Manifestação')+' · '+esc(c.produto||'Produto não informado')+'</span>'+
+      '<span class="quando">'+esc(faz(c.criado_em))+'</span>'+
+      '<span class="situacao">'+esc(t?casoStatus[t.situacao]||t.situacao:'Aguardando triagem')+
+      (t?.area?' · '+esc(casoArea[t.area]):'')+
+      (t?.prazo&&t.situacao!=='CONCLUIDO'&&t.prazo<new Date().toISOString().slice(0,10)?' · PRAZO VENCIDO':'')+
+      ((t?.prioridade==='ALTA'||c.prioridade)?' · PRIORIDADE ALTA':'')+'</span>';
+    b.onclick=()=>casosAbrir(c.id);lista.appendChild(b);
+  }
+}
+function casoAviso(texto){const aviso=$('casoAviso');if(aviso){aviso.textContent=texto;aviso.hidden=!texto;}}
+async function casosAbrir(id){
+  casoSelecionado=id;casosDesenharLista();
+  const seq=++casoSequencia;
+  $('casosDetalhe').innerHTML='<p class="vazio">Carregando protocolo…</p>';
+  const {data:c,error}=await sb.from('sac_entrada')
+    .select('id,protocolo,nome,contato,produto,lote,relato,fotos,tipo,assunto,pedido,entrega_em,ocorrencia,criado_em,prioridade')
+    .eq('id',id).single();
+  if(seq!==casoSequencia||est.encerrada||casoSelecionado!==id)return;
+  if(error||!c){$('casosDetalhe').innerHTML='<p class="recado erro">Não foi possível abrir este protocolo.</p>';return;}
+  const t=casosTratativas.get(id)||{};
+  const opcoes=(obj,valor)=>Object.entries(obj).map(([k,n])=>
+    '<option value="'+esc(k)+'"'+(valor===k?' selected':'')+'>'+esc(n)+'</option>').join('');
+  $('casosDetalhe').innerHTML=`
+    <div class="caso-card"><h2>${esc(c.protocolo||'Sem protocolo')}</h2>
+      <button class="btn" type="button" id="casoVerConversa">Ver conversa no WhatsApp</button>
+      <p><b>Origem:</b> WhatsApp · ${esc(c.tipo||'Manifestação')} · ${esc(c.assunto||'Assunto não informado')}</p>
+      <p><b>Consumidor:</b> ${esc(c.nome||'Não informado')} · ${esc(fone(c.contato))}</p>
+      <p><b>Produto:</b> ${esc(c.produto||'Não informado')} · <b>Lote:</b> ${esc(c.lote||'Não informado')}</p>
+      <p><b>Pedido/NF:</b> ${esc(c.pedido||'Não informado')} · <b>Data informada:</b> ${esc(c.entrega_em||'Não informada')}</p>
+      <p><b>Relato:</b> ${esc(c.relato||'Não informado')}</p>
+      ${c.ocorrencia?'<p><b>Ocorrência:</b> '+esc(c.ocorrencia)+'</p>':''}
+      <div id="casoFotos" class="caso-fotos"></div></div>
+    <form class="caso-card" id="casoForm"><h2>Tratativa da Qualidade</h2>
+      <p>Defina uma área e quem assumiu o caso. O registro fica na fila por área e protocolo; confirme o acionamento com o responsável.</p>
+      <div class="caso-grid">
+        <label>Área responsável<select id="casoArea" required><option value="">Selecione</option>${opcoes(casoArea,t.area)}</select></label>
+        <label>Responsável designado<input id="casoResponsavel" maxlength="160" required value="${esc(t.responsavel||'')}"></label>
+        <label>Prazo para retorno<input id="casoPrazo" type="date" required value="${esc(t.prazo||'')}"></label>
+        <label>Situação<select id="casoSituacao">${opcoes(casoStatus,t.situacao||'ENCAMINHADO')}</select></label>
+        <label>Prioridade<select id="casoPrioridade"><option value="NORMAL"${t.prioridade!=='ALTA'&&!c.prioridade?' selected':''}>Normal</option><option value="ALTA"${t.prioridade==='ALTA'||(!t.prioridade&&c.prioridade)?' selected':''}>Alta</option></select></label>
+        <label>Não conformidade<select id="casoNC"><option value="AVALIAR"${!t.nc_decisao||t.nc_decisao==='AVALIAR'?' selected':''}>Avaliar</option><option value="NECESSARIA"${t.nc_decisao==='NECESSARIA'?' selected':''}>Necessária</option><option value="NAO_APLICA"${t.nc_decisao==='NAO_APLICA'?' selected':''}>Não aplicável</option></select></label>
+      </div>
+      <label class="caso-largo">Resumo e ação solicitada à área<textarea id="casoResumo" maxlength="2000" required>${esc(t.resumo||'')}</textarea></label>
+      <label class="caso-largo">Retorno da área e conclusão<textarea id="casoRetorno" maxlength="2000">${esc(t.retorno||'')}</textarea></label>
+      <p id="casoNCVinculo">${t.nc_numero?'NC vinculada: '+esc(t.nc_numero):t.nc_decisao==='NECESSARIA'?'NC necessária · ainda não vinculada':'Sem NC vinculada'}</p>
+      <div class="acoes"><button class="btn btn-forte" id="casoSalvar" type="submit"${est.podeResponder?'':' disabled'}>Salvar tratativa</button>
+        <button class="btn" id="casoAbrirNC" type="button"${est.podeResponder&&t.nc_decisao==='NECESSARIA'&&!t.nc_id?'':' hidden'}>Abrir NC deste protocolo ↗</button></div>
+      <p class="recado erro" id="casoAviso" hidden></p>
+    </form>`;
+  const fotos=$('casoFotos');
+  for(const [i,f] of (Array.isArray(c.fotos)?c.fotos:[]).entries()){
+    const bloco=document.createElement('div'),titulo=document.createElement('p');
+    titulo.textContent='Foto '+(i+1)+(f.de?' · '+f.de:'');bloco.appendChild(titulo);
+    if(typeof f.data==='string'&&/^data:image\/(jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(f.data)
+       && f.data.length<5000000){
+      const imagem=document.createElement('img');imagem.src=f.data;
+      imagem.alt='Evidência '+(i+1)+' do protocolo '+c.protocolo;imagem.loading='lazy';bloco.appendChild(imagem);
+    }else{const aviso=document.createElement('p');aviso.textContent=f.nota||'Imagem indisponível';bloco.appendChild(aviso);}
+    fotos.appendChild(bloco);
+  }
+  $('casoForm').onsubmit=e=>{e.preventDefault();casosSalvar(c);};
+  $('casoAbrirNC').onclick=()=>casosAbrirNC(c);
+  $('casoVerConversa').onclick=async()=>{
+    casosModo(false);trocarAba('TODAS');await carregarFila();
+    const b=[...$('lista').querySelectorAll('button[data-telefone]')]
+      .find(el=>el.dataset.telefone===c.contato);
+    if(b)b.click();
+  };
+  if(!est.podeResponder)for(const campo of $('casoForm').querySelectorAll('input,select,textarea'))campo.disabled=true;
+}
+async function casosSalvar(c){
+  if(!est.sessao||!est.podeResponder||est.encerrada||casoSelecionado!==c.id)return;
+  const t=casosTratativas.get(c.id),v=id=>$(id).value.trim();
+  const situacao=v('casoSituacao'),ncDecisao=v('casoNC'),retorno=v('casoRetorno');
+  if(!v('casoArea')||v('casoResponsavel').length<2||!v('casoPrazo')||v('casoResumo').length<5){
+    casoAviso('Preencha área, responsável, prazo e resumo da ação.');return;
+  }
+  if(situacao==='CONCLUIDO'&&(retorno.length<5||ncDecisao==='AVALIAR'||
+     (ncDecisao==='NECESSARIA'&&!t?.nc_id))){
+    casoAviso('Para concluir, registre o retorno, decida sobre a NC e vincule a NC se necessária.');return;
+  }
+  $('casoSalvar').disabled=true;casoAviso('');
+  const patch={caso_id:c.id,area:v('casoArea'),responsavel:v('casoResponsavel'),
+    prazo:v('casoPrazo'),situacao,prioridade:v('casoPrioridade'),nc_decisao:ncDecisao,
+    resumo:v('casoResumo'),retorno,atualizado_por:est.sessao.user.id,
+    atualizado_em:new Date().toISOString()};
+  const query=t?sb.from('sac_caso_tratativa').update(patch).eq('caso_id',c.id)
+    :sb.from('sac_caso_tratativa').insert(patch);
+  const r=await query.select('caso_id,area,responsavel,prazo,situacao,prioridade,nc_decisao,resumo,retorno,nc_id,nc_numero').single();
+  if(est.encerrada||casoSelecionado!==c.id)return;
+  $('casoSalvar').disabled=false;
+  if(r.error){casoAviso('Não foi possível salvar: '+r.error.message);return;}
+  casosTratativas.set(c.id,r.data);casosDesenharLista();
+  $('casoAbrirNC').hidden=r.data.nc_decisao!=='NECESSARIA'||!!r.data.nc_id;
+  $('casoNCVinculo').textContent=r.data.nc_numero?'NC vinculada: '+r.data.nc_numero
+    :r.data.nc_decisao==='NECESSARIA'?'NC necessária · ainda não vinculada':'Sem NC vinculada';
+  casoAviso('');$('casoSalvar').textContent='Salvo';
+  setTimeout(()=>{if($('casoSalvar'))$('casoSalvar').textContent='Salvar tratativa';},2500);
+}
+function casosAbrirNC(c){
+  const t=casosTratativas.get(c.id);
+  if(!t||t.nc_decisao!=='NECESSARIA'||t.nc_id||!est.podeResponder)return;
+  sessionStorage.setItem('sac_nc_rascunho',JSON.stringify({caso_id:c.id,protocolo:c.protocolo,
+    telefone:c.contato,area:t.area,responsavel:t.responsavel,observacao:t.resumo,
+    categoria:c.tipo,produto:c.produto,lote:c.lote}));
+  location.href='sistema_qualidade_online.html?abrir=nc&origem=sac';
+}
+$('casosAlternar').onclick=()=>casosModo($('casosPainel').hidden);
+$('casosRecarregar').onclick=casosCarregar;
+$('casosFiltro').onchange=casosDesenharLista;
+$('casosAreaFiltro').onchange=casosDesenharLista;
+setInterval(()=>{if(!est.encerrada&&est.sessao&&!$('casosPainel').hidden)casosCarregar();},30000);
 </script>
 </body>
 </html>

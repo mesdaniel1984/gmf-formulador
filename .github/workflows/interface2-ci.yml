@@ -87,6 +87,8 @@ jobs:
             echo "=== $f ==="
             node "$f"
           done
+      - name: SAC — dois protocolos no mesmo telefone e fluxo de tratativa
+        run: node testes/sac-casos-operacao.js
       - name: Ingredientes — navegação e busca
         run: node testes/ingredientes-navegacao.js
       - name: Smoke visual UI2
