@@ -528,3 +528,29 @@ body.interface-2 .badge{
 .i2-sb-diff-list{display:flex;flex-direction:column;gap:5px}.i2-sb-diff-item{display:grid;grid-template-columns:minmax(120px,.7fr) 1fr auto 1fr;align-items:start;gap:8px;background:#f8fafb;border-radius:7px;padding:7px 8px;font-size:9px;color:#607582}.i2-sb-diff-item code{font-size:8.5px;color:#5a44ad;word-break:break-all}.i2-sb-diff-item span{word-break:break-word}.i2-sb-diff-item b{color:#9aa7af}.i2-sb-more{font-size:9px;color:#83949e;text-align:center;padding:8px}
 .i2-sb-promote-form{display:grid;gap:10px;background:#fff;border:1px solid #dfe7ec;border-radius:10px;padding:13px}.i2-sb-promote-form>div{display:flex;justify-content:flex-end;gap:7px}
 @media(max-width:760px){.i2-sb-overlay{overflow-x:hidden}.i2-sb-drawer{width:100%;max-width:100vw;border-left:0;overflow-x:hidden}.i2-sb-drawer *{box-sizing:border-box;min-width:0}.i2-sb-head{padding:16px}.i2-sb-tabs,.i2-sb-identity{padding-left:16px;padding-right:16px}.i2-sb-tabs{max-width:100%;overflow-x:auto}.i2-sb-id-note{width:100%;margin-left:0}.i2-sb-content{padding:13px 14px 24px;max-width:100%;overflow-x:hidden}.i2-sb-message{margin:10px 14px 0}.i2-sb-create-grid,.i2-sb-compare-selects{grid-template-columns:1fr}.i2-sb-create-grid .wide{grid-column:auto}.i2-sb-compare-summary{grid-template-columns:1fr 1fr}.i2-sb-card-top{align-items:flex-start;flex-wrap:wrap}.i2-sb-formula,.i2-sb-diff-table{max-width:100%}.i2-sb-diff-item{grid-template-columns:1fr}.i2-sb-diff-item b{display:none}.i2-sb-formula td.qty input{width:100px;max-width:100%}}
+
+/* SAC: aproveitar a largura disponível para manter todas as colunas visíveis no desktop. */
+@media (min-width:1200px){
+  body.interface-2 #sac > .panel{width:100%;max-width:none!important;padding:14px!important}
+  body.interface-2 #sac .table-wrap{overflow-x:visible}
+  body.interface-2 #sac .table-wrap table{width:100%;table-layout:fixed;font-size:11px}
+  body.interface-2 #sac .table-wrap th,
+  body.interface-2 #sac .table-wrap td{padding:8px 5px!important;white-space:normal!important;overflow-wrap:anywhere;line-height:1.3}
+  body.interface-2 #sac .table-wrap th{font-size:10px!important;letter-spacing:0}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(1){width:4.5%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(2){width:6.5%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(3){width:8%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(4){width:9%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(5){width:13%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(6){width:7%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(7){width:10%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(8){width:3%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(9){width:7%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(10){width:8%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(11){width:9.5%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(12){width:8%}
+  body.interface-2 #sac .table-wrap :is(th,td):nth-child(13){width:6.5%}
+  body.interface-2 #sac .table-wrap td:nth-child(5){max-width:none!important;overflow:visible!important;text-overflow:clip!important}
+  body.interface-2 #sac .table-wrap td:nth-child(13) .btn{padding:4px 5px!important}
+  body.interface-2 #sac .table-wrap .badge{max-width:100%;white-space:normal}
+}
