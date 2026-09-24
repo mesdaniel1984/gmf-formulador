@@ -357,7 +357,7 @@
     <div class="x-filtros">
       <select id="cfEmpresa" onchange="renderCentral()"></select>
       <select id="cfPeriodo" onchange="renderCentral()"></select>
-      <button type="button" onclick="renderCentral()">Atualizar</button>
+      <button id="cfAtualizarBtn" type="button" onclick="atualizarCentral()">Atualizar dados</button>
     </div>
     <div class="x-carimbo" id="cfCarimbo">—</div>
   </div>
@@ -1546,6 +1546,10 @@
   <div class="form-row"><div class="form-group"><label>Responsável interno</label><input id="fiResponsavel" maxlength="160" required></div>
     <div class="form-group"><label>Situação</label><select id="fiSituacao"><option>Aberta</option><option>Em atendimento</option><option>Concluída</option></select></div></div>
   <div class="form-group"><label>Observações</label><textarea id="fiObs" rows="3" maxlength="4000"></textarea></div>
+  <div class="form-group"><label>Documentos da fiscalização</label>
+    <input id="fiDocumentos" type="file" accept=".pdf,.png,.jpg,.jpeg" multiple>
+    <small>Termo de coleta, auto de fiscalização, notificações e respostas. PDF, PNG ou JPG até 10 MB por arquivo; anexos ficam privados.</small>
+  </div>
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('fiscalModal')">Cancelar</button>
     <button class="btn btn-primary" id="fiSalvar" onclick="fiscalSalvar()">Salvar fiscalização</button></div>
 </div></div>
@@ -2017,8 +2021,44 @@ function _cVazio(msg){
 }
 
 let _cFilaAberta = false, _cRoadAberto = false;
+let _cUltimaBusca = null;
 function _cToggleFila(){ _cFilaAberta = !_cFilaAberta; renderCentral(); }
 function _cToggleRoad(){ _cRoadAberto = !_cRoadAberto; renderCentral(); }
+
+async function atualizarCentral(){
+  const botao=document.getElementById('cfAtualizarBtn');
+  const carimbo=document.getElementById('cfCarimbo');
+  if(botao.disabled)return;
+  const textoAnterior=carimbo.textContent;
+  botao.disabled=true; botao.textContent='Buscando dados…';
+  carimbo.textContent='Consultando o banco de dados…';
+  try{
+    // Nunca descarte uma alteração ainda pendente nesta aba.
+    clearTimeout(_saveTimer);
+    await pushChanges();
+    if(Object.keys(db).some(k=>_snap[k]!==JSON.stringify(db[k])))
+      throw new Error('Há alterações não salvas nesta aba. Verifique a conexão e tente novamente.');
+    const empresa=document.getElementById('cfEmpresa').value;
+    const periodo=document.getElementById('cfPeriodo').value;
+    const dadosAnteriores=db, retratoAnterior=_snap;
+    try{ await loadDB(); }
+    catch(e){ db=dadosAnteriores; _snap=retratoAnterior; throw e; }
+    _cUltimaBusca=new Date();
+    const selE=document.getElementById('cfEmpresa'),selP=document.getElementById('cfPeriodo');
+    selE.innerHTML='';selP.innerHTML='';
+    renderCentral();
+    if(Array.from(selE.options).some(x=>x.value===empresa))selE.value=empresa;
+    if(Array.from(selP.options).some(x=>x.value===periodo))selP.value=periodo;
+    renderCentral();
+    renderDashboard();
+    await fiscalCarregar();
+  }catch(e){
+    console.error('Atualização da Central:',e);
+    carimbo.textContent='Falha ao buscar dados: '+(e.message||'verifique a conexão')+' · '+textoAnterior;
+  }finally{
+    botao.disabled=false;botao.textContent='Atualizar dados';
+  }
+}
 
 // Periodo filtra o que ACONTECEU (NC, SAC, perdas, falhas).
 // Conformidade e fila de acao sao estado de agora — vencimento nao tem periodo.
@@ -2058,7 +2098,7 @@ function renderCentral(){
   const docsF=docs, treinF=trein.filter(function(r){return _cDaEmpresa(r,emp);});
 
   document.getElementById('cfCarimbo').textContent =
-    'Última atualização: '+new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+    'Última busca no banco: '+(_cUltimaBusca?_cUltimaBusca.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'ainda não realizada')
     + '  ·  conformidade e fila de ação mostram a situação de agora, não do período';
 
   const licVenc=licF.filter(function(l){return daysUntil(l.venc)<0;});
@@ -4238,6 +4278,7 @@ async function startApp(){
   showGate('loading');
   try{
     await loadDB();
+    _cUltimaBusca=new Date();
     await seedOnce();
     patchAnalPlanos();
     await fiscalCarregar();

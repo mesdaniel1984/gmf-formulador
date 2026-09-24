@@ -115,14 +115,20 @@ function semUi2(path,src){
     // Fiscalizações alteram apenas o calendário, o cadastro de análises e
     // a navegação. A comparação integral continua protegendo o resto do SGQ.
     const original=baseFile(path);
-    for(const fn of ['showSection','calcProximas','renderAnalMap','renderAnal','openAnalModal','delAnal','saveAnal','startApp']){
+    for(const fn of ['showSection','calcProximas','renderAnalMap','renderAnal','openAnalModal','delAnal','saveAnal','renderCentral','startApp']){
       const novo=extractFn(src,fn), anterior=extractFn(original,fn);
       if(novo && anterior)src=src.replace(novo,anterior);
     }
+    const atualiza=extractFn(src,'atualizarCentral');
+    if(atualiza) src=src.replace(atualiza+'\n\n','');
+    src=src.replace('let _cUltimaBusca = null;\n','');
+    src=src.replace('<button id="cfAtualizarBtn" type="button" onclick="atualizarCentral()">Atualizar dados</button>',
+      '<button type="button" onclick="renderCentral()">Atualizar</button>');
     src=src.replace('  <button onclick="showSection(\'fiscalizacoes\')">🏛️ Fiscalizações</button>\n','');
     src=src.replace(/<!-- FISCALIZAÇÕES: processo oficial separado do registro analítico -->[\s\S]*?(?=<!-- ===== NCS ===== -->)/,'');
     src=src.replace(/    <div class="form-row">\n      <div class="form-group"><label>Origem<\/label><select id="aOrigem"[\s\S]*?(?=    <div class="form-row">\n      <div class="form-group" style="grid-column:1\/-1"><label>Parâmetros Analisados)/,'');
     src=src.replace(/<!-- Modal próprio para a fiscalização; o laudo fica em Análises. -->[\s\S]*?<script src="sgq-fiscalizacoes.js"><\/script>\n/,'');
+    // O bloco do modal acima inteiro é normalizado; os anexos ficam no módulo fiscal.
   }
   return src.replace('<link rel="stylesheet" href="gmf-ui-app.css">\n<script defer src="gmf-interface-2.js"></script>\n<script defer src="sgq-workspace.js"></script>\n','');
 }
