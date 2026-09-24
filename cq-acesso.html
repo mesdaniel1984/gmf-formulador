@@ -23,7 +23,7 @@
  if(!/^[a-f0-9]{64}$/.test(state||'')){fail('Abra o CQ pelo botão da Central.');return;}
  try{
   const {data,error}=await client.auth.getSession();
-  if(error||!data.session){fail('Entre na Central para continuar.');const a=document.createElement('a');a.href='login.html';a.textContent='Entrar na Central';status.append(document.createElement('br'),a);return;}
+  if(error||!data.session){location.replace('login.html?next=cq');return;}
   // O servidor CQ verifica a identidade, a sessão vigente e o vínculo local.
   const form=document.createElement('form');form.method='POST';form.action='https://qualidade-alimentos-production.up.railway.app/sso/complete';
   for(const [name,value] of Object.entries({state,token:data.session.access_token})){const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.append(input);}
