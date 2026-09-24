@@ -1,26 +1,33 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="strict-origin"><title>Acesso ao CQ — Central MF Paris</title>
-<style>body{font:17px system-ui;background:#f4f7fa;color:#16364a;margin:0;padding:8vh 24px}main{max-width:520px;margin:auto;background:white;padding:32px;border-radius:16px}a{color:#1469a0}</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script></head><body><main><h1>Acesso ao CQ</h1><p id="status">Verificando sua sessão da Central…</p><a href="index.html">Voltar à Central</a></main>
+<style>body{font:17px system-ui;background:#f4f7fa;color:#16364a;margin:0;padding:8vh 24px}main{max-width:520px;margin:auto;background:white;padding:32px;border-radius:16px}main[hidden]{display:none}a{color:#1469a0}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script></head><body><main hidden><h1>Acesso ao CQ</h1><p id="status">Verificando sua sessão da Central…</p><a href="index.html">Voltar à Central</a></main>
 <script>
 (async function(){
  const status=document.getElementById('status');
+ const panel=document.querySelector('main');
+ const show=(message)=>{status.textContent=message;panel.hidden=false;};
+ // A passagem entre domínios é automática; só exibimos uma tela se falhar ou demorar.
+ const slow=setTimeout(()=>show('Abrindo o CQ…'),2000);
+ const stuck=setTimeout(()=>show('O CQ está demorando. Volte à Central e tente novamente.'),12000);
+ const fail=(message)=>{clearTimeout(slow);clearTimeout(stuck);show(message);};
  const client=supabase.createClient("https://ailzblgrxtdakpkchstl.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpbHpibGdyeHRkYWtwa2Noc3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzkzOTEsImV4cCI6MjA5NDI1NTM5MX0.P22Cz4osfMvKBsbXn1jmwDC0ZOmbNQjSB-TBHxu6qRw");
  const params=new URLSearchParams(location.search);
  if(params.get('logout')==='1'){
   const {error}=await client.auth.signOut({scope:'local'});
-  status.textContent=error?'Não foi possível sair da Central. Tente novamente.':'Sessão encerrada.';
+  fail(error?'Não foi possível sair da Central. Tente novamente.':'Sessão encerrada.');
   if(!error)location.replace('index.html');return;
  }
  const state=params.get('state');
- if(!/^[a-f0-9]{64}$/.test(state||'')){status.textContent='Abra o CQ pelo botão da Central.';return;}
+ history.replaceState(null,'','cq-acesso.html');
+ if(!/^[a-f0-9]{64}$/.test(state||'')){fail('Abra o CQ pelo botão da Central.');return;}
  try{
   const {data,error}=await client.auth.getSession();
-  if(error||!data.session){status.textContent='Entre na Central para continuar.';const a=document.createElement('a');a.href='login.html';a.textContent='Entrar na Central';status.append(document.createElement('br'),a);return;}
+  if(error||!data.session){fail('Entre na Central para continuar.');const a=document.createElement('a');a.href='login.html';a.textContent='Entrar na Central';status.append(document.createElement('br'),a);return;}
   // O servidor CQ verifica a identidade, a sessão vigente e o vínculo local.
   const form=document.createElement('form');form.method='POST';form.action='https://qualidade-alimentos-production.up.railway.app/sso/complete';
   for(const [name,value] of Object.entries({state,token:data.session.access_token})){const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.append(input);}
-  document.body.append(form);status.textContent='Abrindo o CQ…';form.submit();
- }catch(_){status.textContent='Não foi possível conectar à Central. Tente novamente.';}
+  document.body.append(form);form.submit();
+ }catch(_){fail('Não foi possível conectar à Central. Tente novamente.');}
 })();
 </script></body></html>
