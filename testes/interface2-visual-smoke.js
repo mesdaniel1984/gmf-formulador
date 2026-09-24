@@ -75,6 +75,26 @@ const path=require('path');
     p=await pageCheck('sistema_qualidade_online.html',1440,900,'SGQ gate desktop');
     check(await p.locator('#gate').count()===1,'gate do SGQ existe');
     await p.screenshot({path:path.join(shots,'06-sgq-gate.png'),fullPage:true});
+    await p.evaluate(()=>{
+      document.getElementById('gate').style.display='none';
+      document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
+      document.getElementById('sac').classList.add('active');
+      const values=['SAC-003','11/08/2026','Distribuidora Mc','Okey Lac 1 kg',
+        'Descrição detalhada do atendimento e retorno ao consumidor','Qualidade',
+        'Ficha técnica e especificação','—','Distribuidor','Qualidade',
+        '13/08/2026','Em tratativa','Editar Excluir'];
+      document.getElementById('sacTable').innerHTML='<tr>'+values.map(x=>'<td>'+x+'</td>').join('')+'</tr>';
+    });
+    const sac=await p.evaluate(()=>{
+      const main=document.querySelector('#sac');
+      const panel=main.querySelector('.panel');
+      const table=main.querySelector('.table-wrap');
+      return {mainWidth:main.getBoundingClientRect().width,panelWidth:panel.getBoundingClientRect().width,
+        tableWidth:table.clientWidth,scrollWidth:table.scrollWidth};
+    });
+    check(sac.panelWidth>=sac.mainWidth-2,'SAC desktop utiliza a largura disponível');
+    check(sac.scrollWidth<=sac.tableWidth+2,'SAC desktop mostra as 13 colunas sem rolagem horizontal');
+    await p.screenshot({path:path.join(shots,'06b-sgq-sac-desktop.png'),fullPage:true});
     await p.close();
 
     p=await pageCheck('sistema_qualidade_online.html',390,844,'SGQ modal mobile');
