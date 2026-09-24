@@ -88,6 +88,9 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
                overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .item .quando{ font-size:11.5px; color:var(--grafite); margin-top:4px; }
 .item .lapis{ font-size:11.5px; color:var(--realce); margin-top:3px; }
+.item .situacao{ font-size:11px; color:var(--selo); font-weight:600; margin-top:4px; }
+.fila-nota{ padding:9px 16px; margin:0; border-bottom:1px solid var(--risca);
+            font-size:12px; color:var(--grafite); }
 .vazio{ padding:28px 18px; color:var(--grafite); font-family:Lora,Georgia,serif; }
 
 .painel{ display:flex; flex-direction:column; min-height:0; background:var(--fundo); }
@@ -164,10 +167,12 @@ a{ color:var(--selo); }
     <div class="fila-topo">
       <span id="contador">carregando…</span>
       <span>
-        <button class="aba" id="abaAberto"    aria-pressed="true">Abertos</button>
+        <button class="aba" id="abaTodas"     aria-pressed="true">Todas</button>
+        <button class="aba" id="abaAberto"    aria-pressed="false">Abertos</button>
         <button class="aba" id="abaResolvido" aria-pressed="false">Resolvidos</button>
       </span>
     </div>
+    <p class="fila-nota" id="filaNota">Todas as conversas recentes, inclusive as atendidas pelo robô.</p>
     <div id="lista"></div>
   </section>
 
@@ -255,7 +260,8 @@ const $  = id => document.getElementById(id);
 const est = {
   sessao:null, email:null, papel:null, podeResponder:false,
   aberta:null,              // telefone da conversa aberta
-  situacaoAba:'ABERTO',
+  situacaoAba:'TODAS',
+  situacaoAberta:null,
   rascunhos:new Map(),      // telefone -> texto ainda não enviado
   seq:0,
   enviando:false,
@@ -399,9 +405,11 @@ function atualizarBotoes(){
                        (Date.now() - new Date(est.ultimaEntrada)) < 24*3600*1000;
 
   $('btnEnviar').disabled = est.enviando || est.encerrada || !temConversa
+                            || est.situacaoAberta !== 'ABERTO'
                             || !est.podeResponder || !janelaAberta
                             || !$('texto').value.trim();
   $('texto').disabled = est.enviando || est.encerrada || !temConversa
+                        || est.situacaoAberta !== 'ABERTO'
                         || !est.podeResponder || !janelaAberta;
   $('btnEnviar').textContent = est.enviando ? 'Enviando…' : 'Enviar pelo WhatsApp';
 }
@@ -411,11 +419,43 @@ function atualizarBotoes(){
 --------------------------------------------------------------------------- */
 async function carregarFila(){
   const minha = est.seq;
-  const { data, error } = await sb.from('wa_atendimento')
-    .select('telefone, nome, motivo, situacao, resumo, aberto_em, atualizado_em, resolvido_em, resolvido_por')
-    .eq('situacao', est.situacaoAba)
-    .order('aberto_em', { ascending: est.situacaoAba === 'ABERTO' })
-    .limit(200);
+  let data, error;
+  if(est.situacaoAba === 'TODAS'){
+    // Historico protegido pela mesma RLS do atendimento. A fila humana so
+    // contem casos encaminhados ao atendente; aqui aparecem tambem os do bot.
+    const [mensagens, atendimentos] = await Promise.all([
+      sb.from('wa_mensagem')
+        .select('telefone, texto, tipo, direcao, protocolo, criado_em')
+        .order('criado_em', { ascending:false }).limit(500),
+      sb.from('wa_atendimento')
+        .select('telefone, nome, motivo, situacao, resumo, aberto_em, atualizado_em, resolvido_em, resolvido_por')
+        .limit(200)
+    ]);
+    error = mensagens.error || atendimentos.error;
+    if(!error){
+      const porTelefone = new Map((atendimentos.data || []).map(a => [a.telefone, a]));
+      const vistos = new Set();
+      data = [];
+      for(const m of mensagens.data || []){
+        if(vistos.has(m.telefone)) continue;
+        vistos.add(m.telefone);
+        const a = porTelefone.get(m.telefone) || {};
+        data.push({ ...a, telefone:m.telefone,
+          situacao:a.situacao || 'AUTOMATICO',
+          atualizado_em:m.criado_em,
+          resumo:m.tipo === 'imagem' ? '[foto]' : m.tipo === 'outro' ? '[anexo]'
+            : (m.direcao === 'SAIDA' ? 'Resposta: ' : '') + (m.texto || '—'),
+          protocolo:m.protocolo || null });
+      }
+    }
+  } else {
+    const resultado = await sb.from('wa_atendimento')
+      .select('telefone, nome, motivo, situacao, resumo, aberto_em, atualizado_em, resolvido_em, resolvido_por')
+      .eq('situacao', est.situacaoAba)
+      .order('aberto_em', { ascending: est.situacaoAba === 'ABERTO' })
+      .limit(200);
+    data = resultado.data; error = resultado.error;
+  }
 
   if(minha !== est.seq || est.encerrada) return;      // consulta velha: descarta
 
@@ -425,13 +465,26 @@ async function carregarFila(){
     return;
   }
 
+  // Um atendimento pode ser resolvido ou reaberto por outra pessoa enquanto
+  // esta tela esta aberta. Reflita a situacao atual antes de habilitar envio.
+  const selecionada = data.find(a => a.telefone === est.aberta);
+  if(selecionada && selecionada.situacao !== est.situacaoAberta){
+    est.situacaoAberta = selecionada.situacao;
+    $('caixaResposta').hidden = selecionada.situacao !== 'ABERTO';
+    mostrarResolver(selecionada);
+    atualizarBotoes();
+  }
+
   $('contador').textContent = data.length
-    ? data.length + (est.situacaoAba === 'ABERTO' ? ' aguardando' : ' resolvidos')
-    : (est.situacaoAba === 'ABERTO' ? 'Nada aguardando' : 'Nenhum resolvido');
+    ? data.length + (est.situacaoAba === 'TODAS' ? ' conversas recentes'
+                     : est.situacaoAba === 'ABERTO' ? ' aguardando' : ' resolvidas')
+    : (est.situacaoAba === 'TODAS' ? 'Nenhuma conversa recente'
+       : est.situacaoAba === 'ABERTO' ? 'Nada aguardando' : 'Nenhuma resolvida');
 
   if(!data.length){
     lista.innerHTML = '<p class="vazio">' + (est.situacaoAba === 'ABERTO'
-      ? 'Ninguém na fila. Tudo que chegou virou manifestação e foi para o SAC.'
+      ? 'Ninguém aguardando atendimento humano. Consulte Todas para ver as mensagens do bot.'
+      : est.situacaoAba === 'TODAS' ? 'Ainda não há mensagens no histórico.'
       : 'Ainda não há conversas resolvidas.') + '</p>';
     return;
   }
@@ -449,6 +502,11 @@ async function carregarFila(){
         '<span class="fone">' + fone(a.telefone) + '</span></span>' +
       '<span class="previa">' + esc(a.resumo || '—') + '</span>' +
       '<span class="quando">' + faz(a.atualizado_em) + '</span>' +
+      (est.situacaoAba === 'TODAS' ? '<span class="situacao">' +
+        (a.situacao === 'ABERTO' ? 'Aguardando pessoa'
+          : a.situacao === 'RESOLVIDO' ? 'Atendimento resolvido'
+          : a.protocolo ? 'SAC registrado · robô' : 'Atendimento automático') +
+        '</span>' : '') +
       (rascunho ? '<span class="lapis">rascunho não enviado</span>' : '');
     b.onclick = () => abrir(a);
     lista.appendChild(b);
@@ -474,6 +532,7 @@ async function abrir(a){
 
   est.seq++;                      // tudo que estava em voo deixa de valer
   est.aberta = a.telefone;
+  est.situacaoAberta = a.situacao;
   est.maisAntiga = null;
   est.temAnteriores = false;
   est.ultimaEntrada = null;
@@ -481,11 +540,12 @@ async function abrir(a){
   document.body.classList.add('abriu');
   $('pNome').textContent = a.nome || 'Sem nome';
   $('pFone').textContent = fone(a.telefone) + ' · ' +
-                           (a.motivo === 'PEDIU_HUMANO' ? 'pediu para falar com alguém'
-                                                        : 'não é manifestação de SAC');
+    (a.situacao === 'AUTOMATICO' ? 'atendimento automático'
+     : a.situacao === 'RESOLVIDO' ? 'atendimento resolvido'
+     : 'aguardando atendimento humano');
   $('texto').value = est.rascunhos.get(a.telefone) || '';
   $('erro').hidden = true;
-  $('caixaResposta').hidden = false;
+  $('caixaResposta').hidden = a.situacao !== 'ABERTO';
 
   mostrarResolver(a);
   await carregarConversa();
@@ -642,7 +702,7 @@ async function enviar(){
   if(est.enviando || est.encerrada) return;          // trava contra clique duplo
   const destino = est.aberta;                        // fixa o destinatário AGORA
   const texto = $('texto').value.trim();
-  if(!destino || !texto || !est.podeResponder) return;
+  if(!destino || !texto || !est.podeResponder || est.situacaoAberta !== 'ABERTO') return;
 
   est.enviando = true;
   atualizarBotoes();
@@ -753,14 +813,20 @@ async function tique(){
 function trocarAba(s){
   est.situacaoAba = s;
   est.seq++;
+  $('abaTodas').setAttribute('aria-pressed', String(s === 'TODAS'));
   $('abaAberto').setAttribute('aria-pressed', String(s === 'ABERTO'));
   $('abaResolvido').setAttribute('aria-pressed', String(s === 'RESOLVIDO'));
+  $('filaNota').textContent = s === 'TODAS'
+    ? 'Todas as conversas recentes, inclusive as atendidas pelo robô.'
+    : s === 'ABERTO' ? 'Mensagens que aguardam uma pessoa da equipe.'
+    : 'Atendimentos humanos já concluídos.';
   carregarFila();
 }
 
 $('btnEnviar').onclick   = enviar;
 $('btnResolver').onclick = resolver;
 $('voltar').onclick = () => { guardarRascunho(); document.body.classList.remove('abriu'); };
+$('abaTodas').onclick     = () => trocarAba('TODAS');
 $('abaAberto').onclick    = () => trocarAba('ABERTO');
 $('abaResolvido').onclick = () => trocarAba('RESOLVIDO');
 $('texto').addEventListener('input', () => { guardarRascunho(); atualizarBotoes(); });
