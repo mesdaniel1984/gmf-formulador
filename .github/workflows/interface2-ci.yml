@@ -48,6 +48,8 @@ jobs:
         run: node testes/security-auth-ui.js
       - name: SAC — mensagens do bot visíveis na caixa de entrada
         run: node testes/sac-conversas-historico.js
+      - name: SAC — triagem por área e rascunho de NC
+        run: node testes/sac-triagem-nc.js
       - name: Interface de revisões controladas
         run: node testes/phase4-2-revisions-ui.js
       - name: Interface Sandbox F4.3
