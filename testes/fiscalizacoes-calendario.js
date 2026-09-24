@@ -1,0 +1,24 @@
+// O calendário só dá baixa após resultado interno aprovado ou decisão oficial.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const html=fs.readFileSync('sistema_qualidade_online.html','utf8');
+const start=html.indexOf('function calcProximas(){');
+const end=html.indexOf('\nfunction renderProximas()',start);
+assert(start>0&&end>start,'calcProximas presente');
+const context={db:{analPlanos:[{id:'P1',dias:60}],analises:[]},fiscalEquivalencias:[],Date,console};
+vm.createContext(context);vm.runInContext(html.slice(start,end),context);
+const due=()=>context.calcProximas()[0];
+const day=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+const initial=day(due().proxData);
+context.db.analises.push({id:'A1',planoId:'P1',data:'2026-08-10',status:'Reprovado',origem:'INTERNA'});
+assert.equal(day(due().proxData),initial,'reprovado não reinicia prazo');
+context.db.analises.push({id:'A2',planoId:'P1',data:'2026-08-11',status:'Aprovado',origem:'OFICIAL'});
+assert.equal(day(due().proxData),initial,'laudo oficial sem decisão não reinicia prazo');
+context.fiscalEquivalencias.push({analise_id:'A2',plano_id:'P1',data_analise:'2026-08-11',proximo_prazo:'2026-10-10',revogada_em:null});
+assert.equal(day(due().proxData),'2026-10-10','decisão usa prazo do plano aprovado no servidor');
+context.fiscalEquivalencias[0].revogada_em='2026-09-24';
+assert.equal(day(due().proxData),initial,'revogação devolve pendência');
+context.db.analises.push({id:'A3',planoId:'P1',data:'2026-08-12',status:'Aprovado',origem:'INTERNA'});
+assert.equal(day(due().proxData),'2026-10-11','controle interno aprovado continua válido');
+console.log('Calendário fiscal: 5 cenários passaram.');
