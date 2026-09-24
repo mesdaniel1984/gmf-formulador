@@ -1091,6 +1091,7 @@ const casoStatus={ENCAMINHADO:'Encaminhado',EM_ANALISE:'Em análise',
 const casoArea={QUALIDADE:'Qualidade',PRODUCAO:'Produção',LOGISTICA:'Logística',
   COMERCIAL:'Comercial',FINANCEIRO:'Financeiro',REGULATORIO:'Regulatório',OUTROS:'Outros'};
 let casosEncaminhamentos=[];
+let encaminhamentoGravando=false;
 function casosModo(abrir){
   $('casosPainel').hidden=!abrir;
   $('tela').classList.toggle('modo-casos',abrir);
@@ -1297,6 +1298,7 @@ function encaminhamentoEmail(c){
 }
 async function encaminhamentoCriar(c){
   if(!est.sessao||!est.podeResponder||est.encerrada||casoSelecionado!==c.id)return;
+  if(encaminhamentoGravando)return;
   if(!casosTratativas.get(c.id)){encaminhamentoAviso('Salve a tratativa com área, responsável e prazo antes de encaminhar.');return;}
   if(casosTratativas.get(c.id).situacao==='CONCLUIDO'){
     encaminhamentoAviso('Reabra a tratativa antes de criar um encaminhamento.');return;
@@ -1306,16 +1308,17 @@ async function encaminhamentoCriar(c){
     v('encSolicitacao').length<10||v('encReferencia').length<4){
     encaminhamentoAviso('Preencha área, destinatário, prazo, solicitação e referência do envio.');return;
   }
-  $('encRegistrar').disabled=true;encaminhamentoAviso('');
+  encaminhamentoGravando=true;$('encRegistrar').disabled=true;encaminhamentoAviso('');
   const {data,error}=await sb.from('sac_encaminhamento').insert({
     caso_id:c.id,area:v('encArea'),destinatario:v('encDestinatario'),canal:v('encCanal'),
     solicitacao:v('encSolicitacao'),prazo:v('encPrazo'),referencia_envio:v('encReferencia'),
     enviado_por:est.sessao.user.id
   }).select('id,caso_id,area,destinatario,canal,solicitacao,prazo,referencia_envio,enviado_em,confirmado_em,referencia_confirmacao,respondido_em,resposta').single();
+  encaminhamentoGravando=false;
   if(est.encerrada||casoSelecionado!==c.id)return;
   $('encRegistrar').disabled=false;
   if(error){encaminhamentoAviso('Não foi possível registrar o envio: '+error.message);return;}
-  casosEncaminhamentos.unshift(data);
+  casosEncaminhamentos=[data,...casosEncaminhamentos.filter(e=>e.id!==data.id)];
   $('encDestinatario').value='';$('encSolicitacao').value='';$('encReferencia').value='';
   encaminhamentoAviso('Envio registrado. A Qualidade deve acompanhar o recebimento e o retorno.');
   encaminhamentosDesenhar(c);casosDesenharLista();

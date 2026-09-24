@@ -93,6 +93,9 @@ async function main(){
   await page.locator('#encSolicitacao').fill('Verificar a linha e o lote do produto citado.');
   await page.locator('#encReferencia').fill('Email enviado em 24/09 às 15h');
   await page.locator('#encRegistrar').click();
+  await page.getByText('Envio registrado. A Qualidade deve acompanhar o recebimento e o retorno.').waitFor();
+  if(await page.locator('.caso-encaminhamento').count()!==1)
+    throw Error('mesmo encaminhamento apareceu duplicado');
   await page.getByRole('button',{name:'Confirmar recebimento'}).waitFor();
   await page.locator('#casoNC').selectOption('NAO_APLICA');
   await page.locator('#casoRetorno').fill('Área informou providência à Qualidade.');
