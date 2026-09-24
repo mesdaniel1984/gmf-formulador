@@ -64,7 +64,8 @@ continuarSeAutenticado();
 
 function destinoLogin(search){
   const destinos = { conta:'minha-conta.html', central:'index.html', formulador:'gmf_formulador_wizard.html',
-    qualidade:'sistema_qualidade_online.html', sac:'conversas.html', admin:'painel-admin.html' };
+    qualidade:'sistema_qualidade_online.html', sac:'conversas.html', admin:'painel-admin.html',
+    cq:'https://qualidade-alimentos-production.up.railway.app/sso/start' };
   const escolhido = new URLSearchParams(search).get('next');
   return Object.prototype.hasOwnProperty.call(destinos, escolhido)
     ? destinos[escolhido] : destinos.central;
