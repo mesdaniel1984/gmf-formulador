@@ -3785,6 +3785,20 @@ function aplicarParametrosDaURL(){
 
   var desc   = q.get('desc')   || '';
   var origem = q.get('origem') || '';
+  var triagemSac = null;
+  if(origem === 'sac'){
+    // A conversa passa somente pelo armazenamento da aba, nunca pela URL.
+    // Consumir antes de abrir o modal evita reaplicar o rascunho no F5.
+    try{
+      triagemSac = JSON.parse(sessionStorage.getItem('sac_nc_rascunho') || 'null');
+      sessionStorage.removeItem('sac_nc_rascunho');
+    }catch(e){ triagemSac = null; }
+    if(!triagemSac || !/^55\d{10,11}$/.test(String(triagemSac.telefone||''))) return;
+    origem = 'SAC WhatsApp' + (triagemSac.protocolo ? ' · '+String(triagemSac.protocolo).slice(0,80) : ' · contato final '+String(triagemSac.telefone).slice(-4));
+    desc = 'Categoria: '+String(triagemSac.categoria||'').slice(0,40)
+      +'\nÁrea responsável: '+String(triagemSac.area||'').slice(0,40)
+      +'\nResumo da Qualidade: '+String(triagemSac.observacao||'').slice(0,1000);
+  }
 
   ncTabSecao();
   openNCModal(null);
@@ -3799,15 +3813,16 @@ function aplicarParametrosDaURL(){
   _pontePor('ncResp', q.get('resp'));
   _pontePor('ncData', q.get('data'));
   _pontePor('ncCausa', q.get('causa'));
+  if(triagemSac) _pontePor('ncResp', String(triagemSac.area||'').slice(0,40));
   _ponteSelect('ncEmpresa', q.get('empresa'));
   // Desvio de ronda e nao conformidade INTERNA. 'Interna' e o valor que o
   // select realmente tem — conferido no HTML, nao suposto.
-  _ponteSelect('ncTipoI',  q.get('tipo') || 'Interna');
+  _ponteSelect('ncTipoI', triagemSac ? 'Externa Cliente' : (q.get('tipo') || 'Interna'));
 
   var av = document.getElementById('ncPonteAviso');
   if(av){
     av.style.display = '';
-    av.innerHTML = '<b>Rascunho vindo do sistema de rondas.</b> Nada foi gravado ainda. '
+    av.innerHTML = '<b>Rascunho vindo '+(triagemSac ? 'do SAC WhatsApp' : 'do sistema de rondas')+'.</b> Nada foi gravado ainda. '
       + 'Confira, complete a causa e a acao, e clique em Salvar — ou feche, e nenhuma NC e criada.'
       + (origem ? '<br><span style="opacity:.8">Origem: ' + _sacEsc(origem) + '</span>' : '');
   }
