@@ -23,16 +23,13 @@
   </div>
   <div class="gmf-top-actions">
     <span class="gmf-pill"><span class="gmf-dot" style="color:#19734b"></span> Central online</span>
-    <div class="gmf-avatar" aria-label="Ambiente interno">MF</div>
+    <span id="centralSessionStatus" class="gmf-session-status" role="status" aria-live="polite">Verificando sua sessão…</span>
+    <a id="centralEnter" class="gmf-session-action" href="login.html?next=central">Entrar</a>
+    <button id="centralSignOut" class="gmf-session-action" type="button" hidden>Sair</button>
   </div>
 </header>
 
 <main class="gmf-page">
-  <section class="gmf-panel" aria-label="Sua sessão" style="padding:16px;margin-bottom:20px">
-    <p id="centralSessionStatus" role="status">Verificando sua sessão…</p>
-    <a id="centralEnter" href="login.html?next=central">Entrar na Central →</a>
-    <button id="centralSignOut" type="button" hidden>Sair neste navegador</button>
-  </section>
   <div class="gmf-title-row">
     <div class="gmf-title">
       <div class="gmf-eyebrow">Central corporativa</div>
