@@ -18,6 +18,7 @@ const sdk=`
 window.__salvos=[];
 const entradas=${JSON.stringify(entradas)};
 let tratativas=[];
+let envios=[];
 function tabela(nome){
   const f={nome,id:null,acao:'select',registro:null};
   const q={
@@ -32,12 +33,15 @@ function tabela(nome){
     if(nome==='wa_atendimento'||nome==='wa_mensagem'||nome==='wa_triagem')
       return {data:unico?null:[],error:null};
     if(f.acao==='insert'||f.acao==='update'){
-      const existente=tratativas.findIndex(t=>t.caso_id===(f.id||f.registro.caso_id));
-      const linha={...(tratativas[existente]||{}),...f.registro};
-      if(existente>=0)tratativas[existente]=linha;else tratativas.push(linha);
+      const linhas=nome==='sac_encaminhamento'?envios:tratativas;
+      const existente=linhas.findIndex(t=>nome==='sac_encaminhamento'?
+        t.id===(f.id||f.registro.id):t.caso_id===(f.id||f.registro.caso_id));
+      const linha={...(linhas[existente]||{}),...f.registro};
+      if(nome==='sac_encaminhamento'&&!linha.id)linha.id='44444444-4444-4444-8444-444444444444';
+      if(existente>=0)linhas[existente]=linha;else linhas.push(linha);
       window.__salvos.push(linha);return {data:unico?linha:[linha],error:null};
     }
-    const dados=nome==='sac_entrada'?entradas:tratativas;
+    const dados=nome==='sac_entrada'?entradas:nome==='sac_encaminhamento'?envios:tratativas;
     const selecionados=f.id?dados.filter(v=>(v.id||v.caso_id)===f.id):dados;
     return {data:unico?selecionados[0]||null:selecionados,error:null};
   }
@@ -83,10 +87,30 @@ async function main(){
   await page.getByRole('button',{name:/Abrir NC deste protocolo/}).waitFor();
   const salvos=await page.evaluate(()=>window.__salvos);
   if(salvos.length!==1||salvos[0].caso_id!==id1||salvos[0].area!=='QUALIDADE')throw Error('encaminhamento sem vínculo ao primeiro protocolo');
+  await page.locator('#encArea').selectOption('PRODUCAO');
+  await page.locator('#encDestinatario').fill('Gestor de Produção · producao@empresa.local');
+  await page.locator('#encPrazo').fill('2026-09-26');
+  await page.locator('#encSolicitacao').fill('Verificar a linha e o lote do produto citado.');
+  await page.locator('#encReferencia').fill('Email enviado em 24/09 às 15h');
+  await page.locator('#encRegistrar').click();
+  await page.getByRole('button',{name:'Confirmar recebimento'}).waitFor();
+  await page.locator('#casoNC').selectOption('NAO_APLICA');
+  await page.locator('#casoRetorno').fill('Área informou providência à Qualidade.');
+  await page.locator('#casoSituacao').selectOption('CONCLUIDO');
+  await page.locator('#casoSalvar').click();
+  await page.getByText('Há encaminhamento aguardando retorno da área.').waitFor();
+  await page.locator('.caso-encaminhamento input').fill('Confirmação por e-mail em 24/09');
+  await page.getByRole('button',{name:'Confirmar recebimento'}).click();
+  await page.getByRole('button',{name:'Registrar retorno'}).waitFor();
+  await page.locator('.caso-encaminhamento textarea').fill('Lote verificado e resultado reportado à Qualidade.');
+  await page.getByRole('button',{name:'Registrar retorno'}).click();
+  await page.getByText('Resposta registrada').waitFor();
+  if((await page.evaluate(()=>window.__salvos)).filter(t=>t.referencia_envio).length!==3)
+    throw Error('encaminhamento, confirmação e retorno não foram gravados');
   await page.getByRole('button',{name:/ATD-2026-0002/}).click();
   await page.getByRole('heading',{name:'ATD-2026-0002'}).waitFor();
   if(await page.locator('#casoArea').inputValue())throw Error('segundo protocolo herdou a área do primeiro');
-  console.log('SAC casos: protocolos distintos, fotos, prazo, conclusão bloqueada e NC por caso: OK');
+  console.log('SAC casos: protocolos distintos, fotos, despacho rastreado, recebimento, retorno e bloqueio de conclusão: OK');
  }finally{await browser.close();await new Promise(resolve=>servidor.close(resolve));}
 }
 main().catch(e=>{console.error(e);process.exitCode=1});

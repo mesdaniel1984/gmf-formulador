@@ -163,10 +163,13 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
 .caso-card p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .caso-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .caso-grid label,.caso-largo{display:block;font-size:13px;font-weight:600;color:var(--grafite)}
-.caso-grid input,.caso-grid select,.caso-grid textarea,.caso-largo textarea{width:100%;min-width:0;margin-top:5px;padding:9px;border:1px solid var(--risca);border-radius:7px;background:var(--campo);color:var(--tinta);font:inherit}
+.caso-grid input,.caso-grid select,.caso-grid textarea,.caso-largo textarea,.caso-largo input{width:100%;min-width:0;margin-top:5px;padding:9px;border:1px solid var(--risca);border-radius:7px;background:var(--campo);color:var(--tinta);font:inherit}
 .caso-largo{margin:12px 0}.caso-largo textarea{min-height:75px}
 .caso-fotos{display:flex;flex-wrap:wrap;gap:12px}
 .caso-fotos img{display:block;max-width:240px;max-height:260px;object-fit:contain;border:1px solid var(--risca);border-radius:7px}
+.caso-encaminhamento{padding:12px;margin:10px 0;border:1px solid var(--risca);border-radius:7px;overflow-wrap:anywhere}
+.caso-encaminhamento .acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.caso-encaminhamento textarea{display:block;width:100%;min-height:65px;resize:vertical;margin:8px 0;padding:9px;border:1px solid var(--risca);border-radius:7px;background:var(--campo);color:var(--tinta);font:inherit}
 @media(max-width:750px){.casos{grid-template-columns:1fr}.casos-lista{max-height:35vh}.caso-grid{grid-template-columns:1fr}}
 
 .portao{ max-width:480px; margin:64px auto; background:var(--papel);
@@ -1087,6 +1090,7 @@ const casoStatus={ENCAMINHADO:'Encaminhado',EM_ANALISE:'Em análise',
   AGUARDANDO_CLIENTE:'Aguardando cliente',CONCLUIDO:'Concluído'};
 const casoArea={QUALIDADE:'Qualidade',PRODUCAO:'Produção',LOGISTICA:'Logística',
   COMERCIAL:'Comercial',FINANCEIRO:'Financeiro',REGULATORIO:'Regulatório',OUTROS:'Outros'};
+let casosEncaminhamentos=[];
 function casosModo(abrir){
   $('casosPainel').hidden=!abrir;
   $('tela').classList.toggle('modo-casos',abrir);
@@ -1097,22 +1101,26 @@ function casosModo(abrir){
 async function casosCarregar(){
   if(!est.sessao||est.encerrada)return;
   const minha=++casoSequencia;
-  const [entradas,tratativas]=await Promise.all([
+  const [entradas,tratativas,encaminhamentos]=await Promise.all([
     sb.from('sac_entrada').select('id,protocolo,nome,contato,produto,tipo,assunto,criado_em,prioridade')
       .order('criado_em',{ascending:false}).limit(300),
-    sb.from('sac_caso_tratativa').select('caso_id,area,responsavel,prazo,prioridade,situacao,nc_decisao,resumo,retorno,nc_id,nc_numero,atualizado_em').limit(300)
+    sb.from('sac_caso_tratativa').select('caso_id,area,responsavel,prazo,prioridade,situacao,nc_decisao,resumo,retorno,nc_id,nc_numero,atualizado_em').limit(300),
+    sb.from('sac_encaminhamento').select('id,caso_id,area,destinatario,canal,solicitacao,prazo,referencia_envio,enviado_em,confirmado_em,referencia_confirmacao,respondido_em,resposta').order('enviado_em',{ascending:false}).limit(500)
   ]);
   if(minha!==casoSequencia||est.encerrada)return;
-  if(entradas.error||tratativas.error){
+  if(entradas.error||tratativas.error||encaminhamentos.error){
     $('casosTotal').textContent='Casos indisponíveis';
     $('casosLista').innerHTML='<p class="recado erro">Falha ao carregar os protocolos: '+
-      esc((entradas.error||tratativas.error).message)+'</p>';
+      esc((entradas.error||tratativas.error||encaminhamentos.error).message)+'</p>';
     return;
   }
   casosCache=entradas.data||[];
   casosTratativas=new Map((tratativas.data||[]).map(t=>[t.caso_id,t]));
+  casosEncaminhamentos=encaminhamentos.data||[];
   const pendentes=casosCache.filter(c=>casosTratativas.get(c.id)?.situacao!=='CONCLUIDO').length;
-  $('casosTotal').textContent=pendentes+' caso'+(pendentes===1?' pendente':'s pendentes');
+  const semRetorno=casosEncaminhamentos.filter(e=>!e.respondido_em).length;
+  $('casosTotal').textContent=pendentes+' caso'+(pendentes===1?' pendente':'s pendentes')+
+    (semRetorno?' · '+semRetorno+' encaminhamento'+(semRetorno===1?'':'s')+' aguardando retorno':'');
   $('casosAlternar').textContent=$('casosPainel').hidden
     ? 'Casos SAC'+(pendentes?' · '+pendentes:''):'← Conversas';
   casosDesenharLista();
@@ -1134,6 +1142,7 @@ function casosDesenharLista(){
   if(!dados.length){lista.innerHTML='<p class="vazio">Nenhum protocolo neste filtro.</p>';return;}
   for(const c of dados){
     const t=casosTratativas.get(c.id), b=document.createElement('button');
+    const semRetorno=casosEncaminhamentos.filter(e=>e.caso_id===c.id&&!e.respondido_em).length;
     b.type='button';b.className='item';b.dataset.casoId=c.id;
     if(c.id===casoSelecionado)b.setAttribute('aria-current','true');
     b.innerHTML='<span class="quem">'+esc(c.protocolo||'Sem protocolo')+'</span>'+
@@ -1142,6 +1151,7 @@ function casosDesenharLista(){
       '<span class="situacao">'+esc(t?casoStatus[t.situacao]||t.situacao:'Aguardando triagem')+
       (t?.area?' · '+esc(casoArea[t.area]):'')+
       (t?.prazo&&t.situacao!=='CONCLUIDO'&&t.prazo<new Date().toISOString().slice(0,10)?' · PRAZO VENCIDO':'')+
+      (semRetorno?' · '+semRetorno+' retorno'+(semRetorno===1?'':'s')+' pendente'+(semRetorno===1?'':'s'):'')+
       ((t?.prioridade==='ALTA'||c.prioridade)?' · PRIORIDADE ALTA':'')+'</span>';
     b.onclick=()=>casosAbrir(c.id);lista.appendChild(b);
   }
@@ -1185,7 +1195,22 @@ async function casosAbrir(id){
       <div class="acoes"><button class="btn btn-forte" id="casoSalvar" type="submit"${est.podeResponder?'':' disabled'}>Salvar tratativa</button>
         <button class="btn" id="casoAbrirNC" type="button"${est.podeResponder&&t.nc_decisao==='NECESSARIA'&&!t.nc_id?'':' hidden'}>Abrir NC deste protocolo ↗</button></div>
       <p class="recado erro" id="casoAviso" hidden></p>
-    </form>`;
+    </form>
+    <section class="caso-card" aria-label="Encaminhamentos do protocolo"><h2>Encaminhamento às áreas</h2>
+      <p>A Qualidade acompanha até receber a resposta. Prepare a comunicação, envie pelo canal escolhido e registre uma referência que comprove o envio.</p>
+      <div id="encaminhamentosLista"></div>
+      <form id="encaminhamentoForm"><div class="caso-grid">
+        <label>Área destinatária<select id="encArea" required><option value="">Selecione</option>${opcoes(casoArea,t.area)}</select></label>
+        <label>Canal<select id="encCanal"><option value="EMAIL">E-mail</option><option value="TELEFONE">Telefone</option><option value="PRESENCIAL">Presencial</option><option value="OUTRO">Outro</option></select></label>
+        <label>Destinatário (pessoa e contato)<input id="encDestinatario" maxlength="160" required placeholder="Nome e e-mail ou ramal"></label>
+        <label>Prazo da área<input id="encPrazo" type="date" required value="${esc(t.prazo||'')}"></label>
+      </div>
+      <label class="caso-largo">Solicitação à área<textarea id="encSolicitacao" maxlength="2000" required placeholder="Descreva a ação esperada sem dados pessoais desnecessários."></textarea></label>
+      <div class="acoes"><button class="btn" id="encCopiar" type="button">Copiar solicitação</button>
+        <button class="btn" id="encEmail" type="button">Preparar e-mail</button></div>
+      <label class="caso-largo">Referência do envio realizado<input id="encReferencia" maxlength="200" required placeholder="Ex.: assunto/data do e-mail ou registro da ligação"></label>
+      <button class="btn btn-forte" id="encRegistrar" type="submit"${est.podeResponder?'':' disabled'}>Registrar envio realizado</button>
+      <p id="encAviso" class="recado erro" hidden></p></form></section>`;
   const fotos=$('casoFotos');
   for(const [i,f] of (Array.isArray(c.fotos)?c.fotos:[]).entries()){
     const bloco=document.createElement('div'),titulo=document.createElement('p');
@@ -1198,6 +1223,10 @@ async function casosAbrir(id){
     fotos.appendChild(bloco);
   }
   $('casoForm').onsubmit=e=>{e.preventDefault();casosSalvar(c);};
+  $('encaminhamentoForm').onsubmit=e=>{e.preventDefault();encaminhamentoCriar(c);};
+  $('encCopiar').onclick=()=>encaminhamentoCopiar(c);
+  $('encEmail').onclick=()=>encaminhamentoEmail(c);
+  encaminhamentosDesenhar(c);
   $('casoAbrirNC').onclick=()=>casosAbrirNC(c);
   $('casoVerConversa').onclick=async()=>{
     casosModo(false);trocarAba('TODAS');await carregarFila();
@@ -1206,6 +1235,7 @@ async function casosAbrir(id){
     if(b)b.click();
   };
   if(!est.podeResponder)for(const campo of $('casoForm').querySelectorAll('input,select,textarea'))campo.disabled=true;
+  if(!est.podeResponder)for(const campo of $('encaminhamentoForm').querySelectorAll('input,select,textarea,button'))campo.disabled=true;
 }
 async function casosSalvar(c){
   if(!est.sessao||!est.podeResponder||est.encerrada||casoSelecionado!==c.id)return;
@@ -1217,6 +1247,9 @@ async function casosSalvar(c){
   if(situacao==='CONCLUIDO'&&(retorno.length<5||ncDecisao==='AVALIAR'||
      (ncDecisao==='NECESSARIA'&&!t?.nc_id))){
     casoAviso('Para concluir, registre o retorno, decida sobre a NC e vincule a NC se necessária.');return;
+  }
+  if(situacao==='CONCLUIDO'&&casosEncaminhamentos.some(e=>e.caso_id===c.id&&!e.respondido_em)){
+    casoAviso('Há encaminhamento aguardando retorno da área.');return;
   }
   $('casoSalvar').disabled=true;casoAviso('');
   const patch={caso_id:c.id,area:v('casoArea'),responsavel:v('casoResponsavel'),
@@ -1235,6 +1268,98 @@ async function casosSalvar(c){
     :r.data.nc_decisao==='NECESSARIA'?'NC necessária · ainda não vinculada':'Sem NC vinculada';
   casoAviso('');$('casoSalvar').textContent='Salvo';
   setTimeout(()=>{if($('casoSalvar'))$('casoSalvar').textContent='Salvar tratativa';},2500);
+}
+function encaminhamentoAviso(texto){
+  const el=$('encAviso');if(el){el.textContent=texto;el.hidden=!texto;}
+}
+function encaminhamentoTexto(c){
+  return 'SAC '+(c.protocolo||'sem protocolo')+' · '+($('encArea').selectedOptions[0]?.textContent||'Área')+
+    '\nPrazo: '+$('encPrazo').value+'\nSolicitação: '+$('encSolicitacao').value.trim()+
+    '\nResponda à Qualidade indicando a providência e a data. Dados pessoais e fotos permanecem no SAC.';
+}
+async function encaminhamentoCopiar(c){
+  if(!$('encArea').value||!$('encPrazo').value||$('encSolicitacao').value.trim().length<10){
+    encaminhamentoAviso('Preencha área, prazo e solicitação antes de preparar o envio.');return;
+  }
+  try{await navigator.clipboard.writeText(encaminhamentoTexto(c));encaminhamentoAviso('Solicitação copiada. Envie à área e anote a referência do envio.');}
+  catch(e){encaminhamentoAviso('Não foi possível copiar. Use o texto da solicitação acima.');}
+}
+function encaminhamentoEmail(c){
+  if(!$('encArea').value||!$('encPrazo').value||$('encSolicitacao').value.trim().length<10){
+    encaminhamentoAviso('Preencha área, prazo e solicitação antes de preparar o e-mail.');return;
+  }
+  const email=($('encDestinatario').value.match(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/)||[])[0];
+  if(!email){encaminhamentoAviso('Informe o e-mail do destinatário.');return;}
+  const assunto='SAC '+(c.protocolo||'')+' · ação da '+($('encArea').selectedOptions[0]?.textContent||'área');
+  location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(assunto)+
+    '&body='+encodeURIComponent(encaminhamentoTexto(c));
+  encaminhamentoAviso('Confira e envie o e-mail. Depois registre a referência do envio realizado.');
+}
+async function encaminhamentoCriar(c){
+  if(!est.sessao||!est.podeResponder||est.encerrada||casoSelecionado!==c.id)return;
+  if(!casosTratativas.get(c.id)){encaminhamentoAviso('Salve a tratativa com área, responsável e prazo antes de encaminhar.');return;}
+  if(casosTratativas.get(c.id).situacao==='CONCLUIDO'){
+    encaminhamentoAviso('Reabra a tratativa antes de criar um encaminhamento.');return;
+  }
+  const v=id=>$(id).value.trim();
+  if(!v('encArea')||v('encDestinatario').length<3||!v('encPrazo')||
+    v('encSolicitacao').length<10||v('encReferencia').length<4){
+    encaminhamentoAviso('Preencha área, destinatário, prazo, solicitação e referência do envio.');return;
+  }
+  $('encRegistrar').disabled=true;encaminhamentoAviso('');
+  const {data,error}=await sb.from('sac_encaminhamento').insert({
+    caso_id:c.id,area:v('encArea'),destinatario:v('encDestinatario'),canal:v('encCanal'),
+    solicitacao:v('encSolicitacao'),prazo:v('encPrazo'),referencia_envio:v('encReferencia'),
+    enviado_por:est.sessao.user.id
+  }).select('id,caso_id,area,destinatario,canal,solicitacao,prazo,referencia_envio,enviado_em,confirmado_em,referencia_confirmacao,respondido_em,resposta').single();
+  if(est.encerrada||casoSelecionado!==c.id)return;
+  $('encRegistrar').disabled=false;
+  if(error){encaminhamentoAviso('Não foi possível registrar o envio: '+error.message);return;}
+  casosEncaminhamentos.unshift(data);
+  $('encDestinatario').value='';$('encSolicitacao').value='';$('encReferencia').value='';
+  encaminhamentoAviso('Envio registrado. A Qualidade deve acompanhar o recebimento e o retorno.');
+  encaminhamentosDesenhar(c);casosDesenharLista();
+}
+function encaminhamentosDesenhar(c){
+  const lista=$('encaminhamentosLista');if(!lista)return;
+  lista.replaceChildren();
+  const itens=casosEncaminhamentos.filter(e=>e.caso_id===c.id);
+  if(!itens.length){const p=document.createElement('p');p.textContent='Nenhum envio registrado para este protocolo.';lista.appendChild(p);return;}
+  for(const e of itens){
+    const div=document.createElement('div');div.className='caso-encaminhamento';
+    div.innerHTML='<strong>'+esc(casoArea[e.area]||e.area)+' · '+esc(e.destinatario)+'</strong>'+
+      '<p>'+esc(e.solicitacao)+'</p><p>Canal: '+esc(e.canal)+' · prazo: '+esc(e.prazo)+
+      ' · referência: '+esc(e.referencia_envio)+'</p><p>'+esc(e.respondido_em?'Resposta registrada':
+        e.confirmado_em?'Recebido · aguardando retorno':'Enviado · aguardando confirmação')+'</p>'+
+      (e.resposta?'<p><b>Retorno:</b> '+esc(e.resposta)+'</p>':'');
+    if(est.podeResponder&&!e.respondido_em){
+      const campo=document.createElement('textarea'),referencia=document.createElement('input');
+      campo.maxLength=2000;campo.placeholder=e.confirmado_em?'Registre a resposta e a providência da área':'Confirmação de recebimento pela área';
+      referencia.maxLength=200;referencia.placeholder='Referência da confirmação de recebimento';
+      referencia.style.cssText='width:100%;padding:9px;margin:8px 0;border:1px solid var(--risca);border-radius:7px';
+      const botao=document.createElement('button');botao.type='button';botao.className='btn';
+      botao.textContent=e.confirmado_em?'Registrar retorno':'Confirmar recebimento';
+      if(!e.confirmado_em)div.appendChild(referencia);
+      div.appendChild(campo);div.appendChild(botao);
+      botao.onclick=async()=>{
+        const valor=campo.value.trim(),ref=referencia.value.trim();
+        if(valor.length<(e.confirmado_em?5:4)&&ref.length<4){
+          encaminhamentoAviso(e.confirmado_em?'Descreva o retorno da área.':'Informe a referência da confirmação.');return;
+        }
+        const dados=e.confirmado_em?{respondido_em:new Date().toISOString(),respondido_por:est.sessao.user.id,resposta:valor}
+          :{confirmado_em:new Date().toISOString(),confirmado_por:est.sessao.user.id,referencia_confirmacao:ref||valor};
+        if(e.confirmado_em&&valor.length<5){encaminhamentoAviso('Descreva o retorno da área.');return;}
+        botao.disabled=true;
+        const {data,error}=await sb.from('sac_encaminhamento').update(dados).eq('id',e.id)
+          .select('id,caso_id,area,destinatario,canal,solicitacao,prazo,referencia_envio,enviado_em,confirmado_em,referencia_confirmacao,respondido_em,resposta').single();
+        if(est.encerrada||casoSelecionado!==c.id)return;
+        if(error){botao.disabled=false;encaminhamentoAviso('Não foi possível registrar: '+error.message);return;}
+        casosEncaminhamentos=casosEncaminhamentos.map(x=>x.id===e.id?data:x);
+        encaminhamentoAviso('Acompanhamento registrado.');encaminhamentosDesenhar(c);casosDesenharLista();
+      };
+    }
+    lista.appendChild(div);
+  }
 }
 function casosAbrirNC(c){
   const t=casosTratativas.get(c.id);
