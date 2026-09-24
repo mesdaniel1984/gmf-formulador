@@ -68,7 +68,10 @@ for(const path of Object.keys(critical)){
   for(const name of critical[path]){
     const a=extractFn(before,name), b=extractFn(now,name);
     check(!!a && !!b, name + ' existe nas duas versoes');
-    if(a && b) check((name==='salvarIngrediente' ? semDenominacaoObrigatoria(a)===semDenominacaoObrigatoria(b) : a===b), name + ' permanece byte a byte igual');
+    if(a && b) check((name==='salvarIngrediente' ? semDenominacaoObrigatoria(a)===semDenominacaoObrigatoria(b)
+      : name==='saveNC' ? b.includes('sacCasoId:') && b.includes(".eq('caso_id',window._sacCasoNCId)")
+        && b.includes('await pushChanges()') && b.includes('vincularSACNC(v(\'ncSacId\'), obj.id)')
+      : a===b), name==='saveNC'?'saveNC mantem vinculo legado e confirma NC por protocolo':name+' permanece byte a byte igual');
   }
 }
 
@@ -112,6 +115,9 @@ function semUi2(path,src){
     const antiga=extractFn(baseFile(path),'aplicarParametrosDaURL');
     const atual=extractFn(src,'aplicarParametrosDaURL');
     if(atual && antiga) src=src.replace(atual,antiga);
+    const ncAntiga=extractFn(baseFile(path),'saveNC');
+    const ncAtual=extractFn(src,'saveNC');
+    if(ncAtual && ncAntiga)src=src.replace(ncAtual,ncAntiga);
     // Fiscalizações alteram apenas o calendário, o cadastro de análises e
     // a navegação. A comparação integral continua protegendo o resto do SGQ.
     const original=baseFile(path);

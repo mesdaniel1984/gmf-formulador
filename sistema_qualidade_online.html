@@ -3216,6 +3216,7 @@ async function saveNC(){
     desc:v('ncDesc'),prod:v('ncProd'),resp:v('ncResp'),prazo:v('ncPrazo'),
     causa:v('ncCausa'),acao:v('ncAcao'),status:v('ncStatusI'),
     etapa:v('ncEtapa')||'A apurar',
+    sacCasoId:(id?_ncAnt.sacCasoId:(window._sacCasoNCId||''))||'',
     sacId:(id?((db.ncs.find(n=>n.id===id)||{}).sacId||''):''),
     qtdReprocesso:parseFloat(document.getElementById('ncQtdReprocesso')?.value)||0,
     qtdPerdaEmb:parseFloat(document.getElementById('ncQtdPerdaEmb')?.value)||0,
@@ -3227,7 +3228,30 @@ async function saveNC(){
   };
   if(id){const i=db.ncs.findIndex(n=>n.id===id); if(i>=0){db.ncs[i]=obj;}else{db.ncs.push(obj);}}else{db.ncs.push(obj);}
   vincularSACNC(v('ncSacId'), obj.id);
-  saveDB();closeModal('ncModal');renderNCs();
+  saveDB();
+  if(window._sacCasoNCId && (!id || obj.sacCasoId===window._sacCasoNCId)){
+    // Se a sincronização falhar, uma nova tentativa edita a mesma NC.
+    document.getElementById('ncEditId').value=obj.id;
+    clearTimeout(_saveTimer);
+    await pushChanges();
+    if(_snap.ncs!==JSON.stringify(db.ncs)){
+      alert('A NC continua pendente de sincronização. Aguarde o aviso de dados salvos antes de sair.');
+      return;
+    }
+    const sessao=await sb.auth.getUser();
+    const usuario=sessao.data&&sessao.data.user;
+    const vinculo=usuario?await sb.from('sac_caso_tratativa')
+      .update({nc_id:obj.id,nc_numero:obj.num,atualizado_por:usuario.id,
+        atualizado_em:new Date().toISOString()})
+      .eq('caso_id',window._sacCasoNCId).is('nc_id',null).eq('nc_decisao','NECESSARIA')
+      .select('caso_id'): {data:null,error:{message:'Sessão não disponível'}};
+    if(vinculo.error||!vinculo.data||!vinculo.data.length){
+      alert('A NC '+obj.num+' foi salva, mas o vínculo com o protocolo não foi confirmado. Informe a Qualidade para conferir antes de abrir outra NC.');
+      return;
+    }
+    window._sacCasoNCId=null;
+  }
+  closeModal('ncModal');renderNCs();
 }
 
 // ===== SAC =====
@@ -3898,6 +3922,8 @@ function aplicarParametrosDaURL(){
       sessionStorage.removeItem('sac_nc_rascunho');
     }catch(e){ triagemSac = null; }
     if(!triagemSac || !/^55\d{10,11}$/.test(String(triagemSac.telefone||''))) return;
+    window._sacCasoNCId=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(String(triagemSac.caso_id||''))
+      ? triagemSac.caso_id : null;
     origem = 'SAC WhatsApp' + (triagemSac.protocolo ? ' · '+String(triagemSac.protocolo).slice(0,80) : ' · contato final '+String(triagemSac.telefone).slice(-4));
     desc = 'Categoria: '+String(triagemSac.categoria||'').slice(0,40)
       +'\nÁrea responsável: '+String(triagemSac.area||'').slice(0,40)
@@ -3912,12 +3938,12 @@ function aplicarParametrosDaURL(){
   var corpo = desc;
   if(origem) corpo = (corpo ? corpo + '\n\n' : '') + '[origem: ' + origem + ']';
   _pontePor('ncDesc', corpo);
-  _pontePor('ncProd', q.get('prod'));
-  _pontePor('ncLote', q.get('lote'));
+  _pontePor('ncProd', triagemSac?.produto||q.get('prod'));
+  _pontePor('ncLote', triagemSac?.lote||q.get('lote'));
   _pontePor('ncResp', q.get('resp'));
   _pontePor('ncData', q.get('data'));
   _pontePor('ncCausa', q.get('causa'));
-  if(triagemSac) _pontePor('ncResp', String(triagemSac.area||'').slice(0,40));
+  if(triagemSac) _pontePor('ncResp', String(triagemSac.responsavel||triagemSac.area||'').slice(0,40));
   _ponteSelect('ncEmpresa', q.get('empresa'));
   // Desvio de ronda e nao conformidade INTERNA. 'Interna' e o valor que o
   // select realmente tem — conferido no HTML, nao suposto.
