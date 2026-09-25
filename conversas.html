@@ -158,7 +158,20 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
 .casos-detalhe{overflow:auto;padding:20px;min-width:0}
 .casos-detalhe h2{margin:0 0 8px;font-size:20px}
 .casos-filtros{padding:12px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--risca)}
-.casos-filtros select{max-width:100%;padding:7px;background:var(--papel);color:var(--tinta);border:1px solid var(--risca);border-radius:6px}
+.casos-filtros select,.casos-filtros input{max-width:100%;min-width:0;padding:7px;background:var(--papel);color:var(--tinta);border:1px solid var(--risca);border-radius:6px;font:inherit}
+.casos-filtros input{flex:1 1 150px}
+.casos-resumo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:10px;border-bottom:1px solid var(--risca)}
+.casos-resumo button{background:var(--campo);border:1px solid var(--risca);border-radius:8px;text-align:left;padding:9px;color:var(--tinta);cursor:pointer;font:inherit;font-size:11px;line-height:1.3}
+.casos-resumo strong{display:block;font-size:21px;line-height:1.2}
+.casos-resumo button[data-alerta="true"]{background:var(--alerta-fundo);border-color:var(--alerta)}
+.casos-resumo button[data-alerta="true"] strong{color:var(--alerta)}
+.casos-resumo button[aria-pressed="true"]{outline:2px solid var(--selo);outline-offset:-2px}
+.casos-lista .item[data-vencido="true"]{box-shadow:inset 3px 0 0 var(--alerta)}
+.casos-lista .item[data-vencido="true"] .situacao{color:var(--alerta)}
+.respostas-rapidas{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:7px 0}
+.respostas-rapidas span{font-size:12px;color:var(--grafite);margin-right:3px}
+.respostas-rapidas .btn{font-size:12px;padding:4px 8px}
+.respostas-rapidas .btn:disabled{opacity:.5}
 .caso-card{background:var(--papel);border:1px solid var(--risca);border-radius:9px;padding:16px;margin-bottom:12px}
 .caso-card p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .caso-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -170,7 +183,7 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
 .caso-encaminhamento{padding:12px;margin:10px 0;border:1px solid var(--risca);border-radius:7px;overflow-wrap:anywhere}
 .caso-encaminhamento .acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .caso-encaminhamento textarea{display:block;width:100%;min-height:65px;resize:vertical;margin:8px 0;padding:9px;border:1px solid var(--risca);border-radius:7px;background:var(--campo);color:var(--tinta);font:inherit}
-@media(max-width:750px){.casos{grid-template-columns:1fr}.casos-lista{max-height:35vh}.caso-grid{grid-template-columns:1fr}}
+@media(max-width:750px){.casos{grid-template-columns:1fr}.casos-lista{max-height:42vh}.caso-grid{grid-template-columns:1fr}.casos-detalhe{padding:12px}.topo-dir{flex-wrap:wrap}.casos-resumo{position:sticky;top:0;background:var(--papel);z-index:1}}
 
 .portao{ max-width:480px; margin:64px auto; background:var(--papel);
          border:1px solid var(--risca); border-radius:10px; padding:26px 24px; }
@@ -184,7 +197,7 @@ a{ color:var(--selo); }
 <header>
   <div>
     <div class="marca">SGQ · Grupo MF Paris</div>
-    <h1>Conversas do WhatsApp</h1>
+    <h1>SAC · Atendimento da Qualidade</h1>
   </div>
   <div class="topo-dir">
     <button class="btn btn-forte" id="casosAlternar" type="button">Casos SAC</button>
@@ -267,6 +280,13 @@ a{ color:var(--selo); }
 
     <div class="resposta" id="caixaResposta" hidden>
       <div id="avisoJanela"></div>
+      <div class="respostas-rapidas" id="respostasRapidas" aria-label="Sugestões de resposta">
+        <span>Rascunhos para revisar:</span>
+        <button class="btn" type="button" data-modelo="recebimento">Confirmar recebimento</button>
+        <button class="btn" type="button" data-modelo="dados">Pedir dados do produto</button>
+        <button class="btn" type="button" data-modelo="analise">Atualização da análise</button>
+        <button class="btn" type="button" data-modelo="retorno">Solicitar contato</button>
+      </div>
       <textarea id="texto" placeholder="Escreva a resposta…" maxlength="4000"></textarea>
       <div class="resposta-baixo">
         <button class="btn btn-forte" id="btnEnviar">Enviar pelo WhatsApp</button>
@@ -278,9 +298,15 @@ a{ color:var(--selo); }
   <section class="casos" id="casosPainel" aria-label="Casos do SAC" hidden>
     <div class="casos-lista">
       <div class="fila-topo"><span id="casosTotal">Casos do SAC</span><button class="aba" id="casosRecarregar" type="button">Atualizar</button></div>
+      <div class="casos-resumo" aria-label="Prioridades da Qualidade">
+        <button type="button" id="casosVencidos" aria-pressed="false"><strong>—</strong>Prazo vencido</button>
+        <button type="button" id="casosTriagem" aria-pressed="false"><strong>—</strong>Sem triagem</button>
+        <button type="button" id="casosRetornos" aria-pressed="false"><strong>—</strong>Área sem retorno</button>
+      </div>
       <div class="casos-filtros">
         <select id="casosFiltro" aria-label="Situação dos casos"><option value="pendentes">Pendentes</option><option value="todos">Todos</option><option value="concluidos">Concluídos</option></select>
         <select id="casosAreaFiltro" aria-label="Área responsável"><option value="">Todas as áreas</option><option value="QUALIDADE">Qualidade</option><option value="PRODUCAO">Produção</option><option value="LOGISTICA">Logística</option><option value="COMERCIAL">Comercial</option><option value="FINANCEIRO">Financeiro</option><option value="REGULATORIO">Regulatório</option><option value="OUTROS">Outros</option></select>
+        <input id="casosBusca" type="search" aria-label="Buscar protocolo ou produto" placeholder="Protocolo, produto ou cliente">
       </div>
       <div id="casosLista" aria-live="polite"></div>
     </div>
@@ -509,6 +535,8 @@ function atualizarBotoes(){
                         || est.situacaoAberta !== 'ABERTO'
                         || !est.podeResponder || !janelaAberta;
   $('btnEnviar').textContent = est.enviando ? 'Enviando…' : 'Enviar pelo WhatsApp';
+  if($('respostasRapidas'))for(const botao of $('respostasRapidas').querySelectorAll('button'))
+    botao.disabled=$('texto').disabled;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1059,6 +1087,19 @@ $('abaTodas').onclick     = () => trocarAba('TODAS');
 $('abaAberto').onclick    = () => trocarAba('ABERTO');
 $('abaResolvido').onclick = () => trocarAba('RESOLVIDO');
 $('texto').addEventListener('input', () => { guardarRascunho(); atualizarBotoes(); });
+const modelosResposta={
+  recebimento:'Recebemos sua mensagem. A Qualidade vai conferir as informações e manter você informado por aqui. Se tiver o número do lote ou fotos da embalagem, pode enviar; se não tiver, seguimos com o que você relatou.',
+  dados:'Para investigar o produto, você poderia informar o nome que aparece na embalagem, o lote e a validade? Uma foto desses dados também ajuda. Se não tiver a embalagem, avise e continuaremos a análise com as informações disponíveis.',
+  analise:'Sua manifestação está em análise pela Qualidade. Ainda não temos uma conclusão confirmada para compartilhar. Assim que verificarmos os registros e as providências necessárias, retornaremos com uma atualização por este canal.',
+  retorno:'Precisamos confirmar alguns detalhes para avançar na análise. Podemos conversar por este canal ou, se preferir telefone, informe um horário adequado para contato. Seus dados serão usados somente na tratativa deste atendimento.'
+};
+$('respostasRapidas').addEventListener('click',e=>{
+  const botao=e.target.closest('button[data-modelo]');
+  if(!botao||!est.aberta||$('texto').disabled)return;
+  if($('texto').value.trim()&&!window.confirm('Substituir o rascunho atual por esta sugestão?'))return;
+  $('texto').value=modelosResposta[botao.dataset.modelo]||'';
+  guardarRascunho();atualizarBotoes();$('texto').focus();
+});
 $('texto').addEventListener('keydown', e => {
   if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){
     e.preventDefault();
@@ -1085,7 +1126,7 @@ sb.auth.onAuthStateChange((evento, sessao) => {
 <script>
 /* A manifestacao e identificada pelo ID do protocolo, nunca pelo telefone.
    A conversa continua independente e disponivel no botao Conversas. */
-let casosCache=[], casosTratativas=new Map(), casoSelecionado=null, casoSequencia=0;
+let casosCache=[], casosTratativas=new Map(), casoSelecionado=null, casoSequencia=0, casoAlerta='';
 const casoStatus={ENCAMINHADO:'Encaminhado',EM_ANALISE:'Em análise',
   AGUARDANDO_CLIENTE:'Aguardando cliente',CONCLUIDO:'Concluído'};
 const casoArea={QUALIDADE:'Qualidade',PRODUCAO:'Produção',LOGISTICA:'Logística',
@@ -1128,30 +1169,48 @@ async function casosCarregar(){
 }
 function casosDesenharLista(){
   const lista=$('casosLista');lista.replaceChildren();
+  const hoje=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo'}).format(new Date());
+  const pendentes=c=>casosTratativas.get(c.id)?.situacao!=='CONCLUIDO';
+  const atrasado=c=>{const t=casosTratativas.get(c.id);return pendentes(c)&&!!t?.prazo&&t.prazo<hoje;};
+  const aguardando=c=>casosEncaminhamentos.some(e=>e.caso_id===c.id&&!e.respondido_em);
+  for(const [id,quantidade] of [['casosVencidos',casosCache.filter(atrasado).length],
+    ['casosTriagem',casosCache.filter(c=>pendentes(c)&&!casosTratativas.has(c.id)).length],
+    ['casosRetornos',casosCache.filter(c=>pendentes(c)&&aguardando(c)).length]]){
+    $(id).querySelector('strong').textContent=quantidade;
+    $(id).dataset.alerta=String(quantidade>0);
+    $(id).setAttribute('aria-pressed',String(casoAlerta===id));
+  }
+  const busca=$('casosBusca').value.trim().toLocaleLowerCase('pt-BR');
   let dados=casosCache.filter(c=>{
     const t=casosTratativas.get(c.id), concluido=t?.situacao==='CONCLUIDO';
     const filtro=$('casosFiltro').value,area=$('casosAreaFiltro').value;
     return (filtro==='todos'||(filtro==='concluidos'?concluido:!concluido))
-      &&(!area||t?.area===area);
+      &&(!area||t?.area===area)
+      &&(!busca||[c.protocolo,c.produto,c.nome,c.tipo].some(s=>String(s||'').toLocaleLowerCase('pt-BR').includes(busca)))
+      &&(!casoAlerta||(casoAlerta==='casosVencidos'?atrasado(c)
+        :casoAlerta==='casosTriagem'?!t&&pendentes(c):aguardando(c)));
   });
   dados.sort((a,b)=>{
     const ta=casosTratativas.get(a.id),tb=casosTratativas.get(b.id);
     const pa=(ta?.prioridade==='ALTA'||a.prioridade)?1:0;
     const pb=(tb?.prioridade==='ALTA'||b.prioridade)?1:0;
-    return pb-pa||new Date(a.criado_em)-new Date(b.criado_em);
+    return Number(atrasado(b))-Number(atrasado(a))||pb-pa||
+      Number(!tb&&pendentes(b))-Number(!ta&&pendentes(a))||
+      (ta?.prazo||'9999-12-31').localeCompare(tb?.prazo||'9999-12-31')||
+      new Date(a.criado_em)-new Date(b.criado_em);
   });
-  if(!dados.length){lista.innerHTML='<p class="vazio">Nenhum protocolo neste filtro.</p>';return;}
+  if(!dados.length){lista.innerHTML='<p class="vazio">Nenhum protocolo neste filtro. Limpe a busca ou selecione outra prioridade.</p>';return;}
   for(const c of dados){
     const t=casosTratativas.get(c.id), b=document.createElement('button');
     const semRetorno=casosEncaminhamentos.filter(e=>e.caso_id===c.id&&!e.respondido_em).length;
-    b.type='button';b.className='item';b.dataset.casoId=c.id;
+    b.type='button';b.className='item';b.dataset.casoId=c.id;b.dataset.vencido=String(atrasado(c));
     if(c.id===casoSelecionado)b.setAttribute('aria-current','true');
     b.innerHTML='<span class="quem">'+esc(c.protocolo||'Sem protocolo')+'</span>'+
       '<span class="previa">'+esc(c.tipo||'Manifestação')+' · '+esc(c.produto||'Produto não informado')+'</span>'+
       '<span class="quando">'+esc(faz(c.criado_em))+'</span>'+
       '<span class="situacao">'+esc(t?casoStatus[t.situacao]||t.situacao:'Aguardando triagem')+
       (t?.area?' · '+esc(casoArea[t.area]):'')+
-      (t?.prazo&&t.situacao!=='CONCLUIDO'&&t.prazo<new Date().toISOString().slice(0,10)?' · PRAZO VENCIDO':'')+
+      (atrasado(c)?' · PRAZO VENCIDO':t?.prazo&&pendentes(c)?' · até '+esc(t.prazo):'')+
       (semRetorno?' · '+semRetorno+' retorno'+(semRetorno===1?'':'s')+' pendente'+(semRetorno===1?'':'s'):'')+
       ((t?.prioridade==='ALTA'||c.prioridade)?' · PRIORIDADE ALTA':'')+'</span>';
     b.onclick=()=>casosAbrir(c.id);lista.appendChild(b);
@@ -1180,6 +1239,18 @@ async function casosAbrir(id){
       <p><b>Relato:</b> ${esc(c.relato||'Não informado')}</p>
       ${c.ocorrencia?'<p><b>Ocorrência:</b> '+esc(c.ocorrencia)+'</p>':''}
       <div id="casoFotos" class="caso-fotos"></div></div>
+    <section class="caso-card" aria-label="Rastreabilidade do produto"><h2>Rastreabilidade e evidências</h2>
+      <p>Produto e lote informados pelo consumidor precisam ser conferidos com os registros internos. A NC é vinculada pela tratativa abaixo; OP, ronda, NF-e e laudo são referências registradas pela Qualidade, sem consulta automática ao CQ/Omie.</p>
+      <p><a href="https://qualidade-alimentos-production.up.railway.app/sso/start" target="_blank" rel="noopener noreferrer">Consultar OP, lote e rondas no CQ ↗</a></p>
+      <div id="casoReferencias" aria-live="polite"><p>Carregando referências…</p></div>
+      <form id="casoReferenciaForm"><div class="caso-grid">
+        <label>Tipo de registro<select id="refTipo" required><option value="">Selecione</option><option value="OP_OMIE">OP no Omie/CQ</option><option value="RONDA_CQ">Ronda no CQ</option><option value="NFE">NF-e / pedido</option><option value="LAUDO">Análise / laudo</option><option value="FICHA_TECNICA">Ficha técnica</option><option value="OUTRO">Outro documento</option></select></label>
+        <label>Número ou identificação<input id="refNumero" required maxlength="160" placeholder="Referência conferida"></label>
+      </div>
+      <label class="caso-largo">Fonte consultada e como foi conferida<input id="refFonte" required maxlength="300" placeholder="Ex.: CQ, consulta à OP e lote; laudo nº…"></label>
+      <label class="caso-largo">Observação da conferência<textarea id="refObservacao" maxlength="500" placeholder="Informe o que a referência confirma e eventuais divergências"></textarea></label>
+      <button class="btn btn-forte" id="refSalvar" type="submit"${est.podeResponder?'':' disabled'}>Registrar referência conferida</button>
+      <p id="refAviso" class="recado erro" hidden></p></form></section>
     <form class="caso-card" id="casoForm"><h2>Tratativa da Qualidade</h2>
       <p>Defina uma área e quem assumiu o caso. O registro fica na fila por área e protocolo; confirme o acionamento com o responsável.</p>
       <div class="caso-grid">
@@ -1224,6 +1295,8 @@ async function casosAbrir(id){
     fotos.appendChild(bloco);
   }
   $('casoForm').onsubmit=e=>{e.preventDefault();casosSalvar(c);};
+  $('casoReferenciaForm').onsubmit=e=>{e.preventDefault();casoReferenciaSalvar(c);};
+  casoReferenciasCarregar(c);
   $('encaminhamentoForm').onsubmit=e=>{e.preventDefault();encaminhamentoCriar(c);};
   $('encCopiar').onclick=()=>encaminhamentoCopiar(c);
   $('encEmail').onclick=()=>encaminhamentoEmail(c);
@@ -1236,7 +1309,33 @@ async function casosAbrir(id){
     if(b)b.click();
   };
   if(!est.podeResponder)for(const campo of $('casoForm').querySelectorAll('input,select,textarea'))campo.disabled=true;
+  if(!est.podeResponder)for(const campo of $('casoReferenciaForm').querySelectorAll('input,select,textarea,button'))campo.disabled=true;
   if(!est.podeResponder)for(const campo of $('encaminhamentoForm').querySelectorAll('input,select,textarea,button'))campo.disabled=true;
+}
+async function casoReferenciasCarregar(c){
+  const r=await sb.from('sac_caso_referencia')
+    .select('tipo,referencia,fonte,observacao,registrado_em').eq('caso_id',c.id)
+    .order('registrado_em',{ascending:false}).limit(50);
+  if(est.encerrada||casoSelecionado!==c.id||!$('casoReferencias'))return;
+  if(r.error){$('casoReferencias').innerHTML='<p class="recado erro">Não foi possível consultar as referências: '+esc(r.error.message)+'</p>';return;}
+  const tipos={OP_OMIE:'OP no Omie/CQ',RONDA_CQ:'Ronda no CQ',NFE:'NF-e / pedido',LAUDO:'Análise / laudo',FICHA_TECNICA:'Ficha técnica',OUTRO:'Outro documento'};
+  $('casoReferencias').innerHTML=(r.data||[]).map(v=>'<div class="caso-encaminhamento"><b>'+esc(tipos[v.tipo]||v.tipo)+' · '+esc(v.referencia)+'</b><p>Fonte: '+esc(v.fonte)+'</p>'+
+    (v.observacao?'<p>'+esc(v.observacao)+'</p>':'')+'<small>Registrado '+esc(new Date(v.registrado_em).toLocaleString('pt-BR'))+'</small></div>').join('')||
+    '<p class="vazio">Nenhuma referência conferida. Consulte OP, lote e análises antes de atribuir a causa.</p>';
+}
+async function casoReferenciaSalvar(c){
+  if(!est.sessao||!est.podeResponder||est.encerrada||casoSelecionado!==c.id)return;
+  const v=id=>$(id).value.trim();
+  if(!v('refTipo')||v('refNumero').length<2||v('refFonte').length<5){
+    $('refAviso').textContent='Informe tipo, número e fonte da conferência.';$('refAviso').hidden=false;return;
+  }
+  $('refSalvar').disabled=true;$('refAviso').hidden=true;
+  const r=await sb.from('sac_caso_referencia').insert({caso_id:c.id,tipo:v('refTipo'),
+    referencia:v('refNumero'),fonte:v('refFonte'),observacao:v('refObservacao'),registrado_por:est.sessao.user.id});
+  if(est.encerrada||casoSelecionado!==c.id)return;
+  $('refSalvar').disabled=false;
+  if(r.error){$('refAviso').textContent='Não foi possível registrar: '+r.error.message;$('refAviso').hidden=false;return;}
+  $('casoReferenciaForm').reset();await casoReferenciasCarregar(c);
 }
 async function casosSalvar(c){
   if(!est.sessao||!est.podeResponder||est.encerrada||casoSelecionado!==c.id)return;
@@ -1376,6 +1475,12 @@ $('casosAlternar').onclick=()=>casosModo($('casosPainel').hidden);
 $('casosRecarregar').onclick=casosCarregar;
 $('casosFiltro').onchange=casosDesenharLista;
 $('casosAreaFiltro').onchange=casosDesenharLista;
+$('casosBusca').oninput=casosDesenharLista;
+for(const id of ['casosVencidos','casosTriagem','casosRetornos'])$(id).onclick=()=>{
+  casoAlerta=casoAlerta===id?'':id;
+  if(casoAlerta)$('casosFiltro').value='pendentes';
+  casosDesenharLista();
+};
 setInterval(()=>{if(!est.encerrada&&est.sessao&&!$('casosPainel').hidden)casosCarregar();},30000);
 </script>
 </body>
