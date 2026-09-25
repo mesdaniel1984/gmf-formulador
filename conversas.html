@@ -89,6 +89,7 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
 .item .quando{ font-size:11.5px; color:var(--grafite); margin-top:4px; }
 .item .lapis{ font-size:11.5px; color:var(--realce); margin-top:3px; }
 .item .situacao{ font-size:11px; color:var(--selo); font-weight:600; margin-top:4px; }
+.item .previa,.item .quando,.item .situacao,.item .lapis{display:block;white-space:normal;overflow-wrap:anywhere}
 .fila-nota{ padding:9px 16px; margin:0; border-bottom:1px solid var(--risca);
             font-size:12px; color:var(--grafite); }
 .vazio{ padding:28px 18px; color:var(--grafite); font-family:Lora,Georgia,serif; }
@@ -173,6 +174,7 @@ main{ flex:1; display:grid; grid-template-columns:320px 1fr; min-height:0; }
 .respostas-rapidas .btn{font-size:12px;padding:4px 8px}
 .respostas-rapidas .btn:disabled{opacity:.5}
 .caso-card{background:var(--papel);border:1px solid var(--risca);border-radius:9px;padding:16px;margin-bottom:12px}
+.caso-card summary{cursor:pointer;font-weight:700;color:var(--selo);font-size:16px}
 .caso-card p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .caso-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .caso-grid label,.caso-largo{display:block;font-size:13px;font-weight:600;color:var(--grafite)}
@@ -1239,7 +1241,7 @@ async function casosAbrir(id){
       <p><b>Relato:</b> ${esc(c.relato||'Não informado')}</p>
       ${c.ocorrencia?'<p><b>Ocorrência:</b> '+esc(c.ocorrencia)+'</p>':''}
       <div id="casoFotos" class="caso-fotos"></div></div>
-    <section class="caso-card" aria-label="Rastreabilidade do produto"><h2>Rastreabilidade e evidências</h2>
+    <details class="caso-card" aria-label="Rastreabilidade do produto"><summary>Rastreabilidade · conferir OP, lote e laudos</summary>
       <p>Produto e lote informados pelo consumidor precisam ser conferidos com os registros internos. A NC é vinculada pela tratativa abaixo; OP, ronda, NF-e e laudo são referências registradas pela Qualidade, sem consulta automática ao CQ/Omie.</p>
       <p><a href="https://qualidade-alimentos-production.up.railway.app/sso/start" target="_blank" rel="noopener noreferrer">Consultar OP, lote e rondas no CQ ↗</a></p>
       <div id="casoReferencias" aria-live="polite"><p>Carregando referências…</p></div>
@@ -1250,7 +1252,7 @@ async function casosAbrir(id){
       <label class="caso-largo">Fonte consultada e como foi conferida<input id="refFonte" required maxlength="300" placeholder="Ex.: CQ, consulta à OP e lote; laudo nº…"></label>
       <label class="caso-largo">Observação da conferência<textarea id="refObservacao" maxlength="500" placeholder="Informe o que a referência confirma e eventuais divergências"></textarea></label>
       <button class="btn btn-forte" id="refSalvar" type="submit"${est.podeResponder?'':' disabled'}>Registrar referência conferida</button>
-      <p id="refAviso" class="recado erro" hidden></p></form></section>
+      <p id="refAviso" class="recado erro" hidden></p></form></details>
     <form class="caso-card" id="casoForm"><h2>Tratativa da Qualidade</h2>
       <p>Defina uma área e quem assumiu o caso. O registro fica na fila por área e protocolo; confirme o acionamento com o responsável.</p>
       <div class="caso-grid">
