@@ -47,7 +47,7 @@ function fiscalRender(){
   lista.innerHTML=visiveis.map(f=>{
     const tarefas=fiscalExigencias.filter(x=>x.fiscalizacao_id===f.id&&x.situacao!=='Cumprida').length;
     const atraso=f.situacao!=='Histórico a validar'&&f.situacao!=='Concluída'&&f.prazo_resposta&&f.prazo_resposta<today();
-    return `<button class="fiscal-item" type="button" aria-current="${f.id===fiscalSelecionada}" onclick="fiscalAbrir('${f.id}')"><span class="fiscal-item-top"><strong>${fiEsc(f.orgao)} · ${fiEsc(f.processo)}</strong>${statusBadge(f.situacao)}</span><small>${fiEsc(f.empresa)} · ${fmtDate(f.data_fiscalizacao)}${atraso?' · Prazo vencido':f.prazo_resposta?' · Prazo '+fmtDate(f.prazo_resposta):''}</small><small>${tarefas} encaminhamento${tarefas===1?'':'s'} pendente${tarefas===1?'':'s'} · ${fiEsc(f.responsavel)}</small></button>`;
+    return `<button class="fiscal-item" type="button" aria-current="${f.id===fiscalSelecionada}" onclick="fiscalAbrir('${f.id}',true)"><span class="fiscal-item-top"><strong>${fiEsc(f.orgao)} · ${fiEsc(f.processo)}</strong>${statusBadge(f.situacao)}</span><small>${fiEsc(f.empresa)} · ${fmtDate(f.data_fiscalizacao)}${atraso?' · Prazo vencido':f.prazo_resposta?' · Prazo '+fmtDate(f.prazo_resposta):''}</small><small>${tarefas} encaminhamento${tarefas===1?'':'s'} pendente${tarefas===1?'':'s'} · ${fiEsc(f.responsavel)}</small></button>`;
   }).join('')||'<div class="fiscal-vazio">Nenhum processo corresponde aos filtros. Limpe a busca para ver toda a fila.</div>';
   if(fiscalSelecionada)fiscalAbrir(fiscalSelecionada);else fiEl('fiscalDetalhe').innerHTML='<div class="fiscal-vazio">Selecione um processo na fila para ver as ações e documentos.</div>';
 }
@@ -85,7 +85,7 @@ async function fiscalSalvar(){
     if(files.length)await fiscalCarregar();
   }catch(e){fiscalErro(e);}finally{fiEl('fiSalvar').disabled=false;}
 }
-function fiscalAbrir(id){
+function fiscalAbrir(id,ir){
   const f=fiscalRegistros.find(r=>r.id===id);if(!f)return;
   fiscalSelecionada=id;const ex=fiscalExigencias.filter(x=>x.fiscalizacao_id===id);
   const docs=fiscalDocumentos.filter(x=>x.fiscalizacao_id===id);
@@ -127,6 +127,7 @@ function fiscalAbrir(id){
       Responsável: ${fiEsc(e.aprovada_por)} · Justificativa: ${fiEsc(e.justificativa)}
       ${e.revogada_em?`<br>Revogação: ${fiEsc(e.motivo_revogacao)}`:write?`<button class="btn btn-sm btn-danger" onclick="fiscalRevogar('${e.id}')">Revogar</button>`:''}</p>`).join('')||'<p>Nenhuma decisão registrada.</p>'}
     </div>`;
+  if(ir&&window.matchMedia('(max-width:960px)').matches)fiEl('fiscalDetalhe').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function fiscalEditarExigencia(id){
   if(!fiscalPodeEscrever||!fiscalSelecionada)return;
