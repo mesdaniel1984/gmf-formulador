@@ -24,9 +24,10 @@ async function fiscalCarregar(){
 }
 function fiscalRender(){
   const tabela=fiEl('fiscalTabela');if(!tabela)return;
-  const ativas=fiscalRegistros.filter(f=>f.situacao!=='Concluída');
+  const ativas=fiscalRegistros.filter(f=>['Aberta','Em atendimento'].includes(f.situacao));
+  const historicas=fiscalRegistros.filter(f=>f.situacao==='Histórico a validar');
   const vencidas=ativas.filter(f=>f.prazo_resposta&&f.prazo_resposta<today()).length;
-  fiEl('fiscalResumo').innerHTML=`<span class="badge blue">${fiscalRegistros.length} fiscalizações</span><span class="badge warn">${ativas.length} abertas</span><span class="badge danger">${vencidas} prazos vencidos</span><span class="badge ok">${fiscalEquivalencias.filter(e=>!e.revogada_em).length} equivalências aprovadas</span>`;
+  fiEl('fiscalResumo').innerHTML=`<span class="badge blue">${fiscalRegistros.length} fiscalizações</span><span class="badge warn">${ativas.length} abertas</span><span class="badge blue">${historicas.length} históricas a validar</span><span class="badge danger">${vencidas} prazos vencidos</span><span class="badge ok">${fiscalEquivalencias.filter(e=>!e.revogada_em).length} equivalências aprovadas</span>`;
   tabela.innerHTML=fiscalRegistros.slice().sort((a,b)=>b.data_fiscalizacao.localeCompare(a.data_fiscalizacao)).map(f=>`<tr><td><b>${fiEsc(f.orgao)}</b> · ${fiEsc(f.processo)}</td><td>${fiEsc(f.empresa)}</td><td>${fmtDate(f.data_fiscalizacao)}</td><td>${fmtDate(f.prazo_resposta)}</td><td>${fiEsc(f.responsavel)}</td><td>${statusBadge(f.situacao)}</td><td><button class="btn btn-sm btn-outline" onclick="fiscalAbrir('${f.id}')">Abrir</button></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:22px">Nenhuma fiscalização registrada.</td></tr>';
   if(fiscalSelecionada)fiscalAbrir(fiscalSelecionada);
 }
