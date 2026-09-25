@@ -675,19 +675,64 @@
 
 <!-- FISCALIZAÇÕES: processo oficial separado do registro analítico -->
 <div class="section" id="fiscalizacoes">
-  <div class="section-title">Fiscalizações</div>
-  <div class="section-sub">Exigências, prazos, documentos e laudos oficiais vinculados</div>
-  <div class="toolbar">
-    <button class="btn btn-primary" id="fiscalNovoBtn" onclick="fiscalNovo()">+ Registrar fiscalização</button>
-    <button class="btn btn-outline" onclick="fiscalCarregar()">Atualizar</button>
-  </div>
-  <div id="fiscalAviso" role="status" style="margin-bottom:12px"></div>
-  <div id="fiscalResumo" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px"></div>
-  <div class="panel"><div class="table-wrap"><table>
-    <thead><tr><th>Órgão / processo</th><th>Empresa</th><th>Data</th><th>Prazo</th><th>Responsável</th><th>Situação</th><th>Ação</th></tr></thead>
-    <tbody id="fiscalTabela"></tbody>
-  </table></div></div>
-  <div class="panel" id="fiscalDetalhe" style="display:none;margin-top:16px"></div>
+  <style>
+    #fiscalizacoes .fiscal-topo{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+    #fiscalizacoes .fiscal-topo .section-sub{margin-bottom:0}
+    #fiscalizacoes .fiscal-acoes{display:flex;gap:8px;flex-wrap:wrap}
+    #fiscalizacoes .fiscal-metricas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    #fiscalizacoes .fiscal-metrica{border:1px solid #dbe4ee;border-radius:14px;background:#fff;text-align:left;padding:17px 18px;cursor:pointer;min-width:0;color:#26394c;box-shadow:0 3px 12px rgba(25,46,70,.04)}
+    #fiscalizacoes .fiscal-metrica[aria-pressed="true"]{border-color:#1c609c;box-shadow:0 0 0 2px #d5e9f8}
+    #fiscalizacoes .fiscal-metrica strong{display:block;font-size:27px;line-height:1.1;margin:8px 0 3px;color:#142d49}
+    #fiscalizacoes .fiscal-metrica span{font-size:13px;font-weight:700}
+    #fiscalizacoes .fiscal-metrica small{display:block;color:#60758a;line-height:1.4}
+    #fiscalizacoes .fiscal-metrica.urgente{border-top:4px solid #c84343}
+    #fiscalizacoes .fiscal-metrica.ativo{border-top:4px solid #c48819}
+    #fiscalizacoes .fiscal-metrica.historico{border-top:4px solid #4f63b9}
+    #fiscalizacoes .fiscal-metrica.fechado{border-top:4px solid #218466}
+    #fiscalizacoes .fiscal-layout{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:16px;align-items:start}
+    #fiscalizacoes .fiscal-fila,#fiscalizacoes #fiscalDetalhe{width:100%;max-width:none!important;min-width:0;margin:0!important;padding:20px!important}
+    #fiscalizacoes .fiscal-busca{width:100%;margin:12px 0 8px;padding:11px 13px;border:1px solid #cbd9e6;border-radius:9px;font-size:14px}
+    #fiscalizacoes .fiscal-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    #fiscalizacoes .fiscal-filtros select{min-width:0;flex:1;padding:9px;border:1px solid #cbd9e6;border-radius:8px;background:#fff}
+    #fiscalizacoes .fiscal-item{display:block;width:100%;text-align:left;background:#fff;border:1px solid #e1e8f0;border-radius:11px;padding:14px;margin:0 0 9px;cursor:pointer;color:#26394c}
+    #fiscalizacoes .fiscal-item:hover,#fiscalizacoes .fiscal-item[aria-current="true"]{border-color:#2976ac;background:#f3f9fe}
+    #fiscalizacoes .fiscal-item strong{display:block;font-size:14px;overflow-wrap:anywhere}
+    #fiscalizacoes .fiscal-item small{display:block;color:#63778b;line-height:1.5;margin-top:5px}
+    #fiscalizacoes .fiscal-item-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    #fiscalizacoes .fiscal-item-top .badge{flex:none}
+    #fiscalizacoes .fiscal-titulo{display:flex;justify-content:space-between;align-items:start;gap:12px;flex-wrap:wrap}
+    #fiscalizacoes .fiscal-titulo h3{margin:0;border:0;padding:0;font-size:19px;overflow-wrap:anywhere}
+    #fiscalizacoes .fiscal-muted{color:#60758a;font-size:13px;line-height:1.5}
+    #fiscalizacoes .fiscal-dados{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:17px 0}
+    #fiscalizacoes .fiscal-dados>div{border:1px solid #e1e8f0;border-radius:9px;padding:12px;min-width:0;overflow-wrap:anywhere}
+    #fiscalizacoes .fiscal-dados small{display:block;color:#697b8c;margin-bottom:5px}
+    #fiscalizacoes .fiscal-bloco{border-top:1px solid #e2e9f0;padding-top:18px;margin-top:18px}
+    #fiscalizacoes .fiscal-bloco h4{margin:0 0 10px;font-size:15px;color:#1b3956}
+    #fiscalizacoes .fiscal-nota{background:#f2f7fb;border:1px solid #d7e4ee;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+    #fiscalizacoes .fiscal-tarefa{border:1px solid #dce6ee;border-left:4px solid #d89932;border-radius:9px;padding:13px;margin:10px 0;overflow-wrap:anywhere}
+    #fiscalizacoes .fiscal-tarefa.cumprida{border-left-color:#258564}
+    #fiscalizacoes .fiscal-tarefa p{margin:7px 0;font-size:13px}
+    #fiscalizacoes .fiscal-form{background:#f5f9fc;border:1px solid #d9e6ef;border-radius:10px;padding:15px;margin-top:12px}
+    #fiscalizacoes .fiscal-form label{display:block;font-size:13px;font-weight:650;margin:10px 0 4px}
+    #fiscalizacoes .fiscal-form input,#fiscalizacoes .fiscal-form select,#fiscalizacoes .fiscal-form textarea{width:100%;padding:9px;border:1px solid #cbd9e6;border-radius:8px;background:#fff;box-sizing:border-box}
+    #fiscalizacoes .fiscal-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+    #fiscalizacoes .fiscal-vazio{padding:25px;text-align:center;color:#61768a;border:1px dashed #cad9e6;border-radius:10px}
+    @media(max-width:960px){#fiscalizacoes .fiscal-layout{grid-template-columns:1fr}#fiscalizacoes .fiscal-metricas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){#fiscalizacoes .fiscal-metricas{gap:8px}#fiscalizacoes .fiscal-metrica{padding:12px}#fiscalizacoes .fiscal-dados,#fiscalizacoes .fiscal-form-grid{grid-template-columns:1fr}#fiscalizacoes .fiscal-fila,#fiscalizacoes #fiscalDetalhe{padding:15px!important}}
+  </style>
+  <div class="fiscal-topo"><div><div class="section-title">Fiscalizações</div>
+    <div class="section-sub">Da chegada do órgão à resposta: quem cuida, até quando e com qual evidência.</div></div>
+    <div class="fiscal-acoes"><button class="btn btn-primary" id="fiscalNovoBtn" onclick="fiscalNovo()">+ Registrar fiscalização</button>
+      <button class="btn btn-outline" onclick="fiscalCarregar()">Atualizar dados</button></div></div>
+  <div id="fiscalAviso" role="status" aria-live="polite"></div>
+  <div id="fiscalResumo" class="fiscal-metricas"></div>
+  <div class="fiscal-layout"><div class="panel fiscal-fila">
+    <strong>Fila de trabalho</strong><div class="fiscal-muted" id="fiscalContagem"></div>
+    <input id="fiscalBusca" class="fiscal-busca" type="search" placeholder="Buscar órgão, processo, empresa ou responsável" aria-label="Buscar fiscalização" oninput="fiscalRender()">
+    <div class="fiscal-filtros"><select id="fiscalFiltroEmpresa" aria-label="Filtrar empresa" onchange="fiscalRender()"><option value="">Todas as empresas</option><option>DMS</option><option>MFParis</option><option>Profi</option></select>
+    <select id="fiscalFiltroEstado" aria-label="Filtrar situação" onchange="this.dataset.atual='';fiscalRender()"><option value="">Todas as situações</option><option>Aberta</option><option>Em atendimento</option><option>Histórico a validar</option><option>Concluída</option></select></div>
+    <div id="fiscalLista"></div>
+  </div><div class="panel" id="fiscalDetalhe" aria-live="polite"></div></div>
 </div>
 
 <!-- ===== NCS ===== -->
@@ -1553,7 +1598,7 @@
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('fiscalModal')">Cancelar</button>
     <button class="btn btn-primary" id="fiSalvar" onclick="fiscalSalvar()">Salvar fiscalização</button></div>
 </div></div>
-<script src="sgq-fiscalizacoes.js?v=20260925-historico"></script>
+<script src="sgq-fiscalizacoes.js?v=20260925-fila"></script>
 <script>
 // ===== DATA STORE =====
 // ===== DATA STORE (Supabase / multiusuario, dados compartilhados) =====
