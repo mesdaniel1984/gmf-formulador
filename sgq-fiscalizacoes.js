@@ -50,10 +50,10 @@ function fiscalRender(){
     return `<button class="fiscal-item" type="button" aria-current="${f.id===fiscalSelecionada}" onclick="fiscalAbrir('${f.id}')"><span class="fiscal-item-top"><strong>${fiEsc(f.orgao)} · ${fiEsc(f.processo)}</strong>${statusBadge(f.situacao)}</span><small>${fiEsc(f.empresa)} · ${fmtDate(f.data_fiscalizacao)}${atraso?' · Prazo vencido':f.prazo_resposta?' · Prazo '+fmtDate(f.prazo_resposta):''}</small><small>${tarefas} encaminhamento${tarefas===1?'':'s'} pendente${tarefas===1?'':'s'} · ${fiEsc(f.responsavel)}</small></button>`;
   }).join('')||'<div class="fiscal-vazio">Nenhum processo corresponde aos filtros. Limpe a busca para ver toda a fila.</div>';
   if(fiscalSelecionada)fiscalAbrir(fiscalSelecionada);else fiEl('fiscalDetalhe').innerHTML='<div class="fiscal-vazio">Selecione um processo na fila para ver as ações e documentos.</div>';
+}
 function fiscalFiltrar(chave){const filtro=fiEl('fiscalFiltroEstado');
   const novo=(filtro.dataset.atual||filtro.value)===chave?'':chave;
   filtro.value=novo==='ativas'||novo==='vencidas'?'':novo;filtro.dataset.atual=novo;fiscalRender();}
-}
 function fiscalNovo(id){
   if(!fiscalPodeEscrever)return;
   const f=fiscalRegistros.find(r=>r.id===id)||{};
