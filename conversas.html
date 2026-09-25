@@ -535,7 +535,8 @@ function atualizarBotoes(){
                         || est.situacaoAberta !== 'ABERTO'
                         || !est.podeResponder || !janelaAberta;
   $('btnEnviar').textContent = est.enviando ? 'Enviando…' : 'Enviar pelo WhatsApp';
-  for(const botao of $('respostasRapidas').querySelectorAll('button'))botao.disabled=$('texto').disabled;
+  if($('respostasRapidas'))for(const botao of $('respostasRapidas').querySelectorAll('button'))
+    botao.disabled=$('texto').disabled;
 }
 
 /* ---------------------------------------------------------------------------
