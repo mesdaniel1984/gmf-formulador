@@ -134,13 +134,13 @@ function fiscalEditarExigencia(id){
   const x=fiscalExigencias.find(y=>y.id===id)||{};
   const areas=['Qualidade','Produção','P&D','Manutenção','Logística','Comercial','Diretoria','Jurídico','Outros'];
   const destino=String(x.responsavel||'').split(' · ');
-  const area=areas.includes(destino[0])?destino[0]:'Outros';
+  const area=areas.includes(destino[0])?destino[0]:(id?'Outros':'');
   const pessoa=area==='Outros'?x.responsavel||'':destino.slice(1).join(' · ');
   fiEl('fiscalDecisao').innerHTML=`<div class="fiscal-form"><h4>${id?'Atualizar encaminhamento':'Novo encaminhamento'}</h4>
     <label for="fxDescricao">O que a área precisa fazer? *</label>
     <textarea id="fxDescricao" rows="3" maxlength="2000" placeholder="Descreva a exigência e o resultado esperado">${fiEsc(x.descricao)}</textarea>
     <div class="fiscal-form-grid"><div><label for="fxArea">Área responsável *</label>
-    <select id="fxArea">${areas.map(a=>`<option ${area===a?'selected':''}>${a}</option>`).join('')}</select></div>
+    <select id="fxArea"><option value="">Selecione a área</option>${areas.map(a=>`<option ${area===a?'selected':''}>${a}</option>`).join('')}</select></div>
     <div><label for="fxResponsavel">Pessoa responsável *</label><input id="fxResponsavel" maxlength="120" value="${fiEsc(pessoa)}" placeholder="Nome da pessoa"></div>
     <div><label for="fxPrazo">Prazo da ação *</label><input id="fxPrazo" type="date" value="${fiEsc(x.prazo||'')}"></div>
     <div><label for="fxSituacao">Andamento</label><select id="fxSituacao">${['Pendente','Em andamento','Cumprida'].map(s=>`<option ${x.situacao===s?'selected':''}>${s}</option>`).join('')}</select></div></div>
@@ -151,7 +151,7 @@ function fiscalEditarExigencia(id){
   fiEl('fiscalDecisao').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 async function fiscalSalvarExigencia(id){
-  if(!fiVal('fxDescricao')||!fiVal('fxResponsavel')||!fiVal('fxPrazo'))return alert('Informe a ação, a pessoa responsável e o prazo.');
+  if(!fiVal('fxDescricao')||!fiVal('fxArea')||!fiVal('fxResponsavel')||!fiVal('fxPrazo'))return alert('Informe a ação, a área, a pessoa responsável e o prazo.');
   if(fiVal('fxSituacao')==='Cumprida'&&!fiVal('fxEvidencia'))return alert('Registre a evidência antes de concluir a ação.');
   const v={descricao:fiVal('fxDescricao'),prazo:fiVal('fxPrazo'),responsavel:(fiVal('fxArea')+' · '+fiVal('fxResponsavel')).slice(0,160),situacao:fiVal('fxSituacao'),evidencia:fiVal('fxEvidencia')};
   fiEl('fxSalvar').disabled=true;
