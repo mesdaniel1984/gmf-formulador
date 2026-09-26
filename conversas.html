@@ -1128,7 +1128,7 @@ sb.auth.onAuthStateChange((evento, sessao) => {
 <script>
 /* A manifestacao e identificada pelo ID do protocolo, nunca pelo telefone.
    A conversa continua independente e disponivel no botao Conversas. */
-let casosCache=[], casosTratativas=new Map(), casoSelecionado=null, casoSequencia=0, casoAlerta='';
+let casosCache=[], casosTratativas=new Map(), casoSelecionado=null, casoSequencia=0, casosCargaSequencia=0, casoAlerta='';
 const casoStatus={ENCAMINHADO:'Encaminhado',EM_ANALISE:'Em análise',
   AGUARDANDO_CLIENTE:'Aguardando cliente',CONCLUIDO:'Concluído'};
 const casoArea={QUALIDADE:'Qualidade',PRODUCAO:'Produção',LOGISTICA:'Logística',
@@ -1144,20 +1144,23 @@ function casosModo(abrir){
 }
 async function casosCarregar(){
   if(!est.sessao||est.encerrada)return;
-  const minha=++casoSequencia;
+  const minha=++casosCargaSequencia;
   const [entradas,tratativas,encaminhamentos]=await Promise.all([
     sb.from('sac_entrada').select('id,protocolo,nome,contato,produto,tipo,assunto,criado_em,prioridade')
       .order('criado_em',{ascending:false}).limit(300),
     sb.from('sac_caso_tratativa').select('caso_id,area,responsavel,prazo,prioridade,situacao,nc_decisao,resumo,retorno,nc_id,nc_numero,atualizado_em').limit(300),
     sb.from('sac_encaminhamento').select('id,caso_id,area,destinatario,canal,solicitacao,prazo,referencia_envio,enviado_em,confirmado_em,referencia_confirmacao,respondido_em,resposta').order('enviado_em',{ascending:false}).limit(500)
   ]);
-  if(minha!==casoSequencia||est.encerrada)return;
+  if(minha!==casosCargaSequencia||est.encerrada)return;
   if(entradas.error||tratativas.error||encaminhamentos.error){
     $('casosTotal').textContent='Casos indisponíveis';
     $('casosLista').innerHTML='<p class="recado erro">Falha ao carregar os protocolos: '+
       esc((entradas.error||tratativas.error||encaminhamentos.error).message)+'</p>';
     return;
   }
+  const mudou=JSON.stringify(casosCache)!==JSON.stringify(entradas.data||[])||
+    JSON.stringify([...casosTratativas.values()])!==JSON.stringify(tratativas.data||[])||
+    JSON.stringify(casosEncaminhamentos)!==JSON.stringify(encaminhamentos.data||[]);
   casosCache=entradas.data||[];
   casosTratativas=new Map((tratativas.data||[]).map(t=>[t.caso_id,t]));
   casosEncaminhamentos=encaminhamentos.data||[];
@@ -1167,7 +1170,7 @@ async function casosCarregar(){
     (semRetorno?' · '+semRetorno+' encaminhamento'+(semRetorno===1?'':'s')+' aguardando retorno':'');
   $('casosAlternar').textContent=$('casosPainel').hidden
     ? 'Casos SAC'+(pendentes?' · '+pendentes:''):'← Conversas';
-  casosDesenharLista();
+  if(mudou)casosDesenharLista();
 }
 function casosDesenharLista(){
   const lista=$('casosLista');lista.replaceChildren();
