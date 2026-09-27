@@ -1227,7 +1227,7 @@ async function casosAbrir(id){
   const seq=++casoSequencia;
   $('casosDetalhe').innerHTML='<p class="vazio">Carregando protocolo…</p>';
   const {data:c,error}=await sb.from('sac_entrada')
-    .select('id,protocolo,nome,contato,produto,lote,relato,fotos,tipo,assunto,pedido,entrega_em,ocorrencia,criado_em,prioridade')
+    .select('id,protocolo,origem,nome,contato,produto,lote,relato,fotos,tipo,assunto,pedido,entrega_em,ocorrencia,criado_em,prioridade')
     .eq('id',id).single();
   if(seq!==casoSequencia||est.encerrada||casoSelecionado!==id)return;
   if(error||!c){$('casosDetalhe').innerHTML='<p class="recado erro">Não foi possível abrir este protocolo.</p>';return;}
@@ -1236,8 +1236,8 @@ async function casosAbrir(id){
     '<option value="'+esc(k)+'"'+(valor===k?' selected':'')+'>'+esc(n)+'</option>').join('');
   $('casosDetalhe').innerHTML=`
     <div class="caso-card"><h2>${esc(c.protocolo||'Sem protocolo')}</h2>
-      <button class="btn" type="button" id="casoVerConversa">Ver conversa no WhatsApp</button>
-      <p><b>Origem:</b> WhatsApp · ${esc(c.tipo||'Manifestação')} · ${esc(c.assunto||'Assunto não informado')}</p>
+      ${c.origem==='whatsapp'&&c.contato?'<button class="btn" type="button" id="casoVerConversa">Ver conversa no WhatsApp</button>':''}
+      <p><b>Origem:</b> ${esc(c.origem||'Não informada')} · ${esc(c.tipo||'Manifestação')} · ${esc(c.assunto||'Assunto não informado')}</p>
       <p><b>Consumidor:</b> ${esc(c.nome||'Não informado')} · ${esc(fone(c.contato))}</p>
       <p><b>Produto:</b> ${esc(c.produto||'Não informado')} · <b>Lote:</b> ${esc(c.lote||'Não informado')}</p>
       <p><b>Pedido/NF:</b> ${esc(c.pedido||'Não informado')} · <b>Data informada:</b> ${esc(c.entrega_em||'Não informada')}</p>
@@ -1307,7 +1307,7 @@ async function casosAbrir(id){
   $('encEmail').onclick=()=>encaminhamentoEmail(c);
   encaminhamentosDesenhar(c);
   $('casoAbrirNC').onclick=()=>casosAbrirNC(c);
-  $('casoVerConversa').onclick=async()=>{
+  if($('casoVerConversa'))$('casoVerConversa').onclick=async()=>{
     casosModo(false);trocarAba('TODAS');await carregarFila();
     const b=[...$('lista').querySelectorAll('button[data-telefone]')]
       .find(el=>el.dataset.telefone===c.contato);
@@ -1472,7 +1472,7 @@ function casosAbrirNC(c){
   const t=casosTratativas.get(c.id);
   if(!t||t.nc_decisao!=='NECESSARIA'||t.nc_id||!est.podeResponder)return;
   sessionStorage.setItem('sac_nc_rascunho',JSON.stringify({caso_id:c.id,protocolo:c.protocolo,
-    telefone:c.contato,area:t.area,responsavel:t.responsavel,observacao:t.resumo,
+    origem:c.origem,telefone:c.contato,area:t.area,responsavel:t.responsavel,observacao:t.resumo,
     categoria:c.tipo,produto:c.produto,lote:c.lote}));
   location.href='sistema_qualidade_online.html?abrir=nc&origem=sac';
 }
