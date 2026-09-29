@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fale com o SAC — MF Paris</title>
+<meta name="description" content="Canal de atendimento ao consumidor do Grupo MF Paris. Reclamação, elogio, dúvida ou sugestão.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Lora:ital,wght@0,400;1,400&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ---------------------------------------------------------------------------
+   Formulário público do SAC — Grupo MF Paris.
+   Mesma paleta e mesmas fontes do roteiro A4, porque é o mesmo canal visto do
+   outro lado. Uma coluna, campos grandes: quase todo mundo vai abrir isto no
+   celular, de pé, com a embalagem na outra mão.
+--------------------------------------------------------------------------- */
+:root{
+  --papel:#FFFFFF; --fundo:#F3F5F4;
+  --tinta:#16181A; --grafite:#5A6068; --risca:#DCDFE3; --campo:#F7F9F8;
+  --selo:#1B5E4A; --selo-fundo:#EAF3EF;
+  --realce:#B4541C; --realce-fundo:#FBF2E9;
+  --alerta:#9C3025;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --papel:#15191B; --fundo:#0E1214;
+    --tinta:#E9ECEE; --grafite:#9AA2AA; --risca:#2B3136; --campo:#1B2025;
+    --selo:#6FC3A3; --selo-fundo:#16261F;
+    --realce:#E2925C; --realce-fundo:#2A2015;
+    --alerta:#E08478;
+  }
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{
+  background:var(--fundo); color:var(--tinta);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-size:16px; line-height:1.5;
+  padding:0 16px calc(40px + env(safe-area-inset-bottom,0px));
+  padding-top:calc(24px + env(safe-area-inset-top,0px));
+  -webkit-font-smoothing:antialiased;
+}
+.folha{ max-width:560px; margin:0 auto; }
+
+header{ margin-bottom:18px; }
+.marca{ font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+        color:var(--selo); margin-bottom:6px; }
+h1{ font-size:27px; font-weight:700; letter-spacing:-.02em; margin:0; line-height:1.15; text-wrap:balance; }
+.dek{ font-family:Lora,Georgia,serif; font-size:16px; color:var(--grafite); margin:9px 0 0; }
+
+.cartao{ background:var(--papel); border:1px solid var(--risca); border-radius:10px;
+         padding:20px 18px; }
+
+.verde{ background:var(--selo-fundo); border:1px solid var(--selo);
+        border-radius:8px; padding:12px 14px; margin-bottom:22px; }
+.verde .rot{ font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+             color:var(--selo); margin-bottom:6px; }
+.verde p{ font-family:Lora,Georgia,serif; font-size:14.5px; margin:0; }
+
+.campo{ margin-bottom:20px; }
+label{ display:block; font-size:14px; font-weight:600; margin-bottom:6px; }
+.ajuda{ font-size:13px; color:var(--grafite); margin:0 0 8px; }
+input[type=text], input[type=tel], input[type=email], textarea, select{
+  width:100%; font-family:inherit; font-size:16px; color:var(--tinta);
+  background:var(--campo); border:1px solid var(--risca); border-radius:7px;
+  padding:12px 13px;
+}
+textarea{ min-height:120px; resize:vertical; line-height:1.5; }
+input:focus-visible, textarea:focus-visible, select:focus-visible{
+  outline:2px solid var(--selo); outline-offset:1px; border-color:var(--selo); }
+.obrig{ color:var(--alerta); font-weight:700; }
+
+/* o lote é o campo que sustenta todo o resto */
+.lote{ background:var(--realce-fundo); border:1px solid var(--realce);
+       border-radius:8px; padding:15px 14px; }
+.lote label{ color:var(--realce); }
+.lote .ajuda{ color:var(--realce); opacity:.95; }
+
+.foto{ display:block; border:1.5px dashed var(--risca); border-radius:8px;
+       padding:16px 14px; text-align:center; cursor:pointer; background:var(--campo);
+       font-size:14.5px; font-weight:500; }
+.lote .foto{ border-color:var(--realce); }
+.foto:hover{ border-color:var(--selo); }
+.foto input{ position:absolute; width:1px; height:1px; opacity:0; }
+.previa{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.previa figure{ margin:0; position:relative; }
+.previa img{ width:76px; height:76px; object-fit:cover; border-radius:7px; border:1px solid var(--risca); }
+.previa button{ position:absolute; top:-7px; right:-7px; width:22px; height:22px;
+  border-radius:50%; border:none; background:var(--alerta); color:#fff;
+  font-size:13px; line-height:1; cursor:pointer; }
+
+.dupla{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:430px){ .dupla{ grid-template-columns:1fr; } }
+
+.enviar{ width:100%; font-family:inherit; font-size:17px; font-weight:600;
+  background:var(--selo); color:#fff; border:none; border-radius:8px;
+  padding:15px; cursor:pointer; margin-top:4px; }
+.enviar:disabled{ opacity:.55; cursor:progress; }
+.enviar:focus-visible{ outline:2px solid var(--tinta); outline-offset:2px; }
+
+.erro{ background:#FBEEEC; border:1px solid var(--alerta); color:var(--alerta);
+       border-radius:8px; padding:13px 14px; font-size:14.5px; margin-bottom:18px; }
+@media (prefers-color-scheme: dark){ .erro{ background:#2A1917; } }
+.erro a{ color:inherit; font-weight:600; }
+
+.rodape{ font-size:12.5px; color:var(--grafite); text-align:center; margin-top:20px; line-height:1.6; }
+
+/* tela de recebido */
+.pronto .selo{ width:52px; height:52px; border-radius:50%; background:var(--selo-fundo);
+  border:2px solid var(--selo); margin:0 auto 16px; position:relative; }
+.pronto .selo::after{ content:""; position:absolute; left:19px; top:13px; width:11px; height:21px;
+  border:solid var(--selo); border-width:0 3px 3px 0; transform:rotate(43deg); }
+.pronto{ text-align:center; }
+.pronto h2{ font-size:22px; margin:0 0 10px; }
+.pronto p{ font-family:Lora,Georgia,serif; font-size:15.5px; color:var(--grafite); margin:0 0 12px; }
+.pronto .prazo{ background:var(--selo-fundo); border-radius:8px; padding:13px;
+  font-family:Archivo,sans-serif; font-size:14.5px; color:var(--tinta); margin-top:18px; }
+.mel{ font-size:.85em; color:var(--grafite); }
+[hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="folha">
+
+  <header>
+    <div class="marca">Grupo MF Paris</div>
+    <h1>Fale com o SAC</h1>
+    <p class="dek">Reclamação, elogio, dúvida ou sugestão sobre nossos produtos —
+    Grão de Minas, Horizonte, Okey Lac e os demais. Lemos tudo.</p>
+  </header>
+
+  <div class="cartao">
+
+    <form id="form" novalidate>
+
+      <div class="verde">
+        <div class="rot">Antes de você preencher</div>
+        <p>Os dados e fotos abaixo são usados só para analisar o seu caso e ficam
+        guardados enquanto durar a análise e o prazo legal de retenção. Você pode
+        pedir a exclusão a qualquer momento por este mesmo canal.
+        <b>Não pedimos CPF nem dados bancários.</b></p>
+      </div>
+
+      <div id="erro" class="erro" hidden></div>
+
+      <div class="campo">
+        <label for="nome">Seu nome <span class="obrig">*</span></label>
+        <input type="text" id="nome" name="nome" autocomplete="name" maxlength="200" required>
+      </div>
+
+      <div class="campo dupla">
+        <div>
+          <label for="contato">WhatsApp ou e-mail <span class="obrig">*</span></label>
+          <input type="text" id="contato" name="contato" autocomplete="tel" maxlength="200" required>
+        </div>
+        <div>
+          <label for="prefere">Prefere retorno por</label>
+          <select id="prefere" name="prefere">
+            <option>WhatsApp</option>
+            <option>E-mail</option>
+            <option>Telefone</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="produto">Qual produto?</label>
+        <p class="ajuda">Pode escrever o nome como está na embalagem.</p>
+        <input type="text" id="produto" name="produto" maxlength="200">
+      </div>
+
+      <div class="campo lote">
+        <label for="fotoLote">A foto mais importante: o lote e a validade</label>
+        <p class="ajuda">Costumam vir impressos na parte de baixo ou na lateral da
+        embalagem, em letras pequenas, às vezes em relevo. É o lote que nos permite
+        achar o dia exato em que esse produto foi feito.</p>
+        <label class="foto" for="fotoLote">📷 Tirar ou escolher a foto do lote
+          <input type="file" id="fotoLote" accept="image/*" multiple>
+        </label>
+        <div class="previa" id="previaLote"></div>
+        <div style="margin-top:14px">
+          <label for="lote">Se conseguir ler, digite o lote aqui</label>
+          <input type="text" id="lote" name="lote" maxlength="120" placeholder="opcional">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="relato">O que aconteceu? <span class="obrig">*</span></label>
+        <p class="ajuda">Conte com suas palavras, à vontade. Quanto mais detalhe,
+        melhor a análise.</p>
+        <textarea id="relato" name="relato" maxlength="5000" required></textarea>
+      </div>
+
+      <div class="campo">
+        <label for="fotoOutras">Fotos da embalagem ou do problema</label>
+        <p class="ajuda">Opcional, mas ajuda bastante.</p>
+        <label class="foto" for="fotoOutras">📷 Adicionar fotos
+          <input type="file" id="fotoOutras" accept="image/*" multiple>
+        </label>
+        <div class="previa" id="previaOutras"></div>
+      </div>
+
+      <!-- Armadilha para robô de formulário: pessoa nenhuma vê este campo. -->
+      <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px">
+        <label for="empresa_site">Não preencha este campo</label>
+        <input type="text" id="empresa_site" name="empresa_site" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button type="submit" class="enviar" id="botao">Enviar para o SAC</button>
+      <p class="rodape mel">Ao enviar, sua manifestação entra na fila da nossa
+      equipe de Qualidade.</p>
+    </form>
+
+    <div id="pronto" class="pronto" hidden>
+      <div class="selo" aria-hidden="true"></div>
+      <h2>Recebemos sua mensagem</h2>
+      <p>Obrigada por falar com a gente. Nossa equipe de Qualidade vai analisar e
+      entrar em contato por <b id="pVia">WhatsApp</b>.</p>
+      <div class="prazo">
+        <b>Primeiro retorno em até 1 dia útil.</b><br>
+        É nesse retorno que você recebe o número do seu protocolo, com o nome de
+        quem está cuidando do seu caso.
+      </div>
+      <p class="mel" style="margin-top:18px">Se ainda tiver a embalagem e o produto,
+      guarde por enquanto — às vezes ajudam na análise.</p>
+    </div>
+
+  </div>
+
+  <p class="rodape">
+    Grupo MF Paris · DMS · MF Paris Indústria · Profi<br>
+    Atendimento de segunda a quinta, 8h às 18h · sexta até 17h
+  </p>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var SUPA_URL = 'https://ailzblgrxtdakpkchstl.supabase.co';
+  var SUPA_KEY = 'sb_publishable_WLhtMnPB4ZF0CFMvKthjCQ_xLjalDz4';
+  var WHATS     = '5531971284909';
+
+  var nasceu = Date.now();
+  var fotosLote = [], fotosOutras = [];
+
+  /* Mesma compressão do SGQ (1200px, jpeg 0.65): a foto que chega aqui tem
+     exatamente a forma da foto anexada lá dentro, então importar é copiar. */
+  function comprimir(file, maxPx, q){
+    return new Promise(function(res){
+      var fr = new FileReader();
+      fr.onload = function(e){
+        if(!/^image\//.test(file.type)){ res({ nome:file.name, data:e.target.result }); return; }
+        var img = new Image();
+        img.onload = function(){
+          var w=img.width, h=img.height, sc=Math.min(1, maxPx/Math.max(w,h));
+          w=Math.round(w*sc); h=Math.round(h*sc);
+          var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+          cv.getContext('2d').drawImage(img,0,0,w,h);
+          res({ nome:file.name, data:cv.toDataURL('image/jpeg', q) });
+        };
+        img.onerror = function(){ res({ nome:file.name, data:e.target.result }); };
+        img.src = e.target.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function desenhar(lista, caixa){
+    caixa.innerHTML = '';
+    lista.forEach(function(f, i){
+      var fig = document.createElement('figure');
+      var img = document.createElement('img'); img.src = f.data; img.alt = f.nome || 'foto';
+      var x = document.createElement('button');
+      x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label','Remover foto');
+      x.onclick = function(){ lista.splice(i,1); desenhar(lista, caixa); };
+      fig.appendChild(img); fig.appendChild(x); caixa.appendChild(fig);
+    });
+  }
+
+  function ligarFoto(inputId, caixaId, lista){
+    var inp = document.getElementById(inputId), caixa = document.getElementById(caixaId);
+    inp.addEventListener('change', async function(){
+      var arqs = Array.prototype.slice.call(inp.files || []);
+      for(var i=0;i<arqs.length;i++){
+        if(lista.length >= 6) break;               // teto por campo
+        lista.push(await comprimir(arqs[i], 1200, 0.65));
+      }
+      inp.value = ''; desenhar(lista, caixa);
+    });
+  }
+  ligarFoto('fotoLote','previaLote', fotosLote);
+  ligarFoto('fotoOutras','previaOutras', fotosOutras);
+
+  function erro(html){
+    var box = document.getElementById('erro');
+    box.innerHTML = html; box.hidden = false;
+    box.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+
+  document.getElementById('form').addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    document.getElementById('erro').hidden = true;
+
+    var v = function(id){ return (document.getElementById(id).value || '').trim(); };
+    if(!v('nome'))    return erro('Falta o seu nome.');
+    if(!v('contato')) return erro('Precisamos de um WhatsApp ou e-mail para te retornar.');
+    if(!v('relato'))  return erro('Conte o que aconteceu — esse campo é o que a Qualidade analisa.');
+
+    // Robô: preencheu o campo invisível, ou respondeu rápido demais para ter lido.
+    var robo = !!v('empresa_site') || (Date.now() - nasceu) < 3000;
+
+    var botao = document.getElementById('botao');
+    botao.disabled = true; botao.textContent = 'Enviando…';
+
+    var fotos = fotosLote.concat(fotosOutras);
+    try{
+      if(!robo){
+        if(!window.supabase) throw new Error('supabase-js nao carregou');
+        var sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+        // Sem .select(): a policy anônima é só de INSERT, e pedir a linha de
+        // volta faria o banco recusar a gravação inteira.
+        var r = await sb.from('sac_entrada').insert({
+          origem : 'formulario',
+          nome   : v('nome'),
+          contato: v('contato'),
+          prefere: v('prefere'),
+          produto: v('produto'),
+          lote   : v('lote'),
+          relato : v('relato'),
+          fotos  : fotos
+        });
+        if(r && r.error) throw r.error;
+      }
+      document.getElementById('pVia').textContent = v('prefere') || 'WhatsApp';
+      document.getElementById('form').hidden = true;
+      document.getElementById('pronto').hidden = false;
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }catch(e){
+      console.error(e);
+      botao.disabled = false; botao.textContent = 'Enviar para o SAC';
+      erro('Não conseguimos registrar agora — pode ter sido a conexão, ou as fotos '
+         + 'serem grandes demais. Tente de novo em um instante, ou fale com a gente '
+         + 'direto no WhatsApp: <a href="https://wa.me/' + WHATS + '">(31) 97128-4909</a>. '
+         + 'Sua mensagem não se perde: o canal é o mesmo.');
+    }
+  });
+})();
+</script>
+</body>
+</html>
