@@ -3966,13 +3966,24 @@ function aplicarParametrosDaURL(){
       triagemSac = JSON.parse(sessionStorage.getItem('sac_nc_rascunho') || 'null');
       sessionStorage.removeItem('sac_nc_rascunho');
     }catch(e){ triagemSac = null; }
-    if(!triagemSac || !/^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(String(triagemSac.caso_id||'')) ||
-       !/^ATD-\d{4}-\d{4,}$/.test(String(triagemSac.protocolo||'')) ||
-       !['whatsapp','formulario','telefone','email','presencial'].includes(triagemSac.origem) ||
-       (triagemSac.origem==='whatsapp' && !/^55\d{10,11}$/.test(String(triagemSac.telefone||'')))) return;
-    window._sacCasoNCId=/^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(String(triagemSac.caso_id||''))
-      ? triagemSac.caso_id : null;
-    origem = 'SAC '+triagemSac.origem+' · '+String(triagemSac.protocolo).slice(0,80);
+    // Dois caminhos chegam aqui, e os dois precisam funcionar:
+    //  - PROTOCOLO (tela Casos): caso_id + protocolo ATD + origem; a NC salva
+    //    e ligada ao caso em sac_caso_tratativa.
+    //  - CONVERSA (triagem do WhatsApp): telefone + protocolo opcional, sem
+    //    caso_id. O #55 passou a exigir caso_id e este caminho parou em
+    //    silencio: o botao "Abrir NC" da conversa levava a uma tela vazia
+    //    (achado da certificacao do SAC, 29/09/2026).
+    var fone = String(triagemSac && triagemSac.telefone || '');
+    var ehCaso = !!triagemSac && /^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(String(triagemSac.caso_id||'')) &&
+       /^ATD-\d{4}-\d{4,}$/.test(String(triagemSac.protocolo||'')) &&
+       ['whatsapp','formulario','telefone','email','presencial'].includes(triagemSac.origem) &&
+       (triagemSac.origem!=='whatsapp' || /^55\d{10,11}$/.test(fone));
+    var ehConversa = !!triagemSac && !triagemSac.caso_id && /^55\d{10,11}$/.test(fone);
+    if(!ehCaso && !ehConversa) return;
+    window._sacCasoNCId = ehCaso ? triagemSac.caso_id : null;
+    origem = ehCaso
+      ? 'SAC '+triagemSac.origem+' · '+String(triagemSac.protocolo).slice(0,80)
+      : 'SAC WhatsApp' + (triagemSac.protocolo ? ' · '+String(triagemSac.protocolo).slice(0,80) : ' · contato final '+fone.slice(-4));
     desc = 'Categoria: '+String(triagemSac.categoria||'').slice(0,40)
       +'\nÁrea responsável: '+String(triagemSac.area||'').slice(0,40)
       +'\nResumo da Qualidade: '+String(triagemSac.observacao||'').slice(0,1000);
