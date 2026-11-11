@@ -369,6 +369,8 @@ tr:last-child td{border-bottom:none}
         <option value="cafe-torrado">Café Torrado em Grão</option>
         <option value="soro-derivados">Soro e Derivados Lácteos</option>
         <option value="maltodextrina-glicose">Maltodextrina e Glicose em Pó</option>
+        <option value="chocolate-po">Chocolate em Pó</option>
+        <option value="espessante">Espessante Alimentar</option>
       </select>
     </div>
 
@@ -424,27 +426,27 @@ tr:last-child td{border-bottom:none}
         <div class="cbtn" id="tb-leite-integral" onclick="selTipo('leite-integral')">
           <div class="cbtn-icon">🐄</div>
           <div class="cbtn-title">Leite em Pó Integral</div>
-          <div class="cbtn-sub">IN MAPA 28/2007 · G.tot ≥ 26%</div>
+          <div class="cbtn-sub">IN MAPA 53/2018 · G.tot ≥ 26%</div>
         </div>
         <div class="cbtn" id="tb-leite-instantaneo" onclick="selTipo('leite-instantaneo')">
           <div class="cbtn-icon">⚡</div>
           <div class="cbtn-title">Leite em Pó Instantâneo</div>
-          <div class="cbtn-sub">IN MAPA 28/2007 · Lecitinado</div>
+          <div class="cbtn-sub">IN MAPA 53/2018 · Lecitinado</div>
         </div>
         <div class="cbtn" id="tb-leite-desnatado" onclick="selTipo('leite-desnatado')">
           <div class="cbtn-icon">🫙</div>
           <div class="cbtn-title">Leite em Pó Desnatado</div>
-          <div class="cbtn-sub">IN MAPA 28/2007 · G.tot ≤ 1,5%</div>
+          <div class="cbtn-sub">IN MAPA 53/2018 · G.tot < 1,5%</div>
         </div>
         <div class="cbtn" id="tb-achocolatado" onclick="selTipo('achocolatado')">
           <div class="cbtn-icon">🍫</div>
           <div class="cbtn-title">Achocolatado em Pó</div>
-          <div class="cbtn-sub">RDC ANVISA 264/2005</div>
+          <div class="cbtn-sub">Lei 15.404/2026</div>
         </div>
         <div class="cbtn" id="tb-cacau" onclick="selTipo('cacau')">
           <div class="cbtn-icon">🌱</div>
           <div class="cbtn-title">Cacau em Pó</div>
-          <div class="cbtn-sub">RDC ANVISA 264/2005</div>
+          <div class="cbtn-sub">Lei 15.404/2026</div>
         </div>
         <div class="cbtn" id="tb-cafe-torrado-moido" onclick="selTipo('cafe-torrado-moido')">
           <div class="cbtn-icon">☕</div>
@@ -465,6 +467,16 @@ tr:last-child td{border-bottom:none}
           <div class="cbtn-icon">🌽</div>
           <div class="cbtn-title">Maltodextrina e Glicose</div>
           <div class="cbtn-sub">Carboidrato hidrolisado · RDC 429/2020</div>
+        </div>
+        <div class="cbtn" id="tb-chocolate-po" onclick="selTipo('chocolate-po')">
+          <div class="cbtn-icon">🍫</div>
+          <div class="cbtn-title">Chocolate em Pó</div>
+          <div class="cbtn-sub">Lei 15.404/2026 · ≥ 32% cacau</div>
+        </div>
+        <div class="cbtn" id="tb-espessante" onclick="selTipo('espessante')">
+          <div class="cbtn-icon">🥄</div>
+          <div class="cbtn-title">Espessante Alimentar</div>
+          <div class="cbtn-sub">RDC 724/2022 · IN 161/2022</div>
         </div>
 
       </div>
@@ -1053,6 +1065,8 @@ const CLASSE_META = {
   'cafe-torrado':      { label:'Café Torrado (grão)',            cor:'#3b1f0a', bg:'#fdf5e8', icone:'🫘' },
   'soro-derivados':    { label:'Soro e Derivados Lácteos',       cor:'#1d5238', bg:'#e8f3ed', icone:'🥛' },
   'maltodextrina-glicose': { label:'Maltodextrina e Glicose em Pó', cor:'#92400e', bg:'#fef3c7', icone:'🌽' },
+  'chocolate-po':      { label:'Chocolate em Pó',               cor:'#4a1c06', bg:'#fdf0e8', icone:'🍫' },
+  'espessante':        { label:'Espessante Alimentar',          cor:'#1f2937', bg:'#f3f4f6', icone:'🥄' },
 };
 
 // Seed — 6 fórmulas já registradas (do JSON exportado)
@@ -1412,10 +1426,10 @@ function _validarConformidadeLegal(tipo, ptn) {
     if (ptn < 13) avisos.push(`⚠️ ATENÇÃO — Não conformidade legal detectada:\n\nClassificação selecionada: Composto Lácteo sem Adição\nTeor de proteína calculado: ${ptn.toFixed(1)}g/100g\nMínimo exigido: ≥ 13g/100g (Portaria SDA/MAPA 1.170/2024, Art. 9º I)\n\nCom este teor proteico, o produto não atende os requisitos de Composto Lácteo sem Adição.`);
   }
   if (tipo === 'leite-integral') {
-    if (ptn < 25) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Integral (IN MAPA 28/2007).`);
+    if (ptn < 25) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Integral (IN MAPA 53/2018).`);
   }
   if (tipo === 'leite-desnatado') {
-    if (ptn < 30) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Desnatado (IN MAPA 28/2007).`);
+    if (ptn < 30) avisos.push(`⚠️ ATENÇÃO — Teor proteico ${ptn.toFixed(1)}g/100g abaixo do esperado para Leite em Pó Desnatado (IN MAPA 53/2018).`);
   }
   
   return avisos.length ? avisos.join('\n') : null;
@@ -1984,12 +1998,13 @@ const TEMPLATES = {
   'mistura': {
     label: 'Mistura Láctea',
     classe: 'mistura',
+    denominacao: 'Mistura de [produto lácteo] e [produto adicionado]',
     legal: `<strong>RIISPOA — Decreto nº 9.013/2017</strong> — Art. 366<br>
-      • Ingredientes lácteos ≤ 50% m/m · Sem RTIQ específico do MAPA<br>
+      • Ingredientes lácteos ou produtos lácteos compostos <strong>≥ 50% m/m</strong> · Sem RTIQ específico do MAPA<br>
       • Sem mínimo de PTN estabelecido pelo MAPA para esta categoria<br>
       • Gordura vegetal utilizada como ingrediente estrutural (não apenas enriquecimento)<br>
-      • Denominação: "Mistura Láctea de [descrição dos ingredientes adicionados]"<br>
-      • Regulamentação microbiológica: IN MAPA 28/2007 (se aplicável) + IN ANVISA 161/2022`,
+      • Denominação: "Mistura de [produto lácteo ou produto lácteo composto] e [produto adicionado]"<br>
+      • Microbiologia: IN ANVISA 161/2022 + RDC 724/2022 (categoria 9.j) · Contaminantes: RDC 722/2022 (art. 7º) + IN 160/2022 (calculado pro-rata)`,
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
@@ -2017,10 +2032,10 @@ const TEMPLATES = {
   'po-preparo': {
     label: 'Pó para Preparo de Bebida/Alimento',
     classe: 'po-preparo',
-    legal: `<strong>ANVISA — RDC nº 724, de 01/09/2022</strong> + <strong>IN nº 161, de 01/09/2022</strong> (categoria 9.j)<br>
+    legal: `<strong>ANVISA — RDC nº 724, de 01/09/2022</strong> + <strong>IN nº 161, de 01/09/2022</strong> (categoria 23.b)<br>
       • Sem padrão de identidade e qualidade MAPA · Regulado exclusivamente pela ANVISA<br>
       • Sem mínimo de PTN ou G.tot estabelecido · Denominação conforme composição real<br>
-      • Parâmetros microbiológicos: IN 161/2022 ANVISA, categoria 9.j<br>
+      • Parâmetros microbiológicos: IN 161/2022 ANVISA, categoria 23.b (sem emprego de calor)<br>
       • Rotulagem: conforme RDC 429/2020 + IN 75/2020 (alertas frontais, se aplicável)`,
     subtipo: {
       label: 'Embalagem / apresentação:',
@@ -2046,16 +2061,17 @@ const TEMPLATES = {
     }
   },
 
-  // ── LEITE EM PÓ INTEGRAL (IN MAPA 28/2007) ───────────────────────────────
+  // ── LEITE EM PÓ INTEGRAL (IN MAPA 53/2018 + RIISPOA) ───────────────────────────────
   'leite-integral': {
     label: 'Leite em Pó Integral',
     classe: 'leite-integral',
-    legal: `<strong>IN MAPA nº 28, de 12/06/2007</strong> — Leite em Pó Integral<br>
+    legal: `<strong>IN MAPA nº 53, de 01/10/2018</strong> (RTIQ de Leite em Pó) + <strong>Decreto nº 9.013/2017</strong> (RIISPOA) — Leite em Pó Integral<br>
       • G.tot: <strong>≥ 26,0%</strong> m/m na matéria seca<br>
       • Umidade: <strong>≤ 3,5%</strong> m/m (spray) · Índice de insolubilidade: ≤ 1,0 mL (instantâneo) ou ≤ 15 mL (roller)<br>
       • PTN: ≥ 34% m/m nos sólidos lácteos não-gordurosos (SLNG)<br>
       • Acidez titulável (ácido láctico): ≤ 18 mL NaOH 0,1N / 10g SLNG<br>
-      • <strong>Proibido:</strong> adição de qualquer ingrediente não lácteo`,
+      • <strong>Ingredientes:</strong> apenas ingredientes lácteos próprios do leite. Permitido o uso de lecitina (máx. 0,5% m/m) exclusivamente como emulsionante para leite em pó instantâneo, e aditivos antiumectantes autorizados<br>
+      • Microbiologia: IN ANVISA 161/2022 (Cat. 9.e) · Contaminantes: IN 160/2022`,
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
@@ -2080,27 +2096,30 @@ const TEMPLATES = {
     }
   },
 
-  // ── LEITE EM PÓ INSTANTÂNEO (IN MAPA 28/2007) ────────────────────────────
+  // ── LEITE EM PÓ INSTANTÂNEO (IN MAPA 53/2018 + RIISPOA) ────────────────────────────
   'leite-instantaneo': {
     label: 'Leite em Pó Instantâneo',
     classe: 'leite-instantaneo',
-    legal: `<strong>IN MAPA nº 28, de 12/06/2007</strong> — Leite em Pó Instantâneo<br>
+    legal: `<strong>IN MAPA nº 53, de 01/10/2018</strong> (RTIQ de Leite em Pó) + <strong>Decreto nº 9.013/2017</strong> (RIISPOA) — Leite em Pó Instantâneo<br>
       • Processo: aglomeração por spray dryer + lecitinação (lecitina de soja ou girassol)<br>
-      • G.tot: <strong>≥ 26,0%</strong> m/m na matéria seca (integral) ou <strong>≤ 1,5%</strong> (desnatado instantâneo)<br>
+      • G.tot: <strong>≥ 26,0%</strong> m/m na matéria seca (integral) ou <strong>< 1,5%</strong> (desnatado instantâneo)<br>
       • Índice de insolubilidade: <strong>≤ 1,0 mL</strong> (instantaneidade obrigatória)<br>
-      • Umidade: ≤ 3,5% m/m · PTN: ≥ 34% nos SLNG<br>
-      • Adição de lecitina: ≤ 0,5% m/m no produto final (MAPA 28/2007 Art. 4º §2º)`,
+      • Umidade: integral <strong>≤ 5%</strong> · PTN: ≥ 34% nos SLNG<br>
+      • Acidez titulável: <strong>≤ 18,0 mL NaOH 0,1N / 10 g de sólidos não gordurosos</strong><br>
+      • Lecitina: máx. 0,5% m/m, exclusivamente como emulsionante<br>
+      • <strong>Rotulagem:</strong> com lecitina de soja, incluir "ALÉRGICOS: CONTÉM LEITE E DERIVADOS DE SOJA" (RDC 727/2022)<br>
+      • Microbiologia: IN ANVISA 161/2022 (Cat. 9.e) · Contaminantes: IN 160/2022`,
     subtipo: {
       label: 'Tipo de gordura:',
       opcoes: [
         { id:'st-inst-integral', label:'Integral (G.tot ≥ 26%)', default: true },
-        { id:'st-inst-desnatado', label:'Desnatado instantâneo (G.tot ≤ 1,5%)' },
+        { id:'st-inst-desnatado', label:'Desnatado instantâneo (G.tot < 1,5%)' },
       ]
     },
     campos: {
       aspecto: 'Grânulos aglomerados de coloração branca a creme, de fácil dissolução em água, sem grumos após agitação suave',
       sabor: 'Sabor e odor característicos de leite, suaves, não rançosos, livres de sabores e odores estranhos',
-      alergenicos: 'CONTÉM LEITE E DERIVADOS DE SOJA (lecitina). NÃO CONTÉM GLÚTEN.',
+      alergenicos: 'ALÉRGICOS: CONTÉM LEITE E DERIVADOS DE SOJA.',
       glutenlactose: 'NÃO CONTÉM GLÚTEN. CONTÉM LACTOSE.',
       emb1: 'Embalagem aluminizada hermeticamente fechada (papel/polietileno/alumínio/polietileno) com atmosfera de nitrogênio',
       emb2: 'Caixa de papelão com filme plástico ou fardo de papel kraft — múltiplas unidades',
@@ -2111,16 +2130,17 @@ const TEMPLATES = {
     }
   },
 
-  // ── LEITE EM PÓ DESNATADO (IN MAPA 28/2007) ──────────────────────────────
+  // ── LEITE EM PÓ DESNATADO (IN MAPA 53/2018 + RIISPOA) ──────────────────────────────
   'leite-desnatado': {
     label: 'Leite em Pó Desnatado',
     classe: 'leite-desnatado',
-    legal: `<strong>IN MAPA nº 28, de 12/06/2007</strong> — Leite em Pó Desnatado<br>
-      • G.tot: <strong>≤ 1,5%</strong> m/m na matéria seca (máximo absoluto)<br>
-      • Umidade: ≤ 3,5% m/m (spray dryer) · Índice de insolubilidade: ≤ 1,0 mL<br>
+    legal: `<strong>IN MAPA nº 53, de 01/10/2018</strong> (RTIQ de Leite em Pó) + <strong>Decreto nº 9.013/2017</strong> (RIISPOA) — Leite em Pó Desnatado<br>
+      • Gordura: <strong>< 1,5%</strong> m/m (percentual do produto)<br>
+      • Umidade: <strong>≤ 5,0%</strong> m/m (limite legal) · Índice de insolubilidade: ≤ 1,0 mL<br>
       • PTN: ≥ 34% m/m nos sólidos lácteos não-gordurosos (SLNG)<br>
-      • Acidez: ≤ 18 mL NaOH 0,1N / 10g SLNG · pH reconstituído: 6,3–6,8<br>
-      • <strong>Proibido:</strong> adição de qualquer ingrediente não-lácteo · Destinado a usos dietéticos e culinária`,
+      • Acidez: ≤ 18 mL NaOH 0,1N / 10g SLNG<br>
+      • <strong>Ingredientes:</strong> só leite e ingredientes lácteos usados para padronizar a composição, além dos aditivos autorizados (RDC ANVISA 778/2023 + IN 211/2023)<br>
+      • Microbiologia: IN ANVISA 161/2022 (Cat. 9.e) · Contaminantes: IN 160/2022`,
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
@@ -2145,21 +2165,20 @@ const TEMPLATES = {
     }
   },
 
-  // ── ACHOCOLATADO EM PÓ (RDC ANVISA 264/2005 + RDC 286/2005) ─────────────
+  // ── ACHOCOLATADO EM PÓ (Lei 15.404/2026) ─────────────
   'achocolatado': {
     label: 'Achocolatado em Pó',
     classe: 'achocolatado',
-    legal: `<strong>RDC ANVISA nº 264, de 22/09/2005</strong> — Achocolatado e Similares<br>
-      • Denominação: "Achocolatado" → teor mínimo de <strong>32% m/m de cacau em pó</strong> no produto (calculado base seca)<br>
-      • Abaixo de 32%: denominação "Bebida em pó sabor chocolate" (não pode se chamar achocolatado)<br>
-      • Sacarose: máximo <strong>65% m/m</strong> · G.tot: mínimo <strong>5% m/m</strong><br>
-      • Umidade: ≤ 3,0% m/m (pó) · Alcalinizantes permitidos (carbonato de potássio/sódio)<br>
-      • Parâmetros micro: RDC ANVISA 724/2022 + IN 161/2022 · Alertas: IN 75/2020`,
+    legal: `<strong>Lei nº 15.404, de 08/05/2026</strong> — Produtos derivados de cacau<br>
+      • Denominação "Achocolatado": teor mínimo de <strong>15% de sólidos de cacau</strong> ou <strong>15% de manteiga de cacau</strong> (art. 2º, XI)<br>
+      • <strong>Rótulo:</strong> frase obrigatória "Contém X% de cacau" no painel principal, ocupando <strong>≥ 15% da área frontal</strong> (art. 3º, §1º)<br>
+      • Sacarose: máximo <strong>65% m/m</strong> · G.tot: mínimo <strong>5% m/m</strong> · Umidade: ≤ 3,0% m/m (pó) · Alcalinizantes permitidos (carbonato de potássio/sódio)<br>
+      • Microbiologia: RDC ANVISA 724/2022 + IN 161/2022 (Cat. 20.f — Achocolatados em pó) · Alertas: IN 75/2020`,
     subtipo: {
       label: 'Teor de cacau (define denominação legal):',
       opcoes: [
-        { id:'st-acho-32', label:'≥ 32% cacau → "Achocolatado"', default: true },
-        { id:'st-acho-lt32', label:'< 32% cacau → "Bebida em pó sabor chocolate"' },
+        { id:'st-acho-32', label:'≥ 15% sólidos de cacau (ou 15% manteiga de cacau) → "Achocolatado"', default: true },
+        { id:'st-acho-lt32', label:'< 15% cacau → não pode usar "Achocolatado"' },
         { id:'st-acho-diet', label:'Diet / Zero Açúcar (adoçado)' },
       ]
     },
@@ -2171,23 +2190,22 @@ const TEMPLATES = {
       emb1: 'Embalagem plástica metalizada (PET/AL/PE) hermeticamente fechada, resistente à umidade',
       emb2: 'Caixa de papelão ou fardo de papel kraft multifolhado',
       armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo de luz, calor e umidade. Após aberto, fechar bem a embalagem e consumir em até 30 dias.',
-      obs: 'CONTÉM CACAU — PRODUTO PODE CAUSAR REAÇÕES EM PESSOAS SENSÍVEIS À CAFEÍNA OU TEOBROMINA.\nALERTA: verificar percentual de cacau para definir denominação correta conforme RDC 264/2005.',
+      obs: 'CONTÉM CACAU — PRODUTO PODE CAUSAR REAÇÕES EM PESSOAS SENSÍVEIS À CAFEÍNA OU TEOBROMINA.\nALERTA: verificar percentual de cacau para definir denominação correta conforme Lei nº 15.404/2026 (mín. 15%).\nCONTÉM X% DE CACAU — frase obrigatória no painel principal, ≥ 15% da área frontal (art. 3º, §1º).',
       validade: '18 meses',
       preparo: 'Achocolatado quente: adicione 3 colheres de sopa (30 g) em 200 ml de leite quente. Misture bem até dissolver completamente.\nFrio: dissolva em um pouco de leite frio e complete até 200 ml. Agitar bem.',
     }
   },
 
-  // ── CACAU EM PÓ (RDC ANVISA 264/2005) ────────────────────────────────────
+  // ── CACAU EM PÓ (Lei 15.404/2026) ────────────────────────────────────
   'cacau': {
     label: 'Cacau em Pó',
     classe: 'cacau',
-    legal: `<strong>RDC ANVISA nº 264, de 22/09/2005</strong> — Cacau e Produtos de Cacau<br>
-      • <strong>Cacau em pó comum:</strong> G.tot ≥ 10% e < 22% m/m na matéria seca<br>
-      • <strong>Cacau em pó gordo:</strong> G.tot ≥ 22% m/m na matéria seca<br>
-      • <strong>Cacau em pó magro/desgordado:</strong> G.tot < 10% m/m na matéria seca<br>
-      • Umidade: ≤ 9,0% m/m · pH: 4,5–8,0 (natural) ou até 8,5 (alcalinizado)<br>
-      • Alcalinizantes permitidos: carbonato de K, Na, Mg; bicarbonato de Na<br>
-      • Origem: <em>Theobroma cacao</em> L. — Pureza mínima de cacau: identificação botânica`,
+    legal: `<strong>Lei nº 15.404, de 08/05/2026</strong> — Produtos derivados de cacau<br>
+      • Definição: produto composto por cacau em pó, <strong>sem outros ingredientes</strong> (art. 2º, IV)<br>
+      • Manteiga de cacau: <strong>no mínimo 10%</strong> na matéria seca (art. 2º, IV)<br>
+      • <strong>Rótulo:</strong> frase obrigatória "Contém X% de cacau" no painel principal, ocupando <strong>≥ 15% da área frontal</strong> (art. 3º, §1º)<br>
+      • Umidade: ≤ 9,0% m/m · pH: 4,5–8,0 (natural) ou até 8,5 (alcalinizado) · Alcalinizantes permitidos: carbonato de K, Na, Mg; bicarbonato de Na<br>
+      • Microbiologia: RDC ANVISA 724/2022 + IN 161/2022 (Cat. 20.e — Cacau em pó)`,
     subtipo: {
       label: 'Tipo por teor de gordura (manteiga de cacau):',
       opcoes: [
@@ -2205,7 +2223,7 @@ const TEMPLATES = {
       emb1: 'Embalagem plástica multilaminada (PET/AL/PE) hermeticamente selada, protetora contra umidade e odores externos',
       emb2: 'Caixa de papelão ou saco de papel kraft revestido, com quantidade declarada no rótulo',
       armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 20°C), arejado e livre de odores fortes que possam ser absorvidos pelo produto. Proteger rigorosamente da umidade.',
-      obs: 'CACAU EM PÓ — verificar classificação por G.tot conforme RDC ANVISA 264/2005.\nO percentual de manteiga de cacau define a denominação legal obrigatória no rótulo.\nCONTÉM CAFEÍNA E TEOBROMINA — presentes naturalmente no cacau.',
+      obs: 'CONTÉM X% DE CACAU — frase obrigatória no painel principal (Lei nº 15.404/2026, art. 3º, §1º).\nCACAU EM PÓ — manteiga de cacau mín. 10% na matéria seca (art. 2º, IV).\nO percentual de manteiga de cacau define a denominação legal obrigatória no rótulo.\nCONTÉM CAFEÍNA E TEOBROMINA — presentes naturalmente no cacau.',
       validade: '24 meses',
       preparo: 'Para uso culinário: incorporar diretamente à receita sem diluição prévia, ou misturar com açúcar antes de adicionar ingredientes líquidos. Para bebida: dissolver 10 g (1 colher de sopa) em água ou leite quente.',
     }
@@ -2216,11 +2234,13 @@ const TEMPLATES = {
     label: 'Café Torrado e Moído',
     classe: 'cafe-torrado-moido',
     legal: `<strong>RDC ANVISA nº 277, de 22/09/2005</strong> + <strong>IN MAPA nº 16, de 24/05/2010</strong><br>
-      • Umidade: <strong>≤ 5,0%</strong> m/m · Extrato aquoso: <strong>≥ 25% e ≤ 35%</strong> m/m base seca<br>
-      • Cafeína: <strong>≥ 0,7%</strong> m/m na matéria seca (autenticidade obrigatória)<br>
-      • Proibida adição de qualquer outra substância · Produto puro torrado e moído<br>
-      • Denominação: "Café Torrado e Moído" · Blend deve declarar origens/variedades<br>
-      • Classificação Specialty (≥ 80 pts SCA) é opcional · <strong>Micro:</strong> IN 161/2022 cat. 10.a`,
+      • Umidade: <strong>até 5,0%</strong> (teor tecnicamente recomendado) · Extrato aquoso: <strong>≥ 20%</strong> (abaixo disso, fora de tipo)<br>
+      • Cafeína: <strong>≥ 0,5%</strong> no café comum (análise complementar, não obrigatória) · Descafeinado: <strong>≤ 0,1%</strong><br>
+      • Matéria estranha + impurezas: <strong>≤ 1,0%</strong> · Proibidos elementos estranhos (açúcar, caramelo, corantes, borra, outros grãos) · Aromatizante permitido<br>
+      • Denominação: "Café" + marca, grupo "Torrado e Moído" · Declarar a espécie ("100% Arábica" ou "Predominantemente Canéfora") · Variedade opcional<br>
+      • <strong>Rótulo:</strong> informar o ponto de torra (escala Agtron) · Grau de moagem opcional<br>
+      • Qualidade global mínima: 4,5 pts (Portaria 570) · Specialty (≥ 80 pts SCA) é opcional, critério de mercado<br>
+      • Microbiologia: IN 161/2022, cat. 17.b · Contaminantes: IN 160/2022`,
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
@@ -2252,7 +2272,7 @@ const TEMPLATES = {
       • Cafeína: <strong>≥ 0,7%</strong> m/m na matéria seca<br>
       • Apresentação: grão inteiro torrado, não moído · Proibida adição de qualquer substância<br>
       • Classificação por tipo 1–8 (defeitos físicos) conforme IN MAPA 16/2010<br>
-      • Specialty Coffee ≥ 80 pts SCA (opcional) · <strong>Micro:</strong> IN 161/2022 cat. 10.a`,
+      • Specialty Coffee ≥ 80 pts SCA (opcional) · <strong>Micro:</strong> IN 161/2022 cat. 17.b`,
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
@@ -2277,12 +2297,16 @@ const TEMPLATES = {
   'soro-derivados': {
     label: 'Soro e Derivados Lácteos',
     classe: 'soro-derivados',
-    legal: '<strong>IN MAPA nº 94/2020</strong>',
+    legal: `<strong>IN MAPA nº 94/2020</strong><br>
+      • <strong>Soro de Leite Parcialmente Desmineralizado:</strong> umidade máx. <strong>4,0%</strong> · proteína láctea mín. <strong>10,0%</strong> · lactose mín. <strong>61,0%</strong> · cinzas <strong>1,5 a 7,0%</strong><br>
+      • pH máx. <strong>6,0</strong> (entre 6,0 e 6,8 para soro obtido por coagulação enzimática)<br>
+      • Microbiologia: IN ANVISA 161/2022 (Cat. 9.e) · Contaminantes: IN 160/2022`,
     denominacao: 'Soro de Leite em Pó',
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
         { id:'st-soro-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-soro-parc', label:'🧪 Parcialmente desmineralizado' },
       ]
     },
     campos: {
@@ -2301,13 +2325,18 @@ const TEMPLATES = {
   'maltodextrina-glicose': {
     label: 'Maltodextrina e Glicose em Pó',
     classe: 'maltodextrina-glicose',
-    legal: '<strong>RDC ANVISA nº 429/2020</strong>',
+    legal: `<strong>RDC ANVISA nº 429/2020</strong><br>
+      • <strong>Maltodextrina:</strong> RDC 724/2022 + IN 161/2022 (Cat. 19.a — Farinhas, amidos, féculas e fubás) · contaminantes conforme origem (milho ou mandioca)<br>
+      • <strong>Glicose / Dextrose:</strong> RDC 623/2022 + IN 161/2022 (Cat. 16.a — Açúcares, edulcorantes e adoçantes de mesa sólidos)<br>
+      • Selecione abaixo o produto (Maltodextrina ou Glicose/Dextrose) para aplicar os parâmetros corretos`,
     denominacao: 'Maltodextrina',
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
         { id:'st-malto-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
         { id:'st-malto-1kg',  label:'📦 Embalagem 1 kg' },
+        { id:'st-maltodextrina', label:'🌽 Maltodextrina' },
+        { id:'st-glicose', label:'🍬 Glicose / Dextrose' },
       ]
     },
     campos: {
@@ -2324,11 +2353,357 @@ const TEMPLATES = {
     },
   },
 
+  // ── CHOCOLATE EM PÓ (Lei 15.404/2026) ────────────────────────────────────
+  'chocolate-po': {
+    label: 'Chocolate em Pó',
+    classe: 'chocolate-po',
+    denominacao: 'Chocolate em Pó',
+    legal: `<strong>Lei nº 15.404, de 08/05/2026</strong> — Produtos derivados de cacau<br>
+      • Definição: produto da mistura de açúcar, edulcorante ou outros ingredientes com cacau em pó (art. 2º, VII)<br>
+      • Teor mínimo: <strong>32% de sólidos totais de cacau</strong> (art. 2º, VII)<br>
+      • O cacau em pó usado como ingrediente deve cumprir a própria definição: <strong>≥ 10% de manteiga de cacau</strong> na matéria seca e <strong>≤ 9% de umidade</strong> (art. 2º, IV)<br>
+      • <strong>Rótulo:</strong> frase obrigatória "Contém X% de cacau" no painel principal, ocupando <strong>≥ 15% da área frontal</strong> (art. 3º, §1º)<br>
+      • Aditivos: RDC ANVISA 778/2023 + IN 211/2023<br>
+      • Microbiologia: RDC ANVISA 724/2022 + IN 161/2022 (no pó, por similaridade com achocolatado em pó — Cat. 20.f)<br>
+      • Alertas: RDC ANVISA 429/2020 + IN 75/2020`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó uniforme de coloração marrom característica, sem grumos, aspecto homogêneo',
+      sabor: 'Sabor e aroma característicos de chocolate, livre de sabores e odores estranhos',
+      alergenicos: 'PODE CONTER LEITE, AMENDOIM E CASTANHAS.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN. PODE CONTER TRAÇOS DE LACTOSE (contaminação cruzada). CONTÉM CAFEÍNA (presente naturalmente no cacau).',
+      emb1: 'Embalagem plástica metalizada (PET/AL/PE) hermeticamente fechada, resistente à umidade',
+      emb2: 'Caixa de papelão ou fardo de papel kraft multifolhado',
+      armazenamento: 'Armazenar em local seco, fresco (temperatura ≤ 25°C) e arejado, ao abrigo de luz, calor e umidade. Após aberto, fechar bem a embalagem e consumir em até 30 dias.',
+      obs: 'CONTÉM X% DE CACAU — frase obrigatória no painel principal (Lei nº 15.404/2026, art. 3º, §1º).\nCONTÉM CAFEÍNA E TEOBROMINA — presentes naturalmente no cacau.',
+      validade: '18 meses',
+      preparo: 'Adicione 3 colheres de sopa (30 g) em 200 ml de leite quente ou frio. Misture bem até dissolver completamente.',
+    }
+  },
+
+  // ── ESPESSANTE ALIMENTAR ─────────────────────────────────────────────────
+  'espessante': {
+    label: 'Espessante Alimentar',
+    classe: 'espessante',
+    denominacao: 'Espessante Alimentar',
+    legal: `<strong>ANVISA — RDC nº 724/2022 + IN nº 161/2022</strong> (Cat. 19.a, por similaridade)<br>
+      • Microbiologia no pó: Salmonella, Bacillus cereus presuntivo e Escherichia coli (ver seção 5 da ficha)<br>
+      • Contaminantes no pó: RDC 722/2022 (art. 7º) + IN 160/2022 (ver seção 7 da ficha)`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó fino e uniforme, branco a levemente amarelado, sem grumos',
+      sabor: 'Neutro, livre de sabores e odores estranhos',
+      alergenicos: 'VERIFICAR ORIGEM DOS INGREDIENTES.',
+      glutenlactose: 'VERIFICAR CONFORME COMPOSIÇÃO.',
+      emb1: 'Saco plástico atóxico (polietileno), fechado hermeticamente',
+      emb2: 'Fardo de papel kraft multifolhado — 25 kg',
+      armazenamento: 'Armazenar em local seco, fresco e arejado, ao abrigo do calor, luz solar e umidade, sobre estrados e distante das paredes.',
+      obs: 'ESPESSANTE ALIMENTAR.',
+      validade: '24 meses (embalagem fechada)',
+      preparo: 'Conforme instruções de uso do produto.',
+    }
+  },
+
 };
+
+// ===== REGRAS REGULATÓRIAS POR CATEGORIA — revisão nov/2026 =====
+// Fonte: "Revisão do Programa de Geração de Fichas Técnicas GMF Formulador" (11/11/2026).
+// Alimenta as seções 5 (Microbiologia) e 7 (Contaminantes) da Ficha Técnica.
+const _MELAMINA = ['Melamina', 'Máx. 2,5 mg/kg'];
+const _MICRO_9E = {
+  norma: 'IN ANVISA nº 161/2022 (Cat. 9.e — Produtos lácteos em pó, incl. leite, compostos lácteos, soro e concentrados proteicos) · RDC 724/2022',
+  itens: [
+    ['Salmonella sp.', 'Ausência em 25 g · n=10 · c=0'],
+    ['Enterobacteriaceae', 'Máx. 10 UFC/g · n=5 · c=0'],
+    ['Estafilococos coagulase positiva', 'm=10 · M=10² UFC/g · n=5 · c=1'],
+    ['Aeróbios mesófilos', 'm=3x10⁴ · M=1x10⁵ UFC/g · n=5 · c=2'],
+    ['Enterotoxinas estafilocócicas', 'Ausência · n=5 · c=0'],
+  ],
+};
+const _MICRO_19A = {
+  norma: 'RDC ANVISA nº 724/2022 + IN nº 161/2022 (Cat. 19.a — Farinhas, amidos, féculas e fubás)',
+  itens: [
+    ['Salmonella sp.', 'Ausência em 25 g · n=5 · c=0'],
+    ['Bacillus cereus presuntivo', 'm=10² · M=10³ UFC/g · n=5 · c=1'],
+    ['Escherichia coli', 'm=10 · M=10² UFC/g · n=5 · c=3'],
+  ],
+};
+const _CONTAM_LEITE_BASE = [
+  ['Chumbo (Pb)', 'Máx. 0,02 mg/kg no reconstituído · 0,20 mg/kg no pó'],
+  ['Cádmio (Cd)', 'Máx. 0,05 mg/kg no reconstituído · 0,50 mg/kg no pó'],
+  ['Arsênio total (As)', 'Máx. 0,05 mg/kg no reconstituído · 0,50 mg/kg no pó'],
+  ['Aflatoxina M1', 'Máx. 0,50 mcg/kg no reconstituído · 5,0 mcg/kg no pó'],
+  ['Melamina', 'Máx. 2,5 mg/kg no pó'],
+];
+const _CONTAM_LEITE_COMPLETO = _CONTAM_LEITE_BASE.concat([
+  ['Dioxinas + furanos + PCBs', 'Máx. 5,5 pg/g de gordura'],
+  ['Dioxinas + furanos', 'Máx. 2,5 pg/g de gordura'],
+]);
+const _NORMA_IN160 = 'INSTRUÇÃO NORMATIVA — IN nº 160, de 1º de julho de 2022';
+const _NORMA_PRORATA = 'RDC 722/2022 (art. 7º) + IN 160/2022 — limite calculado: Σ (% de cada ingrediente × limite desse ingrediente)';
+
+const REGRAS_REG = {
+  'composto-com': { micro: _MICRO_9E,
+    contam: { norma: _NORMA_PRORATA, modo: 'prorata', params: ['pb','cd','as','afm1'], fixos: [_MELAMINA] } },
+  'composto-sem': { micro: _MICRO_9E,
+    contam: { norma: _NORMA_IN160, itens: _CONTAM_LEITE_COMPLETO } },
+  'mistura': {
+    micro: { norma: 'IN ANVISA nº 161/2022 + RDC 724/2022 (categoria 9.j)', itens: [
+      ['Salmonella sp.', 'Ausência em 25 g · n=5 · c=0'],
+      ['Enterobacteriaceae', 'm=10 · M=10² UFC/g · n=5 · c=1'],
+      ['Estafilococos coagulase positiva', 'm=10 · M=10² UFC/g · n=5 · c=1'],
+      ['Enterotoxinas estafilocócicas', 'Ausência · n=5 · c=0'],
+    ] },
+    contam: { norma: _NORMA_PRORATA, modo: 'prorata', params: ['pb','cd','as','afm1','afla','ota','fumo'], fixos: [_MELAMINA] } },
+  'po-preparo': {
+    micro: { norma: 'IN ANVISA nº 161/2022 (Cat. 23.b — sem emprego de calor) · RDC 724/2022', itens: [
+      ['Salmonella sp.', 'Ausência em 25 g · n=5 · c=0'],
+      ['Escherichia coli', 'm=10 · M=10² UFC/g · n=5 · c=2'],
+    ] },
+    contam: { norma: _NORMA_PRORATA, modo: 'prorata', params: ['pb','cd','as','afm1','afla','ota','fumo'], fixos: [_MELAMINA] } },
+  'leite-integral':    { micro: _MICRO_9E, contam: { norma: _NORMA_IN160, itens: _CONTAM_LEITE_COMPLETO } },
+  'leite-instantaneo': { micro: _MICRO_9E, contam: { norma: _NORMA_IN160, itens: _CONTAM_LEITE_COMPLETO } },
+  'leite-desnatado':   { micro: _MICRO_9E, contam: { norma: _NORMA_IN160, itens: _CONTAM_LEITE_COMPLETO } },
+  'achocolatado': {
+    micro: { norma: 'RDC ANVISA 724/2022 + IN 161/2022 (Cat. 20.f — Achocolatados em pó)', itens: [
+      ['Salmonella sp.', 'Ausência em 25 g · n=10 · c=0'],
+      ['Enterobacteriaceae', 'm=10 · M=10² UFC/g · n=5 · c=1'],
+    ] },
+    contam: { norma: _NORMA_IN160, afm1Proporcional: true, itens: [
+      ['Chumbo (Pb)', 'Máx. 0,20 mg/kg'],
+      ['Cádmio (Cd)', 'Máx. 0,20 mg/kg'],
+      ['Arsênio total (As)', 'Máx. 0,20 mg/kg'],
+      ['Aflatoxinas B1+B2+G1+G2', 'Máx. 5 mcg/kg'],
+      ['Ocratoxina A', 'Máx. 5 mcg/kg'],
+      _MELAMINA,
+    ] } },
+  'cacau': {
+    micro: { norma: 'RDC ANVISA 724/2022 + IN 161/2022 (Cat. 20.e — Cacau em pó)', itens: [
+      ['Salmonella sp.', 'Ausência em 25 g · n=10 · c=0'],
+      ['Enterobacteriaceae', 'm=10 · M=10² UFC/g · n=5 · c=2'],
+      ['Aeróbios mesófilos', 'm=10³ · M=10⁴ UFC/g · n=5 · c=2'],
+    ] },
+    contam: { norma: _NORMA_IN160, itens: [
+      ['Chumbo (Pb)', 'Máx. 0,40 mg/kg'],
+      ['Cádmio (Cd)', 'Máx. 0,30 mg/kg'],
+      ['Arsênio total (As)', 'Máx. 0,40 mg/kg'],
+      ['Aflatoxinas B1+B2+G1+G2', 'Máx. 5 mcg/kg'],
+      ['Ocratoxina A', 'Máx. 5 mcg/kg'],
+      _MELAMINA,
+    ] } },
+  'chocolate-po': {
+    micro: { norma: 'RDC ANVISA 724/2022 + IN 161/2022 (no pó, por similaridade com achocolatado em pó — Cat. 20.f)', itens: [
+      ['Salmonella sp.', 'Ausência em 25 g · n=10 · c=0'],
+      ['Enterobacteriaceae', 'm=10 · M=10² UFC/g · n=5 · c=1'],
+    ] },
+    contam: { norma: _NORMA_IN160, modo: 'cacau-faixa',
+      menos40: [['Chumbo (Pb)','Máx. 0,20 mg/kg'],['Cádmio (Cd)','Máx. 0,20 mg/kg'],['Arsênio total (As)','Máx. 0,20 mg/kg'],['Aflatoxinas B1+B2+G1+G2','Máx. 5 mcg/kg'],['Ocratoxina A','Máx. 5 mcg/kg'],_MELAMINA],
+      mais40:  [['Chumbo (Pb)','Máx. 0,40 mg/kg'],['Cádmio (Cd)','Máx. 0,30 mg/kg'],['Arsênio total (As)','Máx. 0,40 mg/kg'],['Aflatoxinas B1+B2+G1+G2','Máx. 5 mcg/kg'],['Ocratoxina A','Máx. 5 mcg/kg'],_MELAMINA] } },
+  'cafe-torrado-moido': {
+    micro: { norma: 'IN ANVISA nº 161/2022 (Cat. 17.b)', itens: [
+      ['Salmonella sp.', 'Ausência em 25 g · n=5 · c=0'],
+      ['Escherichia coli', 'm=10² · M=10³ UFC/g · n=5 · c=3'],
+    ] },
+    contam: { norma: _NORMA_IN160, itens: [
+      ['Chumbo (Pb)', 'Máx. 0,50 mg/kg'],
+      ['Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
+      ['Arsênio total (As)', 'Máx. 0,20 mg/kg'],
+      ['Ocratoxina A', 'Máx. 10 mcg/kg'],
+      _MELAMINA,
+    ] } },
+  'soro-derivados': { micro: _MICRO_9E,
+    contam: { norma: _NORMA_IN160, itens: _CONTAM_LEITE_BASE } },
+  'maltodextrina-glicose': { modo: 'malto-glicose',
+    maltodextrina: { micro: _MICRO_19A,
+      contam: { norma: _NORMA_IN160, itens: [
+        ['Se derivada do milho — Chumbo (Pb)', 'Máx. 0,20 mg/kg'],
+        ['Se derivada do milho — Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
+        ['Se derivada do milho — Arsênio total (As)', 'Máx. 0,30 mg/kg'],
+        ['Se derivada do milho — Fumonisinas B1+B2', 'Máx. 2000 mcg/kg'],
+        ['Se derivada do milho — Zearalenona', 'Máx. 150 mcg/kg'],
+        ['Se derivada do milho — Desoxinivalenol (DON)', 'Máx. 1000 mcg/kg'],
+        ['Se derivada do milho — Ocratoxina A', 'Máx. 10 mcg/kg'],
+        ['Se derivada da mandioca — Chumbo (Pb)', 'Máx. 0,10 mg/kg'],
+        ['Se derivada da mandioca — Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
+        ['Se derivada da mandioca — Arsênio total (As)', 'Máx. 0,20 mg/kg'],
+        _MELAMINA,
+      ] } },
+    glicose: {
+      micro: { norma: 'RDC nº 623/2022 + IN nº 161/2022 (Cat. 16.a — Açúcares, edulcorantes e adoçantes de mesa sólidos)', itens: [
+        ['Bolores e leveduras', 'm<10 · M=10² UFC/g · n=5 · c=2'],
+      ] },
+      contam: { norma: _NORMA_IN160, itens: [
+        ['Chumbo (Pb)', 'Máx. 0,10 mg/kg'],
+        ['Arsênio total (As)', 'Máx. 0,10 mg/kg'],
+        _MELAMINA,
+      ] } } },
+  'espessante': {
+    micro: { norma: 'RDC ANVISA 724/2022 + IN 161/2022 (Cat. 19.a, por similaridade)', itens: _MICRO_19A.itens },
+    contam: { norma: 'RDC 722/2022 (art. 7º) + IN 160/2022', itens: [
+      ['Chumbo (Pb)', 'Máx. 0,20 mg/kg'],
+      ['Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
+      ['Arsênio total (As)', 'Máx. 0,30 mg/kg'],
+      ['Fumonisinas B1+B2', 'Máx. 1000 mcg/kg'],
+      ['Zearalenona', 'Máx. 150 mcg/kg'],
+      ['Desoxinivalenol (DON)', 'Máx. 1000 mcg/kg'],
+      ['Ocratoxina A', 'Máx. 10 mcg/kg'],
+      _MELAMINA,
+    ] } },
+};
+REGRAS_REG['cafe-torrado'] = REGRAS_REG['cafe-torrado-moido'];
+
+// Limites de partida por categoria de ingrediente (pó) — base do cálculo pro-rata (RDC 722 art. 7º)
+const LIMITES_PARTIDA = {
+  lacteo:  { pb: 0.20, cd: 0.50, as: 0.50, afm1: 5.0 },
+  acucar:  { pb: 0.10, as: 0.10 },
+  gordura: { pb: 0.10, as: 0.10 },
+  cacau:   { pb: 0.40, cd: 0.30, as: 0.40, afla: 5, ota: 5 },
+  amido:   { pb: 0.20, cd: 0.10, as: 0.30, fumo: 1000 },
+};
+const _ROTULO_PARAM = {
+  pb: ['Chumbo (Pb)', 'mg/kg'], cd: ['Cádmio (Cd)', 'mg/kg'], as: ['Arsênio total (As)', 'mg/kg'],
+  afm1: ['Aflatoxina M1', 'mcg/kg'], afla: ['Aflatoxinas B1+B2+G1+G2', 'mcg/kg'],
+  ota: ['Ocratoxina A', 'mcg/kg'], fumo: ['Fumonisinas B1+B2', 'mcg/kg'],
+};
+
+function _catPartida(ing) {
+  const n = (ing && ing.n || '').toLowerCase();
+  if (!n) return null;
+  if (n.includes('cacau') || n.includes('chocolate')) return 'cacau';
+  if (n.includes('óleo') || n.includes('oleo') || n.includes('gordura vegetal') || n.includes('gordura de palma')) return 'gordura';
+  if (ing.lacteo === 'lacteo' || /leite|lácteo|lacteo|soro|permeado|caseina|caseinato|whey|wpc|wpi/.test(n)) return 'lacteo';
+  if (/a[cç][uú]car|sacarose|dextrose|glicose/.test(n)) return 'acucar';
+  if (n.includes('amido') || n.includes('maltodextrina') || n.includes('féc') || n.includes('fec')) return 'amido';
+  return null;
+}
+
+// Pro-rata: limite = Σ (fração do ingrediente × limite de partida da categoria dele).
+// Ingrediente sem limite de partida para um parâmetro contribui com zero (resultado mais restritivo).
+function calcProRataPartida(params) {
+  const tQ = receita.reduce((s, r) => s + r.qtde, 0);
+  if (!tQ || !receita.length) return null;
+  const soma = {}, presente = {}, semLimite = [];
+  receita.forEach(r => {
+    const cat = _catPartida(r.d);
+    if (!cat) { semLimite.push(r.d.n); return; }
+    const frac = r.qtde / tQ;
+    Object.keys(LIMITES_PARTIDA[cat]).forEach(k => {
+      soma[k] = (soma[k] || 0) + frac * LIMITES_PARTIDA[cat][k];
+      presente[k] = true;
+    });
+  });
+  const itens = [];
+  params.forEach(k => {
+    if (!presente[k]) return;
+    const [lbl, un] = _ROTULO_PARAM[k];
+    const v = Math.round(soma[k] * 1000) / 1000;
+    itens.push([lbl, 'Máx. ' + String(v).replace('.', ',') + ' ' + un + ' <span style="font-size:7px;color:#666">(calculado)</span>']);
+  });
+  return { itens, semLimite };
+}
+
+function _pctCacauReceita() {
+  const tQ = receita.reduce((s, r) => s + r.qtde, 0);
+  if (!tQ) return null;
+  return receita.filter(r => (r.d.n || '').toLowerCase().includes('cacau')).reduce((s, r) => s + r.qtde, 0) / tQ * 100;
+}
+function _pctLeitePoReceita() {
+  const tQ = receita.reduce((s, r) => s + r.qtde, 0);
+  if (!tQ) return 0;
+  return receita.filter(r => _catPartida(r.d) === 'lacteo').reduce((s, r) => s + r.qtde, 0) / tQ * 100;
+}
+
+function _ftpRows(itens) {
+  let h = '';
+  for (let i = 0; i < itens.length; i += 4) {
+    h += '<div class="ftp-row">' + itens.slice(i, i + 4).map(([l, v]) =>
+      `<div class="ftp-cell"><div class="ftp-lbl">${l}</div><div class="ftp-val">${v}</div></div>`).join('') + '</div>';
+  }
+  return h;
+}
+
+function _regrasDoTipo() {
+  const tipo = tipoSel || classeSel;
+  const r = REGRAS_REG[tipo];
+  if (!r) return null;
+  if (r.modo === 'malto-glicose') {
+    const sel = (typeof _getBtnSelecionados === 'function') ? _getBtnSelecionados('subtipoOpts') : [];
+    return sel.includes('st-glicose') ? r.glicose : r.maltodextrina;
+  }
+  return r;
+}
+
+function ftpSecMicro() {
+  const r = _regrasDoTipo();
+  if (!r) return '';
+  return `<div class="ftp-sec">
+      <div class="ftp-sec-t">5. Características Microbiológicas — ${r.micro.norma}</div>
+      ${_ftpRows(r.micro.itens)}
+      <div class="ftp-row"><div class="ftp-cell" style="flex:4"><div class="ftp-lbl" style="font-size:7px">Plano de amostragem · m=limite aceitável · M=limite máximo · n=nº de unidades · c=nº de unidades toleradas entre m e M · Frequência: por lote / POP-QUA-007</div></div></div>
+    </div>`;
+}
+
+function ftpSecContam() {
+  const r = _regrasDoTipo();
+  if (!r) return '';
+  const c = r.contam;
+  let corpo = '', nota = '';
+  if (c.modo === 'prorata') {
+    const pr = calcProRataPartida(c.params);
+    const itens = (pr ? pr.itens : []).concat(c.fixos || []);
+    corpo = _ftpRows(itens);
+    nota = 'Calculado pela fórmula (RDC 722/2022, art. 7º)' +
+      (pr && pr.semLimite.length ? ' · Ingredientes sem limite de partida (não entram no cálculo): ' + pr.semLimite.join(', ') : '');
+  } else if (c.modo === 'cacau-faixa') {
+    const p = _pctCacauReceita();
+    if (p === null) corpo = _ftpRows([['Teor de cacau', 'Adicione ingredientes à receita']]);
+    else if (p < 40) corpo = _ftpRows(c.menos40);
+    else if (p > 40) corpo = _ftpRows(c.mais40);
+    else corpo = _ftpRows(c.menos40) + _ftpRows(c.mais40);
+    nota = 'Teor de cacau na receita: ' + (p === null ? '—' : p.toFixed(1).replace('.', ',') + '%') + ' · < 40% de cacau: limites do achocolatado · > 40% de cacau: limites do cacau em pó';
+  } else {
+    corpo = _ftpRows(c.itens);
+    if (c.afm1Proporcional) {
+      const pl = _pctLeitePoReceita();
+      if (pl > 0) {
+        const lim = Math.round(5.0 * pl / 100 * 1000) / 1000;
+        corpo += _ftpRows([['Aflatoxina M1 (fração láctea)', 'Máx. ' + String(lim).replace('.', ',') + ' mcg/kg <span style="font-size:7px;color:#666">(5,0 × ' + pl.toFixed(1).replace('.', ',') + '% de leite em pó)</span>']]);
+      }
+    }
+    nota = 'Limite direto';
+  }
+  return `<div class="ftp-sec">
+      <div class="ftp-sec-t">7. Contaminantes Químicos, Metais Pesados e Micotoxinas — ${c.norma}</div>
+      ${corpo}
+      <div class="ftp-row"><div class="ftp-cell" style="flex:4"><div class="ftp-lbl" style="font-size:7px">${nota} · Frequência: por fornecedor / semestral ou conforme POP-QUA-008. Laudos arquivados por 2 anos.</div></div></div>
+    </div>`;
+}
+// ===== FIM REGRAS REGULATÓRIAS =====
 
 // Mapa de subtipo para ajuste de campos específicos
 const SUBTIPO_AJUSTES = {
+  'st-soro-parc':  { obs:'SORO DE LEITE PARCIALMENTE DESMINERALIZADO — umidade máx. 4,0% · proteína láctea mín. 10,0% · lactose mín. 61,0% · cinzas 1,5 a 7,0% · pH máx. 6,0 (6,0 a 6,8 para soro por coagulação enzimática).\nESTABELECIMENTO INSPECIONADO PELO MAPA.' },
   'st-soro-25kg':  { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'12 meses (embalagem fechada)', gramatura:'25 kg' },
+  'st-maltodextrina': { obs:'MALTODEXTRINA — carboidrato hidrolisado. RDC ANVISA 429/2020.' },
+  'st-glicose': { obs:'GLICOSE / DEXTROSE EM PÓ — carboidrato. Microbiologia: RDC 623/2022 + IN 161/2022 (Cat. 16.a).' },
   'st-malto-25kg': { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
   'st-malto-1kg':  { emb1:'Embalagem plástica hermeticamente fechada 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (embalagem fechada)', gramatura:'1 kg' },
   'st-25kg':  { emb1:'Saco plástico atóxico (polietileno), hermeticamente fechado', emb2:'Fardo de papel kraft multifolhado — 25 kg (Industrial / granel)', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
@@ -2340,9 +2715,9 @@ const SUBTIPO_AJUSTES = {
   'st-cafe-500g': { emb1:'Embalagem aluminizada com válvula desgasificadora hermeticamente selada — 500 g', emb2:'Caixa de papelão com 12 unidades de 500 g', validade:'12 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'500 g' },
   'st-cafe-5kg':  { emb1:'Saco aluminizado com válvula desgasificadora hermeticamente selado — 5 kg', emb2:'Saco de papel kraft reforçado ou caixa de papelão', validade:'12 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'5 kg' },
   'st-inst-integral': { aspecto:'Grânulos aglomerados de coloração branca a creme, dissolução instantânea em água fria, sem grumos após agitação suave' },
-  'st-inst-desnatado':{ aspecto:'Grânulos aglomerados de coloração branca, dissolução instantânea em água fria, baixíssimo teor de gordura', emb1:'Embalagem aluminizada hermética', obs:'LEITE EM PÓ DESNATADO INSTANTÂNEO — DISSOLVE EM ÁGUA FRIA. G.tot ≤ 1,5% m/m.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.' },
-  'st-acho-32':       { obs:'ACHOCOLATADO EM PÓ — Teor de cacau ≥ 32% m/m (conforme RDC ANVISA 264/2005).\nDENOMINAÇÃO LEGAL: "ACHOCOLATADO EM PÓ".\nCONTÉM CAFEÍNA E TEOBROMINA — presentes naturalmente no cacau.' },
-  'st-acho-lt32':     { obs:'BEBIDA EM PÓ SABOR CHOCOLATE — Teor de cacau < 32% (não pode ser denominado "Achocolatado").\nConforme RDC ANVISA 264/2005, a denominação obrigatória é "BEBIDA EM PÓ SABOR CHOCOLATE".', aspecto:'Pó uniforme de coloração marrom clara a média, sem grumos' },
+  'st-inst-desnatado':{ aspecto:'Grânulos aglomerados de coloração branca, dissolução instantânea em água fria, baixíssimo teor de gordura', emb1:'Embalagem aluminizada hermética', obs:'LEITE EM PÓ DESNATADO INSTANTÂNEO — DISSOLVE EM ÁGUA FRIA. G.tot < 1,5% m/m.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.' },
+  'st-acho-32':       { obs:'ACHOCOLATADO EM PÓ — Teor de cacau ≥ 15% (sólidos de cacau ou manteiga de cacau), conforme Lei nº 15.404/2026, art. 2º, XI.\nDENOMINAÇÃO LEGAL: "ACHOCOLATADO EM PÓ".\nCONTÉM CAFEÍNA E TEOBROMINA — presentes naturalmente no cacau.' },
+  'st-acho-lt32':     { obs:'BEBIDA EM PÓ SABOR CHOCOLATE — Teor de cacau < 15% (não pode ser denominado "Achocolatado" — Lei nº 15.404/2026, art. 2º, XI).', aspecto:'Pó uniforme de coloração marrom clara a média, sem grumos' },
   'st-acho-diet':     { obs:'ACHOCOLATADO/BEBIDA EM PÓ DIET — zero ou baixo teor de açúcar. Verificar legislação de alegação "diet/zero".\nOs adoçantes utilizados devem estar listados e aprovados pela ANVISA.' },
   'st-cacau-comum':   { obs:'CACAU EM PÓ — Teor de manteiga de cacau: ≥ 10% e < 22% m/m (base seca).\nDENOMINAÇÃO: "Cacau em pó" conforme RDC ANVISA 264/2005.' },
   'st-cacau-gordo':   { obs:'CACAU EM PÓ ALTO TEOR DE GORDURA — Teor de manteiga de cacau: ≥ 22% m/m (base seca).\nDENOMINAÇÃO: "Cacau em pó gordo" conforme RDC ANVISA 264/2005.\nSabor e aroma mais intensos; ideal para confeitaria premium.', aspecto:'Pó fino e sério, cor marrom intensa, alto teor de manteiga de cacau, textura levemente oleosa ao toque' },
@@ -2553,9 +2928,11 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
       'st-cacau-comum':'Cacau em Pó','st-cacau-gordo':'Cacau em Pó Gordo',
       'st-cacau-magro':'Cacau em Pó Magro','st-cacau-alcalin':'Cacau em Pó Alcalinizado',
       'st-cafe-250g':'Café Torrado e Moído','st-cafe-500g':'Café Torrado e Moído','st-cafe-5kg':'Café Torrado e Moído',
+      'st-soro-parc':'Soro de Leite Parcialmente Desmineralizado em Pó',
+      'st-maltodextrina':'Maltodextrina','st-glicose':'Glicose em Pó (Dextrose)',
     };
     const tiposLeite = ['leite-integral','leite-instantaneo','leite-desnatado'];
-    if (tiposLeite.includes(tipoSel) && denMap[stId]) {
+    if ((tiposLeite.includes(tipoSel) || ['soro-derivados','maltodextrina-glicose'].includes(tipoSel)) && denMap[stId]) {
       den.value = denMap[stId];
     } else {
       den.value = tpl ? (tpl.denominacao || tpl.label) : '';
@@ -2607,7 +2984,8 @@ function selClasse(c) {
   // Todos os tipos são mapeados diretamente — o tipoSel agora é a própria classificação
   const tiposValidos = ['composto-com','composto-sem','mistura','po-preparo',
                         'leite-integral','leite-instantaneo','leite-desnatado',
-                        'achocolatado','cacau','cafe-torrado-moido','cafe-torrado'];
+                        'achocolatado','cacau','cafe-torrado-moido','cafe-torrado',
+                        'soro-derivados','maltodextrina-glicose','chocolate-po','espessante'];
   if (tiposValidos.includes(c)) selTipo(c);
   else classeSel = c;
 }
@@ -2725,19 +3103,19 @@ function remIng(i){receita.splice(i,1);renderReceita();recalc();}
 // ===== MÓDULO 1 — Limites Diretos por Categoria do Produto Acabado (IN 160/2022) =====
 const LIMITES_DIRETOS_PRODUTO = {
   // Leites em pó
-  'leite-integral':    { as:0.1, cd:0.05, pb:0.02, sn:50, aflatoxinas:0.5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó' },
-  'leite-desnatado':   { as:0.1, cd:0.05, pb:0.02, sn:50, aflatoxinas:0.5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó' },
-  'leite-instantaneo': { as:0.1, cd:0.05, pb:0.02, sn:50, aflatoxinas:0.5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó' },
+  'leite-integral':    { as:0.5, cd:0.5, pb:0.2, sn:50, aflatoxinas:5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó (pó)' },
+  'leite-desnatado':   { as:0.5, cd:0.5, pb:0.2, sn:50, aflatoxinas:5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó (pó)' },
+  'leite-instantaneo': { as:0.5, cd:0.5, pb:0.2, sn:50, aflatoxinas:5, ocratoxina:null, fonte:'IN 160/2022 — Leite em pó (pó)' },
   // Compostos e misturas lácteas — sem categoria direta, usa pro-rata
   'composto-sem':      null,
   'composto-com':      null,
   'mistura':           null,
   // Cafés
-  'cafe-torrado-moido':{ as:0.2, cd:0.3,  pb:0.5,  sn:50, aflatoxinas:10, ocratoxina:10, fonte:'IN 160/2022 — Café torrado' },
-  'cafe-torrado':      { as:0.2, cd:0.3,  pb:0.5,  sn:50, aflatoxinas:10, ocratoxina:10, fonte:'IN 160/2022 — Café torrado' },
+  'cafe-torrado-moido':{ as:0.2, cd:0.1,  pb:0.5,  sn:50, aflatoxinas:null, ocratoxina:10, fonte:'IN 160/2022 — Café torrado' },
+  'cafe-torrado':      { as:0.2, cd:0.1,  pb:0.5,  sn:50, aflatoxinas:null, ocratoxina:10, fonte:'IN 160/2022 — Café torrado' },
   // Cacau
-  'cacau':             { as:0.5, cd:0.5,  pb:0.1,  sn:50, aflatoxinas:10, ocratoxina:null, fonte:'IN 160/2022 — Cacau em pó' },
-  'achocolatado':      { as:0.3, cd:0.3,  pb:0.1,  sn:50, aflatoxinas:5,  ocratoxina:null, fonte:'IN 160/2022 — Achocolatado' },
+  'cacau':             { as:0.4, cd:0.3,  pb:0.4,  sn:50, aflatoxinas:5, ocratoxina:5, fonte:'IN 160/2022 — Cacau em pó' },
+  'achocolatado':      { as:0.2, cd:0.2,  pb:0.2,  sn:50, aflatoxinas:5, ocratoxina:5, fonte:'IN 160/2022 — Achocolatado' },
   // Pó para preparo — sem categoria direta, usa pro-rata
   'po-preparo':        null,
   'soro':              null,
@@ -2758,12 +3136,13 @@ function getLimitesContaminantes() {
   if (!proRata) return null;
 
   // PASSO 3: Regra de segurança — limite pro-rata não pode superar o maior limite dos ingredientes
-  const maxIngrediente = { as: 0.5, cd: 0.3, pb: 0.5, sn: 50 };
+  // (revisão nov/2026: o teto fixo foi removido — o limite segue a fórmula da RDC 722 art. 7º;
+  //  a ficha técnica usa REGRAS_REG / calcProRataPartida)
   return {
-    as: Math.min(proRata.as, maxIngrediente.as),
-    cd: Math.min(proRata.cd, maxIngrediente.cd),
-    pb: Math.min(proRata.pb, maxIngrediente.pb),
-    sn: Math.min(proRata.sn, maxIngrediente.sn),
+    as: proRata.as,
+    cd: proRata.cd,
+    pb: proRata.pb,
+    sn: proRata.sn,
     aflatoxinas: proRata.aflatoxinas,
     ocratoxina: proRata.ocratoxina,
     fonte: 'IN 160/2022 — Calculado pro-rata pela fórmula',
@@ -2784,9 +3163,9 @@ const LIMITES_CONTAM_PADRAO = {
 
 // Limites por categoria de ingrediente (IN 160/2022)
 const LIMITES_CONTAM_CATEGORIA = {
-  lacteo:   { as: 0.1, cd: 0.05, pb: 0.02, sn: 50, aflatoxinas: 0.5, ocratoxina: null },
-  cafe:     { as: 0.2, cd: 0.3,  pb: 0.5,  sn: 50, aflatoxinas: 10,  ocratoxina: 10   },
-  cacau:    { as: 0.5, cd: 0.5,  pb: 0.1,  sn: 50, aflatoxinas: 10,  ocratoxina: null },
+  lacteo:   { as: 0.5, cd: 0.5,  pb: 0.2,  sn: 50, aflatoxinas: 5,   ocratoxina: null },
+  cafe:     { as: 0.2, cd: 0.1,  pb: 0.5,  sn: 50, aflatoxinas: 5,   ocratoxina: 10   },
+  cacau:    { as: 0.4, cd: 0.3,  pb: 0.4,  sn: 50, aflatoxinas: 5,   ocratoxina: 5    },
   cereal:   { as: 0.2, cd: 0.1,  pb: 0.2,  sn: 50, aflatoxinas: 10,  ocratoxina: 10   },
   acucar:   { as: 0.2, cd: 0.05, pb: 0.05, sn: 50, aflatoxinas: 5,   ocratoxina: null },
   default:  { as: 0.5, cd: 0.1,  pb: 0.2,  sn: 50, aflatoxinas: 5,   ocratoxina: null },
@@ -3145,11 +3524,13 @@ function renderStep4(){
     'composto-com':      'Composto Lácteo com Adição · Portaria SDA/MAPA 1.170/2024',
     'mistura':           'Mistura Láctea · RIISPOA Decreto 9.013/2017 Art. 366',
     'po-preparo':        'Pó para Preparo de Bebida/Alimento · ANVISA RDC 724/2022',
-    'leite-integral':    'Leite em Pó Integral · IN MAPA nº 28/2007',
-    'leite-instantaneo': 'Leite em Pó Instantâneo · IN MAPA nº 28/2007',
-    'leite-desnatado':   'Leite em Pó Desnatado · IN MAPA nº 28/2007',
-    'achocolatado':      'Achocolatado em Pó · RDC ANVISA 264/2005',
-    'cacau':             'Cacau em Pó · RDC ANVISA 264/2005',
+    'leite-integral':    'Leite em Pó Integral · IN MAPA nº 53/2018 · Decreto 9.013/2017',
+    'leite-instantaneo': 'Leite em Pó Instantâneo · IN MAPA nº 53/2018 · Decreto 9.013/2017',
+    'leite-desnatado':   'Leite em Pó Desnatado · IN MAPA nº 53/2018 · Decreto 9.013/2017',
+    'achocolatado':      'Achocolatado em Pó · Lei nº 15.404/2026',
+    'cacau':             'Cacau em Pó · Lei nº 15.404/2026',
+    'chocolate-po':      'Chocolate em Pó · Lei nº 15.404/2026',
+    'espessante':        'Espessante Alimentar · ANVISA RDC 724/2022',
     'cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005 · IN MAPA 16/2010',
     'cafe-torrado':      'Café Torrado (grão) · RDC ANVISA 277/2005 · IN MAPA 16/2010',
   };
@@ -3298,19 +3679,8 @@ function renderStep4(){
       </div>
     </div>
 
-    <!-- 5. CARACTERÍSTICAS MICROBIOLÓGICAS -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">5. Características Microbiológicas — Portaria SDA/MAPA 1.170/2024 / RDC ANVISA 331/2019</div>
-      <div class="ftp-row">
-        <div class="ftp-cell"><div class="ftp-lbl">Aeróbios Mesófilos</div><div class="ftp-val">m=10⁴ · M=10⁵ UFC/g · n=5 · c=2</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Enterobacteriaceae</div><div class="ftp-val">m=10 · M=10² UFC/g · n=5 · c=2</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Estafilococos Coagulase Positiva</div><div class="ftp-val">m=10 · M=10² UFC/g · n=5 · c=2</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Salmonella sp.</div><div class="ftp-val">Ausência em 25g · n=5 · c=0</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:4"><div class="ftp-lbl" style="font-size:7px">Plano de amostragem 3 classes · m=limite aceitável · M=limite máximo · c=amostras toleradas · Frequência: por lote / POP-QUA-007</div></div>
-      </div>
-    </div>
+    <!-- 5. CARACTERÍSTICAS MICROBIOLÓGICAS (por categoria — REGRAS_REG) -->
+    ${ftpSecMicro()}
 
     <!-- 6. MATÉRIAS ESTRANHAS E SUJIDADES -->
     <div class="ftp-sec">
@@ -3344,34 +3714,8 @@ function renderStep4(){
       </div>
     </div>
 
-    <!-- 7. CONTAMINANTES QUÍMICOS, METAIS PESADOS E MICOTOXINAS -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">7. Contaminantes Químicos, Metais Pesados e Micotoxinas — IN ANVISA 160/2022 / RDC 331/2019</div>
-      <div class="ftp-row">
-        ${(()=>{ const cr=getLimitesContaminantes(); return cr ? `
-        <div class="ftp-cell"><div class="ftp-lbl">Arsênio (As)</div><div class="ftp-val">Máx. ${cr.as} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Cádmio (Cd)</div><div class="ftp-val">Máx. ${cr.cd} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Chumbo (Pb)</div><div class="ftp-val">Máx. ${cr.pb} mg/kg <span style="font-size:7px;color:#666">(pro-rata calculado)</span></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Estanho (Sn)</div><div class="ftp-val">Máx. ${cr.sn} mg/kg</div></div>
-        ` : `
-        <div class="ftp-cell"><div class="ftp-lbl">Arsênio (As)</div><div class="ftp-val">Máx. 0,5 mg/kg (pro-rata)</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Cádmio (Cd)</div><div class="ftp-val">Máx. 0,1 mg/kg (pro-rata)</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Chumbo (Pb)</div><div class="ftp-val">Máx. 0,2 mg/kg (pro-rata)</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Estanho (Sn)</div><div class="ftp-val">Máx. 50 mg/kg</div></div>
-        `; })()}
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell"><div class="ftp-lbl">Aflatoxinas Totais (B1+B2+G1+G2)</div><div class="ftp-val">${(['cafe-torrado-moido','cafe-torrado','cacau','achocolatado'].includes(tipoSel)?'Máx. 10 mcg/kg':'Máx. 5 mcg/kg')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Aflatoxina M1 (fração láctea)</div><div class="ftp-val">${(['composto-sem','composto-com','mistura','leite-integral','leite-desnatado','leite-instantaneo'].includes(tipoSel)?'<strong>Máx. 0,5 mcg/kg</strong>':'N/A')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Ocratoxina A (fração café)</div><div class="ftp-val">${(['cafe-torrado-moido','cafe-torrado'].includes(tipoSel)?'<strong>Máx. 10 mcg/kg</strong>':['composto-sem','composto-com','mistura'].includes(tipoSel)?'Máx. 10 mcg/kg (se contiver café)':'N/A')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Fumonisinas (B1+B2)</div><div class="ftp-val">Máx. 2.000 mcg/kg (se contiver milho)</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:4">
-          <div class="ftp-lbl" style="font-size:7px">${(()=>{ const _cr=getLimitesContaminantes(); return _cr&&_cr.metodo==='direto'?'Limite DIRETO — '+(_cr.fonte||'IN 160/2022'):'Calculado PRO-RATA — IN ANVISA 160/2022, Art. 4º'; })()} · Frequência: por fornecedor / semestral ou conforme POP-QUA-008. Laudos arquivados por 2 anos.</div>
-        </div>
-      </div>
-    </div>
+    <!-- 7. CONTAMINANTES (por categoria — REGRAS_REG) -->
+    ${ftpSecContam()}
 
     <!-- 8. EMBALAGEM, ARMAZENAMENTO E MODO DE PREPARO -->
     <div class="ftp-sec">
@@ -3745,7 +4089,7 @@ function ltGerarLaudo() {
           <!-- Classificação legal -->
           <div style="border:1px solid #ccc;border-radius:4px;padding:5px 8px;background:#fff">
             <div style="font-size:7px;text-transform:uppercase;font-weight:700;color:#666;margin-bottom:3px">Classificação legal</div>
-            <div style="font-size:8.5px;color:#1e3a8a;font-weight:600">${{'composto-sem':'Composto Lácteo sem Adição · Port. MAPA 1.170/2024','composto-com':'Composto Lácteo com Adição · Port. MAPA 1.170/2024','mistura':'Mistura Láctea · RIISPOA Art. 366','po-preparo':'Pó para Preparo · ANVISA RDC 724/2022','leite-integral':'Leite em Pó Integral · IN MAPA 28/2007','leite-instantaneo':'Leite em Pó Instantâneo · IN MAPA 28/2007','leite-desnatado':'Leite em Pó Desnatado · IN MAPA 28/2007','achocolatado':'Achocolatado em Pó · RDC ANVISA 264/2005','cacau':'Cacau em Pó · RDC ANVISA 264/2005','cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005','cafe-torrado':'Café Torrado (grão) · RDC ANVISA 277/2005'}[classeSel]||'—'}</div>
+            <div style="font-size:8.5px;color:#1e3a8a;font-weight:600">${{'composto-sem':'Composto Lácteo sem Adição · Port. MAPA 1.170/2024','composto-com':'Composto Lácteo com Adição · Port. MAPA 1.170/2024','mistura':'Mistura Láctea · RIISPOA Art. 366','po-preparo':'Pó para Preparo · ANVISA RDC 724/2022','leite-integral':'Leite em Pó Integral · IN MAPA 53/2018','leite-instantaneo':'Leite em Pó Instantâneo · IN MAPA 53/2018','leite-desnatado':'Leite em Pó Desnatado · IN MAPA 53/2018','achocolatado':'Achocolatado em Pó · Lei 15.404/2026','cacau':'Cacau em Pó · Lei 15.404/2026','chocolate-po':'Chocolate em Pó · Lei 15.404/2026','espessante':'Espessante Alimentar · RDC 724/2022','soro-derivados':'Soro e Derivados Lácteos · IN MAPA 94/2020','maltodextrina-glicose':'Maltodextrina e Glicose · RDC 429/2020','cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005','cafe-torrado':'Café Torrado (grão) · RDC ANVISA 277/2005'}[classeSel]||'—'}</div>
           </div>
           <!-- Alertas IN 75 -->
           ${(()=>{
