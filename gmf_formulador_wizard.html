@@ -119,7 +119,7 @@ tr:last-child td{border-bottom:none}
 .ftp-row{display:flex;flex-wrap:wrap}
 .ftp-cell{padding:4px 8px;border-right:1px solid #ddd;flex:1;min-width:100px}
 .ftp-cell:last-child{border-right:none}
-.ftp-lbl{font-size:7.5px;color:#666;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
+.ftp-lbl{font-size:7.5px;color:#1e3a8a;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
 .ftp-val{font-size:9.5px;color:#000;line-height:1.4}
 .ftp-nutri{border:2px solid #000;margin:6px;border-radius:2px}
 .ftp-nutri h5{font-size:11px;font-weight:900;border-bottom:2px solid #000;padding:2px 5px;margin:0}
@@ -368,7 +368,9 @@ tr:last-child td{border-bottom:none}
         <option value="cafe-torrado-moido">Café Torrado e Moído</option>
         <option value="cafe-torrado">Café Torrado em Grão</option>
         <option value="soro-derivados">Soro e Derivados Lácteos</option>
-        <option value="maltodextrina-glicose">Maltodextrina e Glicose em Pó</option>
+        <option value="maltodextrina">Maltodextrina em Pó</option>
+        <option value="glicose">Glicose / Dextrose em Pó</option>
+        <option value="suplemento-po">Suplemento Alimentar em Pó</option>
         <option value="chocolate-po">Chocolate em Pó</option>
         <option value="espessante">Espessante Alimentar</option>
       </select>
@@ -463,10 +465,20 @@ tr:last-child td{border-bottom:none}
           <div class="cbtn-title">Soro e Derivados</div>
           <div class="cbtn-sub">Soro, Permeado, WPC · IN MAPA 94/2020</div>
         </div>
-        <div class="cbtn" id="tb-maltodextrina-glicose" onclick="selTipo('maltodextrina-glicose')">
+        <div class="cbtn" id="tb-maltodextrina" onclick="selTipo('maltodextrina')">
           <div class="cbtn-icon">🌽</div>
-          <div class="cbtn-title">Maltodextrina e Glicose</div>
-          <div class="cbtn-sub">Carboidrato hidrolisado · RDC 429/2020</div>
+          <div class="cbtn-title">Maltodextrina em Pó</div>
+          <div class="cbtn-sub">Milho ou mandioca · RDC 429/2020</div>
+        </div>
+        <div class="cbtn" id="tb-glicose" onclick="selTipo('glicose')">
+          <div class="cbtn-icon">🍬</div>
+          <div class="cbtn-title">Glicose / Dextrose em Pó</div>
+          <div class="cbtn-sub">Cat. 16.a · RDC 429/2020</div>
+        </div>
+        <div class="cbtn" id="tb-suplemento-po" onclick="selTipo('suplemento-po')">
+          <div class="cbtn-icon">💪</div>
+          <div class="cbtn-title">Suplemento Alimentar em Pó</div>
+          <div class="cbtn-sub">RDC 243/2018 · IN 161/2022</div>
         </div>
         <div class="cbtn" id="tb-chocolate-po" onclick="selTipo('chocolate-po')">
           <div class="cbtn-icon">🍫</div>
@@ -1064,7 +1076,9 @@ const CLASSE_META = {
   'cafe-torrado-moido':{ label:'Café Torrado e Moído',          cor:'#3b1f0a', bg:'#fdf5e8', icone:'☕' },
   'cafe-torrado':      { label:'Café Torrado (grão)',            cor:'#3b1f0a', bg:'#fdf5e8', icone:'🫘' },
   'soro-derivados':    { label:'Soro e Derivados Lácteos',       cor:'#1d5238', bg:'#e8f3ed', icone:'🥛' },
-  'maltodextrina-glicose': { label:'Maltodextrina e Glicose em Pó', cor:'#92400e', bg:'#fef3c7', icone:'🌽' },
+  'maltodextrina':     { label:'Maltodextrina em Pó',           cor:'#92400e', bg:'#fef3c7', icone:'🌽' },
+  'glicose':           { label:'Glicose / Dextrose em Pó',      cor:'#92400e', bg:'#fef3c7', icone:'🍬' },
+  'suplemento-po':     { label:'Suplemento Alimentar em Pó',    cor:'#0f766e', bg:'#e6f7f5', icone:'💪' },
   'chocolate-po':      { label:'Chocolate em Pó',               cor:'#4a1c06', bg:'#fdf0e8', icone:'🍫' },
   'espessante':        { label:'Espessante Alimentar',          cor:'#1f2937', bg:'#f3f4f6', icone:'🥄' },
 };
@@ -1686,7 +1700,8 @@ function editarProduto(id) {
   _resto('p_ingredientes_txt', prod.ingredientes_txt);
 
   // Restaurar tipo/classificação SEM sobrescrever denominação e campos já salvos
-  const tipo = prod.classificacao || 'composto-com';
+  let tipo = prod.classificacao || 'composto-com';
+  if (tipo === 'maltodextrina-glicose') tipo = /glicose|dextrose/i.test((prod.nome||'') + ' ' + (prod.denominacao||'')) ? 'glicose' : 'maltodextrina';
   tipoSel = tipo;
   classeSel = tipo;
 
@@ -2322,35 +2337,83 @@ const TEMPLATES = {
       obs: 'ESTABELECIMENTO INSPECIONADO PELO MAPA.',
     },
   },
-  'maltodextrina-glicose': {
-    label: 'Maltodextrina e Glicose em Pó',
-    classe: 'maltodextrina-glicose',
+  'maltodextrina': {
+    label: 'Maltodextrina em Pó',
+    classe: 'maltodextrina',
     legal: `<strong>RDC ANVISA nº 429/2020</strong><br>
-      • <strong>Maltodextrina:</strong> RDC 724/2022 + IN 161/2022 (Cat. 19.a — Farinhas, amidos, féculas e fubás) · contaminantes conforme origem (milho ou mandioca)<br>
-      • <strong>Glicose / Dextrose:</strong> RDC 623/2022 + IN 161/2022 (Cat. 16.a — Açúcares, edulcorantes e adoçantes de mesa sólidos)<br>
-      • Selecione abaixo o produto (Maltodextrina ou Glicose/Dextrose) para aplicar os parâmetros corretos`,
+      • Microbiologia: RDC 724/2022 + IN 161/2022 (Cat. 19.a — Farinhas, amidos, féculas e fubás)<br>
+      • Contaminantes conforme origem (milho ou mandioca): RDC 722/2022 + IN 160/2022<br>
+      • Matérias estranhas: RDC 623/2022`,
     denominacao: 'Maltodextrina',
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
-        { id:'st-malto-25kg', label:'🏭 Fardo 25 kg (Industrial)', default: true },
-        { id:'st-malto-1kg',  label:'📦 Embalagem 1 kg' },
-        { id:'st-maltodextrina', label:'🌽 Maltodextrina' },
-        { id:'st-glicose', label:'🍬 Glicose / Dextrose' },
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
       ]
     },
     campos: {
       aspecto: 'Pó fino, branco a levemente amarelado, homogêneo',
       sabor: 'Sabor levemente adocicado, neutro',
       alergenicos: 'VERIFICAR ORIGEM DO AMIDO.',
-      glutenlactose: 'NÃO CONTÉM LACTOSE.',
-      emb1: 'Saco plástico hermeticamente fechado',
-      emb2: 'Fardo kraft multifolhado 25 kg',
-      validade: '24 meses (embalagem fechada)',
-      armazenamento: 'Local seco, fresco, arejado.',
-      preparo: 'Produto para uso industrial.',
-      obs: 'Carboidrato hidrolisado. RDC ANVISA 429/2020.',
+      obs: 'MALTODEXTRINA.',
+    }
+  },
+  'glicose': {
+    label: 'Glicose / Dextrose em Pó',
+    classe: 'glicose',
+    legal: `<strong>RDC ANVISA nº 429/2020</strong><br>
+      • Microbiologia: RDC 623/2022 + IN 161/2022 (Cat. 16.a — Açúcares, edulcorantes e adoçantes de mesa sólidos)<br>
+      • Contaminantes: RDC 722/2022 + IN 160/2022<br>
+      • Matérias estranhas: RDC 623/2022`,
+    denominacao: 'Glicose em Pó (Dextrose)',
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)', default: true },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg' },
+      ]
     },
+    campos: {
+      aspecto: 'Pó cristalino fino, branco, homogêneo',
+      sabor: 'Sabor adocicado, neutro',
+      alergenicos: 'VERIFICAR ORIGEM DO AMIDO.',
+      obs: 'GLICOSE / DEXTROSE EM PÓ.',
+    }
+  },
+
+  // ── SUPLEMENTO ALIMENTAR EM PÓ ───────────────────────────────────────────
+  'suplemento-po': {
+    label: 'Suplemento Alimentar em Pó',
+    classe: 'suplemento-po',
+    denominacao: 'Suplemento Alimentar em Pó',
+    legal: `<strong>ANVISA — RDC nº 243/2018 (suplementos alimentares) + IN nº 161/2022</strong><br>
+      • Microbiologia no pó: Salmonella, Enterobacteriaceae, Estafilococos, Bolores e leveduras (+ enterotoxinas se base láctea) — ver seção 5<br>
+      • Contaminantes: RDC 722/2022 (art. 7º) + IN 160/2022, calculados pela formulação — ver seção 7<br>
+      • Matérias estranhas: RDC 623/2022 (art. 7º, pro-rata) — ver seção 6<br>
+      • Tabela nutricional: sem coluna de 100 g (RDC 429/2020, art. 8º §1º) · rotulagem frontal proibida`,
+    subtipo: {
+      label: 'Embalagem / apresentação:',
+      opcoes: [
+        { id:'st-25kg',  label:'🏭 Fardo 25 kg (Industrial)' },
+        { id:'st-1kg',   label:'📦 Embalagem 1 kg', default: true },
+        { id:'st-800g',  label:'📦 Embalagem 800 g' },
+        { id:'st-400g',  label:'📦 Embalagem 400 g' },
+        { id:'st-200g',  label:'📦 Embalagem 200 g' },
+      ]
+    },
+    campos: {
+      aspecto: 'Pó fino e homogêneo, conforme o sabor',
+      sabor: 'Característico do sabor',
+      alergenicos: 'VERIFICAR CONFORME COMPOSIÇÃO.',
+      glutenlactose: 'VERIFICAR CONFORME COMPOSIÇÃO.',
+      emb1: 'Pote ou sachê plástico atóxico, fechado hermeticamente',
+      emb2: 'Caixa de papelão',
+      armazenamento: 'Armazenar em local seco, fresco e arejado, ao abrigo da luz e da umidade.',
+      validade: '24 meses (embalagem fechada)',
+      preparo: 'Conforme instruções de uso do produto.',
+      obs: 'NÃO É MEDICAMENTO. NÃO EXCEDER A RECOMENDAÇÃO DIÁRIA DE CONSUMO INDICADA NA EMBALAGEM. MANTENHA FORA DO ALCANCE DE CRIANÇAS. GESTANTES, NUTRIZES, IDOSOS E PORTADORES DE ENFERMIDADES DEVEM CONSULTAR UM MÉDICO OU NUTRICIONISTA ANTES DE USAR O PRODUTO.',
+    }
   },
 
   // ── CHOCOLATE EM PÓ (Lei 15.404/2026) ────────────────────────────────────
@@ -2531,30 +2594,38 @@ const REGRAS_REG = {
     ] } },
   'soro-derivados': { micro: _MICRO_9E,
     contam: { norma: _NORMA_IN160, itens: _CONTAM_LEITE_BASE } },
-  'maltodextrina-glicose': { modo: 'malto-glicose',
-    maltodextrina: { micro: _MICRO_19A,
-      contam: { norma: _NORMA_IN160, itens: [
-        ['Se derivada do milho — Chumbo (Pb)', 'Máx. 0,20 mg/kg'],
-        ['Se derivada do milho — Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
-        ['Se derivada do milho — Arsênio total (As)', 'Máx. 0,30 mg/kg'],
-        ['Se derivada do milho — Fumonisinas B1+B2', 'Máx. 2000 mcg/kg'],
-        ['Se derivada do milho — Zearalenona', 'Máx. 150 mcg/kg'],
-        ['Se derivada do milho — Desoxinivalenol (DON)', 'Máx. 1000 mcg/kg'],
-        ['Se derivada do milho — Ocratoxina A', 'Máx. 10 mcg/kg'],
-        ['Se derivada da mandioca — Chumbo (Pb)', 'Máx. 0,10 mg/kg'],
-        ['Se derivada da mandioca — Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
-        ['Se derivada da mandioca — Arsênio total (As)', 'Máx. 0,20 mg/kg'],
-        _MELAMINA,
-      ] } },
-    glicose: {
-      micro: { norma: 'RDC nº 623/2022 + IN nº 161/2022 (Cat. 16.a — Açúcares, edulcorantes e adoçantes de mesa sólidos)', itens: [
-        ['Bolores e leveduras', 'm<10 · M=10² UFC/g · n=5 · c=2'],
-      ] },
-      contam: { norma: _NORMA_IN160, itens: [
-        ['Chumbo (Pb)', 'Máx. 0,10 mg/kg'],
-        ['Arsênio total (As)', 'Máx. 0,10 mg/kg'],
-        _MELAMINA,
-      ] } } },
+  'maltodextrina': { micro: _MICRO_19A,
+    contam: { norma: _NORMA_IN160, itens: [
+      ['Se derivada do milho — Chumbo (Pb)', 'Máx. 0,20 mg/kg'],
+      ['Se derivada do milho — Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
+      ['Se derivada do milho — Arsênio total (As)', 'Máx. 0,30 mg/kg'],
+      ['Se derivada do milho — Fumonisinas B1+B2', 'Máx. 2000 mcg/kg'],
+      ['Se derivada do milho — Zearalenona', 'Máx. 150 mcg/kg'],
+      ['Se derivada do milho — Desoxinivalenol (DON)', 'Máx. 1000 mcg/kg'],
+      ['Se derivada do milho — Ocratoxina A', 'Máx. 10 mcg/kg'],
+      ['Se derivada da mandioca — Chumbo (Pb)', 'Máx. 0,10 mg/kg'],
+      ['Se derivada da mandioca — Cádmio (Cd)', 'Máx. 0,10 mg/kg'],
+      ['Se derivada da mandioca — Arsênio total (As)', 'Máx. 0,20 mg/kg'],
+      _MELAMINA,
+    ] } },
+  'glicose': {
+    micro: { norma: 'RDC nº 623/2022 + IN nº 161/2022 (Cat. 16.a — Açúcares, edulcorantes e adoçantes de mesa sólidos)', itens: [
+      ['Bolores e leveduras', 'm<10 · M=10² UFC/g · n=5 · c=2'],
+    ] },
+    contam: { norma: _NORMA_IN160, itens: [
+      ['Chumbo (Pb)', 'Máx. 0,10 mg/kg'],
+      ['Arsênio total (As)', 'Máx. 0,10 mg/kg'],
+      _MELAMINA,
+    ] } },
+  'suplemento-po': {
+    micro: { norma: 'IN ANVISA nº 161/2022 — Suplemento alimentar em pó', itens: [
+      ['Salmonella sp.', 'Ausência em 25 g · n=10 · c=0'],
+      ['Enterobacteriaceae', 'Máx. 10 UFC/g · n=5 · c=0'],
+      ['Estafilococos coagulase positiva', 'm=10 · M=10² UFC/g · n=5 · c=1'],
+      ['Bolores e leveduras', 'm=10³ · M=10⁴ UFC/g · n=5 · c=1'],
+      ['Enterotoxinas estafilocócicas (apenas base láctea)', 'Ausência · n=5 · c=0'],
+    ] },
+    contam: { norma: _NORMA_PRORATA, modo: 'prorata', params: ['pb','cd','as','afm1','afla','ota','fumo'], fixos: [_MELAMINA] } },
   'espessante': {
     micro: { norma: 'RDC ANVISA 724/2022 + IN 161/2022 (Cat. 19.a, por similaridade)', itens: _MICRO_19A.itens },
     contam: { norma: 'RDC 722/2022 (art. 7º) + IN 160/2022', itens: [
@@ -2615,7 +2686,7 @@ function calcProRataPartida(params) {
     if (!presente[k]) return;
     const [lbl, un] = _ROTULO_PARAM[k];
     const v = Math.round(soma[k] * 1000) / 1000;
-    itens.push([lbl, 'Máx. ' + String(v).replace('.', ',') + ' ' + un + ' <span style="font-size:7px;color:#666">(calculado)</span>']);
+    itens.push([lbl, 'Máx. ' + String(v).replace('.', ',') + ' ' + un + ' <span style="font-size:7px">(calculado)</span>']);
   });
   return { itens, semLimite };
 }
@@ -2644,10 +2715,6 @@ function _regrasDoTipo() {
   const tipo = tipoSel || classeSel;
   const r = REGRAS_REG[tipo];
   if (!r) return null;
-  if (r.modo === 'malto-glicose') {
-    const sel = (typeof _getBtnSelecionados === 'function') ? _getBtnSelecionados('subtipoOpts') : [];
-    return sel.includes('st-glicose') ? r.glicose : r.maltodextrina;
-  }
   return r;
 }
 
@@ -2685,7 +2752,7 @@ function ftpSecContam() {
       const pl = _pctLeitePoReceita();
       if (pl > 0) {
         const lim = Math.round(5.0 * pl / 100 * 1000) / 1000;
-        corpo += _ftpRows([['Aflatoxina M1 (fração láctea)', 'Máx. ' + String(lim).replace('.', ',') + ' mcg/kg <span style="font-size:7px;color:#666">(5,0 × ' + pl.toFixed(1).replace('.', ',') + '% de leite em pó)</span>']]);
+        corpo += _ftpRows([['Aflatoxina M1 (fração láctea)', 'Máx. ' + String(lim).replace('.', ',') + ' mcg/kg <span style="font-size:7px">(5,0 × ' + pl.toFixed(1).replace('.', ',') + '% de leite em pó)</span>']]);
       }
     }
     nota = 'Limite direto';
@@ -2698,12 +2765,231 @@ function ftpSecContam() {
 }
 // ===== FIM REGRAS REGULATÓRIAS =====
 
+// ===== MATÉRIAS ESTRANHAS — RDC ANVISA 623/2022 (revisão nov/2026) =====
+const _ME_AUS = 'Ausência';
+const ME_REGRAS = {
+  'leite-integral': { ins: _ME_AUS, pel: _ME_AUS }, 'leite-desnatado': { ins: _ME_AUS, pel: _ME_AUS },
+  'leite-instantaneo': { ins: _ME_AUS, pel: _ME_AUS }, 'soro-derivados': { ins: _ME_AUS, pel: _ME_AUS },
+  'composto-sem': { ins: _ME_AUS, pel: _ME_AUS }, 'maltodextrina': { ins: _ME_AUS, pel: _ME_AUS },
+  'glicose': { ins: _ME_AUS, pel: _ME_AUS }, 'espessante': { ins: _ME_AUS, pel: _ME_AUS },
+  'cafe-torrado-moido': { ins: 'Máx. 60 em 25 g', pel: _ME_AUS, met: 'AOAC 988.16 b' },
+  'cacau': { ins: 'Máx. 25 em 50 g', pel: 'Máx. 1 em 50 g', met: 'AOAC 965.38 a' },
+  'chocolate-po': { ins: 'Máx. 10 em 100 g', pel: 'Máx. 1 em 100 g', met: 'AOAC 965.38 b' },
+  'achocolatado': { ins: 'Máx. 10 em 100 g', pel: 'Máx. 1 em 100 g', met: 'AOAC 965.38 b' },
+  'mistura': { prorata: true }, 'composto-com': { prorata: true },
+  'po-preparo': { prorata: true }, 'suplemento-po': { prorata: true },
+};
+ME_REGRAS['cafe-torrado'] = ME_REGRAS['cafe-torrado-moido'];
+
+// Limites do Anexo I da RDC 623 convertidos para 100 g de produto (base do cálculo pro-rata, art. 7º)
+const ME_PARTIDA = {
+  cacau: { ins: 50, pel: 2 },          // cacau em pó: 25 insetos e 1 pelo em 50 g
+  chocolate: { ins: 10, pel: 1 },      // chocolate / achocolatado: 10 insetos e 1 pelo em 100 g
+  fruta: { ins: 25 / 225 * 100, pel: 0 }, // frutas desidratadas: 25 insetos em 225 g
+};
+function _catME(ing) {
+  const n = (ing && ing.n || '').toLowerCase();
+  if (!n) return null;
+  if (n.includes('achocolatado') || n.includes('chocolate')) return 'chocolate';
+  if (n.includes('cacau')) return 'cacau';
+  if (/fruta/.test(n) && /desidrat|liofiliz|seca|em p[óo]/.test(n)) return 'fruta';
+  return null;
+}
+function calcProRataME() {
+  const tQ = receita.reduce((s, r) => s + r.qtde, 0);
+  if (!tQ || !receita.length) return null;
+  let ins = 0, pel = 0, ing = [];
+  receita.forEach(r => {
+    const c = _catME(r.d);
+    if (!c) return;
+    ins += (r.qtde / tQ) * ME_PARTIDA[c].ins;
+    pel += (r.qtde / tQ) * ME_PARTIDA[c].pel;
+    ing.push(r.d.n);
+  });
+  return { ins: Math.round(ins * 100) / 100, pel: Math.round(pel * 100) / 100, ing };
+}
+function _fmtME(v, unid) {
+  if (!v) return _ME_AUS;
+  return 'Máx. ' + String(v).replace('.', ',') + ' ' + unid + ' em 100 g <span style="font-size:7px">(calculado)</span>';
+}
+function ftpSecME(num) {
+  const tipo = tipoSel || classeSel;
+  const r = ME_REGRAS[tipo];
+  if (!r) return '';
+  let ins, pel, nota;
+  if (r.prorata) {
+    const c = calcProRataME();
+    ins = c ? _fmtME(c.ins, 'fragmentos') : _ME_AUS;
+    pel = c ? _fmtME(c.pel, 'pelo(s)') : _ME_AUS;
+    nota = 'Fragmentos de insetos e pelos de roedor calculados pela proporção dos ingredientes do Anexo I (RDC 623/2022, art. 7º): Σ (% do ingrediente × limite do ingrediente), por 100 g' +
+      (c && c.ing.length ? ' · Ingredientes considerados: ' + c.ing.join(', ') : ' · Fórmula sem ingrediente do Anexo I: ausência');
+  } else {
+    ins = r.ins; pel = r.pel;
+    nota = 'Análise por método visual e microscópico' + (r.met ? ' (' + r.met + ')' : '');
+  }
+  const itens = [
+    ['Mat. estranhas indicativas de risco à saúde', _ME_AUS],
+    ['Mat. estranhas de falhas de BPF sem limite previsto', _ME_AUS],
+    ['Areia / cinzas insolúveis em ácido', 'Máx. 1,5%'],
+    ['Ácaros mortos', 'Máx. 5 na alíquota analisada'],
+    ['Fragmentos de insetos', ins],
+    ['Pelos de roedor', pel],
+  ];
+  return `<div class="ftp-sec">
+      <div class="ftp-sec-t">${num}. Matérias Estranhas e Sujidades — RDC ANVISA nº 623/2022</div>
+      ${_ftpRows(itens)}
+      <div class="ftp-row"><div class="ftp-cell" style="flex:4"><div class="ftp-lbl" style="font-size:7px">${nota} · Frequência: por lote · Laboratório interno / terceirizado</div></div></div>
+    </div>`;
+}
+// ===== FIM MATÉRIAS ESTRANHAS =====
+
+// ===== TABELA NUTRICIONAL E SELO SIF — revisão nov/2026 (RDC 429/2020 · IN 75/2020) =====
+const TIPOS_SIF = ['leite-integral','leite-instantaneo','leite-desnatado','composto-sem','composto-com','mistura'];
+// modo: padrao (100 g + porção + %VD) | preparo | sem100 (só porção + %VD) | espessante | voluntaria
+// lupa: limites (obrigatória se atingir) | proibida | nao
+const NUTRI_CFG = {
+  'leite-integral':    { modo:'padrao', lupa:'proibida', porcao:26, medida:'2 colheres de sopa' },
+  'leite-instantaneo': { modo:'padrao', lupa:'proibida', porcao:26, medida:'2 colheres de sopa' },
+  'leite-desnatado':   { modo:'padrao', lupa:'proibida', porcao:26, medida:'2 colheres de sopa' },
+  'composto-sem':      { modo:'padrao', lupa:'limites' },
+  'composto-com':      { modo:'padrao', lupa:'limites' },
+  'mistura':           { modo:'padrao', lupa:'limites' },
+  'cacau':             { modo:'padrao', lupa:'limites', porcao:20, medida:'2 colheres de sopa' },
+  'achocolatado':      { modo:'padrao', lupa:'limites', porcao:20, medida:'2 colheres de sopa' },
+  'chocolate-po':      { modo:'padrao', lupa:'limites', porcao:20, medida:'2 colheres de sopa' },
+  'po-preparo':        { modo:'preparo', lupa:'limites' },
+  'suplemento-po':     { modo:'sem100', lupa:'proibida' },
+  'maltodextrina':     { modo:'padrao', lupa:'nao', porcao:5, medida:'1 colher de chá' },
+  'glicose':           { modo:'padrao', lupa:'nao', porcao:5, medida:'1 colher de chá' },
+  'cafe-torrado-moido':{ modo:'voluntaria', lupa:'nao' },
+  'cafe-torrado':      { modo:'voluntaria', lupa:'nao' },
+  'espessante':        { modo:'espessante', lupa:'nao' },
+  'soro-derivados':    { modo:'padrao', lupa:'limites' },
+};
+const _vfmt = (n, d) => String(Number(n).toFixed(d)).replace('.', ',');
+function _nRound(v, tipo) {   // arredondamento (Anexo III) — valor energético e %VD inteiros
+  v = Number(v) || 0;
+  if (tipo === 'kcal') return String(Math.round(v));
+  if (tipo === 'na') return v < 5 ? '0' : String(Math.round(v));
+  if (tipo === 'tr') return v < 0.1 ? '0' : _vfmt(v, 1);
+  if (v < 0.5) return '0';
+  return v < 10 ? _vfmt(v, 1) : String(Math.round(v));
+}
+const _NR = [   // [rótulo (Anexo XI), chave T, VDR, nível de recuo, tipo de arredondamento]
+  ['Valor energético (kcal)', 'kcal', 2000, 0, 'kcal'],
+  ['Carboidratos totais (g)', 'cho', 300, 0, 'g'],
+  ['Açúcares totais (g)', 'act', null, 1, 'g'],
+  ['Açúcares adicionados (g)', 'acad', 50, 2, 'g'],
+  ['Proteínas (g)', 'ptn', 75, 0, 'g'],
+  ['Gorduras totais (g)', 'gt', 55, 0, 'g'],
+  ['Gorduras saturadas (g)', 'gs', 22, 1, 'g'],
+  ['Gorduras trans (g)', 'tr', null, 1, 'tr'],
+  ['Fibras alimentares (g)', 'fi', 25, 0, 'g'],
+  ['Sódio (mg)', 'na', 2300, 0, 'na'],
+];
+function _recuo(n) { return n ? `<span style="display:inline-block;width:${(n * 0.55).toFixed(2)}em"></span>` : ''; }
+
+// Lupa frontal (IN 75/2020): devolve lista de alertas conforme o tipo de produto
+function ftpAlertasFrontais(tipo, T) {
+  const cfg = NUTRI_CFG[tipo] || { lupa: 'limites' };
+  if (cfg.lupa !== 'limites') return [];
+  const a = [];
+  if ((T.acad || 0) >= 15) a.push('ALTO EM AÇÚCAR ADICIONADO');
+  if ((T.gs || 0) >= 6) a.push('ALTO EM GORDURA SATURADA');
+  if ((T.na || 0) >= 600) a.push('ALTO EM SÓDIO');
+  return a;
+}
+
+function ftpSecNutri(o) {
+  // o: { tipo, T, P100, pesoTotal, medida, alertas, ehSIF }
+  const cfg = NUTRI_CFG[o.tipo] || { modo: 'padrao', lupa: 'limites' };
+  const T = o.T, pp = o.P100;
+  const nPorc = Math.round(o.pesoTotal / pp) || '—';
+  const base = 'font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff';
+  const cell = 'border-bottom:.5px solid #000;padding:1px 3px;height:13px;font-size:8pt;color:#000';
+  let cab, linhas, notas = [];
+  const rowsPadrao = (cols) => _NR.map(([l, k, vd, n, t]) => {
+    const tds = cols.map(c => {
+      if (c.t === 'cem') return `<td style="${cell};text-align:center">${_nRound(T[k], t)}</td>`;
+      if (c.t === 'porc') return `<td style="${cell};text-align:center">${_nRound(T[k] * c.g / 100, t)}</td>`;
+      return `<td style="${cell};text-align:center">${vd ? Math.round((T[k] * c.g / 100) / vd * 100) + '%' : '—'}</td>`;
+    }).join('');
+    return `<tr><td style="${cell};text-align:left">${_recuo(n)}${l}</td>${tds}</tr>`;
+  }).join('');
+  const th = (t) => `<th style="font-size:8pt;font-weight:700;text-align:center;border-bottom:1px solid #000;padding:1px 3px;color:#000">${t}</th>`;
+  let titulo2 = `Porções por embalagem: cerca de ${nPorc}<br>Porção: ${_vfmt(pp, 0)} g (${o.medida})`;
+
+  if (cfg.modo === 'espessante') {
+    const g3 = [4, 6, 8];
+    cab = `<tr><th></th>${th('100 g')}${g3.map(g => th(g + ' g') + th('%VD*')).join('')}</tr>`;
+    const lin = _NR.filter(r => r[1] === 'kcal' || r[1] === 'cho');
+    linhas = lin.map(([l, k, vd, n, t]) => `<tr><td style="${cell};text-align:left">${l}</td><td style="${cell};text-align:center">${_nRound(T[k], t)}</td>` +
+      g3.map(g => `<td style="${cell};text-align:center">${_nRound(T[k] * g / 100, t)}</td><td style="${cell};text-align:center">${vd ? Math.round((T[k] * g / 100) / vd * 100) + '%' : '—'}</td>`).join('') + '</tr>').join('');
+    titulo2 = 'Porções recomendadas: 4 g, 6 g e 8 g';
+    notas.push('Declaração obrigatória: valor energético e carboidratos (alimento para fins especiais).');
+  } else if (cfg.modo === 'sem100') {
+    cab = `<tr><th></th>${th(_vfmt(pp, 0) + ' g')}${th('%VD*')}</tr>`;
+    linhas = rowsPadrao([{ t: 'porc', g: pp }, { t: 'vd', g: pp }]);
+    titulo2 = `Porção: ${_vfmt(pp, 0)} g (${o.medida}) — quantidade diária recomendada`;
+    notas.push('Suplemento alimentar: sem coluna de 100 g (RDC 429/2020, art. 8º §1º). %VD pelos VDR do Anexo VIII para o grupo populacional do rótulo; declarar também nutrientes, substâncias bioativas e enzimas adicionados (art. 5º §3º).');
+  } else {
+    cab = `<tr><th></th>${th(cfg.modo === 'preparo' ? '100 g**' : '100 g')}${th(_vfmt(pp, 0) + ' g')}${th('%VD*')}</tr>`;
+    linhas = rowsPadrao([{ t: 'cem', g: 100 }, { t: 'porc', g: pp }, { t: 'vd', g: pp }]);
+    if (cfg.modo === 'preparo') notas.push('**No alimento pronto para o consumo.');
+    if (cfg.modo === 'voluntaria') notas.push('Declaração nutricional voluntária (RDC 429/2020, Anexo I, item 6).');
+  }
+  const nota6 = '(*) Percentual de valores diários fornecidos pela porção, com base em uma dieta de 2.000 kcal ou 8.400 kJ — RDC 429/2020 / IN 75/2020. Valores calculados a partir da formulação.';
+
+  // lupa
+  let lupa;
+  if (o.alertas.length) {
+    lupa = `<div style="background:#000;color:#fff;border-radius:5px;padding:7px 9px">
+      <div style="font-size:7pt;font-weight:700;margin-bottom:5px;letter-spacing:.5px">ALERTAS FRONTAIS OBRIGATÓRIOS — IN 75/2020</div>
+      ${o.alertas.map(a => `<div style="margin-bottom:3px;font-size:8pt;font-weight:700">🔍 ${a}</div>`).join('')}
+    </div>`;
+  } else if (cfg.lupa === 'proibida') {
+    lupa = `<div style="border:1px solid #000;padding:5px 7px;font-size:8pt;font-weight:600">ROTULAGEM FRONTAL: PROIBIDA PARA ESTE PRODUTO (IN 75/2020)</div>`;
+  } else if (cfg.lupa === 'nao') {
+    lupa = `<div style="border:1px solid #000;padding:5px 7px;font-size:8pt;font-weight:600">ROTULAGEM FRONTAL: NÃO SE APLICA</div>`;
+  } else {
+    lupa = `<div style="border:1px solid #000;padding:5px 7px;font-size:8pt;font-weight:600">SEM ALERTAS FRONTAIS OBRIGATÓRIOS (IN 75/2020)</div>` +
+      (cfg.modo === 'preparo' ? '<div style="font-size:7pt;margin-top:3px">Lupa avaliada no produto pronto, sem contar os ingredientes adicionados.</div>' : '');
+  }
+  const sif = o.ehSIF ? `<div style="display:flex;align-items:center;gap:8px;border:1px solid #000;border-radius:4px;padding:5px 8px;background:#fff">
+      <svg viewBox="0 0 80 80" width="36" height="36" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <circle cx="40" cy="40" r="38" fill="none" stroke="#000" stroke-width="3"/>
+        <defs><path id="arc9" d="M 8 40 A 32 32 0 0 1 72 40"/></defs>
+        <text font-family="Arial" font-weight="900" fill="#000" font-size="10"><textPath href="#arc9" startOffset="50%" text-anchor="middle">MINISTÉRIO DA AGRICULTURA</textPath></text>
+        <text x="40" y="31" text-anchor="middle" font-family="Arial" font-weight="900" font-size="10" fill="#000">BRASIL</text>
+        <text x="40" y="42" text-anchor="middle" font-family="Arial" font-weight="700" font-size="7" fill="#000">INSPECIONADO</text>
+        <text x="40" y="54" text-anchor="middle" font-family="Arial" font-weight="900" font-size="12" fill="#000">5460</text>
+        <text x="40" y="64" text-anchor="middle" font-family="Arial" font-weight="700" font-size="8" fill="#000">S.I.F.</text>
+      </svg>
+      <div style="font-size:8pt"><div style="font-weight:700">SIF 5460</div><div>DMS Indústria<br>de Alimentos</div></div>
+    </div>` : '';
+  return `<div class="ftp-sec">
+      <div class="ftp-sec-t">3. Informação Nutricional · Rotulagem Frontal</div>
+      <div style="display:flex;gap:0;align-items:flex-start">
+        <div style="flex:1;padding:6px 10px">
+          <div style="${base};border:1px solid #000;padding:3px 5px;max-width:420px">
+            <div style="font-size:10pt;font-weight:700;text-align:center;text-transform:uppercase">Informação Nutricional</div>
+            <div style="font-size:8pt;text-align:center;margin-bottom:3px">${titulo2}</div>
+            <table style="width:100%;border-collapse:collapse;table-layout:auto;color:#000">${cab}${linhas}</table>
+            <div style="font-size:6pt;margin-top:3px;line-height:1.3">${[nota6].concat(notas).join('<br>')}</div>
+          </div>
+        </div>
+        <div style="min-width:190px;padding:6px 8px;display:flex;flex-direction:column;gap:6px">${lupa}${sif}</div>
+      </div>
+    </div>`;
+}
+// ===== FIM TABELA NUTRICIONAL =====
+
+
+
 // Mapa de subtipo para ajuste de campos específicos
 const SUBTIPO_AJUSTES = {
   'st-soro-parc':  { obs:'SORO DE LEITE PARCIALMENTE DESMINERALIZADO — umidade máx. 4,0% · proteína láctea mín. 10,0% · lactose mín. 61,0% · cinzas 1,5 a 7,0% · pH máx. 6,0 (6,0 a 6,8 para soro por coagulação enzimática).\nESTABELECIMENTO INSPECIONADO PELO MAPA.' },
   'st-soro-25kg':  { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'12 meses (embalagem fechada)', gramatura:'25 kg' },
-  'st-maltodextrina': { obs:'MALTODEXTRINA — carboidrato hidrolisado. RDC ANVISA 429/2020.' },
-  'st-glicose': { obs:'GLICOSE / DEXTROSE EM PÓ — carboidrato. Microbiologia: RDC 623/2022 + IN 161/2022 (Cat. 16.a).' },
   'st-malto-25kg': { emb1:'Saco plástico hermeticamente fechado', emb2:'Fardo kraft multifolhado 25 kg', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
   'st-malto-1kg':  { emb1:'Embalagem plástica hermeticamente fechada 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (embalagem fechada)', gramatura:'1 kg' },
   'st-25kg':  { emb1:'Saco plástico atóxico (polietileno), hermeticamente fechado', emb2:'Fardo de papel kraft multifolhado — 25 kg (Industrial / granel)', validade:'24 meses (embalagem fechada)', gramatura:'25 kg' },
@@ -2743,6 +3029,11 @@ function selTipo(tipo) {
   // classeSel usa o próprio 'tipo' como identificador de classificação
   // (preserva identidade correta: 'leite-integral', 'achocolatado', etc.)
   classeSel = tipo;
+
+  // Porção e medida caseira padrão da categoria (RDC 429/2020, Anexo V)
+  const _nc = (typeof NUTRI_CFG !== 'undefined') ? NUTRI_CFG[tipo] : null;
+  const _pEl = document.getElementById('p_porcao'), _mEl = document.getElementById('p_medida');
+  if (_pEl && _mEl) { _pEl.value = (_nc && _nc.porcao) || 30; _mEl.value = (_nc && _nc.medida) || '2 colheres de sopa'; }
 
   // Tipos com subtipo de IDENTIDADE (cacau, achocolatado, leite instantâneo)
   // também precisam de seletor de embalagem secundário
@@ -2929,10 +3220,12 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
       'st-cacau-magro':'Cacau em Pó Magro','st-cacau-alcalin':'Cacau em Pó Alcalinizado',
       'st-cafe-250g':'Café Torrado e Moído','st-cafe-500g':'Café Torrado e Moído','st-cafe-5kg':'Café Torrado e Moído',
       'st-soro-parc':'Soro de Leite Parcialmente Desmineralizado em Pó',
-      'st-maltodextrina':'Maltodextrina','st-glicose':'Glicose em Pó (Dextrose)',
     };
     const tiposLeite = ['leite-integral','leite-instantaneo','leite-desnatado'];
-    if ((tiposLeite.includes(tipoSel) || ['soro-derivados','maltodextrina-glicose'].includes(tipoSel)) && denMap[stId]) {
+    const _denLeitePorTipo = { 'leite-integral':'Leite em Pó Integral', 'leite-desnatado':'Leite em Pó Desnatado', 'leite-instantaneo':'Leite em Pó Instantâneo' };
+    if (tiposLeite.includes(tipoSel) && SUBTIPO_SOMENTE_EMBALAGEM.includes(stId)) {
+      den.value = _denLeitePorTipo[tipoSel];   // embalagem não muda a denominação: vale a do tipo escolhido
+    } else if ((tiposLeite.includes(tipoSel) || ['soro-derivados'].includes(tipoSel)) && denMap[stId]) {
       den.value = denMap[stId];
     } else {
       den.value = tpl ? (tpl.denominacao || tpl.label) : '';
@@ -2985,7 +3278,7 @@ function selClasse(c) {
   const tiposValidos = ['composto-com','composto-sem','mistura','po-preparo',
                         'leite-integral','leite-instantaneo','leite-desnatado',
                         'achocolatado','cacau','cafe-torrado-moido','cafe-torrado',
-                        'soro-derivados','maltodextrina-glicose','chocolate-po','espessante'];
+                        'soro-derivados','maltodextrina','glicose','suplemento-po','chocolate-po','espessante'];
   if (tiposValidos.includes(c)) selTipo(c);
   else classeSel = c;
 }
@@ -3485,7 +3778,9 @@ function gv(id,def=''){const e=document.getElementById(id);return e?(e.value||de
 function renderStep4(){
   const _ftpProd = _prodOrigem || {};
   const _ftpMarca = _ftpProd.marca || gv('p_marca') || 'Grupo MF Paris';
-  const _ftpRegistro = _ftpProd.registro || gv('p_registro') || 'SIF 5460';
+  const _ehSIF = TIPOS_SIF.includes(tipoSel || classeSel);
+  const _regSalvo = _ftpProd.registro || gv('p_registro') || '';
+  const _ftpRegistro = _ehSIF ? (_regSalvo || 'SIF 5460') : ((_regSalvo && !/SIF|5460/i.test(_regSalvo)) ? _regSalvo : '—');
   const _ftpCodigo = _ftpProd.codigo || gv('p_codigo') || '—';
   const _ftpRevisao = _ftpProd.revisao || gv('p_revisao') || '00';
   const _embSel = _ftpProd.embalagensSel || getEmbalagensSelecionadas() || [];
@@ -3514,10 +3809,7 @@ function renderStep4(){
   const data=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
 
   // Alertas frontais
-  const alertas=[];
-  if((T.acad||0)>=15)alertas.push('ALTO EM AÇÚCAR ADICIONADO');
-  if((T.gs||0)>=6)alertas.push('ALTO EM GORDURA SATURADA');
-  if((T.na||0)>=600)alertas.push('ALTO EM SÓDIO');
+  const alertas=ftpAlertasFrontais(tipoSel||classeSel, T);
 
   const classeNomes={
     'composto-sem':      'Composto Lácteo sem Adição · Portaria SDA/MAPA 1.170/2024',
@@ -3531,6 +3823,9 @@ function renderStep4(){
     'cacau':             'Cacau em Pó · Lei nº 15.404/2026',
     'chocolate-po':      'Chocolate em Pó · Lei nº 15.404/2026',
     'espessante':        'Espessante Alimentar · ANVISA RDC 724/2022',
+    'maltodextrina':     'Maltodextrina em Pó · ANVISA RDC 429/2020',
+    'glicose':           'Glicose / Dextrose em Pó · ANVISA RDC 429/2020',
+    'suplemento-po':     'Suplemento Alimentar em Pó · ANVISA RDC 243/2018 · IN 161/2022',
     'cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005 · IN MAPA 16/2010',
     'cafe-torrado':      'Café Torrado (grão) · RDC ANVISA 277/2005 · IN MAPA 16/2010',
   };
@@ -3582,7 +3877,7 @@ function renderStep4(){
         <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
       </div>
       <div class="ftp-row">
-        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Classificação Legal</div><div class="ftp-val" style="color:#1e3a8a;font-weight:700">${classeNomes[classeSel]||'—'} — ANVISA (RDC 429/2020, IN 75/2020, RDC 778/2023 e IN 211/2023)</div></div>
+        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Classificação Legal</div><div class="ftp-val" style="font-weight:700">${classeNomes[classeSel]||'—'} — ANVISA (RDC 429/2020, IN 75/2020, RDC 778/2023 e IN 211/2023)</div></div>
       </div>
       <div class="ftp-row">
         <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Alergênicos · Glúten · Lactose</div><div class="ftp-val">${gv('p_alergenicos')} · ${gv('p_glutenlactose')}</div></div>
@@ -3597,75 +3892,11 @@ function renderStep4(){
     <div class="ftp-sec">
       <div class="ftp-sec-t">2. Lista de Ingredientes</div>
       <div style="padding:6px 10px;font-size:9px;line-height:1.6">${ingList}</div>
-      <div style="padding:4px 10px;font-size:8.5px;font-weight:700;color:#c00">${gv('p_alergenicos')}</div>
+      <div style="padding:4px 10px;font-size:8.5px;font-weight:700;">${gv('p_alergenicos')}</div>
     </div>
 
-    <!-- 3. INFORMAÇÃO NUTRICIONAL -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">3. Informação Nutricional · Rotulagem Frontal</div>
-      <div style="display:flex;gap:0;align-items:flex-start">
-        <!-- Tabela nutricional -->
-        <div style="flex:1;padding:6px 10px">
-          <div style="font-size:7.5px;font-weight:700;color:#555;margin-bottom:4px">INFORMAÇÃO NUTRICIONAL</div>
-          <div style="font-size:7.5px;color:#555;margin-bottom:4px">Porções por embalagem: cerca de ${Math.round(((_prodOrigem||{}).pesoTotal||1000)/(_prodOrigem||{}).pesoPorcao)||'—'} · Porção: ${(_prodOrigem||{}).pesoPorcao||30} g (${gv('p_medida','2 colheres de sopa')})</div>
-          <table style="width:100%;border-collapse:collapse;font-size:8px">
-            <tr style="background:#222;color:#fff">
-              <th style="padding:3px 5px;text-align:left;font-weight:700"></th>
-              <th style="padding:3px 5px;text-align:center;font-weight:700">100 g</th>
-              <th style="padding:3px 5px;text-align:center;font-weight:700">${(_prodOrigem||{}).pesoPorcao||30} g</th>
-              <th style="padding:3px 5px;text-align:center;font-weight:700">%VD*</th>
-            </tr>
-            ${[
-              ['Valor energético (kcal)', T.kcal, 2000, 'kcal'],
-              ['Carboidratos (g)', T.cho, 300, 'g'],
-              ['Açúcares totais (g)', T.act, null, 'g'],
-              ['Açúcares adicionados (g)', T.acad, 50, 'g'],
-              ['Proteínas (g)', T.ptn, 75, 'g'],
-              ['Gorduras totais (g)', T.gt, 55, 'g'],
-              ['Gorduras saturadas (g)', T.gs, 22, 'g'],
-              ['Gorduras trans (g)', T.tr, null, 'g'],
-              ['Fibra alimentar (g)', T.fi, 25, 'g'],
-              ['Sódio (mg)', T.na, 2300, 'mg'],
-            ].map(([lbl,v100,vd,u],i)=>{
-              const v30 = v100*(_prodOrigem||{}).pesoPorcao/100;
-              const pct = vd ? Math.round(v100/vd*100)+'%' : '—';
-              const bg = i%2===0?'#fff':'#f8f8f8';
-              return `<tr style="background:${bg};border-bottom:.5px solid #ddd">
-                <td style="padding:3px 5px">${lbl}</td>
-                <td style="padding:3px 5px;text-align:center">${f2(v100)}</td>
-                <td style="padding:3px 5px;text-align:center">${f2(v30)}</td>
-                <td style="padding:3px 5px;text-align:center">${pct}</td>
-              </tr>`;
-            }).join('')}
-          </table>
-          <div style="font-size:7px;color:#666;margin-top:3px">(*) %VD com base em uma dieta de 2.000 kcal — ANVISA RDC 429/2020 / IN 75/2020. Valores calculados a partir da formulação; recomenda-se confirmação por análise laboratorial.</div>
-        </div>
-        <!-- Alertas frontais + SIF -->
-        <div style="min-width:180px;padding:6px 8px;display:flex;flex-direction:column;gap:6px">
-          ${alertas.length?`<div style="background:#111;color:#fff;border-radius:5px;padding:7px 9px">
-            <div style="font-size:7px;font-weight:700;margin-bottom:5px;letter-spacing:.5px;color:#aaa">ALERTAS FRONTAIS OBRIGATÓRIOS — IN 75/2020</div>
-            ${alertas.map(a=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-              <div style="background:#000;border:1.5px solid #fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              </div>
-              <span style="font-size:8px;font-weight:700">${a}</span>
-            </div>`).join('')}
-          </div>`:`<div style="background:#e8f3ed;border:1px solid #2a6e4a;border-radius:4px;padding:5px 7px;font-size:8px;color:#1d5238;font-weight:600">✅ Sem alertas frontais obrigatórios (IN 75/2020)</div>`}
-          ${_ftpRegistro.includes('SIF')||_ftpRegistro.includes('5460')?`<div style="display:flex;align-items:center;gap:8px;border:1px solid #ccc;border-radius:4px;padding:5px 8px;background:#fff">
-            <svg viewBox="0 0 80 80" width="36" height="36" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-              <circle cx="40" cy="40" r="38" fill="none" stroke="#000" stroke-width="3"/>
-              <defs><path id="arc9" d="M 8 40 A 32 32 0 0 1 72 40"/></defs>
-              <text font-family="Arial" font-weight="900" fill="#000" font-size="10"><textPath href="#arc9" startOffset="50%" text-anchor="middle">MINISTÉRIO DA AGRICULTURA</textPath></text>
-              <text x="40" y="31" text-anchor="middle" font-family="Arial" font-weight="900" font-size="10" fill="#000">BRASIL</text>
-              <text x="40" y="42" text-anchor="middle" font-family="Arial" font-weight="700" font-size="7" fill="#000">INSPECIONADO</text>
-              <text x="40" y="54" text-anchor="middle" font-family="Arial" font-weight="900" font-size="12" fill="#000">5460</text>
-              <text x="40" y="64" text-anchor="middle" font-family="Arial" font-weight="700" font-size="8" fill="#000">S.I.F.</text>
-            </svg>
-            <div style="font-size:8px"><div style="font-weight:700;color:#1e3a8a">SIF 5460</div><div style="color:#555">DMS Indústria<br>de Alimentos</div></div>
-          </div>`:''}
-        </div>
-      </div>
-    </div>
+    <!-- 3. INFORMAÇÃO NUTRICIONAL (ftpSecNutri) -->
+    ${ftpSecNutri({tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF})}
 
     <!-- 4. CARACTERÍSTICAS FÍSICO-QUÍMICAS -->
     <div class="ftp-sec">
@@ -3682,37 +3913,8 @@ function renderStep4(){
     <!-- 5. CARACTERÍSTICAS MICROBIOLÓGICAS (por categoria — REGRAS_REG) -->
     ${ftpSecMicro()}
 
-    <!-- 6. MATÉRIAS ESTRANHAS E SUJIDADES -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">6. Matérias Estranhas e Sujidades — RDC ANVISA nº 623/2022</div>
-      <div class="ftp-row">
-        <div class="ftp-cell">
-          <div class="ftp-lbl">Fragmentos de Insetos</div>
-          <div class="ftp-val">${(['composto-sem','composto-com','mistura','leite-integral','leite-desnatado','leite-instantaneo'].includes(tipoSel)?'Ausência':'Máx. 1 fragmento/25g')}</div>
-        </div>
-        <div class="ftp-cell">
-          <div class="ftp-lbl">Pelos de Roedores</div>
-          <div class="ftp-val">${(['composto-sem','composto-com','mistura','leite-integral','leite-desnatado','leite-instantaneo'].includes(tipoSel)?'<strong style="color:#dc2626">AUSÊNCIA (obrigatório — produto lácteo)</strong>':'Ausência')}</div>
-        </div>
-        <div class="ftp-cell">
-          <div class="ftp-lbl">Cinzas Insolúveis em Ácido</div>
-          <div class="ftp-val">Máx. 0,1% m/m</div>
-        </div>
-        <div class="ftp-cell">
-          <div class="ftp-lbl">Matérias Estranhas Diversas</div>
-          <div class="ftp-val">Ausência (vidro, metal, plástico, madeira)</div>
-        </div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:4">
-          <div class="ftp-lbl" style="font-size:7px">
-            ${(['composto-sem','composto-com','mistura','leite-integral','leite-desnatado','leite-instantaneo'].includes(tipoSel)?
-              '⚠️ Produto lácteo: limite de pelos de roedores = AUSÊNCIA obrigatória conforme Módulo C / RDC 623/2022. Qualquer tolerância de ingredientes secundários NÃO se aplica ao produto final.':
-              'Análise por método visual e microscópico · Frequência: por lote · Laboratório interno / terceirizado')}
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- 6. MATÉRIAS ESTRANHAS (RDC 623/2022 — por categoria) -->
+    ${ftpSecME(6)}
 
     <!-- 7. CONTAMINANTES (por categoria — REGRAS_REG) -->
     ${ftpSecContam()}
@@ -3735,8 +3937,8 @@ function renderStep4(){
 
     <!-- 6. INFORMAÇÕES OBRIGATÓRIAS -->
     <div class="ftp-sec">
-      <div class="ftp-sec-t">6. Informações Obrigatórias e Restrições</div>
-      <div style="padding:6px 10px;font-size:9px;font-weight:700;line-height:1.8">${gv('p_obs','—')}</div>
+      <div class="ftp-sec-t">9. Informações Obrigatórias e Restrições</div>
+      <div style="padding:6px 10px;font-size:9px;font-weight:700;line-height:1.8">${(_ehSIF ? gv('p_obs','—') : (String(gv('p_obs','')).split('\n').filter(l=>!/INSPECIONADO PEL/i.test(l)).join('\n').trim() || '—')).replace(/\n/g,'<br>')}</div>
     </div>
 
     <!-- ASSINATURAS -->
@@ -3744,8 +3946,8 @@ function renderStep4(){
       <div style="display:flex;gap:18px;align-items:flex-end;margin-bottom:10px">
         ${[['Elaborado por',gv('p_elaborado','')],['Revisado por',gv('p_revisado','')],['Aprovado por / RT',gv('p_aprovado','')]].map(([lbl,val])=>`
         <div style="flex:1;text-align:center">
-          <div style="min-height:28px;border-bottom:1px solid #333;margin-bottom:3px;font-size:9px;color:#222;font-weight:600;padding:2px 4px;text-align:center">${val||'&nbsp;'}</div>
-          <div style="font-size:8px;color:#555">${lbl}</div>
+          <div style="min-height:28px;border-bottom:1px solid #333;margin-bottom:3px;font-size:9px;font-weight:600;padding:2px 4px;text-align:center">${val||'&nbsp;'}</div>
+          <div style="font-size:8px;">${lbl}</div>
         </div>`).join('')}
       </div>
       <!-- Histórico de revisões -->
@@ -3769,9 +3971,9 @@ function renderStep4(){
     </div>
 
     <!-- RODAPÉ -->
-    <div style="background:#f8fafc;border-top:1px solid #e5e7eb;padding:5px 12px;display:flex;justify-content:space-between;align-items:center;font-size:7.5px;color:#888">
+    <div style="background:#f8fafc;border-top:1px solid #e5e7eb;padding:5px 12px;display:flex;justify-content:space-between;align-items:center;font-size:7.5px;">
       <span>Grupo MF Paris Alimentos · DMS Indústria de Alimentos · Contagem/MG</span>
-      <span style="font-weight:700;color:#c00">CÓPIA NÃO CONTROLADA</span>
+      <span style="font-weight:700;">CÓPIA NÃO CONTROLADA</span>
       <span>RDC 429/2020 · IN 75/2020 · IN 211/2023 · Gerado em ${data}</span>
     </div>
 
@@ -3799,7 +4001,7 @@ function imprimirFTP(){
     .ftp-row{display:flex;flex-wrap:wrap}
     .ftp-cell{padding:4px 8px;border-right:1px solid #ddd;flex:1;min-width:80px}
     .ftp-cell:last-child{border-right:none}
-    .ftp-lbl{font-size:7.5px;color:#666;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
+    .ftp-lbl{font-size:7.5px;color:#1e3a8a;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
     .ftp-val{font-size:9.5px;color:#000;line-height:1.4}
     .ftp-nutri{border:2px solid #000;margin:6px;border-radius:2px}
     .ftp-nutri h5{font-size:11px;font-weight:900;border-bottom:2px solid #000;padding:2px 5px;margin:0}
@@ -4089,7 +4291,7 @@ function ltGerarLaudo() {
           <!-- Classificação legal -->
           <div style="border:1px solid #ccc;border-radius:4px;padding:5px 8px;background:#fff">
             <div style="font-size:7px;text-transform:uppercase;font-weight:700;color:#666;margin-bottom:3px">Classificação legal</div>
-            <div style="font-size:8.5px;color:#1e3a8a;font-weight:600">${{'composto-sem':'Composto Lácteo sem Adição · Port. MAPA 1.170/2024','composto-com':'Composto Lácteo com Adição · Port. MAPA 1.170/2024','mistura':'Mistura Láctea · RIISPOA Art. 366','po-preparo':'Pó para Preparo · ANVISA RDC 724/2022','leite-integral':'Leite em Pó Integral · IN MAPA 53/2018','leite-instantaneo':'Leite em Pó Instantâneo · IN MAPA 53/2018','leite-desnatado':'Leite em Pó Desnatado · IN MAPA 53/2018','achocolatado':'Achocolatado em Pó · Lei 15.404/2026','cacau':'Cacau em Pó · Lei 15.404/2026','chocolate-po':'Chocolate em Pó · Lei 15.404/2026','espessante':'Espessante Alimentar · RDC 724/2022','soro-derivados':'Soro e Derivados Lácteos · IN MAPA 94/2020','maltodextrina-glicose':'Maltodextrina e Glicose · RDC 429/2020','cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005','cafe-torrado':'Café Torrado (grão) · RDC ANVISA 277/2005'}[classeSel]||'—'}</div>
+            <div style="font-size:8.5px;color:#1e3a8a;font-weight:600">${{'composto-sem':'Composto Lácteo sem Adição · Port. MAPA 1.170/2024','composto-com':'Composto Lácteo com Adição · Port. MAPA 1.170/2024','mistura':'Mistura Láctea · RIISPOA Art. 366','po-preparo':'Pó para Preparo · ANVISA RDC 724/2022','leite-integral':'Leite em Pó Integral · IN MAPA 53/2018','leite-instantaneo':'Leite em Pó Instantâneo · IN MAPA 53/2018','leite-desnatado':'Leite em Pó Desnatado · IN MAPA 53/2018','achocolatado':'Achocolatado em Pó · Lei 15.404/2026','cacau':'Cacau em Pó · Lei 15.404/2026','chocolate-po':'Chocolate em Pó · Lei 15.404/2026','espessante':'Espessante Alimentar · RDC 724/2022','soro-derivados':'Soro e Derivados Lácteos · IN MAPA 94/2020','maltodextrina':'Maltodextrina em Pó · RDC 429/2020','glicose':'Glicose / Dextrose em Pó · RDC 429/2020','suplemento-po':'Suplemento Alimentar em Pó · RDC 243/2018','cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005','cafe-torrado':'Café Torrado (grão) · RDC ANVISA 277/2005'}[classeSel]||'—'}</div>
           </div>
           <!-- Alertas IN 75 -->
           ${(()=>{
@@ -4185,7 +4387,7 @@ function imprimirLaudo() {
     .ftp-row{display:flex;flex-wrap:wrap}
     .ftp-cell{padding:4px 8px;border-right:1px solid #ddd;flex:1;min-width:80px}
     .ftp-cell:last-child{border-right:none}
-    .ftp-lbl{font-size:7.5px;color:#666;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
+    .ftp-lbl{font-size:7.5px;color:#1e3a8a;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
     .ftp-val{font-size:9.5px;color:#000;line-height:1.4}
     .ftp-nutri{border:2px solid #000;margin:6px;border-radius:2px}
     .ftp-nutri h5{font-size:11px;font-weight:900;border-bottom:2px solid #000;padding:2px 5px;margin:0}
@@ -4226,7 +4428,7 @@ function imprimirLaudoSalvoId(id) {
     .ftp-row{display:flex;flex-wrap:wrap}
     .ftp-cell{padding:4px 8px;border-right:1px solid #ddd;flex:1;min-width:80px}
     .ftp-cell:last-child{border-right:none}
-    .ftp-lbl{font-size:7.5px;color:#666;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
+    .ftp-lbl{font-size:7.5px;color:#1e3a8a;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
     .ftp-val{font-size:9.5px;color:#000;line-height:1.4}
     .ftp-nutri{border:2px solid #000;margin:6px;border-radius:2px}
     .ftp-nutri h5{font-size:11px;font-weight:900;border-bottom:2px solid #000;padding:2px 5px;margin:0}
@@ -4259,7 +4461,7 @@ function imprimirLaudoSalvo(l) {
       .ftp-row{display:flex;flex-wrap:wrap}
       .ftp-cell{padding:4px 8px;border-right:1px solid #ddd;flex:1;min-width:80px}
       .ftp-cell:last-child{border-right:none}
-      .ftp-lbl{font-size:7.5px;color:#666;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
+      .ftp-lbl{font-size:7.5px;color:#1e3a8a;text-transform:uppercase;font-weight:700;letter-spacing:.3px;margin-bottom:1px}
       .ftp-val{font-size:9.5px;color:#000;line-height:1.4}
       .ftp-nutri{border:2px solid #000;margin:6px;border-radius:2px}
       .ftp-nutri h5{font-size:11px;font-weight:900;border-bottom:2px solid #000;padding:2px 5px;margin:0}
