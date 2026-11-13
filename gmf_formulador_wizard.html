@@ -2967,22 +2967,91 @@ function ftpSecNutri(o) {
       </svg>
       <div style="font-size:8pt"><div style="font-weight:700">SIF 5460</div><div>DMS Indústria<br>de Alimentos</div></div>
     </div>` : '';
-  return `<div class="ftp-sec">
-      <div class="ftp-sec-t">3. Informação Nutricional · Rotulagem Frontal</div>
-      <div style="display:flex;gap:0;align-items:flex-start">
-        <div style="flex:1;padding:6px 10px">
-          <div style="${base};border:1px solid #000;padding:3px 5px;max-width:420px">
+  const tabelaHtml = `<div style="${base};border:1px solid #000;padding:3px 5px;max-width:420px">
             <div style="font-size:10pt;font-weight:700;text-align:center;text-transform:uppercase">Informação Nutricional</div>
             <div style="font-size:8pt;text-align:center;margin-bottom:3px">${titulo2}</div>
             <table style="width:100%;border-collapse:collapse;table-layout:auto;color:#000">${cab}${linhas}</table>
             <div style="font-size:6pt;margin-top:3px;line-height:1.3">${[nota6].concat(notas).join('<br>')}</div>
-          </div>
-        </div>
+          </div>`;
+  if (o.partes) return { tabela: tabelaHtml, lupa, sif };
+  return `<div class="ftp-sec">
+      <div class="ftp-sec-t">3. Informação Nutricional · Rotulagem Frontal</div>
+      <div style="display:flex;gap:0;align-items:flex-start">
+        <div style="flex:1;padding:6px 10px">${tabelaHtml}</div>
         <div style="min-width:190px;padding:6px 8px;display:flex;flex-direction:column;gap:6px">${lupa}${sif}</div>
       </div>
     </div>`;
 }
 // ===== FIM TABELA NUTRICIONAL =====
+
+// ===== FICHA TÉCNICA COMPACTA — 1 página A4, 1 assinatura (modelo aprovado nov/2026) =====
+function _ftpPares(html) {
+  const d = document.createElement('div'); d.innerHTML = html;
+  const titulo = (d.querySelector('.ftp-sec-t')?.textContent || '').replace(/^\d+\.\s*/, '').trim();
+  const pares = [], notas = [];
+  d.querySelectorAll('.ftp-cell').forEach(c => {
+    const l = c.querySelector('.ftp-lbl'), v = c.querySelector('.ftp-val');
+    if (v) pares.push([l ? l.textContent.trim() : '', v.innerHTML]);
+    else if (l && l.textContent.trim()) notas.push(l.textContent.trim());
+  });
+  return { titulo, pares, notas };
+}
+function ftpDocCompacto(o) {
+  const SB = 'border:1px solid #1e3a8a;margin-top:4px';
+  const ST = 'background:#1e3a8a;color:#fff;font-weight:700;font-size:8px;padding:2px 6px;letter-spacing:.3px;text-transform:uppercase';
+  const CL = 'border-right:1px solid #ddd;border-bottom:1px solid #ddd;padding:2px 5px;line-height:1.25;font-size:8.5px;color:#000';
+  const LB = 'font-size:7px;color:#1e3a8a;text-transform:uppercase;font-weight:700;letter-spacing:.2px';
+  const grid = (arr, cols) => `<div style="display:grid;grid-template-columns:${cols};gap:0">` +
+    arr.map(([l, v]) => `<div style="${CL}"><span style="${LB}">${l}</span><br>${v}</div>`).join('') + '</div>';
+  const n = (cols) => 'repeat(' + cols + ',1fr)';
+  const nota = (t) => t ? `<div style="font-size:7px;color:#000;padding:2px 6px">${t}</div>` : '';
+  const sec = (num, p, cols) => `<div style="${SB}"><div style="${ST}">${num}. ${p.titulo}</div>${grid(p.pares, n(cols))}${nota(p.notas.join(' · '))}</div>`;
+  const nu = ftpSecNutri({ ...o.nut, partes: true });
+  const T = o.T;
+  const cafe = /^cafe/.test(o.tipo);
+  const fq = [['Umidade (%)', o.umidade], ['Proteínas / lipídeos (%)', f2(T.ptn) + ' / ' + f2(T.gt) + ' <span style="font-size:7px">(calculado)</span>'], ['pH (solução 10%)', o.ph]];
+  if (cafe) fq.push(['Partículas queimadas', o.particulas]);
+  const reg = o.ehSIF ? 'SIF 5460' : '—';
+  const meParts = _ftpPares(ftpSecME(6));
+  const id1 = [
+    ['Denominação de venda', '<b>' + o.denominacao + '</b>'], ['Marca', o.marca], ['Registro', o.registro],
+    ['Gramatura', o.gramatura], ['Validade', o.validade]];
+  const id2 = [
+    ['Classificação legal', '<b>' + o.classe + ' — ANVISA (RDC 429/2020, IN 75/2020, RDC 778/2023 e IN 211/2023)</b>'],
+    ['Alergênicos · glúten · lactose', o.alergenicos + ' · ' + o.glutenlactose],
+    ['Aspecto / cor', o.aspecto], ['Sabor e odor', o.sabor]];
+  return `<div id="ftpDocInner" style="font-family:Arial,Helvetica,sans-serif;font-size:8.5px;color:#000;max-width:718px;margin:0 auto;background:#fff;padding:0">
+    <div style="display:flex;align-items:center;border-bottom:2px solid #1e3a8a;padding-bottom:4px">
+      <div style="background:#1e3a8a;color:#fff;padding:5px 9px;display:flex;flex-direction:column;align-items:center;min-width:64px">
+        <img src="${LOGO}" style="width:34px;margin-bottom:2px" onerror="this.style.display='none'">
+        <div style="font-size:6px;font-weight:700;text-align:center;line-height:1.2">GMF<br>GRUPO MF PARIS</div>
+      </div>
+      <div style="flex:1;padding:0 10px">
+        <div style="font-size:7.5px;color:#1e3a8a;font-weight:700;letter-spacing:.5px">FICHA TÉCNICA DE PRODUTO</div>
+        <div style="font-size:14px;font-weight:900;color:#1e3a8a;line-height:1.15">${o.nome}</div>
+      </div>
+      <div style="text-align:right;font-size:8px;line-height:1.45;color:#000">Código: <b>${o.codigo}</b> · Rev.: <b>${o.revisao}</b><br>Data: <b>${o.data}</b> · Pág. <b>1/1</b></div>
+    </div>
+    <div style="${SB}"><div style="${ST}">1. Identificação do produto</div>${grid(id1, '2fr 1.2fr 1fr 1fr 1.2fr')}${grid(id2, '1.6fr 1.6fr 1fr 1fr')}</div>
+    <div style="${SB}"><div style="${ST}">2. Lista de ingredientes</div><div style="padding:3px 6px;line-height:1.35">${o.ingList}<br><b>${o.alergenicos}</b></div></div>
+    <div style="display:flex;gap:4px;align-items:stretch">
+      <div style="${SB};flex:0 0 auto"><div style="${ST}">3. Informação nutricional</div><div style="padding:4px;min-width:330px">${nu.tabela}</div></div>
+      <div style="flex:1;display:flex;flex-direction:column">
+        <div style="${SB}"><div style="${ST}">4. Padrões físico-químicos</div>${grid(fq, '1fr 1.4fr 1fr')}</div>
+        <div style="margin-top:4px;display:flex;flex-direction:column;gap:4px">${nu.lupa}${nu.sif}</div>
+      </div>
+    </div>
+    ${sec(5, _ftpPares(ftpSecMicro()), 4)}
+    ${sec(6, meParts, 3)}
+    ${sec(7, _ftpPares(ftpSecContam()), 4)}
+    <div style="${SB}"><div style="${ST}">8. Embalagem, armazenamento e preparo</div>${grid([['Primária', o.emb1], ['Secundária', o.emb2], ['Paletização', o.paletizacao]], '1.3fr 1.3fr 1.4fr')}${grid([['Armazenamento e transporte', o.armazenamento], ['Modo de preparo', o.preparo]], '1fr 1fr')}</div>
+    <div style="${SB}"><div style="${ST}">9. Informações obrigatórias e restrições</div><div style="padding:3px 6px;font-weight:700;line-height:1.35">${o.obs}</div></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px"><div style="width:240px;text-align:center"><div style="border-bottom:1px solid #000;min-height:20px;font-weight:700;font-size:9px">${o.aprovado || '&nbsp;'}</div><div style="font-size:7.5px;color:#000">Responsável Técnico — Aprovação</div></div></div>
+    <div style="border-top:1px solid #000;margin-top:5px;padding-top:2px;font-size:7px;color:#000;display:flex;justify-content:space-between"><span>Grupo MF Paris Alimentos · DMS Indústria de Alimentos · Contagem/MG</span><b>CÓPIA NÃO CONTROLADA</b><span>Gerado em ${o.data}</span></div>
+  </div>`;
+}
+// ===== FIM FICHA COMPACTA =====
+
 
 
 
@@ -3844,140 +3913,21 @@ function renderStep4(){
       🖨️ Imprimir / Salvar PDF
     </button>
   </div>
-  <div id="ftpDocInner" style="font-family:Arial,sans-serif;font-size:9px;color:#111;max-width:800px;margin:0 auto;background:#fff;border:1px solid #ccc">
-
-    <!-- CABEÇALHO -->
-    <div style="display:flex;align-items:stretch;border-bottom:2px solid #1e3a8a">
-      <div style="background:#1e3a8a;color:#fff;padding:8px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:80px">
-        <img src="${LOGO}" style="width:50px;margin-bottom:4px" onerror="this.style.display='none'">
-        <div style="font-size:7px;font-weight:700;text-align:center">GMF<br>GRUPO MF PARIS</div>
-      </div>
-      <div style="flex:1;padding:8px 12px;display:flex;flex-direction:column;justify-content:center">
-        <div style="font-size:8px;font-weight:700;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px">Ficha Técnica de Produto</div>
-        <div style="font-size:13px;font-weight:900;color:#1e3a8a;line-height:1.2">${gv('p_nome','—')}</div>
-      </div>
-      <div style="padding:8px 12px;font-size:8px;color:#555;text-align:right;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:140px">
-        <div>Código: <strong>${gv('p_codigo','—')}</strong></div>
-        <div>Revisão: <strong>${_ftpRevisao}</strong></div>
-        <div>Data: <strong>${data}</strong></div>
-        <div>Pág.: <strong>1/1</strong></div>
-      </div>
-    </div>
-
-    <!-- 1. IDENTIFICAÇÃO -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">1. Identificação do Produto</div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Denominação de Venda</div><div class="ftp-val"><strong>${gv('p_denominacao','—')}</strong></div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Marca</div><div class="ftp-val">${_ftpMarca}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Gramatura</div><div class="ftp-val">${_ftpGramatura}</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:3"><div class="ftp-lbl">Registro</div><div class="ftp-val">${_ftpRegistro}</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Validade</div><div class="ftp-val">${gv('p_validade','12 meses')}</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Classificação Legal</div><div class="ftp-val" style="font-weight:700">${classeNomes[classeSel]||'—'} — ANVISA (RDC 429/2020, IN 75/2020, RDC 778/2023 e IN 211/2023)</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Alergênicos · Glúten · Lactose</div><div class="ftp-val">${gv('p_alergenicos')} · ${gv('p_glutenlactose')}</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Aspecto / Cor</div><div class="ftp-val">${gv('p_aspecto')}</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Sabor e Odor</div><div class="ftp-val">${gv('p_sabor')}</div></div>
-      </div>
-    </div>
-
-    <!-- 2. LISTA DE INGREDIENTES -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">2. Lista de Ingredientes</div>
-      <div style="padding:6px 10px;font-size:9px;line-height:1.6">${ingList}</div>
-      <div style="padding:4px 10px;font-size:8.5px;font-weight:700;">${gv('p_alergenicos')}</div>
-    </div>
-
-    <!-- 3. INFORMAÇÃO NUTRICIONAL (ftpSecNutri) -->
-    ${ftpSecNutri({tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF})}
-
-    <!-- 4. CARACTERÍSTICAS FÍSICO-QUÍMICAS -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">4. Características Físico-Químicas (Padrões Internos)</div>
-      <div class="ftp-row">
-        <div class="ftp-cell"><div class="ftp-lbl">Umidade (%)</div><div class="ftp-val">${gv('p_umidade','Máx. 4,0')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Proteínas (%)</div><div class="ftp-val">${f2(T.ptn)} (calculado)</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Lipídeos (%)</div><div class="ftp-val">${f2(T.gt)} (calculado)</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">pH (solução 10%)</div><div class="ftp-val">${gv('p_ph','6,0 a 7,0')}</div></div>
-        <div class="ftp-cell"><div class="ftp-lbl">Partículas Queimadas</div><div class="ftp-val">${gv('p_particulas','Máx. Disco B')}</div></div>
-      </div>
-    </div>
-
-    <!-- 5. CARACTERÍSTICAS MICROBIOLÓGICAS (por categoria — REGRAS_REG) -->
-    ${ftpSecMicro()}
-
-    <!-- 6. MATÉRIAS ESTRANHAS (RDC 623/2022 — por categoria) -->
-    ${ftpSecME(6)}
-
-    <!-- 7. CONTAMINANTES (por categoria — REGRAS_REG) -->
-    ${ftpSecContam()}
-
-    <!-- 8. EMBALAGEM, ARMAZENAMENTO E MODO DE PREPARO -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">8. Embalagem, Armazenamento e Modo de Preparo</div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Embalagem Primária</div><div class="ftp-val">${gv('p_emb1','—')}</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Embalagem Secundária</div><div class="ftp-val">${gv('p_emb2','—')}</div></div>
-        <div class="ftp-cell" style="flex:2"><div class="ftp-lbl">Paletização</div><div class="ftp-val">${gv('p_paletizacao','Pallet descartável · filme stretch · fardo plástico')}</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Armazenamento e Transporte</div><div class="ftp-val">${gv('p_armazenamento','—')}</div></div>
-      </div>
-      <div class="ftp-row">
-        <div class="ftp-cell" style="flex:1"><div class="ftp-lbl">Modo de Preparo</div><div class="ftp-val">${gv('p_preparo_txt','—')}</div></div>
-      </div>
-    </div>
-
-    <!-- 6. INFORMAÇÕES OBRIGATÓRIAS -->
-    <div class="ftp-sec">
-      <div class="ftp-sec-t">9. Informações Obrigatórias e Restrições</div>
-      <div style="padding:6px 10px;font-size:9px;font-weight:700;line-height:1.8">${(_ehSIF ? gv('p_obs','—') : (String(gv('p_obs','')).split('\n').filter(l=>!/INSPECIONADO PEL/i.test(l)).join('\n').trim() || '—')).replace(/\n/g,'<br>')}</div>
-    </div>
-
-    <!-- ASSINATURAS -->
-    <div style="padding:8px 12px;border-top:1px solid #ddd">
-      <div style="display:flex;gap:18px;align-items:flex-end;margin-bottom:10px">
-        ${[['Elaborado por',gv('p_elaborado','')],['Revisado por',gv('p_revisado','')],['Aprovado por / RT',gv('p_aprovado','')]].map(([lbl,val])=>`
-        <div style="flex:1;text-align:center">
-          <div style="min-height:28px;border-bottom:1px solid #333;margin-bottom:3px;font-size:9px;font-weight:600;padding:2px 4px;text-align:center">${val||'&nbsp;'}</div>
-          <div style="font-size:8px;">${lbl}</div>
-        </div>`).join('')}
-      </div>
-      <!-- Histórico de revisões -->
-      <table style="width:100%;border-collapse:collapse;font-size:8px;margin-top:6px">
-        <tr style="background:#f0f4ff">
-          <th style="padding:3px 6px;border:1px solid #ddd;text-align:center;width:50px">Rev.</th>
-          <th style="padding:3px 6px;border:1px solid #ddd;text-align:center;width:90px">Data</th>
-          <th style="padding:3px 6px;border:1px solid #ddd;text-align:left">Descrição</th>
-        </tr>
-        ${(gv('p_revisao','00')==='004'?[
-          ['003','12/06/2026','Emissão inicial'],
-          ['004','12/06/2026','Revisão geral: formulação alinhada ao OMIE; ajustes nutricionais e rotulagem frontal']
-        ]:[
-          ['001','—','Emissão inicial']
-        ]).map(([r,d,desc])=>`<tr>
-          <td style="padding:3px 6px;border:1px solid #ddd;text-align:center">${r}</td>
-          <td style="padding:3px 6px;border:1px solid #ddd;text-align:center">${d}</td>
-          <td style="padding:3px 6px;border:1px solid #ddd">${desc}</td>
-        </tr>`).join('')}
-      </table>
-    </div>
-
-    <!-- RODAPÉ -->
-    <div style="background:#f8fafc;border-top:1px solid #e5e7eb;padding:5px 12px;display:flex;justify-content:space-between;align-items:center;font-size:7.5px;">
-      <span>Grupo MF Paris Alimentos · DMS Indústria de Alimentos · Contagem/MG</span>
-      <span style="font-weight:700;">CÓPIA NÃO CONTROLADA</span>
-      <span>RDC 429/2020 · IN 75/2020 · IN 211/2023 · Gerado em ${data}</span>
-    </div>
-
-  </div>
+  ${ftpDocCompacto({
+    tipo: tipoSel||classeSel, T, ehSIF: _ehSIF,
+    nut: {tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF},
+    nome: gv('p_nome','—'), codigo: _ftpCodigo, revisao: _ftpRevisao, data,
+    denominacao: gv('p_denominacao','—'), marca: _ftpMarca, registro: _ftpRegistro, gramatura: _ftpGramatura,
+    validade: gv('p_validade','12 meses'), classe: classeNomes[classeSel]||'—',
+    alergenicos: gv('p_alergenicos'), glutenlactose: gv('p_glutenlactose'),
+    aspecto: gv('p_aspecto'), sabor: gv('p_sabor'), ingList,
+    umidade: gv('p_umidade','Máx. 4,0'), ph: gv('p_ph','6,0 a 7,0'), particulas: gv('p_particulas','Máx. Disco B'),
+    emb1: gv('p_emb1','—'), emb2: gv('p_emb2','—'),
+    paletizacao: gv('p_paletizacao','Pallet descartável · filme stretch · fardo plástico'),
+    armazenamento: gv('p_armazenamento','—'), preparo: gv('p_preparo_txt','—'),
+    obs: `${(_ehSIF ? gv('p_obs','—') : (String(gv('p_obs','')).split('\n').filter(l=>!/INSPECIONADO PEL/i.test(l)).join('\n').trim() || '—')).replace(/\n/g,'<br>')}`,
+    aprovado: gv('p_aprovado','')
+  })}
 `;
 }
 
@@ -3989,7 +3939,8 @@ function imprimirFTP(){
   w.document.write(`<!DOCTYPE html><html><head>
     <meta charset="UTF-8"><title>FTP — ${nome}</title>
     <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff}
-    @page{size:A4 portrait;margin:10mm}
+    @page{size:A4 portrait;margin:8mm}
+    #ftpDocInner{max-width:none !important;width:100%}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
     .ftp-doc{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;background:#fff;border:2px solid #1e3a8a;border-radius:4px;overflow:hidden}
     .ftp-hdr{background:#1e3a8a;color:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
