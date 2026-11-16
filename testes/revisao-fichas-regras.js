@@ -7,7 +7,7 @@ const b = src.indexOf('// ===== FIM TABELA NUTRICIONAL');
 if (a < 0 || b < 0) { console.log('FALHA bloco de regras nao encontrado'); process.exit(1); }
 const ctx = { receita: [], tipoSel: 'composto-com', classeSel: 'composto-com', _getBtnSelecionados: () => ctx.__sub || [] };
 vm.createContext(ctx);
-vm.runInContext(src.slice(a, b) + '\nthis.REGRAS_REG=REGRAS_REG;this.calcProRataPartida=calcProRataPartida;this.ftpSecMicro=ftpSecMicro;this.ftpSecContam=ftpSecContam;this.ftpSecME=ftpSecME;this.calcProRataME=calcProRataME;this.ftpSecNutri=ftpSecNutri;this.ftpAlertasFrontais=ftpAlertasFrontais;this.NUTRI_CFG=NUTRI_CFG;this.TIPOS_SIF=TIPOS_SIF;', ctx);
+vm.runInContext(src.slice(a, b) + '\nthis.REGRAS_REG=REGRAS_REG;this.calcProRataPartida=calcProRataPartida;this.ftpSecMicro=ftpSecMicro;this.ftpSecContam=ftpSecContam;this.ftpSecME=ftpSecME;this.calcProRataME=calcProRataME;this.ftpSecNutri=ftpSecNutri;this._nRound=_nRound;this._sc=_sc;this.ftpAlertasFrontais=ftpAlertasFrontais;this.NUTRI_CFG=NUTRI_CFG;this.TIPOS_SIF=TIPOS_SIF;', ctx);
 let ok = 0, fail = 0;
 const check = (c, m) => { console.log((c ? '  ok    ' : '  FALHA ') + m); c ? ok++ : fail++; };
 const R = ctx.REGRAS_REG;
@@ -73,5 +73,21 @@ check(nu('espessante', T0).includes('4 g') && nu('espessante', T0).includes('6 g
 check(nu('maltodextrina', T0).includes('NÃO SE APLICA') && nu('po-preparo', T0).includes('**No alimento pronto para o consumo'), 'malto sem lupa; pó para preparo com nota "**"');
 check(ctx.NUTRI_CFG['leite-integral'].porcao === 26 && ctx.NUTRI_CFG['achocolatado'].porcao === 20 && ctx.NUTRI_CFG['glicose'].porcao === 5, 'porções padrão: leite 26 g · achocolatado 20 g · maltodextrina/glicose 5 g');
 check(!/color:#(?!000|fff)/i.test(nu('achocolatado', T0).replace(/ftp-sec-t[^>]*>/g, '')), 'tabela nutricional sem cores (apenas preto)');
+
+// ---- IN 75/2020: arredondamento (Anexo III) e quantidades não significativas (Anexo IV) ----
+const RN = (v, t, S) => ctx._nRound(v, t, S || {});
+check(RN(12.4, 'ptn') === '12' && RN(12.5, 'ptn') === '13', 'arredondamento: ≥10 → inteiro');
+check(RN(4.04, 'ptn') === '4' && RN(4.06, 'ptn') === '4,1' && RN(2.34, 'gt') === '2,3', 'arredondamento: 1 a <10 → 1 casa (inteiro se a casa for 0)');
+check(RN(0.74, 'ptn') === '0,7' && RN(0.55, 'fi') === '0,6', 'arredondamento: <1 g → 1 casa decimal');
+check(RN(5, 'na') === '0' && RN(5.4, 'na') === '5,4' && RN(120.4, 'na') === '120', 'sódio: ≤5 mg = 0; 1–<10 → 1 casa; ≥10 inteiro');
+check(RN(4, 'kcal') === '0' && RN(4.6, 'kcal') === '5' && RN(123.4, 'kcal') === '123', 'valor energético: ≤4 kcal = 0');
+check(RN(0.5, 'ptn') === '0' && RN(0.5, 'fi') === '0' && RN(0.6, 'ptn') === '0,6', 'proteínas e fibras: ≤0,5 g = 0');
+check(RN(0.1, 'gs') === '0' && RN(0.1, 'tr') === '0' && RN(0.2, 'gs') === '0,2', 'saturadas e trans: ≤0,1 g = 0');
+check(RN(0.5, 'gt', { gs: 0, tr: 0 }) === '0' && RN(0.5, 'gt', { gs: 0.3, tr: 0 }) === '0,5', 'gorduras totais: ≤0,5 g só = 0 se saturadas e trans também forem 0');
+check(RN(0.4, 'cho', { act: 0 }) === '0' && RN(0.4, 'cho', { act: 0.6 }) === '0,4', 'carboidratos: ≤0,5 g só = 0 se açúcares totais também');
+check(RN(0, 'acad') === '0' && RN(0.3, 'acad') === '0,3', 'açúcares adicionados: 0 só quando não há adicionados');
+const nuQ = ctx.ftpSecNutri({ tipo: 'maltodextrina', T: { kcal: 380, cho: 94, act: 1, acad: 0, ptn: 0, gt: 0, gs: 0, tr: 0, fi: 0, na: 20 }, P100: 5, pesoTotal: 1000, medida: '1 colher de chá', alertas: [], ehSIF: false });
+check(nuQ.includes('*Percentual de valores diários fornecidos pela porção.') && !nuQ.includes('2.000 kcal'), 'nota do %VD no texto oficial da IN 75 (Anexo XII)');
+check(/>19<\/td>/.test(nuQ) && />0<\/td>/.test(nuQ), 'porção de 5 g: energia 19 kcal; sódio (1 mg) e açúcares (0,05 g) caem em QNS (0)');
 console.log('\n' + ok + ' ok, ' + fail + ' falha(s)');
 process.exit(fail ? 1 : 0);

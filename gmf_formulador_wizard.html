@@ -2867,24 +2867,43 @@ const NUTRI_CFG = {
   'soro-derivados':    { modo:'padrao', lupa:'limites' },
 };
 const _vfmt = (n, d) => String(Number(n).toFixed(d)).replace('.', ',');
-function _nRound(v, tipo) {   // arredondamento (Anexo III) — valor energético e %VD inteiros
+// IN ANVISA nº 75/2020 — Anexo III (arredondamento) e Anexo IV (quantidades não significativas, declaradas como "0")
+function _nBase(v, unid) {
   v = Number(v) || 0;
-  if (tipo === 'kcal') return String(Math.round(v));
-  if (tipo === 'na') return v < 5 ? '0' : String(Math.round(v));
-  if (tipo === 'tr') return v < 0.1 ? '0' : _vfmt(v, 1);
-  if (v < 0.5) return '0';
-  return v < 10 ? _vfmt(v, 1) : String(Math.round(v));
+  if (v >= 10) return String(Math.round(v));                                   // ≥ 10: número inteiro
+  if (v >= 1) { const r = Math.round(v * 10) / 10; return Number.isInteger(r) ? String(r) : _vfmt(r, 1); }   // 1 a <10: 1 casa (inteiro se a casa for 0)
+  if (unid === 'mg') {                                                          // < 1 mg: 2 casas (1 se a segunda for 0)
+    const r = Math.round(v * 100) / 100;
+    return r === 0 ? '0' : (Math.round(r * 10) / 10 === r ? _vfmt(r, 1) : _vfmt(r, 2));
+  }
+  const r = Math.round(v * 10) / 10;                                            // < 1 g: 1 casa decimal
+  return r === 0 ? '0' : _vfmt(r, 1);
 }
+// S: nutrientes já na mesma base da coluna (100 g ou porção), para testar as condições de QNS
+function _nRound(v, tipo, S) {
+  v = Number(v) || 0; S = S || {};
+  if (tipo === 'kcal') return v <= 4 ? '0' : String(Math.round(v));
+  if (tipo === 'cho')  return (v <= 0.5 && (S.act || 0) <= 0.5) ? '0' : _nBase(v, 'g');
+  if (tipo === 'act')  return v <= 0.5 ? '0' : _nBase(v, 'g');
+  if (tipo === 'acad') return v <= 0 ? '0' : _nBase(v, 'g');
+  if (tipo === 'ptn')  return v <= 0.5 ? '0' : _nBase(v, 'g');
+  if (tipo === 'gt')   return (v <= 0.5 && (S.gs || 0) <= 0.1 && (S.tr || 0) <= 0.1) ? '0' : _nBase(v, 'g');
+  if (tipo === 'gs' || tipo === 'tr') return v <= 0.1 ? '0' : _nBase(v, 'g');
+  if (tipo === 'fi')   return v <= 0.5 ? '0' : _nBase(v, 'g');
+  if (tipo === 'na')   return v <= 5 ? '0' : _nBase(v, 'mg');
+  return _nBase(v, 'g');
+}
+const _sc = (T, g) => { const o = {}; Object.keys(T).forEach(k => o[k] = (Number(T[k]) || 0) * g / 100); return o; };
 const _NR = [   // [rótulo (Anexo XI), chave T, VDR, nível de recuo, tipo de arredondamento]
   ['Valor energético (kcal)', 'kcal', 2000, 0, 'kcal'],
-  ['Carboidratos totais (g)', 'cho', 300, 0, 'g'],
-  ['Açúcares totais (g)', 'act', null, 1, 'g'],
-  ['Açúcares adicionados (g)', 'acad', 50, 2, 'g'],
-  ['Proteínas (g)', 'ptn', 75, 0, 'g'],
-  ['Gorduras totais (g)', 'gt', 55, 0, 'g'],
-  ['Gorduras saturadas (g)', 'gs', 22, 1, 'g'],
+  ['Carboidratos totais (g)', 'cho', 300, 0, 'cho'],
+  ['Açúcares totais (g)', 'act', null, 1, 'act'],
+  ['Açúcares adicionados (g)', 'acad', 50, 2, 'acad'],
+  ['Proteínas (g)', 'ptn', 75, 0, 'ptn'],
+  ['Gorduras totais (g)', 'gt', 55, 0, 'gt'],
+  ['Gorduras saturadas (g)', 'gs', 22, 1, 'gs'],
   ['Gorduras trans (g)', 'tr', null, 1, 'tr'],
-  ['Fibras alimentares (g)', 'fi', 25, 0, 'g'],
+  ['Fibras alimentares (g)', 'fi', 25, 0, 'fi'],
   ['Sódio (mg)', 'na', 2300, 0, 'na'],
 ];
 function _recuo(n) { return n ? `<span style="display:inline-block;width:${(n * 0.55).toFixed(2)}em"></span>` : ''; }
@@ -2910,8 +2929,8 @@ function ftpSecNutri(o) {
   let cab, linhas, notas = [];
   const rowsPadrao = (cols) => _NR.map(([l, k, vd, n, t]) => {
     const tds = cols.map(c => {
-      if (c.t === 'cem') return `<td style="${cell};text-align:center">${_nRound(T[k], t)}</td>`;
-      if (c.t === 'porc') return `<td style="${cell};text-align:center">${_nRound(T[k] * c.g / 100, t)}</td>`;
+      if (c.t === 'cem') return `<td style="${cell};text-align:center">${_nRound(T[k], t, T)}</td>`;
+      if (c.t === 'porc') return `<td style="${cell};text-align:center">${_nRound(T[k] * c.g / 100, t, _sc(T, c.g))}</td>`;
       return `<td style="${cell};text-align:center">${vd ? Math.round((T[k] * c.g / 100) / vd * 100) + '%' : '—'}</td>`;
     }).join('');
     return `<tr><td style="${cell};text-align:left">${_recuo(n)}${l}</td>${tds}</tr>`;
@@ -2923,8 +2942,8 @@ function ftpSecNutri(o) {
     const g3 = [4, 6, 8];
     cab = `<tr><th></th>${th('100 g')}${g3.map(g => th(g + ' g') + th('%VD*')).join('')}</tr>`;
     const lin = _NR.filter(r => r[1] === 'kcal' || r[1] === 'cho');
-    linhas = lin.map(([l, k, vd, n, t]) => `<tr><td style="${cell};text-align:left">${l}</td><td style="${cell};text-align:center">${_nRound(T[k], t)}</td>` +
-      g3.map(g => `<td style="${cell};text-align:center">${_nRound(T[k] * g / 100, t)}</td><td style="${cell};text-align:center">${vd ? Math.round((T[k] * g / 100) / vd * 100) + '%' : '—'}</td>`).join('') + '</tr>').join('');
+    linhas = lin.map(([l, k, vd, n, t]) => `<tr><td style="${cell};text-align:left">${l}</td><td style="${cell};text-align:center">${_nRound(T[k], t, T)}</td>` +
+      g3.map(g => `<td style="${cell};text-align:center">${_nRound(T[k] * g / 100, t, _sc(T, g))}</td><td style="${cell};text-align:center">${vd ? Math.round((T[k] * g / 100) / vd * 100) + '%' : '—'}</td>`).join('') + '</tr>').join('');
     titulo2 = 'Porções recomendadas: 4 g, 6 g e 8 g';
     notas.push('Declaração obrigatória: valor energético e carboidratos (alimento para fins especiais).');
   } else if (cfg.modo === 'sem100') {
@@ -2938,7 +2957,7 @@ function ftpSecNutri(o) {
     if (cfg.modo === 'preparo') notas.push('**No alimento pronto para o consumo.');
     if (cfg.modo === 'voluntaria') notas.push('Declaração nutricional voluntária (RDC 429/2020, Anexo I, item 6).');
   }
-  const nota6 = '(*) Percentual de valores diários fornecidos pela porção, com base em uma dieta de 2.000 kcal ou 8.400 kJ — RDC 429/2020 / IN 75/2020. Valores calculados a partir da formulação.';
+  const nota6 = '*Percentual de valores diários fornecidos pela porção.';
 
   // lupa
   let lupa;
