@@ -32,3 +32,11 @@ Pontos a confirmar com a Qualidade: omissão só quando **todos** os demais nutr
 
 ## 17/11/2026 — Umidade, pH e acidez por produto
 Campos **Umidade (%)**, **pH** e **Acidez total titulável** no preenchimento do produto, salvos por produto. Na ficha (seção "Padrões físico-químicos") cada item só aparece se preenchido. Antes, umidade e pH saíam com valores padrão ("Máx. 4,0" e "6,0 a 7,0") mesmo sem preenchimento; agora saem vazios até serem preenchidos.
+
+## 17/11/2026 — Legislação do café, partículas queimadas e fabricante
+- **Café** (moído e grão): base legal atualizada para Portaria MAPA 570/2022, RDC 716/2022 (que consolidou a RDC 277/2005), RDC 727/2022, RDC 429/2020 + IN 75/2020, Lei 10.674/2003 e Decreto 12.709/2025. Novos campos "Rotulagem do café": tipo (Tipo Único/Fora de Tipo), espécie e ponto de torra (obrigatórios; a ficha avisa quando não preenchidos) e grau de moagem (opcional, só moído). Padrões da ficha: matérias estranhas e impurezas máx. 1,0%; elementos estranhos ausência; extrato aquoso mín. 20%; cafeína mín. 0,5%.
+- Removidos do café: "NÃO CONTÉM LACTOSE" (a Lei 10.674 trata só de glúten) e a frase "estabelecimento inspecionado pelo Mapa" (produto de origem vegetal, sem SIF). Removidos do texto de apoio os limites que não constam das fontes consultadas (umidade ≤5%, extrato aquoso 25–35%, cafeína ≥0,7%, tipos 1–8 da IN 16/2010).
+- **Partículas queimadas:** aparecem só em leite e derivados (leite em pó, compostos lácteos, mistura e soro); ocultas nos demais produtos.
+- **Fabricante** (razão social, CNPJ e endereço) em todas as fichas: DMS (padrão) ou MFPARIS (padrão no café), editável por produto.
+
+A confirmar: Decreto 12.709/2025 foi lido só pela ementa (fiscalização de produtos de origem vegetal); endereço da DMS (Rua Beta 387) e da MFPARIS (Rua Beta 378) conforme o cadastro; fabricante dos tipos sem definição (cacau, chocolate em pó, maltodextrina, glicose, suplemento, espessante, pó para preparo) ficou como DMS.
