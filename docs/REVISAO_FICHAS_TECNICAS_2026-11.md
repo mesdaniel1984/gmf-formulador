@@ -18,3 +18,14 @@ Origem: documento "Revisão do Programa de Geração de Fichas Técnicas GMF For
 4. Achocolatado: linhas de sacarose/G.tot/umidade (RDC 264/2005) foram mantidas; conferir se seguem vigentes sob a Lei 15.404/2026.
 5. Leite em Pó Integral: umidade segue em ≤ 3,5% (o documento só trata a umidade do instantâneo e do desnatado, ≤ 5%).
 6. Chocolate em Pó e Espessante: campos de aspecto, alergênicos, validade e preparo são valores iniciais para revisão.
+
+## Correções de 16/11/2026 (documento "CORREÇÕES NO FORMULADOR")
+
+- **Embalagens:** opções **300 g** e **Outra** (quantidade digitada em g ou kg) em todas as listas de embalagem; a quantidade digitada atualiza peso, gramatura, embalagem primária/secundária e vai para a ficha.
+- **Ingrediente:** 76 campos novos de composição (polióis, polidextrose, amido, galactose, lactose, gorduras mono/poli, ômega 3/6/9, EPA, DHA, colesterol, fibras solúveis/insolúveis, vitaminas, minerais, bioativos e aminoácidos), em seção recolhível "Composição completa". São salvos no ingrediente (chaves `x_*`) e somados na fórmula (`calcT`). **Ainda não aparecem na tabela nutricional da ficha.**
+- **Porções por embalagem:** campo automático (peso ÷ porção, inteiro mais próximo, "cerca de N") na tela e na tabela.
+- **Medida caseira** por porção; **várias porções** com título de coluna, porções por embalagem e medida caseira de cada bloco (espessante: Néctar 4 g, Mel 6 g, Pudim 8 g; coluna de referência "100 mL**").
+- **Nutrientes suprimidos:** quando todos os "demais" (açúcares totais e adicionados, proteínas, gorduras totais/saturadas/trans, fibras, sódio) são não significativos em todas as colunas, as linhas são omitidas e aparece "Não contém quantidades significativas de …".
+- **Café:** bebida (IN 75, Anexo V): porção 200 ml com o pó por porção (campo, padrão 20 g), colunas 100 ml**, 200 ml e %VD*, todos os nutrientes 0, linhas ocultas, frase obrigatória e nota "**No alimento pronto para o consumo".
+
+Pontos a confirmar com a Qualidade: omissão só quando **todos** os demais nutrientes são não significativos (não omite linha a linha); arredondamento de porções por embalagem do café pelo inteiro mais próximo (Anexo VI não conferido); pó por porção do café = 20 g (exemplo do documento), editável.
