@@ -587,8 +587,8 @@ tr:last-child td{border-bottom:none}
       <div style="font-size:12px;font-weight:700;margin-bottom:8px">Rotulagem do café <span style="font-weight:400;color:#6b7280">(Portaria MAPA 570/2022)</span></div>
       <div style="display:grid;grid-template-columns:1fr 1.2fr 1fr 1fr;gap:12px">
         <div class="field"><label>Tipo</label><select id="p_cafe_tipo"><option value="">Não informar</option><option value="Tipo Único">Tipo Único</option><option value="Fora de Tipo">Fora de Tipo</option></select></div>
-        <div class="field"><label>Espécie (obrigatória)</label><input id="p_cafe_especie" type="text" placeholder="Ex: 100% Arábica"></div>
-        <div class="field"><label>Ponto de torra (obrigatório)</label><input id="p_cafe_torra" type="text" placeholder="Ex: Média"></div>
+        <div class="field"><label>Espécie (opcional)</label><input id="p_cafe_especie" type="text" placeholder="Ex: 100% Arábica"></div>
+        <div class="field"><label>Ponto de torra (opcional)</label><input id="p_cafe_torra" type="text" placeholder="Ex: Média"></div>
         <div class="field" id="cafeMoagemField"><label>Grau de moagem (opcional)</label><input id="p_cafe_moagem" type="text" placeholder="Ex: Fina"></div>
       </div>
     </div>
@@ -3182,8 +3182,8 @@ function ftpDocCompacto(o) {
     const grupo = o.tipo === 'cafe-torrado' ? 'Torrado em Grão' : 'Torrado e Moído';
     const partes = ['Grupo: ' + grupo];
     if (cd.tipo) partes.push('Tipo: ' + cd.tipo);
-    partes.push(cd.especie ? 'Espécie: ' + cd.especie : 'Espécie: NÃO INFORMADA (obrigatória)');
-    partes.push(cd.torra ? 'Ponto de torra: ' + cd.torra : 'Ponto de torra: NÃO INFORMADO (obrigatório)');
+    if (cd.especie) partes.push('Espécie: ' + cd.especie);
+    if (cd.torra) partes.push('Ponto de torra: ' + cd.torra);
     if (cd.moagem && o.tipo !== 'cafe-torrado') partes.push('Moagem: ' + cd.moagem);
     obsTxt = 'Café — ' + partes.join(' · ') + (obsTxt && obsTxt !== '—' ? '<br>' + obsTxt : '');
   }
@@ -3228,7 +3228,7 @@ function ftpDocCompacto(o) {
     <div style="${SB}"><div style="${ST}">8. Embalagem, armazenamento e preparo</div>${grid([['Primária', o.emb1], ['Secundária', o.emb2], ['Paletização', o.paletizacao]], '1.3fr 1.3fr 1.4fr')}${grid([['Armazenamento e transporte', o.armazenamento], ['Modo de preparo', o.preparo]], '1fr 1fr')}</div>
     <div style="${SB}"><div style="${ST}">9. Informações obrigatórias e restrições</div><div style="padding:3px 6px;font-weight:700;line-height:1.35">${obsTxt}</div></div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px"><div style="width:240px;text-align:center"><div style="border-bottom:1px solid #000;min-height:20px;font-weight:700;font-size:9px">${o.aprovado || '&nbsp;'}</div><div style="font-size:7.5px;color:#000">Responsável Técnico — Aprovação</div></div></div>
-    <div style="border-top:1px solid #000;margin-top:5px;padding-top:2px;font-size:7px;color:#000;display:flex;justify-content:space-between"><span>Grupo MF Paris Alimentos · DMS Indústria de Alimentos · Contagem/MG</span><b>CÓPIA NÃO CONTROLADA</b><span>Gerado em ${o.data}</span></div>
+    <div style="border-top:1px solid #000;margin-top:5px;padding-top:2px;font-size:7px;color:#000;display:flex;justify-content:space-between"><span>Grupo MF Paris Alimentos · ${_fab.nome.replace(/ Ltda$/,'')} · Contagem/MG</span><b>CÓPIA NÃO CONTROLADA</b><span>Gerado em ${o.data}</span></div>
   </div>`;
 }
 // ===== FIM FICHA COMPACTA =====
