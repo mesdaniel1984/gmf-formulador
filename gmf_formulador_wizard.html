@@ -453,12 +453,12 @@ tr:last-child td{border-bottom:none}
         <div class="cbtn" id="tb-cafe-torrado-moido" onclick="selTipo('cafe-torrado-moido')">
           <div class="cbtn-icon">☕</div>
           <div class="cbtn-title">Café Torrado e Moído</div>
-          <div class="cbtn-sub">RDC ANVISA 277/2005 · IN 16/2010</div>
+          <div class="cbtn-sub">Portaria MAPA 570/2022 · RDC 716/2022</div>
         </div>
         <div class="cbtn" id="tb-cafe-torrado" onclick="selTipo('cafe-torrado')">
           <div class="cbtn-icon">🫘</div>
           <div class="cbtn-title">Café Torrado (grão)</div>
-          <div class="cbtn-sub">RDC ANVISA 277/2005 · IN 16/2010</div>
+          <div class="cbtn-sub">Portaria MAPA 570/2022 · RDC 716/2022</div>
         </div>
         <div class="cbtn" id="tb-soro-derivados" onclick="selTipo('soro-derivados')">
           <div class="cbtn-icon">🥛</div>
@@ -574,11 +574,22 @@ tr:last-child td{border-bottom:none}
       <div class="field"><label>Validade</label><input id="p_validade" type="text" value="12 meses"></div>
     </div>
     <div style="margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:8px;border:1px solid var(--border)">
+      <div class="field" style="margin-bottom:10px;max-width:420px"><label>Fabricante (razão social, CNPJ e endereço saem na ficha)</label>
+        <select id="p_fabricante"><option value="dms">DMS Indústria de Alimentos Ltda — CNPJ 33.174.960/0001-27</option><option value="mfparis">MFPARIS Indústria de Alimentos Ltda — CNPJ 26.855.558/0001-42</option></select></div>
       <div style="font-size:12px;font-weight:700;margin-bottom:8px">Padrões físico-químicos do produto <span style="font-weight:400;color:#6b7280">(opcional — o item só aparece na ficha se for preenchido)</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:12px">
         <div class="field"><label>Umidade (%)</label><input id="p_umidade" type="text" placeholder="Ex: Máx. 4,0"></div>
         <div class="field"><label>pH</label><input id="p_ph" type="text" placeholder="Ex: 6,0 a 7,0"></div>
         <div class="field"><label>Acidez total titulável</label><input id="p_acidez" type="text" placeholder="Ex: Máx. 18 mL NaOH 0,1N / 10 g"></div>
+      </div>
+    </div>
+    <div id="cafeRotuloBox" style="display:none;margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">Rotulagem do café <span style="font-weight:400;color:#6b7280">(Portaria MAPA 570/2022)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1.2fr 1fr 1fr;gap:12px">
+        <div class="field"><label>Tipo</label><select id="p_cafe_tipo"><option value="">Não informar</option><option value="Tipo Único">Tipo Único</option><option value="Fora de Tipo">Fora de Tipo</option></select></div>
+        <div class="field"><label>Espécie (obrigatória)</label><input id="p_cafe_especie" type="text" placeholder="Ex: 100% Arábica"></div>
+        <div class="field"><label>Ponto de torra (obrigatório)</label><input id="p_cafe_torra" type="text" placeholder="Ex: Média"></div>
+        <div class="field" id="cafeMoagemField"><label>Grau de moagem (opcional)</label><input id="p_cafe_moagem" type="text" placeholder="Ex: Fina"></div>
       </div>
     </div>
     <div id="porcoesBox" style="margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:8px;border:1px solid var(--border)">
@@ -1522,7 +1533,7 @@ function _hashReceitaAtual() {
     porcao: document.getElementById('p_porcao').value,
     peso: document.getElementById('p_peso').value,
     medida: document.getElementById('p_medida').value,
-    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || '') + '|' + gv('p_umidade') + '|' + gv('p_ph') + '|' + gv('p_acidez'),
+    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || '') + '|' + gv('p_fabricante') + '|' + gv('p_cafe_tipo') + gv('p_cafe_especie') + gv('p_cafe_torra') + gv('p_cafe_moagem') + '|' + gv('p_umidade') + '|' + gv('p_ph') + '|' + gv('p_acidez'),
     tipo: tipoSel,   // inclui tipo para detectar mudança de classificação
     classe: classeSel,
     ings: receita.map(r=>({n:_nomeExibicao(r.d), q:r.qtde}))
@@ -1590,7 +1601,7 @@ function novoProduto() {
   _prodOrigem = null;
   _prodOrigemHash = null;
   receita = [];
-  ['p_nome','p_codigo','p_denominacao','p_umidade','p_ph','p_acidez'].forEach(id=>{
+  ['p_nome','p_codigo','p_denominacao','p_umidade','p_ph','p_acidez','p_cafe_tipo','p_cafe_especie','p_cafe_torra','p_cafe_moagem'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('p_revisao').value='00';
@@ -1745,6 +1756,8 @@ function editarProduto(id) {
   document.getElementById('p_porcao').value = prod.pesoPorcao;
   document.getElementById('p_medida').value = prod.medida;
   document.getElementById('p_peso').value = prod.pesoTotal;
+  { const _fb = document.getElementById('p_fabricante'); if (_fb && prod.fabricante) _fb.value = prod.fabricante; }
+  { const cd = prod.cafeDados || {}; [['tipo','tipo'],['especie','especie'],['torra','torra'],['moagem','moagem']].forEach(([k, f]) => { const el = document.getElementById('p_cafe_' + k); if (el) el.value = cd[f] || ''; }); }
   ['umidade','ph','acidez'].forEach(k => { const el = document.getElementById('p_' + k); if (el) el.value = prod[k] || ''; });
   { const _t = document.getElementById('p_porcao_titulo'); if (_t) _t.value = prod.porcaoTitulo || '';
     _porcoesExtra = (prod.porcoesExtra || []).map(x => ({ ...x })); renderPorcoesExtra();
@@ -1907,6 +1920,8 @@ function salvarProdutoAtual() {
     emb2:          document.getElementById('p_emb2')?.value || '',
     embalagensSel: getEmbalagensSelecionadas(),
     embOutra:      getEmbalagensSelecionadas().includes('st-outra') ? (() => { const o = _outraGramas(); return o ? { qtd: o.qtd, un: o.un } : null; })() : null,
+    fabricante: gv('p_fabricante'),
+    cafeDados: { tipo: gv('p_cafe_tipo'), especie: gv('p_cafe_especie').trim(), torra: gv('p_cafe_torra').trim(), moagem: gv('p_cafe_moagem').trim() },
     umidade: (document.getElementById('p_umidade')?.value || '').trim(),
     ph: (document.getElementById('p_ph')?.value || '').trim(),
     acidez: (document.getElementById('p_acidez')?.value || '').trim(),
@@ -2328,14 +2343,13 @@ const TEMPLATES = {
   'cafe-torrado-moido': {
     label: 'Café Torrado e Moído',
     classe: 'cafe-torrado-moido',
-    legal: `<strong>RDC ANVISA nº 277, de 22/09/2005</strong> + <strong>IN MAPA nº 16, de 24/05/2010</strong><br>
-      • Umidade: <strong>até 5,0%</strong> (teor tecnicamente recomendado) · Extrato aquoso: <strong>≥ 20%</strong> (abaixo disso, fora de tipo)<br>
-      • Cafeína: <strong>≥ 0,5%</strong> no café comum (análise complementar, não obrigatória) · Descafeinado: <strong>≤ 0,1%</strong><br>
-      • Matéria estranha + impurezas: <strong>≤ 1,0%</strong> · Proibidos elementos estranhos (açúcar, caramelo, corantes, borra, outros grãos) · Aromatizante permitido<br>
-      • Denominação: "Café" + marca, grupo "Torrado e Moído" · Declarar a espécie ("100% Arábica" ou "Predominantemente Canéfora") · Variedade opcional<br>
-      • <strong>Rótulo:</strong> informar o ponto de torra (escala Agtron) · Grau de moagem opcional<br>
-      • Qualidade global mínima: 4,5 pts (Portaria 570) · Specialty (≥ 80 pts SCA) é opcional, critério de mercado<br>
-      • Microbiologia: IN 161/2022, cat. 17.b · Contaminantes: IN 160/2022`,
+    legal: `<strong>Portaria SDA/MAPA nº 570/2022</strong> (Regulamento Técnico do Café Torrado) · <strong>RDC ANVISA nº 716/2022</strong> (consolidou a RDC 277/2005) · <strong>RDC 727/2022</strong> (rotulagem) · <strong>RDC 429/2020 + IN 75/2020</strong> (informação nutricional) · <strong>Lei 10.674/2003</strong> (glúten) · <strong>Decreto 12.709/2025</strong> (fiscalização de produtos de origem vegetal)<br>
+      • Denominação de venda: "Café" + marca · Grupo: <strong>Torrado e Moído</strong> · "Café" só para produto com grãos de café como único ingrediente (art. 41 e 43)<br>
+      • Tipo: <strong>"Tipo Único"</strong> (opcional) · <strong>"Fora de Tipo"</strong> obrigatório se extrato aquoso &lt; 20%, cafeína &gt; 0,1% e &lt; 0,5% ou qualidade global &lt; 4,5 pontos (Anexos II e III)<br>
+      • Espécie: "100% (espécie)" ou "predominantemente (espécie)" · <strong>Ponto de torra obrigatório</strong> (Anexo IV) · Grau de moagem opcional (Anexo V)<br>
+      • Análise obrigatória: soma de matérias estranhas e impurezas e ausência de elementos que indiquem fraude (Anexo I) · Descafeinado: declarar "Descafeinado" no painel principal<br>
+      • Glúten: declarar "CONTÉM GLÚTEN" ou "NÃO CONTÉM GLÚTEN" (Lei 10.674/2003) · Alergênicos conforme RDC 727/2022<br>
+      • Microbiologia: IN 161/2022, cat. 17.b · Contaminantes: IN 160/2022 · Informação nutricional: bebida pronta (IN 75/2020, Anexo V)`,
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
@@ -2348,11 +2362,11 @@ const TEMPLATES = {
       aspecto: 'Pó fino e uniforme de coloração marrom característica, aspecto homogêneo sem grumos',
       sabor: 'Sabor e aroma típicos de café torrado, intensos, característicos, livres de odores estranhos, ranço ou mofo',
       alergenicos: 'NÃO CONTÉM ALERGÊNICOS declarados. PODE CONTER traços de outros grãos processados na mesma linha.',
-      glutenlactose: 'NÃO CONTÉM GLÚTEN. NÃO CONTÉM LACTOSE.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN.',
       emb1: 'Embalagem aluminizada com válvula desgasificadora, hermeticamente selada com atmosfera de nitrogênio',
       emb2: 'Fardo de papel kraft multifolhado — 25 kg (industrial) · Caixa de papelão para varejo',
       armazenamento: 'Armazenar em local seco, fresco (≤ 25°C) e arejado, ao abrigo de luz, calor, umidade e odores externos. Após aberto, fechar bem e consumir em até 30 dias.',
-      obs: 'CONTÉM CAFEÍNA — presença natural do café. Não recomendado para crianças e gestantes.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      obs: 'CONTÉM CAFEÍNA — presença natural do café. Não recomendado para crianças e gestantes.',
       validade: '12 meses (embalagem lacrada) · Após aberto: consumir em até 30 dias',
       preparo: 'Café coado: 10 g (1 colher de sopa) para 100 ml de água filtrada quente (90–95°C).\nEspresso: 7–10 g / 30 ml. Adaptar conforme equipamento.',
     }
@@ -2362,12 +2376,13 @@ const TEMPLATES = {
   'cafe-torrado': {
     label: 'Café Torrado (grão)',
     classe: 'cafe-torrado',
-    legal: `<strong>RDC ANVISA nº 277, de 22/09/2005</strong> + <strong>IN MAPA nº 16, de 24/05/2010</strong><br>
-      • Umidade: <strong>≤ 5,0%</strong> m/m · Extrato aquoso: <strong>≥ 25% e ≤ 35%</strong> m/m base seca<br>
-      • Cafeína: <strong>≥ 0,7%</strong> m/m na matéria seca<br>
-      • Apresentação: grão inteiro torrado, não moído · Proibida adição de qualquer substância<br>
-      • Classificação por tipo 1–8 (defeitos físicos) conforme IN MAPA 16/2010<br>
-      • Specialty Coffee ≥ 80 pts SCA (opcional) · <strong>Micro:</strong> IN 161/2022 cat. 17.b`,
+    legal: `<strong>Portaria SDA/MAPA nº 570/2022</strong> (Regulamento Técnico do Café Torrado) · <strong>RDC ANVISA nº 716/2022</strong> (consolidou a RDC 277/2005) · <strong>RDC 727/2022</strong> (rotulagem) · <strong>RDC 429/2020 + IN 75/2020</strong> (informação nutricional) · <strong>Lei 10.674/2003</strong> (glúten) · <strong>Decreto 12.709/2025</strong> (fiscalização de produtos de origem vegetal)<br>
+      • Denominação de venda: "Café" + marca · Grupo: <strong>Torrado em Grão</strong> · "Café" só para produto com grãos de café como único ingrediente (art. 41 e 43)<br>
+      • Tipo: <strong>"Tipo Único"</strong> (opcional) · <strong>"Fora de Tipo"</strong> obrigatório se extrato aquoso &lt; 20%, cafeína &gt; 0,1% e &lt; 0,5% ou qualidade global &lt; 4,5 pontos (Anexos II e III)<br>
+      • Espécie: "100% (espécie)" ou "predominantemente (espécie)" · <strong>Ponto de torra obrigatório</strong> (Anexo IV)<br>
+      • Análise obrigatória: soma de matérias estranhas e impurezas e ausência de elementos que indiquem fraude (Anexo I) · Descafeinado: declarar "Descafeinado" no painel principal<br>
+      • Glúten: declarar "CONTÉM GLÚTEN" ou "NÃO CONTÉM GLÚTEN" (Lei 10.674/2003) · Alergênicos conforme RDC 727/2022<br>
+      • Microbiologia: IN 161/2022, cat. 17.b · Contaminantes: IN 160/2022 · Informação nutricional: bebida pronta (IN 75/2020, Anexo V)`,
     subtipo: {
       label: 'Embalagem / apresentação:',
       opcoes: [
@@ -2380,11 +2395,11 @@ const TEMPLATES = {
       aspecto: 'Grãos inteiros, uniformes, coloração marrom característica conforme grau de torra, sem excesso de grãos defeituosos',
       sabor: 'Sabor e aroma típicos de café torrado, característicos da torra e origem, livres de odores estranhos, ranço ou mofo',
       alergenicos: 'NÃO CONTÉM ALERGÊNICOS declarados. PODE CONTER traços de outros grãos processados na mesma linha.',
-      glutenlactose: 'NÃO CONTÉM GLÚTEN. NÃO CONTÉM LACTOSE.',
+      glutenlactose: 'NÃO CONTÉM GLÚTEN.',
       emb1: 'Embalagem aluminizada com válvula desgasificadora, hermeticamente selada com atmosfera de nitrogênio',
       emb2: 'Saco de ráfia ou papel kraft reforçado — 25 kg (industrial) · Caixa de papelão para varejo',
       armazenamento: 'Armazenar em local seco, fresco (≤ 25°C) e arejado, ao abrigo de luz, calor, umidade e odores externos. Após aberto, armazenar em recipiente hermético. Não refrigerar.',
-      obs: 'CAFÉ EM GRÃO — Moer imediatamente antes do preparo para preservar aroma e sabor.\nCONTÉM CAFEÍNA — presença natural do café.\nESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+      obs: 'CAFÉ EM GRÃO — Moer imediatamente antes do preparo para preservar aroma e sabor.\nCONTÉM CAFEÍNA — presença natural do café.',
       validade: '12 meses (embalagem lacrada) · Após aberto: consumir em até 60 dias',
       preparo: 'Moa os grãos imediatamente antes do preparo.\nCafé coado: 10 g para 100 ml de água filtrada quente (90–95°C). Espresso: 7–10 g / 30 ml.',
     }
@@ -2924,6 +2939,12 @@ function ftpSecME(num) {
 // ===== FIM MATÉRIAS ESTRANHAS =====
 
 // ===== TABELA NUTRICIONAL E SELO SIF — revisão nov/2026 (RDC 429/2020 · IN 75/2020) =====
+const FABRICANTES = {
+  dms:     { nome: 'DMS Indústria de Alimentos Ltda',     cnpj: '33.174.960/0001-27', end: 'Rua Beta, 387, Vila Paris, Contagem/MG, CEP 32.372-090' },
+  mfparis: { nome: 'MFPARIS Indústria de Alimentos Ltda', cnpj: '26.855.558/0001-42', end: 'Rua Beta, 378, Vila Paris, Contagem/MG, CEP 32.372-090' },
+};
+const _fabPadrao = (tipo) => /^cafe/.test(tipo) ? 'mfparis' : 'dms';
+const TIPOS_LACTEOS = ['leite-integral','leite-instantaneo','leite-desnatado','composto-sem','composto-com','mistura','soro-derivados'];
 const TIPOS_SIF = ['leite-integral','leite-instantaneo','leite-desnatado','composto-sem','composto-com','mistura'];
 // modo: padrao (100 g + porção + %VD) | preparo | sem100 (só porção + %VD) | espessante (100 mL** = porção) | cafe (bebida: 100 ml**, 200 ml, %VD)
 // lupa: limites (obrigatória se atingir) | proibida | nao
@@ -3152,8 +3173,20 @@ function ftpDocCompacto(o) {
   fq.push(['Proteínas / lipídeos (%)', f2(T.ptn) + ' / ' + f2(T.gt) + ' <span style="font-size:7px">(calculado)</span>']);
   if (_fv(o.ph)) fq.push(['pH', _fv(o.ph)]);
   if (_fv(o.acidez)) fq.push(['Acidez total titulável', _fv(o.acidez)]);
-  if (cafe) fq.push(['Partículas queimadas', o.particulas]);
+  if (cafe) fq.push(['Matérias estranhas e impurezas', 'Máx. 1,0%'], ['Elementos estranhos', 'Ausência'], ['Extrato aquoso', 'Mín. 20%'], ['Cafeína', 'Mín. 0,5%']);
+  if (TIPOS_LACTEOS.includes(o.tipo) && _fv(o.particulas)) fq.push(['Partículas queimadas', _fv(o.particulas)]);
   const reg = o.ehSIF ? 'SIF 5460' : '—';
+  let obsTxt = o.obs;
+  if (cafe) {
+    const cd = o.cafeDados || {};
+    const grupo = o.tipo === 'cafe-torrado' ? 'Torrado em Grão' : 'Torrado e Moído';
+    const partes = ['Grupo: ' + grupo];
+    if (cd.tipo) partes.push('Tipo: ' + cd.tipo);
+    partes.push(cd.especie ? 'Espécie: ' + cd.especie : 'Espécie: NÃO INFORMADA (obrigatória)');
+    partes.push(cd.torra ? 'Ponto de torra: ' + cd.torra : 'Ponto de torra: NÃO INFORMADO (obrigatório)');
+    if (cd.moagem && o.tipo !== 'cafe-torrado') partes.push('Moagem: ' + cd.moagem);
+    obsTxt = 'Café — ' + partes.join(' · ') + (obsTxt && obsTxt !== '—' ? '<br>' + obsTxt : '');
+  }
   const meParts = _ftpPares(ftpSecME(6));
   const id1 = [
     ['Denominação de venda', '<b>' + o.denominacao + '</b>'], ['Marca', o.marca], ['Registro', o.registro],
@@ -3162,6 +3195,8 @@ function ftpDocCompacto(o) {
     ['Classificação legal', '<b>' + o.classe + ' — ANVISA (RDC 429/2020, IN 75/2020, RDC 778/2023 e IN 211/2023)</b>'],
     ['Alergênicos · glúten · lactose', o.alergenicos + ' · ' + o.glutenlactose],
     ['Aspecto / cor', o.aspecto], ['Sabor e odor', o.sabor]];
+  const _fab = FABRICANTES[o.fabricante] || FABRICANTES[_fabPadrao(o.tipo)];
+  const id3 = [['Fabricante', '<b>' + _fab.nome + '</b> · CNPJ ' + _fab.cnpj + ' · ' + _fab.end]];
   return `<div id="ftpDocInner" style="font-family:Arial,Helvetica,sans-serif;font-size:8.5px;color:#000;max-width:718px;margin:0 auto;background:#fff;padding:0">
     <div style="display:flex;align-items:center;border-bottom:2px solid #1e3a8a;padding-bottom:4px">
       <div style="background:#1e3a8a;color:#fff;padding:5px 9px;display:flex;flex-direction:column;align-items:center;min-width:64px">
@@ -3174,7 +3209,7 @@ function ftpDocCompacto(o) {
       </div>
       <div style="text-align:right;font-size:8px;line-height:1.45;color:#000">Código: <b>${o.codigo}</b> · Rev.: <b>${o.revisao}</b><br>Data: <b>${o.data}</b> · Pág. <b>1/1</b></div>
     </div>
-    <div style="${SB}"><div style="${ST}">1. Identificação do produto</div>${grid(id1, '2fr 1.2fr 1fr 1fr 1.2fr')}${grid(id2, '1.6fr 1.6fr 1fr 1fr')}</div>
+    <div style="${SB}"><div style="${ST}">1. Identificação do produto</div>${grid(id1, '2fr 1.2fr 1fr 1fr 1.2fr')}${grid(id2, '1.6fr 1.6fr 1fr 1fr')}${grid(id3, '1fr')}</div>
     <div style="${SB}"><div style="${ST}">2. Lista de ingredientes</div><div style="padding:3px 6px;line-height:1.35">${o.ingList}<br><b>${o.alergenicos}</b></div></div>
     ${nu.wide ? `<div style="${SB}"><div style="${ST}">3. Informação nutricional</div><div style="padding:4px">${nu.tabela}</div></div>
     <div style="display:flex;gap:4px;align-items:stretch">
@@ -3191,7 +3226,7 @@ function ftpDocCompacto(o) {
     ${sec(6, meParts, 3)}
     ${sec(7, _ftpPares(ftpSecContam()), 4)}
     <div style="${SB}"><div style="${ST}">8. Embalagem, armazenamento e preparo</div>${grid([['Primária', o.emb1], ['Secundária', o.emb2], ['Paletização', o.paletizacao]], '1.3fr 1.3fr 1.4fr')}${grid([['Armazenamento e transporte', o.armazenamento], ['Modo de preparo', o.preparo]], '1fr 1fr')}</div>
-    <div style="${SB}"><div style="${ST}">9. Informações obrigatórias e restrições</div><div style="padding:3px 6px;font-weight:700;line-height:1.35">${o.obs}</div></div>
+    <div style="${SB}"><div style="${ST}">9. Informações obrigatórias e restrições</div><div style="padding:3px 6px;font-weight:700;line-height:1.35">${obsTxt}</div></div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px"><div style="width:240px;text-align:center"><div style="border-bottom:1px solid #000;min-height:20px;font-weight:700;font-size:9px">${o.aprovado || '&nbsp;'}</div><div style="font-size:7.5px;color:#000">Responsável Técnico — Aprovação</div></div></div>
     <div style="border-top:1px solid #000;margin-top:5px;padding-top:2px;font-size:7px;color:#000;display:flex;justify-content:space-between"><span>Grupo MF Paris Alimentos · DMS Indústria de Alimentos · Contagem/MG</span><b>CÓPIA NÃO CONTROLADA</b><span>Gerado em ${o.data}</span></div>
   </div>`;
@@ -3337,7 +3372,10 @@ function selTipo(tipo) {
   if (_pd && _pEl && _mEl) { _pEl.value = _pd[0].g; _mEl.value = _pd[0].medida; if (_tEl) _tEl.value = _pd[0].titulo || ''; _porcoesExtra = _pd.slice(1).map(x => ({ ...x })); }
   else { if (_tEl) _tEl.value = ''; _porcoesExtra = []; }
   const _cpf = document.getElementById('cafePoField'); if (_cpf) _cpf.style.display = (_nc && _nc.modo === 'cafe') ? '' : 'none';
+  const _crb = document.getElementById('cafeRotuloBox'); if (_crb) _crb.style.display = (_nc && _nc.modo === 'cafe') ? '' : 'none';
+  const _cmg = document.getElementById('cafeMoagemField'); if (_cmg) _cmg.style.display = (tipo === 'cafe-torrado') ? 'none' : '';
   renderPorcoesExtra();
+  { const _fb = document.getElementById('p_fabricante'); if (_fb) _fb.value = _fabPadrao(tipo); }
 
   // Tipos com subtipo de IDENTIDADE (cacau, achocolatado, leite instantâneo)
   // também precisam de seletor de embalagem secundário
@@ -4124,8 +4162,8 @@ function renderStep4(){
     'maltodextrina':     'Maltodextrina em Pó · ANVISA RDC 429/2020',
     'glicose':           'Glicose / Dextrose em Pó · ANVISA RDC 429/2020',
     'suplemento-po':     'Suplemento Alimentar em Pó · ANVISA RDC 243/2018 · IN 161/2022',
-    'cafe-torrado-moido':'Café Torrado e Moído · RDC ANVISA 277/2005 · IN MAPA 16/2010',
-    'cafe-torrado':      'Café Torrado (grão) · RDC ANVISA 277/2005 · IN MAPA 16/2010',
+    'cafe-torrado-moido':'Café Torrado e Moído · Portaria MAPA 570/2022 · RDC ANVISA 716/2022 · RDC 727/2022 · RDC 429/2020 e IN 75/2020 · Lei 10.674/2003 · Decreto 12.709/2025',
+    'cafe-torrado':      'Café Torrado em Grão · Portaria MAPA 570/2022 · RDC ANVISA 716/2022 · RDC 727/2022 · RDC 429/2020 e IN 75/2020 · Lei 10.674/2003 · Decreto 12.709/2025',
   };
 
 
@@ -4151,6 +4189,8 @@ function renderStep4(){
     alergenicos: gv('p_alergenicos'), glutenlactose: gv('p_glutenlactose'),
     aspecto: gv('p_aspecto'), sabor: gv('p_sabor'), ingList,
     umidade: gv('p_umidade'), ph: gv('p_ph'), acidez: gv('p_acidez'), particulas: gv('p_particulas','Máx. Disco B'),
+    fabricante: gv('p_fabricante') || _fabPadrao(tipoSel || classeSel),
+    cafeDados: { tipo: gv('p_cafe_tipo'), especie: gv('p_cafe_especie').trim(), torra: gv('p_cafe_torra').trim(), moagem: gv('p_cafe_moagem').trim() },
     emb1: gv('p_emb1','—'), emb2: gv('p_emb2','—'),
     paletizacao: gv('p_paletizacao','Pallet descartável · filme stretch · fardo plástico'),
     armazenamento: gv('p_armazenamento','—'), preparo: gv('p_preparo_txt','—'),
