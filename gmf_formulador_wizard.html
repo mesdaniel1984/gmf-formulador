@@ -573,6 +573,14 @@ tr:last-child td{border-bottom:none}
       <div class="field"><label>Gramatura / Embalagem</label><input id="p_gramatura" type="text" value="25 kg"></div>
       <div class="field"><label>Validade</label><input id="p_validade" type="text" value="12 meses"></div>
     </div>
+    <div style="margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">Padrões físico-químicos do produto <span style="font-weight:400;color:#6b7280">(opcional — o item só aparece na ficha se for preenchido)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:12px">
+        <div class="field"><label>Umidade (%)</label><input id="p_umidade" type="text" placeholder="Ex: Máx. 4,0"></div>
+        <div class="field"><label>pH</label><input id="p_ph" type="text" placeholder="Ex: 6,0 a 7,0"></div>
+        <div class="field"><label>Acidez total titulável</label><input id="p_acidez" type="text" placeholder="Ex: Máx. 18 mL NaOH 0,1N / 10 g"></div>
+      </div>
+    </div>
     <div id="porcoesBox" style="margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:8px;border:1px solid var(--border)">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px">
         <div class="field"><label>Título da coluna da porção (opcional)</label><input id="p_porcao_titulo" type="text" placeholder="Ex: Textura Néctar"></div>
@@ -1514,7 +1522,7 @@ function _hashReceitaAtual() {
     porcao: document.getElementById('p_porcao').value,
     peso: document.getElementById('p_peso').value,
     medida: document.getElementById('p_medida').value,
-    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || ''),
+    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || '') + '|' + gv('p_umidade') + '|' + gv('p_ph') + '|' + gv('p_acidez'),
     tipo: tipoSel,   // inclui tipo para detectar mudança de classificação
     classe: classeSel,
     ings: receita.map(r=>({n:_nomeExibicao(r.d), q:r.qtde}))
@@ -1582,7 +1590,7 @@ function novoProduto() {
   _prodOrigem = null;
   _prodOrigemHash = null;
   receita = [];
-  ['p_nome','p_codigo','p_denominacao'].forEach(id=>{
+  ['p_nome','p_codigo','p_denominacao','p_umidade','p_ph','p_acidez'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('p_revisao').value='00';
@@ -1737,6 +1745,7 @@ function editarProduto(id) {
   document.getElementById('p_porcao').value = prod.pesoPorcao;
   document.getElementById('p_medida').value = prod.medida;
   document.getElementById('p_peso').value = prod.pesoTotal;
+  ['umidade','ph','acidez'].forEach(k => { const el = document.getElementById('p_' + k); if (el) el.value = prod[k] || ''; });
   { const _t = document.getElementById('p_porcao_titulo'); if (_t) _t.value = prod.porcaoTitulo || '';
     _porcoesExtra = (prod.porcoesExtra || []).map(x => ({ ...x })); renderPorcoesExtra();
     const _cp = document.getElementById('p_cafe_po'); if (_cp && prod.cafePo) _cp.value = prod.cafePo; atualizarNPorcAuto(); }
@@ -1898,6 +1907,9 @@ function salvarProdutoAtual() {
     emb2:          document.getElementById('p_emb2')?.value || '',
     embalagensSel: getEmbalagensSelecionadas(),
     embOutra:      getEmbalagensSelecionadas().includes('st-outra') ? (() => { const o = _outraGramas(); return o ? { qtd: o.qtd, un: o.un } : null; })() : null,
+    umidade: (document.getElementById('p_umidade')?.value || '').trim(),
+    ph: (document.getElementById('p_ph')?.value || '').trim(),
+    acidez: (document.getElementById('p_acidez')?.value || '').trim(),
     porcaoTitulo:  (document.getElementById('p_porcao_titulo')?.value || '').trim(),
     porcoesExtra:  (_porcoesExtra || []).map(x => ({ ...x })),
     cafePo:        parseFloat(document.getElementById('p_cafe_po')?.value) || null,
@@ -3134,7 +3146,12 @@ function ftpDocCompacto(o) {
   const nu = ftpSecNutri({ ...o.nut, partes: true });
   const T = o.T;
   const cafe = /^cafe/.test(o.tipo);
-  const fq = [['Umidade (%)', o.umidade], ['Proteínas / lipídeos (%)', f2(T.ptn) + ' / ' + f2(T.gt) + ' <span style="font-size:7px">(calculado)</span>'], ['pH (solução 10%)', o.ph]];
+  const _fv = (v) => String(v == null ? '' : v).trim();
+  const fq = [];
+  if (_fv(o.umidade)) fq.push(['Umidade (%)', _fv(o.umidade)]);
+  fq.push(['Proteínas / lipídeos (%)', f2(T.ptn) + ' / ' + f2(T.gt) + ' <span style="font-size:7px">(calculado)</span>']);
+  if (_fv(o.ph)) fq.push(['pH', _fv(o.ph)]);
+  if (_fv(o.acidez)) fq.push(['Acidez total titulável', _fv(o.acidez)]);
   if (cafe) fq.push(['Partículas queimadas', o.particulas]);
   const reg = o.ehSIF ? 'SIF 5460' : '—';
   const meParts = _ftpPares(ftpSecME(6));
@@ -4133,7 +4150,7 @@ function renderStep4(){
     validade: gv('p_validade','12 meses'), classe: classeNomes[classeSel]||'—',
     alergenicos: gv('p_alergenicos'), glutenlactose: gv('p_glutenlactose'),
     aspecto: gv('p_aspecto'), sabor: gv('p_sabor'), ingList,
-    umidade: gv('p_umidade','Máx. 4,0'), ph: gv('p_ph','6,0 a 7,0'), particulas: gv('p_particulas','Máx. Disco B'),
+    umidade: gv('p_umidade'), ph: gv('p_ph'), acidez: gv('p_acidez'), particulas: gv('p_particulas','Máx. Disco B'),
     emb1: gv('p_emb1','—'), emb2: gv('p_emb2','—'),
     paletizacao: gv('p_paletizacao','Pallet descartável · filme stretch · fardo plástico'),
     armazenamento: gv('p_armazenamento','—'), preparo: gv('p_preparo_txt','—'),
