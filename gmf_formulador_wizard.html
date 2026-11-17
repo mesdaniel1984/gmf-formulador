@@ -567,11 +567,21 @@ tr:last-child td{border-bottom:none}
       <div class="field"><label>Denominação de venda</label><input id="p_denominacao" type="text" placeholder="Ex: Composto Lácteo com Adição"></div>
       <div class="field"><label>Marca</label><input id="p_marca" type="text" placeholder="Ex: Grupo MF Paris"></div>
       <div class="field"><label>Registro / SIF</label><input id="p_registro" type="text" placeholder="Ex: SIF 5460"></div>
-      <div class="field"><label>Porção (g)</label><input id="p_porcao" type="number" value="30" min="1" oninput="recalc()"></div>
-      <div class="field"><label>Medida caseira</label><input id="p_medida" type="text" value="2 colheres de sopa"></div>
-      <div class="field"><label>Peso total embalagem (g)</label><input id="p_peso" type="number" value="1000" min="1"></div>
+      <div class="field"><label>Porção (g ou ml)</label><input id="p_porcao" type="number" value="30" min="1" oninput="recalc();atualizarNPorcAuto()"></div>
+      <div class="field"><label>Medida caseira</label><input id="p_medida" type="text" value="2 colheres de sopa" placeholder="Ex: 1 colher de chá"></div>
+      <div class="field"><label>Peso total embalagem (g)</label><input id="p_peso" type="number" value="1000" min="1" oninput="atualizarNPorcAuto()"></div>
       <div class="field"><label>Gramatura / Embalagem</label><input id="p_gramatura" type="text" value="25 kg"></div>
       <div class="field"><label>Validade</label><input id="p_validade" type="text" value="12 meses"></div>
+    </div>
+    <div id="porcoesBox" style="margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:8px;border:1px solid var(--border)">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px">
+        <div class="field"><label>Título da coluna da porção (opcional)</label><input id="p_porcao_titulo" type="text" placeholder="Ex: Textura Néctar"></div>
+        <div class="field"><label>Porções por embalagem (automático: peso ÷ porção)</label><input id="p_nporc_auto" type="text" readonly style="background:#eee"></div>
+        <div class="field" id="cafePoField" style="display:none"><label>Pó por porção de bebida (g)</label><input id="p_cafe_po" type="number" min="1" step="any" value="20" oninput="atualizarNPorcAuto()"></div>
+      </div>
+      <div id="porcoesExtra"></div>
+      <button class="btn" type="button" onclick="addPorcaoExtra()" style="height:32px;font-size:12px">＋ Adicionar outra porção (ex.: outra textura)</button>
+      <div style="font-size:11px;color:#6b7280;margin-top:6px">Com mais de uma porção, a tabela nutricional mostra um bloco por porção, com título, porções por embalagem e medida caseira de cada uma.</div>
     </div>
   </div>
 </div>
@@ -1236,6 +1246,46 @@ function irParaFormuladorDosIngredientes() {
   renderProdutos();
 }
 
+
+// ── Composição completa do ingrediente (por 100 g) — campos opcionais ──
+const NUTRI_EXT = [
+ ['Carboidratos e açúcares', [
+  ['pol','Polióis','g'],['pdx','Polidextrose','g'],['amido','Amido','g'],['galact','Galactose','g'],['lact','Lactose','g']]],
+ ['Gorduras', [
+  ['gmono','Gorduras monoinsaturadas','g'],['gpoli','Gorduras poli-insaturadas','g'],['ala','Ômega 3 - Ácido Alfa-Linolênico / ALA','g'],
+  ['epa','EPA - Ácido Eicosapentaenoico','mg'],['dha','DHA - Ácido Docosahexaenoico','mg'],['o6','Ômega 6 - Ácido Linoleico','g'],
+  ['o9','Ômega 9 - Ácido Oleico','g'],['col','Colesterol','mg']]],
+ ['Fibras', [['fis','Fibras solúveis','g'],['fii','Fibras insolúveis','g']]],
+ ['Vitaminas', [
+  ['vA','Vitamina A','µg RAE'],['vD','Vitamina D','µg'],['vE','Vitamina E','mg alfa-tocoferol'],['vK','Vitamina K','µg'],['vC','Vitamina C','mg'],
+  ['b1','Tiamina - Vitamina B1','mg'],['b2','Riboflavina - Vitamina B2','mg'],['b3','Niacina - Vitamina B3','mg'],['b5','Ácido pantotênico - Vitamina B5','mg'],
+  ['b6','Vitamina B6','mg'],['b7','Biotina - Vitamina B7','µg'],['b9','Ácido fólico - Vitamina B9','µg DFE'],['b12','Vitamina B12','µg'],['colina','Colina','mg']]],
+ ['Minerais', [
+  ['boro','Boro','mg'],['ca','Cálcio','mg'],['cl','Cloreto','mg'],['cu','Cobre','µg'],['cr','Cromo','µg'],['fe','Ferro','mg'],['fl','Flúor','mg'],
+  ['p','Fósforo','mg'],['i','Iodo','µg'],['mgn','Magnésio','mg'],['mn','Manganês','mg'],['mo','Molibdênio','µg'],['k','Potássio','mg'],
+  ['se','Selênio','µg'],['si','Silício','mg'],['zn','Zinco','mg']]],
+ ['Compostos bioativos', [
+  ['cafeina','Cafeína','mg'],['creatina','Creatina','g'],['carnitina','Carnitina','mg'],['q10','Coenzima Q10','mg'],['luteina','Luteína','mg'],
+  ['zeax','Zeaxantina','mg'],['licop','Licopeno','mg'],['astax','Astaxantina','mg'],['fitoest','Fitoesteróis','g'],['antoc','Antocianinas / Compostos Fenólicos Totais','mg']]],
+ ['Aminoácidos', [
+  ['aa_ala','Alanina','g'],['aa_arg','Arginina','g'],['aa_asp','Ácido Aspártico','g'],['aa_cys','Cisteína','g'],['aa_glu','Glutamina / Ácido Glutâmico','g'],
+  ['aa_gly','Glicina','g'],['aa_his','Histidina','g'],['aa_ile','Isoleucina','g'],['aa_leu','Leucina','g'],['aa_lys','Lisina','g'],['aa_met','Metionina','g'],
+  ['aa_phe','Fenilalanina','g'],['aa_pro','Prolina','g'],['aa_ser','Serina','g'],['aa_thr','Treonina','g'],['aa_trp','Triptofano','g'],['aa_tyr','Tirosina','g'],
+  ['aa_val','Valina','g'],['aa_hyl','Hidroxilisina','g'],['aa_hyp','Hidroxiprolina','g'],['aa_tau','Taurina','g']]],
+];
+const EXT_KEYS = NUTRI_EXT.flatMap(g => g[1].map(c => 'x_' + c[0]));
+function montarCamposExtraIng() {
+  const wrap = document.getElementById('ing_ext_wrap');
+  if (!wrap || wrap.dataset.ok) return;
+  wrap.dataset.ok = '1';
+  wrap.innerHTML = '<details style="margin-bottom:16px"><summary style="cursor:pointer;font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:8px">➕ Composição completa (opcional) — carboidratos, gorduras, fibras, vitaminas, minerais, bioativos e aminoácidos</summary>' +
+    NUTRI_EXT.map(([grupo, campos]) => `<div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 6px">${grupo}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">` +
+      campos.map(([k, l, u]) => `<div class="field"><label>${l} (${u}/100g)</label><input id="ing_x_${k}" type="number" step="any" min="0" placeholder="0"></div>`).join('') + '</div>').join('') +
+    '</details>';
+}
+document.addEventListener('DOMContentLoaded', montarCamposExtraIng);
+
 async function salvarIngrediente() {
   if (!_currentUser) { alert('Faça login para salvar ingredientes.'); return; }
   const nome = document.getElementById('ing_nome')?.value?.trim();
@@ -1269,6 +1319,8 @@ async function salvarIngrediente() {
     alergenicos: Array.from(document.querySelectorAll('[id^="ing_al_"]:checked')).map(el=>el.value),
     cadastradoPor: _currentUser.email,
   };
+  montarCamposExtraIng();
+  NUTRI_EXT.forEach(g => g[1].forEach(([k]) => { const v = parseFloat(document.getElementById('ing_x_' + k)?.value); if (v) ing['x_' + k] = v; }));
   const { error } = await _sb.from('ingredientes_custom').upsert({nome:ing.n,dados:ing,usuario_id:_currentUser.id},{onConflict:'nome'});
   const msg = document.getElementById('ing_msg');
   if (error) { msg.style.color='#dc2626'; msg.textContent='❌ '+error.message; }
@@ -1318,6 +1370,8 @@ function editarIngCustom(dadosEncoded) {
   set('ing_tr', d.tr);
   set('ing_fi', d.fi);
   set('ing_na', d.na);
+  montarCamposExtraIng();
+  EXT_KEYS.forEach(k => set('ing_' + k, d[k]));
   const s = document.getElementById('ing_src'); if(s) s.value = d.src||'Usuário';
   // Navegar para a tela de ingredientes
   irParaIngredientes();
@@ -1334,6 +1388,7 @@ function limparFormIngrediente() {
   const sf2=document.getElementById('ing_status_fisico');if(sf2)sf2.value='';
   const sa2=document.getElementById('ing_alergenico_principal');if(sa2)Array.from(sa2.options).forEach(o=>o.selected=false);
   document.querySelectorAll('[id^="ing_al_"]').forEach(el=>el.checked=false);;
+  EXT_KEYS.forEach(k=>{const el=document.getElementById('ing_'+k); if(el) el.value='';});
   const s=document.getElementById('ing_src'); if(s) s.value='FT';
 }
 
@@ -1459,6 +1514,7 @@ function _hashReceitaAtual() {
     porcao: document.getElementById('p_porcao').value,
     peso: document.getElementById('p_peso').value,
     medida: document.getElementById('p_medida').value,
+    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || ''),
     tipo: tipoSel,   // inclui tipo para detectar mudança de classificação
     classe: classeSel,
     ings: receita.map(r=>({n:_nomeExibicao(r.d), q:r.qtde}))
@@ -1681,6 +1737,9 @@ function editarProduto(id) {
   document.getElementById('p_porcao').value = prod.pesoPorcao;
   document.getElementById('p_medida').value = prod.medida;
   document.getElementById('p_peso').value = prod.pesoTotal;
+  { const _t = document.getElementById('p_porcao_titulo'); if (_t) _t.value = prod.porcaoTitulo || '';
+    _porcoesExtra = (prod.porcoesExtra || []).map(x => ({ ...x })); renderPorcoesExtra();
+    const _cp = document.getElementById('p_cafe_po'); if (_cp && prod.cafePo) _cp.value = prod.cafePo; atualizarNPorcAuto(); }
 
   // Restaurar campos do produto salvos (embalagem, validade, armazenamento, etc.)
   const _resto = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== '') el.value = val; };
@@ -1742,6 +1801,12 @@ function editarProduto(id) {
     prod.embalagensSel.forEach(stId => { const btn = document.getElementById(stId); if (btn) { btn.classList.add('btn-primary'); btn.classList.remove('btn'); } });
   }
 
+  if (prod.embOutra && prod.embOutra.qtd > 0 && (prod.embalagensSel || []).includes('st-outra')) {
+    const _ob = document.getElementById('st-outra') || document.getElementById('emb-st-outra');
+    mostrarOutraEmb(true, _ob);
+    const _q = document.getElementById('emb_outra_qtd'), _u = document.getElementById('emb_outra_un');
+    if (_q) _q.value = prod.embOutra.qtd; if (_u) _u.value = prod.embOutra.un || 'g';
+  }
   // Restaurar marca e registro SEMPRE do produto
   const _mEl = document.getElementById('p_marca'); if (_mEl) _mEl.value = prod.marca || 'Grupo MF Paris';
   const _rEl = document.getElementById('p_registro'); if (_rEl) _rEl.value = prod.registro || 'SIF 5460';
@@ -1832,7 +1897,10 @@ function salvarProdutoAtual() {
     emb1:          document.getElementById('p_emb1')?.value || '',
     emb2:          document.getElementById('p_emb2')?.value || '',
     embalagensSel: getEmbalagensSelecionadas(),
-    embalagensSel: getEmbalagensSelecionadas(),
+    embOutra:      getEmbalagensSelecionadas().includes('st-outra') ? (() => { const o = _outraGramas(); return o ? { qtd: o.qtd, un: o.un } : null; })() : null,
+    porcaoTitulo:  (document.getElementById('p_porcao_titulo')?.value || '').trim(),
+    porcoesExtra:  (_porcoesExtra || []).map(x => ({ ...x })),
+    cafePo:        parseFloat(document.getElementById('p_cafe_po')?.value) || null,
     validade:      document.getElementById('p_validade')?.value || '',
     armazenamento: document.getElementById('p_armazenamento')?.value || '',
     elaborado:     document.getElementById('p_elaborado')?.value || '',
@@ -2845,7 +2913,7 @@ function ftpSecME(num) {
 
 // ===== TABELA NUTRICIONAL E SELO SIF — revisão nov/2026 (RDC 429/2020 · IN 75/2020) =====
 const TIPOS_SIF = ['leite-integral','leite-instantaneo','leite-desnatado','composto-sem','composto-com','mistura'];
-// modo: padrao (100 g + porção + %VD) | preparo | sem100 (só porção + %VD) | espessante | voluntaria
+// modo: padrao (100 g + porção + %VD) | preparo | sem100 (só porção + %VD) | espessante (100 mL** = porção) | cafe (bebida: 100 ml**, 200 ml, %VD)
 // lupa: limites (obrigatória se atingir) | proibida | nao
 const NUTRI_CFG = {
   'leite-integral':    { modo:'padrao', lupa:'proibida', porcao:26, medida:'2 colheres de sopa' },
@@ -2861,9 +2929,12 @@ const NUTRI_CFG = {
   'suplemento-po':     { modo:'sem100', lupa:'proibida' },
   'maltodextrina':     { modo:'padrao', lupa:'nao', porcao:5, medida:'1 colher de chá' },
   'glicose':           { modo:'padrao', lupa:'nao', porcao:5, medida:'1 colher de chá' },
-  'cafe-torrado-moido':{ modo:'voluntaria', lupa:'nao' },
-  'cafe-torrado':      { modo:'voluntaria', lupa:'nao' },
-  'espessante':        { modo:'espessante', lupa:'nao' },
+  'cafe-torrado-moido':{ modo:'cafe', lupa:'nao', porcao:200, medida:'1 xícara de chá' },
+  'cafe-torrado':      { modo:'cafe', lupa:'nao', porcao:200, medida:'1 xícara de chá' },
+  'espessante':        { modo:'espessante', lupa:'nao', porcao:4, medida:'1 colher de chá', porcoesDef:[
+    { titulo:'Textura Néctar', g:4, medida:'1 colher de chá' },
+    { titulo:'Textura Mel',    g:6, medida:'1 + 1/2 colher de chá' },
+    { titulo:'Textura Pudim',  g:8, medida:'2 colheres de chá' } ] },
   'soro-derivados':    { modo:'padrao', lupa:'limites' },
 };
 const _vfmt = (n, d) => String(Number(n).toFixed(d)).replace('.', ',');
@@ -2919,45 +2990,82 @@ function ftpAlertasFrontais(tipo, T) {
   return a;
 }
 
+// Nutrientes "demais" (todos exceto valor energético e carboidratos): quando todos forem não significativos, as linhas
+// são omitidas e a frase abaixo da tabela lista os ausentes (RDC 429/2020 + IN 75/2020 — Anexo IV)
+const _DEMAIS = [['act','açúcares totais'],['acad','açúcares adicionados'],['ptn','proteínas'],['gt','gorduras totais'],['gs','gorduras saturadas'],['tr','gorduras trans'],['fi','fibras alimentares'],['na','sódio']];
+function _listaE(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' e ' + a[a.length - 1]; }
+function _nPorcEmb(pesoTotal, g) { const n = Math.round((Number(pesoTotal) || 0) / (Number(g) || 1)); return n > 0 ? n : '—'; }
+const _gfmt = (g) => Number.isInteger(Number(g)) ? String(Number(g)) : _vfmt(g, 1);
+
 function ftpSecNutri(o) {
-  // o: { tipo, T, P100, pesoTotal, medida, alertas, ehSIF }
+  // o: { tipo, T, P100, pesoTotal, medida, alertas, ehSIF, porcoes:[{titulo,g,medida}], poCafe }
   const cfg = NUTRI_CFG[o.tipo] || { modo: 'padrao', lupa: 'limites' };
-  const T = o.T, pp = o.P100;
-  const nPorc = Math.round(o.pesoTotal / pp) || '—';
+  const cafe = cfg.modo === 'cafe', esp = cfg.modo === 'espessante';
+  const Z = {}; Object.keys(o.T).forEach(k => Z[k] = 0);
+  const T = cafe ? Z : o.T;                         // café infusionado: todos os nutrientes declarados como 0
+  const un = cafe ? 'ml' : 'g';
+  const blocos = (o.porcoes && o.porcoes.length) ? o.porcoes : [{ titulo: '', g: o.P100, medida: o.medida }];
+  const multi = blocos.length > 1;
   const base = 'font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff';
   const cell = 'border-bottom:.5px solid #000;padding:1px 3px;height:13px;font-size:8pt;color:#000';
-  let cab, linhas, notas = [];
-  const rowsPadrao = (cols) => _NR.map(([l, k, vd, n, t]) => {
-    const tds = cols.map(c => {
-      if (c.t === 'cem') return `<td style="${cell};text-align:center">${_nRound(T[k], t, T)}</td>`;
-      if (c.t === 'porc') return `<td style="${cell};text-align:center">${_nRound(T[k] * c.g / 100, t, _sc(T, c.g))}</td>`;
-      return `<td style="${cell};text-align:center">${vd ? Math.round((T[k] * c.g / 100) / vd * 100) + '%' : '—'}</td>`;
-    }).join('');
+  const th = (t, extra) => `<th style="font-size:8pt;font-weight:700;text-align:center;border-bottom:1px solid #000;padding:1px 3px;color:#000;text-transform:none;letter-spacing:0;${extra || ''}">${t}</th>`;
+  const colsOf = cfg.modo === 'sem100' ? ['porc', 'vd'] : ['ref', 'porc', 'vd'];
+  const refLabel = cafe ? '100 ml**' : esp ? '100 mL**' : cfg.modo === 'preparo' ? '100 g**' : '100 g';
+  const tipoRow = {}; _NR.forEach(r => tipoRow[r[1]] = r[4]);
+  const refVal = (k, g) => esp ? T[k] * g / 100 : T[k];
+  const refS = (g) => esp ? _sc(T, g) : T;
+
+  // Omissão das linhas: café (tudo zero) ou "demais" todos não significativos em todas as colunas
+  const qnsTodos = _DEMAIS.every(([k]) => blocos.every(b => {
+    const S = _sc(T, b.g);
+    return _nRound(T[k] * b.g / 100, tipoRow[k], S) === '0' && _nRound(refVal(k, b.g), tipoRow[k], refS(b.g)) === '0';
+  }));
+  const ocultaDemais = cafe || qnsTodos;
+  const linhasMostrar = cafe ? [] : (qnsTodos ? _NR.filter(r => r[1] === 'kcal' || r[1] === 'cho') : _NR);
+
+  const nPor = (b) => _nPorcEmb(o.pesoTotal, cafe ? (o.poCafe || 20) : b.g);
+  const medidaTxt = (b) => `${b.medida || '—'}${cafe ? ' — preparado com ' + _gfmt(o.poCafe || 20) + ' g de pó' : ''}`;
+  const porcTxt = (b) => `Porção: ${_gfmt(b.g)} ${un} (${medidaTxt(b)})`;
+
+  const linhas = linhasMostrar.map(([l, k, vd, n, t]) => {
+    const tds = blocos.map(b => colsOf.map(c => {
+      if (c === 'ref') return `<td style="${cell};text-align:center">${_nRound(refVal(k, b.g), t, refS(b.g))}</td>`;
+      if (c === 'porc') return `<td style="${cell};text-align:center">${_nRound(T[k] * b.g / 100, t, _sc(T, b.g))}</td>`;
+      return `<td style="${cell};text-align:center">${vd ? Math.round((T[k] * b.g / 100) / vd * 100) + '%' : '—'}</td>`;
+    }).join('')).join('');
     return `<tr><td style="${cell};text-align:left">${_recuo(n)}${l}</td>${tds}</tr>`;
   }).join('');
-  const th = (t) => `<th style="font-size:8pt;font-weight:700;text-align:center;border-bottom:1px solid #000;padding:1px 3px;color:#000">${t}</th>`;
-  let titulo2 = `Porções por embalagem: cerca de ${nPorc}<br>Porção: ${_vfmt(pp, 0)} g (${o.medida})`;
+  const headCols = blocos.map(b => colsOf.map(c => c === 'ref' ? th(refLabel) : c === 'porc' ? th(_gfmt(b.g) + ' ' + un) : th('%VD*')).join('')).join('');
 
-  if (cfg.modo === 'espessante') {
-    const g3 = [4, 6, 8];
-    cab = `<tr><th></th>${th('100 g')}${g3.map(g => th(g + ' g') + th('%VD*')).join('')}</tr>`;
-    const lin = _NR.filter(r => r[1] === 'kcal' || r[1] === 'cho');
-    linhas = lin.map(([l, k, vd, n, t]) => `<tr><td style="${cell};text-align:left">${l}</td><td style="${cell};text-align:center">${_nRound(T[k], t, T)}</td>` +
-      g3.map(g => `<td style="${cell};text-align:center">${_nRound(T[k] * g / 100, t, _sc(T, g))}</td><td style="${cell};text-align:center">${vd ? Math.round((T[k] * g / 100) / vd * 100) + '%' : '—'}</td>`).join('') + '</tr>').join('');
-    titulo2 = 'Porções recomendadas: 4 g, 6 g e 8 g';
-    notas.push('Declaração obrigatória: valor energético e carboidratos (alimento para fins especiais).');
-  } else if (cfg.modo === 'sem100') {
-    cab = `<tr><th></th>${th(_vfmt(pp, 0) + ' g')}${th('%VD*')}</tr>`;
-    linhas = rowsPadrao([{ t: 'porc', g: pp }, { t: 'vd', g: pp }]);
-    titulo2 = `Porção: ${_vfmt(pp, 0)} g (${o.medida}) — quantidade diária recomendada`;
-    notas.push('Suplemento alimentar: sem coluna de 100 g (RDC 429/2020, art. 8º §1º). %VD pelos VDR do Anexo VIII para o grupo populacional do rótulo; declarar também nutrientes, substâncias bioativas e enzimas adicionados (art. 5º §3º).');
+  let cabecalho;
+  if (!multi) {
+    const b = blocos[0];
+    const suf = cfg.modo === 'sem100' ? ' — quantidade diária recomendada' : '';
+    cabecalho = `<div style="font-size:10pt;font-weight:700;text-align:center;text-transform:uppercase">Informação Nutricional</div>
+            <div style="font-size:8pt;text-align:center;margin-bottom:3px">${b.titulo ? '<b>' + b.titulo + '</b><br>' : ''}Porções por embalagem: cerca de ${nPor(b)}<br>${porcTxt(b)}${suf}</div>
+            <table style="width:100%;border-collapse:collapse;table-layout:fixed;color:#000"><tr><th style="width:${linhasMostrar.length ? '40%' : '0'};padding:0;border:0"></th>${headCols}</tr>${linhas}</table>`;
   } else {
-    cab = `<tr><th></th>${th(cfg.modo === 'preparo' ? '100 g**' : '100 g')}${th(_vfmt(pp, 0) + ' g')}${th('%VD*')}</tr>`;
-    linhas = rowsPadrao([{ t: 'cem', g: 100 }, { t: 'porc', g: pp }, { t: 'vd', g: pp }]);
-    if (cfg.modo === 'preparo') notas.push('**No alimento pronto para o consumo.');
-    if (cfg.modo === 'voluntaria') notas.push('Declaração nutricional voluntária (RDC 429/2020, Anexo I, item 6).');
+    const temTit = blocos.some(b => b.titulo);
+    const span = colsOf.length;
+    const tdb = 'font-size:8pt;text-align:center;border-bottom:.5px solid #000;padding:2px 3px;color:#000;text-transform:none;letter-spacing:0;';
+    cabecalho = `<table style="width:100%;border-collapse:collapse;table-layout:auto;color:#000">
+      <tr><th rowspan="${temTit ? 4 : 3}" style="font-size:9pt;font-weight:700;letter-spacing:0;text-transform:uppercase;text-align:center;border-bottom:1px solid #000;border-right:1px solid #000;padding:2px 4px;color:#000">Informação<br>Nutricional</th>` +
+      (temTit ? blocos.map(b => `<th colspan="${span}" style="${tdb}font-weight:700;border-left:1px solid #000">${b.titulo || ''}</th>`).join('') + '</tr><tr>' : '') +
+      blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">Porções por embalagem: cerca de ${nPor(b)}</td>`).join('') + '</tr><tr>' +
+      blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">${porcTxt(b)}</td>`).join('') + '</tr><tr>' +
+      headCols + `</tr>${linhas}</table>`;
   }
-  const nota6 = '*Percentual de valores diários fornecidos pela porção.';
+
+  const notas = [];
+  if (ocultaDemais) {
+    const lista = (cafe ? ['valor energético', 'carboidratos'] : []).concat(_DEMAIS.map(d => d[1]));
+    notas.push(`Não contém quantidades significativas de ${_listaE(lista)}.`);
+  }
+  notas.push('*Percentual de valores diários fornecidos pela porção.');
+  if (cfg.modo === 'preparo') notas.push('**No alimento pronto para o consumo.');
+  if (esp) notas.push('**No alimento pronto para o consumo.', 'Declaração obrigatória: valor energético e carboidratos (alimento para fins especiais).');
+  if (cafe) notas.push('**No alimento pronto para o consumo.', 'Bebidas não alcoólicas (chás, infusões) — IN 75/2020, Anexo V.');
+  if (cfg.modo === 'sem100') notas.push('Suplemento alimentar: sem coluna de 100 g (RDC 429/2020, art. 8º §1º). %VD pelos VDR do Anexo VIII para o grupo populacional do rótulo; declarar também nutrientes, substâncias bioativas e enzimas adicionados (art. 5º §3º).');
 
   // lupa
   let lupa;
@@ -2986,13 +3094,11 @@ function ftpSecNutri(o) {
       </svg>
       <div style="font-size:8pt"><div style="font-weight:700">SIF 5460</div><div>DMS Indústria<br>de Alimentos</div></div>
     </div>` : '';
-  const tabelaHtml = `<div style="${base};border:1px solid #000;padding:3px 5px;max-width:420px">
-            <div style="font-size:10pt;font-weight:700;text-align:center;text-transform:uppercase">Informação Nutricional</div>
-            <div style="font-size:8pt;text-align:center;margin-bottom:3px">${titulo2}</div>
-            <table style="width:100%;border-collapse:collapse;table-layout:auto;color:#000">${cab}${linhas}</table>
-            <div style="font-size:6pt;margin-top:3px;line-height:1.3">${[nota6].concat(notas).join('<br>')}</div>
+  const tabelaHtml = `<div style="${base};border:1px solid #000;padding:3px 5px;${multi ? 'width:100%' : 'width:390px;max-width:100%'}">
+            ${cabecalho}
+            <div style="font-size:6pt;margin-top:3px;line-height:1.3">${notas.join('<br>')}</div>
           </div>`;
-  if (o.partes) return { tabela: tabelaHtml, lupa, sif };
+  if (o.partes) return { tabela: tabelaHtml, lupa, sif, wide: multi };
   return `<div class="ftp-sec">
       <div class="ftp-sec-t">3. Informação Nutricional · Rotulagem Frontal</div>
       <div style="display:flex;gap:0;align-items:flex-start">
@@ -3053,13 +3159,17 @@ function ftpDocCompacto(o) {
     </div>
     <div style="${SB}"><div style="${ST}">1. Identificação do produto</div>${grid(id1, '2fr 1.2fr 1fr 1fr 1.2fr')}${grid(id2, '1.6fr 1.6fr 1fr 1fr')}</div>
     <div style="${SB}"><div style="${ST}">2. Lista de ingredientes</div><div style="padding:3px 6px;line-height:1.35">${o.ingList}<br><b>${o.alergenicos}</b></div></div>
+    ${nu.wide ? `<div style="${SB}"><div style="${ST}">3. Informação nutricional</div><div style="padding:4px">${nu.tabela}</div></div>
     <div style="display:flex;gap:4px;align-items:stretch">
+      <div style="${SB};flex:1"><div style="${ST}">4. Padrões físico-químicos</div>${grid(fq, '1fr 1.4fr 1fr')}</div>
+      <div style="margin-top:4px;display:flex;gap:4px;align-items:stretch">${nu.lupa}${nu.sif}</div>
+    </div>` : `<div style="display:flex;gap:4px;align-items:stretch">
       <div style="${SB};flex:0 0 auto"><div style="${ST}">3. Informação nutricional</div><div style="padding:4px;min-width:330px">${nu.tabela}</div></div>
       <div style="flex:1;display:flex;flex-direction:column">
         <div style="${SB}"><div style="${ST}">4. Padrões físico-químicos</div>${grid(fq, '1fr 1.4fr 1fr')}</div>
         <div style="margin-top:4px;display:flex;flex-direction:column;gap:4px">${nu.lupa}${nu.sif}</div>
       </div>
-    </div>
+    </div>`}
     ${sec(5, _ftpPares(ftpSecMicro()), 4)}
     ${sec(6, meParts, 3)}
     ${sec(7, _ftpPares(ftpSecContam()), 4)}
@@ -3084,6 +3194,7 @@ const SUBTIPO_AJUSTES = {
   'st-1kg':   { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 1 kg', emb2:'Caixa de papelão com 12 unidades de 1 kg', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'1 kg' },
   'st-800g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 800 g', emb2:'Caixa de papelão com 15 unidades de 800 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'800 g' },
   'st-400g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 400 g', emb2:'Caixa de papelão com 24 unidades de 400 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'400 g' },
+  'st-300g':  { emb1:'Lata de folha de flandres lacrada com tampa plástica ou embalagem aluminizada hermética — 300 g', emb2:'Caixa de papelão com 24 unidades de 300 g', validade:'24 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'300 g' },
   'st-200g':  { emb1:'Embalagem aluminizada (sachê) hermeticamente selada — 200 g', emb2:'Caixa de papelão com 48 sachês de 200 g', validade:'24 meses (fechada) · Uso único após abertura', gramatura:'200 g' },
   'st-cafe-250g': { emb1:'Embalagem aluminizada com válvula desgasificadora hermeticamente selada — 250 g', emb2:'Caixa de papelão com 24 unidades de 250 g', validade:'12 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'250 g' },
   'st-cafe-500g': { emb1:'Embalagem aluminizada com válvula desgasificadora hermeticamente selada — 500 g', emb2:'Caixa de papelão com 12 unidades de 500 g', validade:'12 meses (fechada) · Após aberto: consumir em até 30 dias', gramatura:'500 g' },
@@ -3098,6 +3209,88 @@ const SUBTIPO_AJUSTES = {
   'st-cacau-magro':   { obs:'CACAU EM PÓ DESGORDADO — Teor de manteiga de cacau: < 10% m/m (base seca).\nDENOMINAÇÃO: "Cacau em pó magro" ou "cacau em pó desgordado" conforme RDC ANVISA 264/2005.', aspecto:'Pó fino, cor marrom clara, baixíssimo teor de gordura, textura seca e pulverulenta' },
   'st-cacau-alcalin': { obs:'CACAU EM PÓ ALCALINIZADO (Dutch process) — tratado com agente alcalinizante para redução de acidez e escurecimento.\nDENOMINAÇÃO: incluir "alcalinizado" na denominação conforme RDC ANVISA 264/2005.\nO processo altera cor, sabor e pH: produto tipicamente com pH 7,0–8,5.', aspecto:'Pó fino de coloração marrom escura a quase negra, característica do processo Dutch, sabor suave e menos amargo' },
 };
+
+// Opções de embalagem: inclui 300 g e "Outra" (quantidade digitada em g ou kg) em todas as listas de embalagem
+(function () {
+  const ehEmb = (o) => /^st-(25kg|1kg|800g|400g|300g|200g|cafe-|soro-25kg|malto-)/.test(o.id);
+  Object.values(TEMPLATES).forEach(t => {
+    const ops = t.subtipo && t.subtipo.opcoes;
+    if (!ops || !ops.some(ehEmb)) return;
+    const i4 = ops.findIndex(o => o.id === 'st-400g');
+    if (i4 >= 0 && !ops.some(o => o.id === 'st-300g')) ops.splice(i4 + 1, 0, { id: 'st-300g', label: '📦 Embalagem 300 g' });
+    if (!ops.some(o => o.id === 'st-outra')) ops.push({ id: 'st-outra', label: '✏️ Outra (digitar quantidade)' });
+  });
+})();
+function _outraGramas() {
+  const q = parseFloat(String(document.getElementById('emb_outra_qtd')?.value || '').replace(',', '.'));
+  const un = document.getElementById('emb_outra_un')?.value || 'g';
+  if (!(q > 0)) return null;
+  const rot = (un === 'kg' ? String(q).replace('.', ',') + ' kg' : String(q).replace('.', ',') + ' g');
+  return { g: un === 'kg' ? q * 1000 : q, rot, qtd: q, un };
+}
+function _ajusteOutra() {
+  const o = _outraGramas();
+  if (!o) return {};
+  return { gramatura: o.rot, emb1: 'Embalagem hermeticamente fechada — ' + o.rot, emb2: 'Caixa de papelão com unidades de ' + o.rot, _peso: o.g };
+}
+function _labelOutraEmb(prod) {
+  if (prod && prod.embOutra && prod.embOutra.qtd > 0) return String(prod.embOutra.qtd).replace('.', ',') + ' ' + (prod.embOutra.un || 'g');
+  const o = _outraGramas();
+  return o ? o.rot : '';
+}
+function mostrarOutraEmb(on, btn) {
+  let box = document.getElementById('outraEmbBox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'outraEmbBox';
+    box.style.cssText = 'display:none;margin-top:8px;gap:8px;align-items:center;font-size:12px';
+    box.innerHTML = '<span style="font-weight:600">Quantidade da embalagem:</span>' +
+      '<input id="emb_outra_qtd" type="number" min="0" step="any" placeholder="Ex: 350" style="width:110px;height:32px" oninput="aplicarEmbalagemOutra()">' +
+      '<select id="emb_outra_un" style="width:80px;height:32px" onchange="aplicarEmbalagemOutra()"><option value="g">g</option><option value="kg">kg</option></select>';
+  }
+  if (btn && btn.parentElement) btn.parentElement.insertAdjacentElement('afterend', box);
+  box.style.display = on ? 'flex' : 'none';
+  if (on) setTimeout(() => document.getElementById('emb_outra_qtd')?.focus(), 0);
+}
+function aplicarEmbalagemOutra() {
+  const aj = _ajusteOutra();
+  if (!aj._peso) { atualizarNPorcAuto(); return; }
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  set('p_peso', aj._peso); set('p_gramatura', aj.gramatura); set('p_emb1', aj.emb1); set('p_emb2', aj.emb2);
+  atualizarNPorcAuto();
+}
+
+// ── Porções: título da coluna, porções adicionais (várias texturas), porções por embalagem automáticas ──
+let _porcoesExtra = [];
+function _lerPorcoes() {
+  const g = parseFloat(document.getElementById('p_porcao')?.value) || 30;
+  const arr = [{ titulo: (document.getElementById('p_porcao_titulo')?.value || '').trim(), g, medida: document.getElementById('p_medida')?.value || '' }];
+  (_porcoesExtra || []).forEach(p => { const gg = parseFloat(p.g); if (gg > 0) arr.push({ titulo: String(p.titulo || '').trim(), g: gg, medida: p.medida || '' }); });
+  return arr;
+}
+function atualizarNPorcAuto() {
+  const el = document.getElementById('p_nporc_auto'); if (!el) return;
+  const peso = parseFloat(document.getElementById('p_peso')?.value) || 0;
+  const cafe = (NUTRI_CFG[tipoSel] || {}).modo === 'cafe';
+  const poCafe = parseFloat(document.getElementById('p_cafe_po')?.value) || 0;
+  const arr = _lerPorcoes();
+  const txt = arr.map(b => {
+    const n = _nPorcEmb(peso, cafe ? poCafe : b.g);
+    return (arr.length > 1 && b.titulo ? b.titulo + ': ' : '') + 'cerca de ' + n;
+  }).join(' · ');
+  el.value = peso ? txt : '';
+}
+function renderPorcoesExtra() {
+  const box = document.getElementById('porcoesExtra'); if (!box) return;
+  box.innerHTML = (_porcoesExtra || []).map((p, i) => `<div style="display:grid;grid-template-columns:1.2fr .7fr 1.4fr auto;gap:8px;margin-bottom:6px;align-items:end">
+    <div class="field"><label>Título da coluna ${i + 2}</label><input type="text" value="${String(p.titulo || '').replace(/"/g, '&quot;')}" placeholder="Ex: Textura Mel" oninput="updPorcaoExtra(${i},'titulo',this.value)"></div>
+    <div class="field"><label>Porção (g)</label><input type="number" min="0" step="any" value="${p.g || ''}" oninput="updPorcaoExtra(${i},'g',this.value)"></div>
+    <div class="field"><label>Medida caseira</label><input type="text" value="${String(p.medida || '').replace(/"/g, '&quot;')}" placeholder="Ex: 1 + 1/2 colher de chá" oninput="updPorcaoExtra(${i},'medida',this.value)"></div>
+    <button class="btn" style="height:36px" onclick="remPorcaoExtra(${i})">✕</button></div>`).join('');
+}
+function addPorcaoExtra() { _porcoesExtra.push({ titulo: '', g: '', medida: '' }); renderPorcoesExtra(); atualizarNPorcAuto(); }
+function remPorcaoExtra(i) { _porcoesExtra.splice(i, 1); renderPorcoesExtra(); atualizarNPorcAuto(); }
+function updPorcaoExtra(i, campo, v) { if (_porcoesExtra[i]) { _porcoesExtra[i][campo] = v; atualizarNPorcAuto(); } }
 
 let tipoSel = 'composto-com';
 let subtipoSel = null;
@@ -3122,6 +3315,12 @@ function selTipo(tipo) {
   const _nc = (typeof NUTRI_CFG !== 'undefined') ? NUTRI_CFG[tipo] : null;
   const _pEl = document.getElementById('p_porcao'), _mEl = document.getElementById('p_medida');
   if (_pEl && _mEl) { _pEl.value = (_nc && _nc.porcao) || 30; _mEl.value = (_nc && _nc.medida) || '2 colheres de sopa'; }
+  const _pd = _nc && _nc.porcoesDef;
+  const _tEl = document.getElementById('p_porcao_titulo');
+  if (_pd && _pEl && _mEl) { _pEl.value = _pd[0].g; _mEl.value = _pd[0].medida; if (_tEl) _tEl.value = _pd[0].titulo || ''; _porcoesExtra = _pd.slice(1).map(x => ({ ...x })); }
+  else { if (_tEl) _tEl.value = ''; _porcoesExtra = []; }
+  const _cpf = document.getElementById('cafePoField'); if (_cpf) _cpf.style.display = (_nc && _nc.modo === 'cafe') ? '' : 'none';
+  renderPorcoesExtra();
 
   // Tipos com subtipo de IDENTIDADE (cacau, achocolatado, leite instantâneo)
   // também precisam de seletor de embalagem secundário
@@ -3162,7 +3361,9 @@ function selTipo(tipo) {
         {id:'st-1kg',  label:'📦 Embalagem 1 kg'},
         {id:'st-800g', label:'📦 Embalagem 800 g'},
         {id:'st-400g', label:'📦 Embalagem 400 g'},
+        {id:'st-300g', label:'📦 Embalagem 300 g'},
         {id:'st-200g', label:'📦 Embalagem 200 g'},
+        {id:'st-outra', label:'✏️ Outra (digitar quantidade)'},
       ];
       embOpts.innerHTML = embOpcoes.map(o=>
         `<button class="btn${o.def?' btn-primary':''}" id="emb-${o.id}"
@@ -3240,7 +3441,8 @@ function _atualizarResumoEmbalagem(tipo) {
   if (!sel.length) { resumo.textContent = '⚠️ Selecione ao menos uma embalagem.'; return; }
   const allOpts = [
     {id:'st-25kg',label:'Fardo 25 kg'},{id:'st-1kg',label:'1 kg'},
-    {id:'st-800g',label:'800 g'},{id:'st-400g',label:'400 g'},{id:'st-200g',label:'200 g'},
+    {id:'st-800g',label:'800 g'},{id:'st-400g',label:'400 g'},{id:'st-300g',label:'300 g'},{id:'st-200g',label:'200 g'},
+    {id:'st-outra',label:'Outra'},
   ];
   const labels = sel.map(id => {
     const op = allOpts.find(o=>o.id===id);
@@ -3258,6 +3460,7 @@ function toggleSubtipo(tipo, stId) {
   btn.classList.toggle('btn-primary', !jaAtivo);
   btn.classList.toggle('btn', jaAtivo);
   // Aplicar campos se ativando; se desativando, manter estado atual
+  if (stId === 'st-outra') mostrarOutraEmb(!jaAtivo, btn);
   if (!jaAtivo) {
     subtipoSel = stId;
     _aplicarSubtipoOuEmb(tipo, stId);
@@ -3272,6 +3475,7 @@ function toggleEmbalagem(tipo, stId) {
   const jaAtivo = btn.classList.contains('btn-primary');
   btn.classList.toggle('btn-primary', !jaAtivo);
   btn.classList.toggle('btn', jaAtivo);
+  if (stId === 'st-outra') mostrarOutraEmb(!jaAtivo, btn);
   if (!jaAtivo) _aplicarSubtipoOuEmb(tipo, stId);
   _atualizarResumoEmbalagem(tipo);
 }
@@ -3279,17 +3483,18 @@ function toggleEmbalagem(tipo, stId) {
 // Aplica campos de um subtipo/embalagem (lógica unificada)
 function _aplicarSubtipoOuEmb(tipo, stId) {
   const tpl = TEMPLATES[tipo];
-  const ajuste = SUBTIPO_AJUSTES[stId] || {};
-  const SUBTIPO_SOMENTE_EMBALAGEM = ['st-25kg','st-1kg','st-800g','st-400g','st-200g','st-cafe-250g','st-cafe-500g','st-cafe-5kg'];
+  const ajuste = stId === 'st-outra' ? _ajusteOutra() : (SUBTIPO_AJUSTES[stId] || {});
+  const SUBTIPO_SOMENTE_EMBALAGEM = ['st-25kg','st-1kg','st-800g','st-400g','st-300g','st-200g','st-outra','st-cafe-250g','st-cafe-500g','st-cafe-5kg'];
 
   if (SUBTIPO_SOMENTE_EMBALAGEM.includes(stId)) {
     _aplicarTemplate(ajuste);
     const pesoMap = {
-      'st-25kg':25000,'st-1kg':1000,'st-800g':800,'st-400g':400,'st-200g':200,
+      'st-25kg':25000,'st-1kg':1000,'st-800g':800,'st-400g':400,'st-300g':300,'st-200g':200,
       'st-cafe-250g':250,'st-cafe-500g':500,'st-cafe-5kg':5000,
     };
     const pesoEl = document.getElementById('p_peso');
     if (pesoEl && pesoMap[stId]) pesoEl.value = pesoMap[stId];
+    if (pesoEl && stId === 'st-outra' && ajuste._peso) pesoEl.value = ajuste._peso;
   } else {
     _aplicarTemplate({...tpl.campos, ...ajuste});
   }
@@ -3328,6 +3533,7 @@ function _aplicarSubtipoOuEmb(tipo, stId) {
   if (tpl && classeLegalEl) {
     classeLegalEl.innerHTML = `<strong style="color:var(--blue)">${tpl.label}</strong><br>${tpl.legal}${legalExtra}`;
   }
+  atualizarNPorcAuto();
 }
 
 // Compatibilidade: selSubtipo agora chama toggleSubtipo
@@ -3667,8 +3873,9 @@ function autoPreencherAlergenicos() {
 
 function calcT(){
   const tQ=receita.reduce((s,r)=>s+r.qtde,0);
-  if(!tQ)return{kcal:0,cho:0,act:0,acad:0,ptn:0,gt:0,gs:0,tr:0,fi:0,na:0};
-  let T={kcal:0,cho:0,act:0,acad:0,ptn:0,gt:0,gs:0,tr:0,fi:0,na:0};
+  const _z={kcal:0,cho:0,act:0,acad:0,ptn:0,gt:0,gs:0,tr:0,fi:0,na:0}; EXT_KEYS.forEach(k=>_z[k]=0);
+  if(!tQ)return {..._z};
+  let T={..._z};
   receita.forEach(r=>{const f=r.qtde/100;Object.keys(T).forEach(k=>T[k]+=(r.d[k]||0)*f);});
   Object.keys(T).forEach(k=>T[k]=T[k]/tQ*100);
   return T;
@@ -3763,23 +3970,8 @@ function renderStep3(){
     const cls=(bold?'bold':'')+(indent?' indent':'');
     return `<tr class="${cls}"><td>${lbl}</td><td class="num">${v100}</td><td class="num">${vP}</td><td class="vd">${vd}</td></tr>`;
   }
-  document.getElementById('tabelaNutri').innerHTML=`
-    <h4>INFORMAÇÃO NUTRICIONAL</h4>
-    <div style="font-size:9px;border-bottom:1px solid #000;padding-bottom:3px;margin-bottom:4px">Porções por embalagem: ${_nPLabel} | Porção: ${P100} g (${mc})</div>
-    <table class="ntbl">
-      <tr class="col-hdr"><td></td><td class="num">100g</td><td class="num">${P100}g</td><td class="vd">%VD*</td></tr>
-      ${nrow('Valor energético (kcal)',f0(T.kcal),f0(P.kcal),vdp(P.kcal,VD.kcal)+'%',true)}
-      ${nrow('Carboidratos (g)',f2(T.cho),f2(P.cho),vdp(P.cho,VD.cho)+'%')}
-      ${nrow('Açúcares totais (g)',f2(T.act),f2(P.act),'—',false,true)}
-      ${nrow('Açúcares adicionados (g)',f2(T.acad),f2(P.acad),vdp(P.acad,VD.acat)+'%',false,true)}
-      ${nrow('Proteínas (g)',f2(T.ptn),f2(P.ptn),vdp(P.ptn,VD.ptn)+'%')}
-      ${nrow('Gorduras totais (g)',f2(T.gt),f2(P.gt),vdp(P.gt,VD.gtot)+'%')}
-      ${nrow('Gorduras saturadas (g)',f2(T.gs),f2(P.gs),vdp(P.gs,VD.gsat)+'%',false,true)}
-      ${nrow('Gorduras trans (g)',f2(T.tr),f2(P.tr),'—',false,true)}
-      ${nrow('Fibra alimentar (g)',f2(T.fi),f2(P.fi),vdp(P.fi,VD.fibra)+'%')}
-      ${nrow('Sódio (mg)',f0(T.na),f0(P.na),vdp(P.na,VD.na)+'%',true)}
-    </table>
-    <p style="font-size:8.5px;color:#555;margin-top:5px">(*) % VD com base em dieta de 2.000 kcal — ANVISA RDC 429/2020</p>`;
+  document.getElementById('tabelaNutri').innerHTML = ftpSecNutri({ tipo: tipoSel || classeSel, T, P100, pesoTotal, medida: mc, alertas: ftpAlertasFrontais(tipoSel || classeSel, T), ehSIF: false,
+    porcoes: _lerPorcoes(), poCafe: parseFloat(gv('p_cafe_po')) || 20, partes: true }).tabela;
 
   // Por 100g
   document.getElementById('tbl100g').innerHTML=`<table>
@@ -3874,6 +4066,7 @@ function renderStep4(){
   const _embSel = _ftpProd.embalagensSel || getEmbalagensSelecionadas() || [];
   const _embLabels = _embSel.map(id => {
     const aj = SUBTIPO_AJUSTES[id] || {};
+    if (id === 'st-outra') return _labelOutraEmb(_ftpProd);
     return aj.gramatura || id.replace('st-','').replace('-','');
   }).filter(Boolean);
   const _ftpEmb1 = gv('p_emb1') || '';
@@ -3934,7 +4127,7 @@ function renderStep4(){
   </div>
   ${ftpDocCompacto({
     tipo: tipoSel||classeSel, T, ehSIF: _ehSIF,
-    nut: {tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF},
+    nut: {tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF,porcoes:_lerPorcoes(),poCafe:parseFloat(gv('p_cafe_po'))||20},
     nome: gv('p_nome','—'), codigo: _ftpCodigo, revisao: _ftpRevisao, data,
     denominacao: gv('p_denominacao','—'), marca: _ftpMarca, registro: _ftpRegistro, gramatura: _ftpGramatura,
     validade: gv('p_validade','12 meses'), classe: classeNomes[classeSel]||'—',
@@ -4623,17 +4816,18 @@ _initAuth().then(async()=>{ if (!_currentUser) return; try { await _sincronizarS
 
       <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin:16px 0 8px">📊 Informação Nutricional (por 100g)</div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
-        <div class="field"><label>Energia (kcal)</label><input id="ing_kcal" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Carboidratos (g)</label><input id="ing_cho" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Açúcares totais (g)</label><input id="ing_act" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Açúcares adicionados (g)</label><input id="ing_acad" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Proteínas (g)</label><input id="ing_ptn" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Gorduras totais (g)</label><input id="ing_gt" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Gorduras saturadas (g)</label><input id="ing_gs" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Gorduras trans (g)</label><input id="ing_tr" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Fibra alimentar (g)</label><input id="ing_fi" type="number" step="0.1" min="0" placeholder="0"></div>
-        <div class="field"><label>Sódio (mg)</label><input id="ing_na" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Valor energético (kcal/100g)</label><input id="ing_kcal" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Carboidratos (g/100g)</label><input id="ing_cho" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Açúcares totais (g/100g)</label><input id="ing_act" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Açúcares adicionados (g/100g)</label><input id="ing_acad" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Proteínas (g/100g)</label><input id="ing_ptn" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Gorduras totais (g/100g)</label><input id="ing_gt" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Gorduras saturadas (g/100g)</label><input id="ing_gs" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Gorduras trans (g/100g)</label><input id="ing_tr" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Fibras alimentares totais (g/100g)</label><input id="ing_fi" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="field"><label>Sódio (mg/100g)</label><input id="ing_na" type="number" step="0.1" min="0" placeholder="0"></div>
       </div>
+      <div id="ing_ext_wrap"></div>
       <div style="display:flex;gap:12px;align-items:center">
         <button onclick="salvarIngrediente()" style="height:40px;padding:0 24px;font-size:14px;background:#1e3a8a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">💾 Salvar Ingrediente</button>
         <button onclick="limparFormIngrediente()" style="height:40px;padding:0 16px;font-size:13px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer">🗑 Limpar</button>
