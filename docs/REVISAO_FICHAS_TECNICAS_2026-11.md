@@ -29,3 +29,6 @@ Origem: documento "Revisão do Programa de Geração de Fichas Técnicas GMF For
 - **Café:** bebida (IN 75, Anexo V): porção 200 ml com o pó por porção (campo, padrão 20 g), colunas 100 ml**, 200 ml e %VD*, todos os nutrientes 0, linhas ocultas, frase obrigatória e nota "**No alimento pronto para o consumo".
 
 Pontos a confirmar com a Qualidade: omissão só quando **todos** os demais nutrientes são não significativos (não omite linha a linha); arredondamento de porções por embalagem do café pelo inteiro mais próximo (Anexo VI não conferido); pó por porção do café = 20 g (exemplo do documento), editável.
+
+## 17/11/2026 — Umidade, pH e acidez por produto
+Campos **Umidade (%)**, **pH** e **Acidez total titulável** no preenchimento do produto, salvos por produto. Na ficha (seção "Padrões físico-químicos") cada item só aparece se preenchido. Antes, umidade e pH saíam com valores padrão ("Máx. 4,0" e "6,0 a 7,0") mesmo sem preenchimento; agora saem vazios até serem preenchidos.
