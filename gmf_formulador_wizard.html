@@ -2995,6 +2995,7 @@ function _nRound(v, tipo, S) {
   if (tipo === 'gs' || tipo === 'tr') return v <= 0.1 ? '0' : _nBase(v, 'g');
   if (tipo === 'fi')   return v <= 0.5 ? '0' : _nBase(v, 'g');
   if (tipo === 'na')   return v <= 5 ? '0' : _nBase(v, 'mg');
+  if (tipo === 'xmg')  return _nBase(v, 'mg');   // nutrientes opcionais em mg/µg: < 1 → 2 casas (IN 75, Anexo III)
   return _nBase(v, 'g');
 }
 const _sc = (T, g) => { const o = {}; Object.keys(T).forEach(k => o[k] = (Number(T[k]) || 0) * g / 100); return o; };
@@ -3010,6 +3011,36 @@ const _NR = [   // [rótulo (Anexo XI), chave T, VDR, nível de recuo, tipo de a
   ['Fibras alimentares (g)', 'fi', 25, 0, 'fi'],
   ['Sódio (mg)', 'na', 2300, 0, 'na'],
 ];
+
+// Nutrientes opcionais (campos do cadastro do ingrediente): entram na tabela quando > 0, na ordem/recuo do Anexo XI da IN 75/2020.
+// [chave em T, rótulo, VDR (Anexo II, mesma unidade do campo), recuo, tipo de arredondamento]
+const _XM = ['ala','arg','asp','cys','glu','gly','his','ile','leu','lys','met','phe','pro','ser','thr','trp','tyr','val','hyl','hyp'];
+const _XAA = { ala:'Alanina', arg:'Arginina', asp:'Ácido aspártico', cys:'Cisteína', glu:'Glutamina / Ácido glutâmico', gly:'Glicina', his:'Histidina', ile:'Isoleucina', leu:'Leucina', lys:'Lisina', met:'Metionina', phe:'Fenilalanina', pro:'Prolina', ser:'Serina', thr:'Treonina', trp:'Triptofano', tyr:'Tirosina', val:'Valina', hyl:'Hidroxilisina', hyp:'Hidroxiprolina' };
+const _XL = {   // posição → linhas opcionais que vêm logo depois da linha-âncora (chave da linha obrigatória)
+  acad: [['x_lact','Lactose (g)',null,2,'x'],['x_galact','Galactose (g)',null,2,'x'],['x_pol','Polióis totais (g)',null,1,'x'],['x_pdx','Polidextrose (g)',null,1,'x'],['x_amido','Amido (g)',null,1,'x']],
+  ptn:  _XM.map(a => ['m_aa_' + a, _XAA[a] + ' (mg)', null, 1, 'xmg']),
+  tr:   [['x_gmono','Gorduras monoinsaturadas (g)',20,1,'x'],['x_o9','Ômega 9 (g)',null,2,'x'],['x_gpoli','Gorduras poli-insaturadas (g)',20,1,'x'],['x_o6','Ômega 6 (g)',18,2,'x'],
+         ['m_o3','Ômega 3 (mg)',4000,2,'xmg'],['m_ala','Ácido linolênico (mg)',null,3,'xmg'],['x_epa','EPA (mg)',null,3,'xmg'],['x_dha','DHA (mg)',null,3,'xmg'],['x_col','Colesterol (mg)',300,1,'xmg']],
+  fi:   [['x_fis','Fibras solúveis (g)',null,1,'x'],['x_fii','Fibras insolúveis (g)',null,1,'x']],
+  na:   [['x_vA','Vitamina A (µg RAE)',800,0,'xmg'],['x_vD','Vitamina D (µg)',15,0,'xmg'],['x_vE','Vitamina E (mg)',15,0,'xmg'],['x_vK','Vitamina K (µg)',120,0,'xmg'],['x_vC','Vitamina C (mg)',100,0,'xmg'],
+         ['x_b1','Vitamina B1 (mg)',1.2,0,'xmg'],['x_b2','Vitamina B2 (mg)',1.2,0,'xmg'],['x_b3','Vitamina B3 (mg NE)',15,0,'xmg'],['x_b5','Vitamina B5 (mg)',5,0,'xmg'],
+         ['x_b6','Vitamina B6 (mg)',1.3,0,'xmg'],['x_b7','Vitamina B7 (µg)',30,0,'xmg'],['x_b9','Vitamina B9 (µg DFE)',400,0,'xmg'],['x_b12','Vitamina B12 (µg)',2.4,0,'xmg'],
+         ['x_ca','Cálcio (mg)',1000,0,'xmg'],['x_cl','Cloreto (mg)',2300,0,'xmg'],['x_cu','Cobre (µg)',900,0,'xmg'],['x_cr','Cromo (µg)',35,0,'xmg'],['x_fe','Ferro (mg)',14,0,'xmg'],['x_fl','Flúor (mg)',4,0,'xmg'],
+         ['x_p','Fósforo (mg)',700,0,'xmg'],['x_i','Iodo (µg)',150,0,'xmg'],['x_mgn','Magnésio (mg)',420,0,'xmg'],['x_mn','Manganês (mg)',3,0,'xmg'],['x_mo','Molibdênio (µg)',45,0,'xmg'],['x_k','Potássio (mg)',3500,0,'xmg'],
+         ['x_se','Selênio (µg)',60,0,'xmg'],['x_zn','Zinco (mg)',11,0,'xmg'],['x_boro','Boro (mg)',null,0,'xmg'],['x_si','Silício (mg)',null,0,'xmg'],['x_colina','Colina (mg)',550,0,'xmg'],['m_aa_tau','Taurina (mg)',null,0,'xmg'],
+         ['x_cafeina','Cafeína (mg)',null,0,'xmg'],['x_creatina','Creatina (g)',null,0,'x'],['x_carnitina','Carnitina (mg)',null,0,'xmg'],['x_q10','Coenzima Q10 (mg)',null,0,'xmg'],['x_luteina','Luteína (mg)',null,0,'xmg'],
+         ['x_zeax','Zeaxantina (mg)',null,0,'xmg'],['x_licop','Licopeno (mg)',null,0,'xmg'],['x_astax','Astaxantina (mg)',null,0,'xmg'],['x_fitoest','Fitoesteróis (g)',null,0,'x'],['x_antoc','Compostos fenólicos totais (mg)',null,0,'xmg']],
+};
+// mesmo formato das linhas de _NR: [rótulo, chave, VDR, recuo, tipo]
+Object.keys(_XL).forEach(k => _XL[k] = _XL[k].map(r => [r[1], r[0], r[2], r[3], r[4]]));
+// valores derivados (conversões g → mg e Ômega 3 total) para as colunas da tabela
+function _derivaExt(T) {
+  const D = Object.assign({}, T);
+  _XM.concat(['tau']).forEach(a => D['m_aa_' + a] = (Number(T['x_aa_' + a]) || 0) * 1000);
+  const ala = (Number(T.x_ala) || 0) * 1000, epa = Number(T.x_epa) || 0, dha = Number(T.x_dha) || 0;
+  D.m_ala = ala; D.m_o3 = ala + epa + dha;
+  return D;
+}
 function _recuo(n) { return n ? `<span style="display:inline-block;width:${(n * 0.55).toFixed(2)}em"></span>` : ''; }
 
 // Lupa frontal (IN 75/2020): devolve lista de alertas conforme o tipo de produto
@@ -3035,12 +3066,11 @@ function ftpSecNutri(o) {
   const cfg = NUTRI_CFG[o.tipo] || { modo: 'padrao', lupa: 'limites' };
   const cafe = cfg.modo === 'cafe', esp = cfg.modo === 'espessante';
   const Z = {}; Object.keys(o.T).forEach(k => Z[k] = 0);
-  const T = cafe ? Z : o.T;                         // café infusionado: todos os nutrientes declarados como 0
+  const T = _derivaExt(cafe ? Z : o.T);             // café infusionado: todos os nutrientes declarados como 0
   const un = cafe ? 'ml' : 'g';
   const blocos = (o.porcoes && o.porcoes.length) ? o.porcoes : [{ titulo: '', g: o.P100, medida: o.medida }];
   const multi = blocos.length > 1;
   const base = 'font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff';
-  const cell = 'border-bottom:.5px solid #000;padding:1px 3px;height:13px;font-size:8pt;color:#000';
   const th = (t, extra) => `<th style="font-size:8pt;font-weight:700;text-align:center;border-bottom:1px solid #000;padding:1px 3px;color:#000;text-transform:none;letter-spacing:0;${extra || ''}">${t}</th>`;
   const colsOf = cfg.modo === 'sem100' ? ['porc', 'vd'] : ['ref', 'porc', 'vd'];
   const refLabel = cafe ? '100 ml**' : esp ? '100 mL**' : cfg.modo === 'preparo' ? '100 g**' : '100 g';
@@ -3054,8 +3084,14 @@ function ftpSecNutri(o) {
     return _nRound(T[k] * b.g / 100, tipoRow[k], S) === '0' && _nRound(refVal(k, b.g), tipoRow[k], refS(b.g)) === '0';
   }));
   const ocultaDemais = cafe || qnsTodos;
-  const linhasMostrar = cafe ? [] : (qnsTodos ? _NR.filter(r => r[1] === 'kcal' || r[1] === 'cho') : _NR);
+  const _core = qnsTodos ? _NR.filter(r => r[1] === 'kcal' || r[1] === 'cho') : _NR;
+  // nutrientes opcionais preenchidos (> 0) entram logo após a linha-âncora, na ordem do Anexo XI
+  const linhasMostrar = cafe ? [] : _core.flatMap(r => [r].concat((_XL[r[1]] || []).filter(x => (Number(T[x[1]]) || 0) > 0)));
+  if (!cafe && qnsTodos) { ['acad','ptn','tr','fi','na'].forEach(a => { if (linhasMostrar.some(r => r[1] === a)) return; const ex = (_XL[a] || []).filter(x => (Number(T[x[1]]) || 0) > 0); if (ex.length) linhasMostrar.push(...ex); }); }
 
+  const _nL = linhasMostrar.length;
+  const _cmp = _nL > 22 ? 'padding:0 3px;height:10px;font-size:7pt' : _nL > 14 ? 'padding:0 3px;height:11px;font-size:7.5pt' : 'padding:1px 3px;height:13px;font-size:8pt';  // muitas linhas opcionais: compacta para caber
+  const cell = 'border-bottom:.5px solid #000;' + _cmp + ';color:#000';
   const nPor = (b) => _nPorcEmb(o.pesoTotal, cafe ? (o.poCafe || 20) : b.g);
   const medidaTxt = (b) => `${b.medida || '—'}${cafe ? ' — preparado com ' + _gfmt(o.poCafe || 20) + ' g de pó' : ''}`;
   const porcTxt = (b) => `Porção: ${_gfmt(b.g)} ${un} (${medidaTxt(b)})`;

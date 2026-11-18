@@ -40,3 +40,15 @@ Campos **Umidade (%)**, **pH** e **Acidez total titulável** no preenchimento do
 - **Fabricante** (razão social, CNPJ e endereço) em todas as fichas: DMS (padrão) ou MFPARIS (padrão no café), editável por produto.
 
 A confirmar: Decreto 12.709/2025 foi lido só pela ementa (fiscalização de produtos de origem vegetal); endereço da DMS (Rua Beta 387) e da MFPARIS (Rua Beta 378) conforme o cadastro; fabricante dos tipos sem definição (cacau, chocolate em pó, maltodextrina, glicose, suplemento, espessante, pó para preparo) ficou como DMS.
+
+## 18/11/2026 — Nutrientes opcionais na tabela nutricional
+
+Pedido: vitaminas, minerais e demais nutrientes opcionais do cadastro do ingrediente (fibras específicas, gorduras mono/poli-insaturadas, lactose, galactose etc.) preenchidos com valor > 0 entram automaticamente na tabela, com 100 g, porção e %VD.
+
+- Posição: ordem e recuo do **Anexo XI da IN 75/2020**. Lactose/galactose/polióis/polidextrose/amido logo abaixo dos açúcares; aminoácidos abaixo de proteínas (em mg); mono, poli-insaturadas (ômega 9/6/3, EPA, DHA) e colesterol abaixo de gorduras trans; fibras solúveis/insolúveis abaixo de fibras alimentares; vitaminas, minerais, colina, taurina e bioativos logo abaixo do sódio.
+- %VD: VDR do **Anexo II da IN 75/2020** (alimentos em geral), na unidade do campo (ex.: vitamina A 800 µg RAE, cálcio 1000 mg). Sem VDR no Anexo II (lactose, aminoácidos, bioativos, boro, silício etc.): "—".
+- Arredondamento do Anexo III (≥10 inteiro; 1 a <10 uma casa; <1 mg/µg duas casas). Valor zero não aparece. Café (bebida) segue com tudo zero.
+- Se as linhas obrigatórias estiverem todas em QNS, continuam omitidas e os opcionais preenchidos aparecem.
+- Muitas linhas: acima de 14 linhas a tabela reduz a altura/fonte; com cerca de 20 linhas opcionais a ficha ainda cabe em 1 página; com quase todos os campos preenchidos (~45 linhas) passa para 2 páginas.
+
+**Para confirmar:** os %VD das linhas já existentes (proteínas 75 g, gorduras totais 55 g, saturadas 22 g, sódio 2300 mg) vêm de revisão anterior e diferem do Anexo II para alimentos em geral (proteínas 50 g, gorduras totais 65 g, saturadas 20 g, sódio 2000 mg). Não foram alterados.
