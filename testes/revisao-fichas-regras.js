@@ -106,5 +106,33 @@ check(RN(0, 'acad') === '0' && RN(0.3, 'acad') === '0,3', 'açúcares adicionado
 const nuQ = ctx.ftpSecNutri({ tipo: 'maltodextrina', T: { kcal: 380, cho: 94, act: 1, acad: 0, ptn: 0, gt: 0, gs: 0, tr: 0, fi: 0, na: 20 }, P100: 5, pesoTotal: 1000, medida: '1 colher de chá', alertas: [], ehSIF: false });
 check(nuQ.includes('*Percentual de valores diários fornecidos pela porção.') && !nuQ.includes('2.000 kcal'), 'nota do %VD no texto oficial da IN 75 (Anexo XII)');
 check(/>19<\/td>/.test(nuQ) && />0<\/td>/.test(nuQ), 'porção de 5 g: energia 19 kcal; sódio (1 mg) e açúcares (0,05 g) caem em QNS (0)');
+
+// ---- Nutrientes opcionais (>0) na tabela, na ordem do Anexo XI da IN 75/2020 ----
+const base = { kcal: 380, cho: 70, act: 40, acad: 0, ptn: 25, gt: 8, gs: 5, tr: 0, fi: 2, na: 300 };
+const sem = nu('leite-integral', Object.assign({}, base));
+check(!/Lactose|Vitamina|Cálcio|monoinsaturadas|Colesterol/.test(sem), 'sem opcionais preenchidos: nenhuma linha extra (comportamento anterior)');
+const T2 = Object.assign({}, base, { x_lact: 38, x_galact: 0.5, x_gmono: 2.4, x_gpoli: 0.3, x_col: 28, x_vA: 400, x_vD: 5, x_vC: 0, x_b12: 1.2, x_ca: 900, x_fe: 1.4, x_aa_leu: 2.5, x_aa_tau: 0.05 });
+const c2 = nu('leite-integral', T2);
+const pos = (t) => c2.indexOf(t);
+check(pos('Lactose (g)') > pos('Açúcares adicionados') && pos('Lactose (g)') < pos('Proteínas'), 'lactose/galactose logo abaixo dos açúcares (carboidratos, antes de proteínas)');
+check(pos('Leucina (mg)') > pos('Proteínas') && pos('Leucina (mg)') < pos('Gorduras totais'), 'aminoácido específico abaixo de proteínas, em mg');
+check(pos('Gorduras monoinsaturadas') > pos('Gorduras trans') && pos('Gorduras poli-insaturadas') > pos('Gorduras monoinsaturadas') && pos('Colesterol') > pos('Gorduras poli-insaturadas') && pos('Colesterol') < pos('Fibras alimentares'), 'mono, poli e colesterol abaixo de trans e antes de fibras');
+check(pos('Vitamina A') > pos('Sódio') && pos('Vitamina D') > pos('Vitamina A') && pos('Vitamina B12') > pos('Vitamina D') && pos('Cálcio') > pos('Vitamina B12') && pos('Ferro') > pos('Cálcio') && pos('Taurina') > pos('Ferro'), 'vitaminas, minerais e taurina logo abaixo do sódio, na ordem do Anexo XI');
+check(!c2.includes('Vitamina C (mg)'), 'vitamina C = 0 não aparece');
+// 100 g, porção (20 g) e %VD
+check(c2.includes('>400</td>') && c2.includes('>80</td>') && c2.includes('>10%</td>'), 'Vitamina A: 400 µg/100 g · 80 µg/porção · 10% VD (VDR 800 µg)');
+check(c2.includes('>900</td>') && c2.includes('>180</td>') && c2.includes('>18%</td>'), 'Cálcio: 900 mg/100 g · 180 mg/porção · 18% VD (VDR 1000 mg)');
+check(c2.includes('>1,2</td>') && c2.includes('>0,24</td>') && c2.includes('>2%</td>'), 'Vitamina B12: 1,2 / 0,24 µg · 2% VD (VDR 2,4 µg)');
+check(c2.includes('>0,24</td>') && c2.includes('>50</td>'), 'Leucina 2,5 g/100 g = 2500 mg/100 g -> 500 mg na porção (conversão g→mg)'.slice(0,0) + 'Taurina 0,05 g = 50 mg/100 g');
+check(/Lactose \(g\)<\/td><td[^>]*>38<\/td>[^]*?>7,6<\/td>[^]*?>—<\/td>/.test(c2), 'Lactose: 38 g/100 g · 7,6 g/porção · % VD "—" (sem VDR)');
+// ômega 3 soma ALA+EPA+DHA e mostra os filhos
+const c3 = nu('leite-integral', Object.assign({}, base, { x_ala: 0.5, x_epa: 100, x_dha: 200 }));
+check(c3.includes('Ômega 3 (mg)') && c3.includes('>800</td>') && c3.includes('Ácido linolênico (mg)') && c3.includes('EPA (mg)') && c3.includes('DHA (mg)'), 'Ômega 3 total (ALA 500 + EPA 100 + DHA 200 = 800 mg) com subitens');
+// QNS dos demais + opcional preenchido: mantém kcal/cho e mostra o opcional
+const c4 = nu('maltodextrina', { kcal: 380, cho: 94, act: 0, acad: 0, ptn: 0, gt: 0, gs: 0, tr: 0, fi: 0, na: 0, x_ca: 500 });
+check(c4.includes('Cálcio (mg)') && !c4.includes('Proteínas (g)'), 'demais em QNS + cálcio preenchido: linhas omitidas, cálcio aparece');
+// café continua com tudo zero (sem linhas extras)
+const c5 = ctx.ftpSecNutri({ tipo: 'cafe-torrado-moido', T: Object.assign({}, base, { x_ca: 500, x_cafeina: 800 }), P100: 200, pesoTotal: 500, medida: '1 xícara de chá', alertas: [], ehSIF: false, poCafe: 20 });
+check(!c5.includes('Cálcio (mg)'), 'café (bebida): nutrientes declarados como 0, sem linhas extras');
 console.log('\n' + ok + ' ok, ' + fail + ' falha(s)');
 process.exit(fail ? 1 : 0);
