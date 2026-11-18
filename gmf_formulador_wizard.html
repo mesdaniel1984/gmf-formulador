@@ -570,6 +570,7 @@ tr:last-child td{border-bottom:none}
       <div class="field"><label>Porção (g ou ml)</label><input id="p_porcao" type="number" value="30" min="1" oninput="recalc();atualizarNPorcAuto()"></div>
       <div class="field"><label>Medida caseira</label><input id="p_medida" type="text" value="2 colheres de sopa" placeholder="Ex: 1 colher de chá"></div>
       <div class="field"><label>Peso total embalagem (g)</label><input id="p_peso" type="number" value="1000" min="1" oninput="atualizarNPorcAuto()"></div>
+      <div class="field"><label>Outras gramaturas da ficha (g ou kg, separadas por vírgula)</label><input id="p_gramaturas_extra" type="text" placeholder="Ex: 300 g, 1 kg" oninput="atualizarNPorcAuto()"></div>
       <div class="field"><label>Gramatura / Embalagem</label><input id="p_gramatura" type="text" value="25 kg"></div>
       <div class="field"><label>Validade</label><input id="p_validade" type="text" value="12 meses"></div>
     </div>
@@ -1391,6 +1392,7 @@ function editarIngCustom(dadosEncoded) {
   set('ing_na', d.na);
   montarCamposExtraIng();
   EXT_KEYS.forEach(k => set('ing_' + k, d[k]));
+  { const _dt = document.querySelector('#ing_ext_wrap details'); if (_dt) _dt.open = true; }   // edição: abre a lista completa de macro e micronutrientes
   const s = document.getElementById('ing_src'); if(s) s.value = d.src||'Usuário';
   // Navegar para a tela de ingredientes
   irParaIngredientes();
@@ -1533,7 +1535,7 @@ function _hashReceitaAtual() {
     porcao: document.getElementById('p_porcao').value,
     peso: document.getElementById('p_peso').value,
     medida: document.getElementById('p_medida').value,
-    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || '') + '|' + gv('p_fabricante') + '|' + gv('p_cafe_tipo') + gv('p_cafe_especie') + gv('p_cafe_torra') + gv('p_cafe_moagem') + '|' + gv('p_umidade') + '|' + gv('p_ph') + '|' + gv('p_acidez'),
+    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || '') + '|' + gv('p_gramaturas_extra') + '|' + gv('p_fabricante') + '|' + gv('p_cafe_tipo') + gv('p_cafe_especie') + gv('p_cafe_torra') + gv('p_cafe_moagem') + '|' + gv('p_umidade') + '|' + gv('p_ph') + '|' + gv('p_acidez'),
     tipo: tipoSel,   // inclui tipo para detectar mudança de classificação
     classe: classeSel,
     ings: receita.map(r=>({n:_nomeExibicao(r.d), q:r.qtde}))
@@ -1601,7 +1603,7 @@ function novoProduto() {
   _prodOrigem = null;
   _prodOrigemHash = null;
   receita = [];
-  ['p_nome','p_codigo','p_denominacao','p_umidade','p_ph','p_acidez','p_cafe_tipo','p_cafe_especie','p_cafe_torra','p_cafe_moagem'].forEach(id=>{
+  ['p_nome','p_codigo','p_denominacao','p_gramaturas_extra','p_umidade','p_ph','p_acidez','p_cafe_tipo','p_cafe_especie','p_cafe_torra','p_cafe_moagem'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('p_revisao').value='00';
@@ -1759,6 +1761,7 @@ function editarProduto(id) {
   { const _fb = document.getElementById('p_fabricante'); if (_fb && prod.fabricante) _fb.value = prod.fabricante; }
   { const cd = prod.cafeDados || {}; [['tipo','tipo'],['especie','especie'],['torra','torra'],['moagem','moagem']].forEach(([k, f]) => { const el = document.getElementById('p_cafe_' + k); if (el) el.value = cd[f] || ''; }); }
   ['umidade','ph','acidez'].forEach(k => { const el = document.getElementById('p_' + k); if (el) el.value = prod[k] || ''; });
+  { const _ge = document.getElementById('p_gramaturas_extra'); if (_ge) _ge.value = prod.gramaturasExtra || ''; }
   { const _t = document.getElementById('p_porcao_titulo'); if (_t) _t.value = prod.porcaoTitulo || '';
     _porcoesExtra = (prod.porcoesExtra || []).map(x => ({ ...x })); renderPorcoesExtra();
     const _cp = document.getElementById('p_cafe_po'); if (_cp && prod.cafePo) _cp.value = prod.cafePo; atualizarNPorcAuto(); }
@@ -1926,6 +1929,7 @@ function salvarProdutoAtual() {
     ph: (document.getElementById('p_ph')?.value || '').trim(),
     acidez: (document.getElementById('p_acidez')?.value || '').trim(),
     porcaoTitulo:  (document.getElementById('p_porcao_titulo')?.value || '').trim(),
+    gramaturasExtra: (document.getElementById('p_gramaturas_extra')?.value || '').trim(),
     porcoesExtra:  (_porcoesExtra || []).map(x => ({ ...x })),
     cafePo:        parseFloat(document.getElementById('p_cafe_po')?.value) || null,
     validade:      document.getElementById('p_validade')?.value || '',
@@ -3004,12 +3008,12 @@ const _NR = [   // [rótulo (Anexo XI), chave T, VDR, nível de recuo, tipo de a
   ['Carboidratos totais (g)', 'cho', 300, 0, 'cho'],
   ['Açúcares totais (g)', 'act', null, 1, 'act'],
   ['Açúcares adicionados (g)', 'acad', 50, 2, 'acad'],
-  ['Proteínas (g)', 'ptn', 75, 0, 'ptn'],
-  ['Gorduras totais (g)', 'gt', 55, 0, 'gt'],
-  ['Gorduras saturadas (g)', 'gs', 22, 1, 'gs'],
+  ['Proteínas (g)', 'ptn', 50, 0, 'ptn'],
+  ['Gorduras totais (g)', 'gt', 65, 0, 'gt'],
+  ['Gorduras saturadas (g)', 'gs', 20, 1, 'gs'],
   ['Gorduras trans (g)', 'tr', null, 1, 'tr'],
   ['Fibras alimentares (g)', 'fi', 25, 0, 'fi'],
-  ['Sódio (mg)', 'na', 2300, 0, 'na'],
+  ['Sódio (mg)', 'na', 2000, 0, 'na'],
 ];
 
 // Nutrientes opcionais (campos do cadastro do ingrediente): entram na tabela quando > 0, na ordem/recuo do Anexo XI da IN 75/2020.
@@ -3061,6 +3065,13 @@ function _listaE(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', 
 function _nPorcEmb(pesoTotal, g) { const n = Math.round((Number(pesoTotal) || 0) / (Number(g) || 1)); return n > 0 ? n : '—'; }
 const _gfmt = (g) => Number.isInteger(Number(g)) ? String(Number(g)) : _vfmt(g, 1);
 
+// Padroniza a letra que identifica a vitamina em maiúscula: "vitamina a" → "vitamina A"; "vitaminas a, c e d" → "vitaminas A, C e D"
+function _padronizaVit(t) {
+  return String(t || '').replace(/\b(vitaminas?\s+)([a-k]\d{0,2})\b((?:(?:,\s*|\s+e\s+)[a-k]\d{0,2}\b)*)/gi,
+    (m, v, l, resto) => v + l.toUpperCase() + resto.replace(/(,\s*|\s+e\s+)([a-k]\d{0,2})\b/gi, (mm, sep, x) => sep + x.toUpperCase()));
+}
+const _fmtPeso = (g) => g >= 1000 ? _vfmt(g / 1000, 3).replace(/,?0+$/, '') + ' kg' : _gfmt(g) + ' g';
+
 function ftpSecNutri(o) {
   // o: { tipo, T, P100, pesoTotal, medida, alertas, ehSIF, porcoes:[{titulo,g,medida}], poCafe }
   const cfg = NUTRI_CFG[o.tipo] || { modo: 'padrao', lupa: 'limites' };
@@ -3092,7 +3103,11 @@ function ftpSecNutri(o) {
   const _nL = linhasMostrar.length;
   const _cmp = _nL > 22 ? 'padding:0 3px;height:10px;font-size:7pt' : _nL > 14 ? 'padding:0 3px;height:11px;font-size:7.5pt' : 'padding:1px 3px;height:13px;font-size:8pt';  // muitas linhas opcionais: compacta para caber
   const cell = 'border-bottom:.5px solid #000;' + _cmp + ';color:#000';
-  const nPor = (b) => _nPorcEmb(o.pesoTotal, cafe ? (o.poCafe || 20) : b.g);
+  const _grs = (o.gramaturas && o.gramaturas.length > 1) ? o.gramaturas : null;
+  const nPor = (b) => {
+    const gp = cafe ? (o.poCafe || 20) : b.g;
+    return _grs ? 'cerca de ' + _grs.map(w => _fmtPeso(w) + ': ' + _nPorcEmb(w, gp)).join(' · ') : 'cerca de ' + _nPorcEmb(o.pesoTotal, gp);
+  };
   const medidaTxt = (b) => `${b.medida || '—'}${cafe ? ' — preparado com ' + _gfmt(o.poCafe || 20) + ' g de pó' : ''}`;
   const porcTxt = (b) => `Porção: ${_gfmt(b.g)} ${un} (${medidaTxt(b)})`;
 
@@ -3111,7 +3126,7 @@ function ftpSecNutri(o) {
     const b = blocos[0];
     const suf = cfg.modo === 'sem100' ? ' — quantidade diária recomendada' : '';
     cabecalho = `<div style="font-size:10pt;font-weight:700;text-align:center;text-transform:uppercase">Informação Nutricional</div>
-            <div style="font-size:8pt;text-align:center;margin-bottom:3px">${b.titulo ? '<b>' + b.titulo + '</b><br>' : ''}Porções por embalagem: cerca de ${nPor(b)}<br>${porcTxt(b)}${suf}</div>
+            <div style="font-size:8pt;text-align:center;margin-bottom:3px">${b.titulo ? '<b>' + b.titulo + '</b><br>' : ''}Porções por embalagem: ${nPor(b)}<br>${porcTxt(b)}${suf}</div>
             <table style="width:100%;border-collapse:collapse;table-layout:fixed;color:#000"><tr><th style="width:${linhasMostrar.length ? '40%' : '0'};padding:0;border:0"></th>${headCols}</tr>${linhas}</table>`;
   } else {
     const temTit = blocos.some(b => b.titulo);
@@ -3120,7 +3135,7 @@ function ftpSecNutri(o) {
     cabecalho = `<table style="width:100%;border-collapse:collapse;table-layout:auto;color:#000">
       <tr><th rowspan="${temTit ? 4 : 3}" style="font-size:9pt;font-weight:700;letter-spacing:0;text-transform:uppercase;text-align:center;border-bottom:1px solid #000;border-right:1px solid #000;padding:2px 4px;color:#000">Informação<br>Nutricional</th>` +
       (temTit ? blocos.map(b => `<th colspan="${span}" style="${tdb}font-weight:700;border-left:1px solid #000">${b.titulo || ''}</th>`).join('') + '</tr><tr>' : '') +
-      blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">Porções por embalagem: cerca de ${nPor(b)}</td>`).join('') + '</tr><tr>' +
+      blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">Porções por embalagem: ${nPor(b)}</td>`).join('') + '</tr><tr>' +
       blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">${porcTxt(b)}</td>`).join('') + '</tr><tr>' +
       headCols + `</tr>${linhas}</table>`;
   }
@@ -3356,6 +3371,17 @@ function _lerPorcoes() {
   (_porcoesExtra || []).forEach(p => { const gg = parseFloat(p.g); if (gg > 0) arr.push({ titulo: String(p.titulo || '').trim(), g: gg, medida: p.medida || '' }); });
   return arr;
 }
+// Gramaturas da ficha: a embalagem principal (p_peso) + as informadas em "Outras gramaturas" (em g; aceita "kg")
+function _lerGramaturas() {
+  const p = parseFloat(document.getElementById('p_peso')?.value) || 0;
+  const arr = p ? [p] : [];
+  String(document.getElementById('p_gramaturas_extra')?.value || '').split(/[;,\/]/).forEach(t => {
+    const m = t.trim().toLowerCase().replace(',', '.').match(/^(\d+(?:\.\d+)?)\s*(kg|g)?$/);
+    if (!m) return; const g = parseFloat(m[1]) * (m[2] === 'kg' ? 1000 : 1);
+    if (g > 0 && !arr.includes(g)) arr.push(g);
+  });
+  return arr;
+}
 function atualizarNPorcAuto() {
   const el = document.getElementById('p_nporc_auto'); if (!el) return;
   const peso = parseFloat(document.getElementById('p_peso')?.value) || 0;
@@ -3363,8 +3389,9 @@ function atualizarNPorcAuto() {
   const poCafe = parseFloat(document.getElementById('p_cafe_po')?.value) || 0;
   const arr = _lerPorcoes();
   const txt = arr.map(b => {
-    const n = _nPorcEmb(peso, cafe ? poCafe : b.g);
-    return (arr.length > 1 && b.titulo ? b.titulo + ': ' : '') + 'cerca de ' + n;
+    const gr = _lerGramaturas();
+    const nn = gr.length > 1 ? gr.map(w => _fmtPeso(w) + ': ' + _nPorcEmb(w, cafe ? poCafe : b.g)).join(' / ') : _nPorcEmb(peso, cafe ? poCafe : b.g);
+    return (arr.length > 1 && b.titulo ? b.titulo + ': ' : '') + 'cerca de ' + nn;
   }).join(' · ');
   el.value = peso ? txt : '';
 }
@@ -3731,7 +3758,7 @@ function _buildIngredientesList() {
     .sort((a,b) => b.qtde - a.qtde)
     .map(r => _textoIngredientesPublico(r.d.rotuloCompleto || r.d.rotulo || _nomeExibicao(r.d)).toLowerCase())
     .join(', ');
-  return _lista ? _lista.charAt(0).toUpperCase() + _lista.slice(1) : _lista;
+  return _lista ? _padronizaVit(_lista.charAt(0).toUpperCase() + _lista.slice(1)) : _lista;
 }
 
 function autoPreencherIngredientes() {
@@ -4062,7 +4089,7 @@ function renderStep3(){
     return `<tr class="${cls}"><td>${lbl}</td><td class="num">${v100}</td><td class="num">${vP}</td><td class="vd">${vd}</td></tr>`;
   }
   document.getElementById('tabelaNutri').innerHTML = ftpSecNutri({ tipo: tipoSel || classeSel, T, P100, pesoTotal, medida: mc, alertas: ftpAlertasFrontais(tipoSel || classeSel, T), ehSIF: false,
-    porcoes: _lerPorcoes(), poCafe: parseFloat(gv('p_cafe_po')) || 20, partes: true }).tabela;
+    porcoes: _lerPorcoes(), poCafe: parseFloat(gv('p_cafe_po')) || 20, gramaturas: _lerGramaturas(), partes: true }).tabela;
 
   // Por 100g
   document.getElementById('tbl100g').innerHTML=`<table>
@@ -4207,7 +4234,7 @@ function renderStep4(){
   // Lista de ingredientes para rótulo:
   // usa campo `rotulo` do DB quando disponível (ingredientes compostos com subingredientes)
   // Ordem decrescente de quantidade (legislação RDC 429/2020, Art. 19)
-  const ingList = _textoIngredientesPublico(gv('p_ingredientes_txt') || _buildIngredientesList());
+  const ingList = _padronizaVit(_textoIngredientesPublico(gv('p_ingredientes_txt') || _buildIngredientesList()));
 
   document.getElementById('s4content').innerHTML = `
   <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px">
@@ -4218,7 +4245,7 @@ function renderStep4(){
   </div>
   ${ftpDocCompacto({
     tipo: tipoSel||classeSel, T, ehSIF: _ehSIF,
-    nut: {tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF,porcoes:_lerPorcoes(),poCafe:parseFloat(gv('p_cafe_po'))||20},
+    nut: {tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF,porcoes:_lerPorcoes(),poCafe:parseFloat(gv('p_cafe_po'))||20,gramaturas:_lerGramaturas()},
     nome: gv('p_nome','—'), codigo: _ftpCodigo, revisao: _ftpRevisao, data,
     denominacao: gv('p_denominacao','—'), marca: _ftpMarca, registro: _ftpRegistro, gramatura: _ftpGramatura,
     validade: gv('p_validade','12 meses'), classe: classeNomes[classeSel]||'—',

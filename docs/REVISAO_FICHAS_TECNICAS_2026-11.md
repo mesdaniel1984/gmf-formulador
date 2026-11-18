@@ -52,3 +52,11 @@ Pedido: vitaminas, minerais e demais nutrientes opcionais do cadastro do ingredi
 - Muitas linhas: acima de 14 linhas a tabela reduz a altura/fonte; com cerca de 20 linhas opcionais a ficha ainda cabe em 1 página; com quase todos os campos preenchidos (~45 linhas) passa para 2 páginas.
 
 **Para confirmar:** os %VD das linhas já existentes (proteínas 75 g, gorduras totais 55 g, saturadas 22 g, sódio 2300 mg) vêm de revisão anterior e diferem do Anexo II para alimentos em geral (proteínas 50 g, gorduras totais 65 g, saturadas 20 g, sódio 2000 mg). Não foram alterados.
+
+## 18/11/2026 (2) — Correções do documento "Correções 18-11" (itens 2, 3, 4 e 5)
+
+- **Item 2 — gramaturas:** novo campo "Outras gramaturas da ficha" (ex.: 300 g, 1 kg). A tabela nutricional mostra "Porções por embalagem: cerca de 25 kg: 962 · 300 g: 12 · 1 kg: 38". Com uma gramatura só, o texto é o de antes.
+- **Item 3 — vitaminas:** na lista de ingredientes a letra da vitamina sai em maiúscula (vitamina A, B12; vitaminas C, D e E).
+- **Item 4 — ingredientes:** editar e excluir já existiam para ingredientes cadastrados (usuários com permissão de escrita). Ao clicar em Editar, a "Composição completa" (macro e micronutrientes) agora abre já expandida.
+- **Item 5 — %VD (alimentos em geral, IN 75/2020, Anexo II):** proteínas 50 g, gorduras totais 65 g, saturadas 20 g, sódio 2000 mg (antes 75/55/22/2300).
+- Pendentes (aguardam definição): 1 (sem lactose), 6 (Anexo VIII) e 7 (nova categoria).
