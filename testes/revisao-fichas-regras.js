@@ -7,7 +7,7 @@ const b = src.indexOf('// ===== FIM TABELA NUTRICIONAL');
 if (a < 0 || b < 0) { console.log('FALHA bloco de regras nao encontrado'); process.exit(1); }
 const ctx = { receita: [], tipoSel: 'composto-com', classeSel: 'composto-com', _getBtnSelecionados: () => ctx.__sub || [] };
 vm.createContext(ctx);
-vm.runInContext(src.slice(a, b) + '\nthis.REGRAS_REG=REGRAS_REG;this.calcProRataPartida=calcProRataPartida;this.ftpSecMicro=ftpSecMicro;this.ftpSecContam=ftpSecContam;this.ftpSecME=ftpSecME;this.calcProRataME=calcProRataME;this.ftpSecNutri=ftpSecNutri;this._padronizaVit=_padronizaVit;this._fmtPeso=_fmtPeso;this._nRound=_nRound;this._sc=_sc;this.ftpAlertasFrontais=ftpAlertasFrontais;this.NUTRI_CFG=NUTRI_CFG;this.TIPOS_SIF=TIPOS_SIF;', ctx);
+vm.runInContext(src.slice(a, b) + '\nthis.REGRAS_REG=REGRAS_REG;this.calcProRataPartida=calcProRataPartida;this.ftpSecMicro=ftpSecMicro;this.ftpSecContam=ftpSecContam;this.ftpSecME=ftpSecME;this.calcProRataME=calcProRataME;this.ftpSecNutri=ftpSecNutri;this._padronizaVit=_padronizaVit;this.GRUPOS_POP=GRUPOS_POP;this.VDR_VIII=VDR_VIII;this._fmtPeso=_fmtPeso;this._nRound=_nRound;this._sc=_sc;this.ftpAlertasFrontais=ftpAlertasFrontais;this.NUTRI_CFG=NUTRI_CFG;this.TIPOS_SIF=TIPOS_SIF;this.TIPOS_LACTEOS=TIPOS_LACTEOS;', ctx);
 let ok = 0, fail = 0;
 const check = (c, m) => { console.log((c ? '  ok    ' : '  FALHA ') + m); c ? ok++ : fail++; };
 const R = ctx.REGRAS_REG;
@@ -149,5 +149,31 @@ const g2 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: base, P100: 20, pesoTota
 check(g2.includes('cerca de 25 kg: 1250 · 300 g: 15 · 1 kg: 50'), 'porções por embalagem para cada gramatura (25 kg, 300 g e 1 kg)');
 const g1 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: base, P100: 20, pesoTotal: 1000, gramaturas: [1000], medida: '2 colheres', alertas: [], ehSIF: false });
 check(g1.includes('Porções por embalagem: cerca de 50') && !g1.includes('1 kg:'), 'uma gramatura só: texto igual ao anterior');
+
+// ---- Correções de 18/11: itens 1, 6 e 7 ----
+const bS = { kcal: 380, cho: 70, act: 40, acad: 0, ptn: 25, gt: 8, gs: 5, tr: 0, fi: 2, na: 300 };
+const sl0 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: Object.assign({}, bS), P100: 20, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false, semLactose: true });
+check(sl0.includes('Lactose (g)') && sl0.includes('Galactose (g)') && sl0.includes('Glicose (g)'), 'sem lactose: lactose, galactose e glicose na tabela mesmo com valor zero');
+const iL = sl0.indexOf('Lactose (g)'), iG = sl0.indexOf('Galactose (g)'), iGl = sl0.indexOf('Glicose (g)');
+check(iL > sl0.indexOf('Açúcares adicionados') && iG > iL && iGl > iG && iGl < sl0.indexOf('Proteínas'), 'sem lactose: ordem lactose → galactose → glicose, logo abaixo dos açúcares');
+const sl1 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: Object.assign({}, bS, { x_glic: 2, x_galact: 1 }), P100: 20, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false, semLactose: true });
+check(/Açúcares totais \(g\)<\/td><td[^>]*>43<\/td>/.test(sl1), 'sem lactose: açúcares totais = 40 + glicose 2 + galactose 1 = 43 g/100 g');
+const nl1 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: Object.assign({}, bS, { x_glic: 2, x_galact: 1 }), P100: 20, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false });
+check(/Açúcares totais \(g\)<\/td><td[^>]*>40<\/td>/.test(nl1), 'produto comum: açúcares totais não somam glicose/galactose');
+// Anexo VIII
+const gsup = (gp) => ctx.ftpSecNutri({ tipo: 'suplemento-po', T: Object.assign({}, bS, { x_vC: 50 }), P100: 20, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false, grupoPop: gp });
+const rowOf = (h, nome) => (h.match(new RegExp('<tr>(?:(?!</tr>).)*' + nome + '(?:(?!</tr>).)*</tr>'))||[''])[0].replace(/<[^>]+>/g,'|');
+check(/\|10%\|/.test(rowOf(gsup(5), 'Proteínas')) && /\|10%\|/.test(rowOf(gsup(5), 'Vitamina C')), 'Anexo VIII ≥19 anos: proteínas 5 g/50 g = 10% · vitamina C 10 mg/100 mg = 10%');
+check(/\|20%\|/.test(rowOf(gsup(2), 'Proteínas')) && /\|67%\|/.test(rowOf(gsup(2), 'Vitamina C')), 'Anexo VIII 1 a 3 anos: proteínas 5/25 = 20% · vitamina C 10/15 = 67%');
+check(gsup(2).includes('Anexo VIII da IN 75/2020 — 1 a 3 anos'), 'nota informa o grupo populacional do Anexo VIII');
+check(/\|—\|/.test(rowOf(gsup(0), 'Gorduras saturadas')), 'Anexo VIII 0 a 6 meses: sem VDR de gorduras saturadas → "—"');
+check(!nu('leite-integral', Object.assign({}, bS)).includes('Anexo VIII'), 'sem grupo: Anexo II (sem nota do Anexo VIII)');
+// categoria dietas especiais: regras do produto lácteo de base
+ctx.tipoSel = 'dietas-especiais'; ctx.classeSel = 'dietas-especiais'; ctx.baseDietaSel = 'mistura';
+check(ctx.ftpSecMicro().includes('categoria 9.j'), 'dietas especiais com base mistura láctea: micro cat. 9.j');
+ctx.baseDietaSel = 'leite-integral';
+check(ctx.ftpSecMicro().includes('Cat. 9.e') && ctx.ftpSecContam().includes('nº 160'), 'dietas especiais com base leite integral: micro 9.e e contaminantes IN 160');
+check(ctx.ftpSecME().includes('Ausência'), 'dietas especiais: matérias estranhas pelo produto de base');
+check(ctx.TIPOS_LACTEOS.includes('dietas-especiais') && !!ctx.NUTRI_CFG['dietas-especiais'], 'dietas especiais: configuração nutricional e de lácteos definida');
 console.log('\n' + ok + ' ok, ' + fail + ' falha(s)');
 process.exit(fail ? 1 : 0);
