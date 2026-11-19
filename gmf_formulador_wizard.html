@@ -475,6 +475,11 @@ tr:last-child td{border-bottom:none}
           <div class="cbtn-title">Glicose / Dextrose em Pó</div>
           <div class="cbtn-sub">Cat. 16.a · RDC 429/2020</div>
         </div>
+        <div class="cbtn" id="tb-dietas-especiais" onclick="selTipo('dietas-especiais')">
+          <div class="cbtn-icon">🥄</div>
+          <div class="cbtn-title">Alimento para Dietas com Fins Especiais</div>
+          <div class="cbtn-sub">Decreto-Lei 986/1969 · RDC 715/2022 · Lei 13.305/2016</div>
+        </div>
         <div class="cbtn" id="tb-suplemento-po" onclick="selTipo('suplemento-po')">
           <div class="cbtn-icon">💪</div>
           <div class="cbtn-title">Suplemento Alimentar em Pó</div>
@@ -570,12 +575,18 @@ tr:last-child td{border-bottom:none}
       <div class="field"><label>Porção (g ou ml)</label><input id="p_porcao" type="number" value="30" min="1" oninput="recalc();atualizarNPorcAuto()"></div>
       <div class="field"><label>Medida caseira</label><input id="p_medida" type="text" value="2 colheres de sopa" placeholder="Ex: 1 colher de chá"></div>
       <div class="field"><label>Peso total embalagem (g)</label><input id="p_peso" type="number" value="1000" min="1" oninput="atualizarNPorcAuto()"></div>
+      <div class="field"><label>Outras gramaturas da ficha (g ou kg, separadas por vírgula)</label><input id="p_gramaturas_extra" type="text" placeholder="Ex: 300 g, 1 kg" oninput="atualizarNPorcAuto()"></div>
       <div class="field"><label>Gramatura / Embalagem</label><input id="p_gramatura" type="text" value="25 kg"></div>
       <div class="field"><label>Validade</label><input id="p_validade" type="text" value="12 meses"></div>
     </div>
     <div style="margin-bottom:12px;padding:12px 14px;background:#f8f7f5;border-radius:8px;border:1px solid var(--border)">
       <div class="field" style="margin-bottom:10px;max-width:420px"><label>Fabricante (razão social, CNPJ e endereço saem na ficha)</label>
         <select id="p_fabricante"><option value="dms">DMS Indústria de Alimentos Ltda — CNPJ 33.174.960/0001-27</option><option value="mfparis">MFPARIS Indústria de Alimentos Ltda — CNPJ 26.855.558/0001-42</option></select></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px">
+        <div class="field"><label>Produto sem lactose</label><select id="p_sem_lactose" onchange="aplicarSemLactose();recalc()"><option value="">Não</option><option value="1">Sim — isento de lactose (máx. 100 mg/100 g)</option></select></div>
+        <div class="field" id="grupoPopField" style="display:none"><label>Grupo populacional (%VD — Anexo VIII da IN 75/2020)</label><select id="p_grupo_pop" onchange="recalc()"><option value="">Não informar (população em geral — Anexo II)</option><option value="0">0 a 6 meses</option><option value="1">7 a 11 meses</option><option value="2">1 a 3 anos</option><option value="3">4 a 8 anos</option><option value="4">9 a 18 anos</option><option value="5">≥ 19 anos</option><option value="6">Gestantes</option><option value="7">Lactantes</option></select></div>
+        <div class="field" id="baseDietaField" style="display:none"><label>Produto lácteo de base (micro, contaminantes e matérias estranhas)</label><select id="p_base_dieta" onchange="baseDietaSel=this.value"><option value="leite-integral">Leite em pó integral</option><option value="leite-instantaneo">Leite em pó instantâneo</option><option value="leite-desnatado">Leite em pó desnatado</option><option value="composto-sem">Composto lácteo sem adição</option><option value="composto-com">Composto lácteo com adição</option><option value="mistura">Mistura láctea</option></select></div>
+      </div>
       <div style="font-size:12px;font-weight:700;margin-bottom:8px">Padrões físico-químicos do produto <span style="font-weight:400;color:#6b7280">(opcional — o item só aparece na ficha se for preenchido)</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:12px">
         <div class="field"><label>Umidade (%)</label><input id="p_umidade" type="text" placeholder="Ex: Máx. 4,0"></div>
@@ -1108,6 +1119,7 @@ const CLASSE_META = {
   'maltodextrina':     { label:'Maltodextrina em Pó',           cor:'#92400e', bg:'#fef3c7', icone:'🌽' },
   'glicose':           { label:'Glicose / Dextrose em Pó',      cor:'#92400e', bg:'#fef3c7', icone:'🍬' },
   'suplemento-po':     { label:'Suplemento Alimentar em Pó',    cor:'#0f766e', bg:'#e6f7f5', icone:'💪' },
+  'dietas-especiais':  { label:'Alimento para Dietas com Fins Especiais', cor:'#9a3412', bg:'#fff1e6', icone:'🥄' },
   'chocolate-po':      { label:'Chocolate em Pó',               cor:'#4a1c06', bg:'#fdf0e8', icone:'🍫' },
   'espessante':        { label:'Espessante Alimentar',          cor:'#1f2937', bg:'#f3f4f6', icone:'🥄' },
 };
@@ -1269,7 +1281,7 @@ function irParaFormuladorDosIngredientes() {
 // ── Composição completa do ingrediente (por 100 g) — campos opcionais ──
 const NUTRI_EXT = [
  ['Carboidratos e açúcares', [
-  ['pol','Polióis','g'],['pdx','Polidextrose','g'],['amido','Amido','g'],['galact','Galactose','g'],['lact','Lactose','g']]],
+  ['pol','Polióis','g'],['pdx','Polidextrose','g'],['amido','Amido','g'],['galact','Galactose','g'],['glic','Glicose','g'],['lact','Lactose','g']]],
  ['Gorduras', [
   ['gmono','Gorduras monoinsaturadas','g'],['gpoli','Gorduras poli-insaturadas','g'],['ala','Ômega 3 - Ácido Alfa-Linolênico / ALA','g'],
   ['epa','EPA - Ácido Eicosapentaenoico','mg'],['dha','DHA - Ácido Docosahexaenoico','mg'],['o6','Ômega 6 - Ácido Linoleico','g'],
@@ -1391,6 +1403,7 @@ function editarIngCustom(dadosEncoded) {
   set('ing_na', d.na);
   montarCamposExtraIng();
   EXT_KEYS.forEach(k => set('ing_' + k, d[k]));
+  { const _dt = document.querySelector('#ing_ext_wrap details'); if (_dt) _dt.open = true; }   // edição: abre a lista completa de macro e micronutrientes
   const s = document.getElementById('ing_src'); if(s) s.value = d.src||'Usuário';
   // Navegar para a tela de ingredientes
   irParaIngredientes();
@@ -1533,7 +1546,7 @@ function _hashReceitaAtual() {
     porcao: document.getElementById('p_porcao').value,
     peso: document.getElementById('p_peso').value,
     medida: document.getElementById('p_medida').value,
-    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || '') + '|' + gv('p_fabricante') + '|' + gv('p_cafe_tipo') + gv('p_cafe_especie') + gv('p_cafe_torra') + gv('p_cafe_moagem') + '|' + gv('p_umidade') + '|' + gv('p_ph') + '|' + gv('p_acidez'),
+    porcoes: JSON.stringify(_porcoesExtra || []) + (document.getElementById('p_porcao_titulo')?.value || '') + '|' + gv('p_gramaturas_extra') + gv('p_sem_lactose') + gv('p_grupo_pop') + baseDietaSel + '|' + gv('p_fabricante') + '|' + gv('p_cafe_tipo') + gv('p_cafe_especie') + gv('p_cafe_torra') + gv('p_cafe_moagem') + '|' + gv('p_umidade') + '|' + gv('p_ph') + '|' + gv('p_acidez'),
     tipo: tipoSel,   // inclui tipo para detectar mudança de classificação
     classe: classeSel,
     ings: receita.map(r=>({n:_nomeExibicao(r.d), q:r.qtde}))
@@ -1601,7 +1614,7 @@ function novoProduto() {
   _prodOrigem = null;
   _prodOrigemHash = null;
   receita = [];
-  ['p_nome','p_codigo','p_denominacao','p_umidade','p_ph','p_acidez','p_cafe_tipo','p_cafe_especie','p_cafe_torra','p_cafe_moagem'].forEach(id=>{
+  ['p_nome','p_codigo','p_denominacao','p_gramaturas_extra','p_sem_lactose','p_grupo_pop','p_umidade','p_ph','p_acidez','p_cafe_tipo','p_cafe_especie','p_cafe_torra','p_cafe_moagem'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('p_revisao').value='00';
@@ -1759,6 +1772,10 @@ function editarProduto(id) {
   { const _fb = document.getElementById('p_fabricante'); if (_fb && prod.fabricante) _fb.value = prod.fabricante; }
   { const cd = prod.cafeDados || {}; [['tipo','tipo'],['especie','especie'],['torra','torra'],['moagem','moagem']].forEach(([k, f]) => { const el = document.getElementById('p_cafe_' + k); if (el) el.value = cd[f] || ''; }); }
   ['umidade','ph','acidez'].forEach(k => { const el = document.getElementById('p_' + k); if (el) el.value = prod[k] || ''; });
+  { const _ge = document.getElementById('p_gramaturas_extra'); if (_ge) _ge.value = prod.gramaturasExtra || ''; }
+  { const _sl = document.getElementById('p_sem_lactose'); if (_sl) _sl.value = prod.semLactose ? '1' : '';
+    const _gp = document.getElementById('p_grupo_pop'); if (_gp && prod.grupoPop !== undefined) _gp.value = prod.grupoPop;
+    baseDietaSel = prod.baseDieta || 'leite-integral'; const _bd = document.getElementById('p_base_dieta'); if (_bd) _bd.value = baseDietaSel; }
   { const _t = document.getElementById('p_porcao_titulo'); if (_t) _t.value = prod.porcaoTitulo || '';
     _porcoesExtra = (prod.porcoesExtra || []).map(x => ({ ...x })); renderPorcoesExtra();
     const _cp = document.getElementById('p_cafe_po'); if (_cp && prod.cafePo) _cp.value = prod.cafePo; atualizarNPorcAuto(); }
@@ -1926,6 +1943,10 @@ function salvarProdutoAtual() {
     ph: (document.getElementById('p_ph')?.value || '').trim(),
     acidez: (document.getElementById('p_acidez')?.value || '').trim(),
     porcaoTitulo:  (document.getElementById('p_porcao_titulo')?.value || '').trim(),
+    gramaturasExtra: (document.getElementById('p_gramaturas_extra')?.value || '').trim(),
+    semLactose: _semLactose(),
+    grupoPop: document.getElementById('p_grupo_pop')?.value || '',
+    baseDieta: baseDietaSel,
     porcoesExtra:  (_porcoesExtra || []).map(x => ({ ...x })),
     cafePo:        parseFloat(document.getElementById('p_cafe_po')?.value) || null,
     validade:      document.getElementById('p_validade')?.value || '',
@@ -2806,8 +2827,10 @@ function _ftpRows(itens) {
   return h;
 }
 
+var baseDietaSel = 'leite-integral';   // produto lácteo de base da categoria "dietas especiais" (define micro, contaminantes e matérias estranhas)
+function _tipoEfetivo() { const t = tipoSel || classeSel; return t === 'dietas-especiais' ? baseDietaSel : t; }
 function _regrasDoTipo() {
-  const tipo = tipoSel || classeSel;
+  const tipo = _tipoEfetivo();
   const r = REGRAS_REG[tipo];
   if (!r) return null;
   return r;
@@ -2908,7 +2931,7 @@ function _fmtME(v, unid) {
   return 'Máx. ' + String(v).replace('.', ',') + ' ' + unid + ' em 100 g <span style="font-size:7px">(calculado)</span>';
 }
 function ftpSecME(num) {
-  const tipo = tipoSel || classeSel;
+  const tipo = _tipoEfetivo();
   const r = ME_REGRAS[tipo];
   if (!r) return '';
   let ins, pel, nota;
@@ -2944,7 +2967,7 @@ const FABRICANTES = {
   mfparis: { nome: 'MFPARIS Indústria de Alimentos Ltda', cnpj: '26.855.558/0001-42', end: 'Rua Beta, 378, Vila Paris, Contagem/MG, CEP 32.372-090' },
 };
 const _fabPadrao = (tipo) => /^cafe/.test(tipo) ? 'mfparis' : 'dms';
-const TIPOS_LACTEOS = ['leite-integral','leite-instantaneo','leite-desnatado','composto-sem','composto-com','mistura','soro-derivados'];
+const TIPOS_LACTEOS = ['dietas-especiais','leite-integral','leite-instantaneo','leite-desnatado','composto-sem','composto-com','mistura','soro-derivados'];
 const TIPOS_SIF = ['leite-integral','leite-instantaneo','leite-desnatado','composto-sem','composto-com','mistura'];
 // modo: padrao (100 g + porção + %VD) | preparo | sem100 (só porção + %VD) | espessante (100 mL** = porção) | cafe (bebida: 100 ml**, 200 ml, %VD)
 // lupa: limites (obrigatória se atingir) | proibida | nao
@@ -2960,6 +2983,7 @@ const NUTRI_CFG = {
   'chocolate-po':      { modo:'padrao', lupa:'limites', porcao:20, medida:'2 colheres de sopa' },
   'po-preparo':        { modo:'preparo', lupa:'limites' },
   'suplemento-po':     { modo:'sem100', lupa:'proibida' },
+  'dietas-especiais':  { modo:'padrao', lupa:'limites', porcao:26, medida:'2 colheres de sopa' },
   'maltodextrina':     { modo:'padrao', lupa:'nao', porcao:5, medida:'1 colher de chá' },
   'glicose':           { modo:'padrao', lupa:'nao', porcao:5, medida:'1 colher de chá' },
   'cafe-torrado-moido':{ modo:'cafe', lupa:'nao', porcao:200, medida:'1 xícara de chá' },
@@ -3004,12 +3028,12 @@ const _NR = [   // [rótulo (Anexo XI), chave T, VDR, nível de recuo, tipo de a
   ['Carboidratos totais (g)', 'cho', 300, 0, 'cho'],
   ['Açúcares totais (g)', 'act', null, 1, 'act'],
   ['Açúcares adicionados (g)', 'acad', 50, 2, 'acad'],
-  ['Proteínas (g)', 'ptn', 75, 0, 'ptn'],
-  ['Gorduras totais (g)', 'gt', 55, 0, 'gt'],
-  ['Gorduras saturadas (g)', 'gs', 22, 1, 'gs'],
+  ['Proteínas (g)', 'ptn', 50, 0, 'ptn'],
+  ['Gorduras totais (g)', 'gt', 65, 0, 'gt'],
+  ['Gorduras saturadas (g)', 'gs', 20, 1, 'gs'],
   ['Gorduras trans (g)', 'tr', null, 1, 'tr'],
   ['Fibras alimentares (g)', 'fi', 25, 0, 'fi'],
-  ['Sódio (mg)', 'na', 2300, 0, 'na'],
+  ['Sódio (mg)', 'na', 2000, 0, 'na'],
 ];
 
 // Nutrientes opcionais (campos do cadastro do ingrediente): entram na tabela quando > 0, na ordem/recuo do Anexo XI da IN 75/2020.
@@ -3017,7 +3041,7 @@ const _NR = [   // [rótulo (Anexo XI), chave T, VDR, nível de recuo, tipo de a
 const _XM = ['ala','arg','asp','cys','glu','gly','his','ile','leu','lys','met','phe','pro','ser','thr','trp','tyr','val','hyl','hyp'];
 const _XAA = { ala:'Alanina', arg:'Arginina', asp:'Ácido aspártico', cys:'Cisteína', glu:'Glutamina / Ácido glutâmico', gly:'Glicina', his:'Histidina', ile:'Isoleucina', leu:'Leucina', lys:'Lisina', met:'Metionina', phe:'Fenilalanina', pro:'Prolina', ser:'Serina', thr:'Treonina', trp:'Triptofano', tyr:'Tirosina', val:'Valina', hyl:'Hidroxilisina', hyp:'Hidroxiprolina' };
 const _XL = {   // posição → linhas opcionais que vêm logo depois da linha-âncora (chave da linha obrigatória)
-  acad: [['x_lact','Lactose (g)',null,2,'x'],['x_galact','Galactose (g)',null,2,'x'],['x_pol','Polióis totais (g)',null,1,'x'],['x_pdx','Polidextrose (g)',null,1,'x'],['x_amido','Amido (g)',null,1,'x']],
+  acad: [['x_lact','Lactose (g)',null,2,'x'],['x_galact','Galactose (g)',null,2,'x'],['x_glic','Glicose (g)',null,2,'x'],['x_pol','Polióis totais (g)',null,1,'x'],['x_pdx','Polidextrose (g)',null,1,'x'],['x_amido','Amido (g)',null,1,'x']],
   ptn:  _XM.map(a => ['m_aa_' + a, _XAA[a] + ' (mg)', null, 1, 'xmg']),
   tr:   [['x_gmono','Gorduras monoinsaturadas (g)',20,1,'x'],['x_o9','Ômega 9 (g)',null,2,'x'],['x_gpoli','Gorduras poli-insaturadas (g)',20,1,'x'],['x_o6','Ômega 6 (g)',18,2,'x'],
          ['m_o3','Ômega 3 (mg)',4000,2,'xmg'],['m_ala','Ácido linolênico (mg)',null,3,'xmg'],['x_epa','EPA (mg)',null,3,'xmg'],['x_dha','DHA (mg)',null,3,'xmg'],['x_col','Colesterol (mg)',300,1,'xmg']],
@@ -3033,6 +3057,25 @@ const _XL = {   // posição → linhas opcionais que vêm logo depois da linha-
 };
 // mesmo formato das linhas de _NR: [rótulo, chave, VDR, recuo, tipo]
 Object.keys(_XL).forEach(k => _XL[k] = _XL[k].map(r => [r[1], r[0], r[2], r[3], r[4]]));
+
+// IN 75/2020, Anexo VIII — VDR para alimentos para fins especiais com indicação de grupo populacional no rótulo e suplementos alimentares
+// ordem dos grupos: 0-6 m · 7-11 m · 1-3 a · 4-8 a · 9-18 a · ≥19 a · gestantes · lactantes ("-" = sem VDR)
+const GRUPOS_POP = ['0 a 6 meses','7 a 11 meses','1 a 3 anos','4 a 8 anos','9 a 18 anos','≥ 19 anos','gestantes','lactantes'];
+const VDR_VIII = {
+  kcal:[550,700,1000,1500,2500,2000,2300,2600], cho:[60,95,150,225,375,300,345,360], acad:[null,null,25,35,60,50,55,65],
+  ptn:[9,11,25,35,60,50,55,65], gt:[30,27,33,50,80,65,75,85], gs:[null,null,11,16,27,20,25,28], tr:[null,null,1,1.5,2.5,2,2.5,2.5],
+  x_gmono:[null,null,11,16,27,20,25,28], x_gpoli:[null,null,11,16,27,20,25,28], x_o6:[null,null,9,13,22,18,20,23],
+  m_o3:[null,null,2000,3000,5000,4000,5000,5000], x_col:[null,null,300,300,300,300,300,300], fi:[null,null,19,25,38,25,28,29],
+  na:[120,370,1000,2000,2000,2000,2000,2000],
+  x_vA:[400,500,300,400,900,800,770,1300], x_vD:[10,10,15,15,15,15,15,15], x_vE:[4,5,6,7,15,15,15,15], x_vK:[2,2.5,30,55,75,120,90,90],
+  x_vC:[40,50,15,25,75,100,85,120], x_b1:[0.2,0.3,0.5,0.6,1.2,1.2,1.4,1.4], x_b2:[0.3,0.4,0.5,0.6,1.3,1.2,1.4,1.6], x_b3:[2,4,6,8,16,15,18,17],
+  x_b6:[0.1,0.3,0.5,0.6,1.3,1.3,1.9,2], x_b7:[5,6,8,12,25,30,30,35], x_b9:[65,80,150,200,400,400,600,500], x_b5:[1.7,1.8,2,3,5,5,6,7],
+  x_b12:[0.4,0.5,0.9,1.2,2.4,2.4,2.6,2.8], x_ca:[200,260,700,1000,1300,1000,1300,1300], x_cl:[180,570,1500,1900,2300,2300,2300,2300],
+  x_cu:[200,220,340,440,890,900,1000,1300], x_cr:[0.2,5.5,11,15,35,35,30,45], x_fe:[0.27,11,7,10,15,14,27,10], x_fl:[0.01,0.5,0.7,1,3,4,3,3],
+  x_p:[100,275,460,500,1250,700,1250,1250], x_i:[110,130,90,90,150,150,220,290], x_mgn:[30,75,80,130,410,420,400,360],
+  x_mn:[0.003,0.6,1.2,1.5,2.2,3,2,2.6], x_mo:[2,3,17,22,43,45,5,50], x_k:[400,700,3000,3500,3500,3500,3500,3500],
+  x_se:[15,20,20,30,55,60,60,70], x_zn:[2,3,3,5,11,11,12,13], x_colina:[125,150,200,250,550,550,450,550],
+};
 // valores derivados (conversões g → mg e Ômega 3 total) para as colunas da tabela
 function _derivaExt(T) {
   const D = Object.assign({}, T);
@@ -3061,12 +3104,25 @@ function _listaE(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', 
 function _nPorcEmb(pesoTotal, g) { const n = Math.round((Number(pesoTotal) || 0) / (Number(g) || 1)); return n > 0 ? n : '—'; }
 const _gfmt = (g) => Number.isInteger(Number(g)) ? String(Number(g)) : _vfmt(g, 1);
 
+// Padroniza a letra que identifica a vitamina em maiúscula: "vitamina a" → "vitamina A"; "vitaminas a, c e d" → "vitaminas A, C e D"
+function _padronizaVit(t) {
+  return String(t || '').replace(/\b(vitaminas?\s+)([a-k]\d{0,2})\b((?:(?:,\s*|\s+e\s+)[a-k]\d{0,2}\b)*)/gi,
+    (m, v, l, resto) => v + l.toUpperCase() + resto.replace(/(,\s*|\s+e\s+)([a-k]\d{0,2})\b/gi, (mm, sep, x) => sep + x.toUpperCase()));
+}
+const _fmtPeso = (g) => g >= 1000 ? _vfmt(g / 1000, 3).replace(/,?0+$/, '') + ' kg' : _gfmt(g) + ' g';
+
 function ftpSecNutri(o) {
   // o: { tipo, T, P100, pesoTotal, medida, alertas, ehSIF, porcoes:[{titulo,g,medida}], poCafe }
   const cfg = NUTRI_CFG[o.tipo] || { modo: 'padrao', lupa: 'limites' };
   const cafe = cfg.modo === 'cafe', esp = cfg.modo === 'espessante';
   const Z = {}; Object.keys(o.T).forEach(k => Z[k] = 0);
   const T = _derivaExt(cafe ? Z : o.T);             // café infusionado: todos os nutrientes declarados como 0
+  const _LAC = ['x_lact', 'x_galact', 'x_glic'];
+  // produto sem lactose: açúcares totais = valor cadastrado + glicose + galactose declaradas
+  if (o.semLactose && !cafe) T.act = (Number(T.act) || 0) + (Number(T.x_glic) || 0) + (Number(T.x_galact) || 0);
+  const _vis = (x) => (Number(T[x[1]]) || 0) > 0 || (o.semLactose && !cafe && _LAC.includes(x[1]));   // sem lactose: lactose, galactose e glicose sempre declaradas (RDC 429, art. 5º §4º)
+  const gi = (o.grupoPop === 0 || o.grupoPop > 0) ? Number(o.grupoPop) : null;                       // Anexo VIII: índice do grupo populacional
+  const _vdr = (k, v) => gi !== null ? ((VDR_VIII[k] || [])[gi] ?? null) : v;
   const un = cafe ? 'ml' : 'g';
   const blocos = (o.porcoes && o.porcoes.length) ? o.porcoes : [{ titulo: '', g: o.P100, medida: o.medida }];
   const multi = blocos.length > 1;
@@ -3079,24 +3135,29 @@ function ftpSecNutri(o) {
   const refS = (g) => esp ? _sc(T, g) : T;
 
   // Omissão das linhas: café (tudo zero) ou "demais" todos não significativos em todas as colunas
-  const qnsTodos = _DEMAIS.every(([k]) => blocos.every(b => {
+  const qnsTodos = !o.semLactose && _DEMAIS.every(([k]) => blocos.every(b => {
     const S = _sc(T, b.g);
     return _nRound(T[k] * b.g / 100, tipoRow[k], S) === '0' && _nRound(refVal(k, b.g), tipoRow[k], refS(b.g)) === '0';
   }));
   const ocultaDemais = cafe || qnsTodos;
   const _core = qnsTodos ? _NR.filter(r => r[1] === 'kcal' || r[1] === 'cho') : _NR;
   // nutrientes opcionais preenchidos (> 0) entram logo após a linha-âncora, na ordem do Anexo XI
-  const linhasMostrar = cafe ? [] : _core.flatMap(r => [r].concat((_XL[r[1]] || []).filter(x => (Number(T[x[1]]) || 0) > 0)));
-  if (!cafe && qnsTodos) { ['acad','ptn','tr','fi','na'].forEach(a => { if (linhasMostrar.some(r => r[1] === a)) return; const ex = (_XL[a] || []).filter(x => (Number(T[x[1]]) || 0) > 0); if (ex.length) linhasMostrar.push(...ex); }); }
+  const linhasMostrar = cafe ? [] : _core.flatMap(r => [r].concat((_XL[r[1]] || []).filter(_vis)));
+  if (!cafe && qnsTodos) { ['acad','ptn','tr','fi','na'].forEach(a => { if (linhasMostrar.some(r => r[1] === a)) return; const ex = (_XL[a] || []).filter(_vis); if (ex.length) linhasMostrar.push(...ex); }); }
 
   const _nL = linhasMostrar.length;
   const _cmp = _nL > 22 ? 'padding:0 3px;height:10px;font-size:7pt' : _nL > 14 ? 'padding:0 3px;height:11px;font-size:7.5pt' : 'padding:1px 3px;height:13px;font-size:8pt';  // muitas linhas opcionais: compacta para caber
   const cell = 'border-bottom:.5px solid #000;' + _cmp + ';color:#000';
-  const nPor = (b) => _nPorcEmb(o.pesoTotal, cafe ? (o.poCafe || 20) : b.g);
+  const _grs = (o.gramaturas && o.gramaturas.length > 1) ? o.gramaturas : null;
+  const nPor = (b) => {
+    const gp = cafe ? (o.poCafe || 20) : b.g;
+    return _grs ? 'cerca de ' + _grs.map(w => _fmtPeso(w) + ': ' + _nPorcEmb(w, gp)).join(' · ') : 'cerca de ' + _nPorcEmb(o.pesoTotal, gp);
+  };
   const medidaTxt = (b) => `${b.medida || '—'}${cafe ? ' — preparado com ' + _gfmt(o.poCafe || 20) + ' g de pó' : ''}`;
   const porcTxt = (b) => `Porção: ${_gfmt(b.g)} ${un} (${medidaTxt(b)})`;
 
-  const linhas = linhasMostrar.map(([l, k, vd, n, t]) => {
+  const linhas = linhasMostrar.map(([l, k, vd0, n, t]) => {
+    const vd = _vdr(k, vd0);
     const tds = blocos.map(b => colsOf.map(c => {
       if (c === 'ref') return `<td style="${cell};text-align:center">${_nRound(refVal(k, b.g), t, refS(b.g))}</td>`;
       if (c === 'porc') return `<td style="${cell};text-align:center">${_nRound(T[k] * b.g / 100, t, _sc(T, b.g))}</td>`;
@@ -3111,7 +3172,7 @@ function ftpSecNutri(o) {
     const b = blocos[0];
     const suf = cfg.modo === 'sem100' ? ' — quantidade diária recomendada' : '';
     cabecalho = `<div style="font-size:10pt;font-weight:700;text-align:center;text-transform:uppercase">Informação Nutricional</div>
-            <div style="font-size:8pt;text-align:center;margin-bottom:3px">${b.titulo ? '<b>' + b.titulo + '</b><br>' : ''}Porções por embalagem: cerca de ${nPor(b)}<br>${porcTxt(b)}${suf}</div>
+            <div style="font-size:8pt;text-align:center;margin-bottom:3px">${b.titulo ? '<b>' + b.titulo + '</b><br>' : ''}Porções por embalagem: ${nPor(b)}<br>${porcTxt(b)}${suf}</div>
             <table style="width:100%;border-collapse:collapse;table-layout:fixed;color:#000"><tr><th style="width:${linhasMostrar.length ? '40%' : '0'};padding:0;border:0"></th>${headCols}</tr>${linhas}</table>`;
   } else {
     const temTit = blocos.some(b => b.titulo);
@@ -3120,7 +3181,7 @@ function ftpSecNutri(o) {
     cabecalho = `<table style="width:100%;border-collapse:collapse;table-layout:auto;color:#000">
       <tr><th rowspan="${temTit ? 4 : 3}" style="font-size:9pt;font-weight:700;letter-spacing:0;text-transform:uppercase;text-align:center;border-bottom:1px solid #000;border-right:1px solid #000;padding:2px 4px;color:#000">Informação<br>Nutricional</th>` +
       (temTit ? blocos.map(b => `<th colspan="${span}" style="${tdb}font-weight:700;border-left:1px solid #000">${b.titulo || ''}</th>`).join('') + '</tr><tr>' : '') +
-      blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">Porções por embalagem: cerca de ${nPor(b)}</td>`).join('') + '</tr><tr>' +
+      blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">Porções por embalagem: ${nPor(b)}</td>`).join('') + '</tr><tr>' +
       blocos.map(b => `<td colspan="${span}" style="${tdb}border-left:1px solid #000">${porcTxt(b)}</td>`).join('') + '</tr><tr>' +
       headCols + `</tr>${linhas}</table>`;
   }
@@ -3131,10 +3192,11 @@ function ftpSecNutri(o) {
     notas.push(`Não contém quantidades significativas de ${_listaE(lista)}.`);
   }
   notas.push('*Percentual de valores diários fornecidos pela porção.');
+  if (gi !== null) notas.push('%VD calculado com os valores de referência do Anexo VIII da IN 75/2020 — ' + GRUPOS_POP[gi] + '.');
   if (cfg.modo === 'preparo') notas.push('**No alimento pronto para o consumo.');
   if (esp) notas.push('**No alimento pronto para o consumo.', 'Declaração obrigatória: valor energético e carboidratos (alimento para fins especiais).');
   if (cafe) notas.push('**No alimento pronto para o consumo.', 'Bebidas não alcoólicas (chás, infusões) — IN 75/2020, Anexo V.');
-  if (cfg.modo === 'sem100') notas.push('Suplemento alimentar: sem coluna de 100 g (RDC 429/2020, art. 8º §1º). %VD pelos VDR do Anexo VIII para o grupo populacional do rótulo; declarar também nutrientes, substâncias bioativas e enzimas adicionados (art. 5º §3º).');
+  if (cfg.modo === 'sem100') notas.push('Suplemento alimentar: sem coluna de 100 g (RDC 429/2020, art. 8º §1º). %VD pelos VDR do Anexo VIII (grupo populacional informado na ficha); declarar também nutrientes, substâncias bioativas e enzimas adicionados (art. 5º §3º).');
 
   // lupa
   let lupa;
@@ -3209,6 +3271,7 @@ function ftpDocCompacto(o) {
   fq.push(['Proteínas / lipídeos (%)', f2(T.ptn) + ' / ' + f2(T.gt) + ' <span style="font-size:7px">(calculado)</span>']);
   if (_fv(o.ph)) fq.push(['pH', _fv(o.ph)]);
   if (_fv(o.acidez)) fq.push(['Acidez total titulável', _fv(o.acidez)]);
+  if (o.semLactose) fq.push(['Lactose', 'Máx. 100 mg/100 g']);
   if (cafe) fq.push(['Matérias estranhas e impurezas', 'Máx. 1,0%'], ['Elementos estranhos', 'Ausência'], ['Extrato aquoso', 'Mín. 20%'], ['Cafeína', 'Mín. 0,5%']);
   if (TIPOS_LACTEOS.includes(o.tipo) && _fv(o.particulas)) fq.push(['Partículas queimadas', _fv(o.particulas)]);
   const reg = o.ehSIF ? 'SIF 5460' : '—';
@@ -3299,6 +3362,21 @@ const SUBTIPO_AJUSTES = {
 };
 
 // Opções de embalagem: inclui 300 g e "Outra" (quantidade digitada em g ou kg) em todas as listas de embalagem
+
+TEMPLATES['dietas-especiais'] = Object.assign({}, TEMPLATES['composto-sem'], {
+  label: 'Alimento para Dietas com Fins Especiais',
+  classe: 'dietas-especiais',
+  denominacao: 'Alimento para dietas com fins especiais',
+  legal: `<strong>Decreto-Lei nº 986/1969</strong> — normas básicas sobre alimentos; conceito geral de alimentos dietéticos/para fins especiais<br>
+      • <strong>Lei nº 13.305/2016</strong> (art. 19-A do Decreto-Lei 986/1969): obrigatória a indicação da presença de lactose no rótulo e do teor remanescente nos produtos com teor original de lactose alterado<br>
+      • <strong>RDC nº 715/2022</strong>: requisitos sanitários, de composição e de rotulagem dos alimentos para fins especiais (sal hipossódico, controle de peso, ingestão controlada de açúcares, restrição de nutrientes)<br>
+      • <strong>Isento de lactose</strong> ("zero lactose"/"sem lactose"): ≤ 100 mg de lactose por 100 g ou 100 mL do alimento pronto · <strong>Baixo teor de lactose</strong>: > 100 mg e ≤ 1 g por 100 g ou 100 mL<br>
+      • Rotulagem: <strong>RDC nº 727/2022</strong> · <strong>RDC nº 429/2020</strong> · <strong>IN nº 75/2020</strong> · Microbiologia, contaminantes e matérias estranhas: do produto lácteo de base escolhido`,
+  campos: Object.assign({}, TEMPLATES['composto-sem'].campos, {
+    alergenicos: 'CONTÉM LEITE.',
+    obs: 'ESTABELECIMENTO INSPECIONADO PELO MINISTÉRIO DA AGRICULTURA, PECUÁRIA E ABASTECIMENTO.',
+  }),
+});
 (function () {
   const ehEmb = (o) => /^st-(25kg|1kg|800g|400g|300g|200g|cafe-|soro-25kg|malto-)/.test(o.id);
   Object.values(TEMPLATES).forEach(t => {
@@ -3356,6 +3434,39 @@ function _lerPorcoes() {
   (_porcoesExtra || []).forEach(p => { const gg = parseFloat(p.g); if (gg > 0) arr.push({ titulo: String(p.titulo || '').trim(), g: gg, medida: p.medida || '' }); });
   return arr;
 }
+// Gramaturas da ficha: a embalagem principal (p_peso) + as informadas em "Outras gramaturas" (em g; aceita "kg")
+function _lerGramaturas() {
+  const p = parseFloat(document.getElementById('p_peso')?.value) || 0;
+  const arr = p ? [p] : [];
+  String(document.getElementById('p_gramaturas_extra')?.value || '').split(/[;,\/]/).forEach(t => {
+    const m = t.trim().toLowerCase().replace(',', '.').match(/^(\d+(?:\.\d+)?)\s*(kg|g)?$/);
+    if (!m) return; const g = parseFloat(m[1]) * (m[2] === 'kg' ? 1000 : 1);
+    if (g > 0 && !arr.includes(g)) arr.push(g);
+  });
+  return arr;
+}
+const _semLactose = () => document.getElementById('p_sem_lactose')?.value === '1';
+function _lerGrupoPop() {
+  const t = tipoSel || classeSel;
+  if (t !== 'suplemento-po' && t !== 'dietas-especiais') return null;
+  const v = document.getElementById('p_grupo_pop')?.value;
+  if (v !== '' && v != null) return Number(v);
+  return t === 'suplemento-po' ? 5 : null;   // suplemento sem escolha: adultos (≥ 19 anos)
+}
+// produto sem lactose: ajusta a frase de glúten/lactose da ficha (isento ≤ 100 mg/100 g — RDC 715/2022)
+function aplicarSemLactose() {
+  const el = document.getElementById('p_glutenlactose'); if (!el) return;
+  const sim = _semLactose();
+  if (sim) el.value = el.value.replace(/CONTÉM LACTOSE\.?/i, 'ISENTO DE LACTOSE (máx. 100 mg/100 g).');
+  else el.value = el.value.replace(/ISENTO DE LACTOSE \(máx\. 100 mg\/100 g\)\.?/i, 'CONTÉM LACTOSE.');
+}
+function atualizarCamposTipo(tipo) {
+  const show = (id, on) => { const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
+  const esp = tipo === 'dietas-especiais', sup = tipo === 'suplemento-po';
+  show('baseDietaField', esp); show('grupoPopField', esp || sup);
+  const g = document.getElementById('p_grupo_pop'); if (g) g.value = sup ? '5' : '';
+  const b = document.getElementById('p_base_dieta'); if (b) b.value = baseDietaSel = 'leite-integral';
+}
 function atualizarNPorcAuto() {
   const el = document.getElementById('p_nporc_auto'); if (!el) return;
   const peso = parseFloat(document.getElementById('p_peso')?.value) || 0;
@@ -3363,8 +3474,9 @@ function atualizarNPorcAuto() {
   const poCafe = parseFloat(document.getElementById('p_cafe_po')?.value) || 0;
   const arr = _lerPorcoes();
   const txt = arr.map(b => {
-    const n = _nPorcEmb(peso, cafe ? poCafe : b.g);
-    return (arr.length > 1 && b.titulo ? b.titulo + ': ' : '') + 'cerca de ' + n;
+    const gr = _lerGramaturas();
+    const nn = gr.length > 1 ? gr.map(w => _fmtPeso(w) + ': ' + _nPorcEmb(w, cafe ? poCafe : b.g)).join(' / ') : _nPorcEmb(peso, cafe ? poCafe : b.g);
+    return (arr.length > 1 && b.titulo ? b.titulo + ': ' : '') + 'cerca de ' + nn;
   }).join(' · ');
   el.value = peso ? txt : '';
 }
@@ -3412,6 +3524,7 @@ function selTipo(tipo) {
   const _cmg = document.getElementById('cafeMoagemField'); if (_cmg) _cmg.style.display = (tipo === 'cafe-torrado') ? 'none' : '';
   renderPorcoesExtra();
   { const _fb = document.getElementById('p_fabricante'); if (_fb) _fb.value = _fabPadrao(tipo); }
+  atualizarCamposTipo(tipo);
 
   // Tipos com subtipo de IDENTIDADE (cacau, achocolatado, leite instantâneo)
   // também precisam de seletor de embalagem secundário
@@ -3663,7 +3776,7 @@ function selClasse(c) {
   const tiposValidos = ['composto-com','composto-sem','mistura','po-preparo',
                         'leite-integral','leite-instantaneo','leite-desnatado',
                         'achocolatado','cacau','cafe-torrado-moido','cafe-torrado',
-                        'soro-derivados','maltodextrina','glicose','suplemento-po','chocolate-po','espessante'];
+                        'soro-derivados','maltodextrina','glicose','suplemento-po','dietas-especiais','chocolate-po','espessante'];
   if (tiposValidos.includes(c)) selTipo(c);
   else classeSel = c;
 }
@@ -3731,7 +3844,7 @@ function _buildIngredientesList() {
     .sort((a,b) => b.qtde - a.qtde)
     .map(r => _textoIngredientesPublico(r.d.rotuloCompleto || r.d.rotulo || _nomeExibicao(r.d)).toLowerCase())
     .join(', ');
-  return _lista ? _lista.charAt(0).toUpperCase() + _lista.slice(1) : _lista;
+  return _lista ? _padronizaVit(_lista.charAt(0).toUpperCase() + _lista.slice(1)) : _lista;
 }
 
 function autoPreencherIngredientes() {
@@ -4062,7 +4175,7 @@ function renderStep3(){
     return `<tr class="${cls}"><td>${lbl}</td><td class="num">${v100}</td><td class="num">${vP}</td><td class="vd">${vd}</td></tr>`;
   }
   document.getElementById('tabelaNutri').innerHTML = ftpSecNutri({ tipo: tipoSel || classeSel, T, P100, pesoTotal, medida: mc, alertas: ftpAlertasFrontais(tipoSel || classeSel, T), ehSIF: false,
-    porcoes: _lerPorcoes(), poCafe: parseFloat(gv('p_cafe_po')) || 20, partes: true }).tabela;
+    porcoes: _lerPorcoes(), poCafe: parseFloat(gv('p_cafe_po')) || 20, gramaturas: _lerGramaturas(), semLactose: _semLactose(), grupoPop: _lerGrupoPop(), partes: true }).tabela;
 
   // Por 100g
   document.getElementById('tbl100g').innerHTML=`<table>
@@ -4198,6 +4311,7 @@ function renderStep4(){
     'maltodextrina':     'Maltodextrina em Pó · ANVISA RDC 429/2020',
     'glicose':           'Glicose / Dextrose em Pó · ANVISA RDC 429/2020',
     'suplemento-po':     'Suplemento Alimentar em Pó · ANVISA RDC 243/2018 · IN 161/2022',
+    'dietas-especiais':  'Alimento para Dietas com Fins Especiais · Decreto-Lei 986/1969 · RDC 715/2022',
     'cafe-torrado-moido':'Café Torrado e Moído · Portaria MAPA 570/2022 · RDC ANVISA 716/2022 · RDC 727/2022 · RDC 429/2020 e IN 75/2020 · Lei 10.674/2003 · Decreto 12.709/2025',
     'cafe-torrado':      'Café Torrado em Grão · Portaria MAPA 570/2022 · RDC ANVISA 716/2022 · RDC 727/2022 · RDC 429/2020 e IN 75/2020 · Lei 10.674/2003 · Decreto 12.709/2025',
   };
@@ -4207,7 +4321,7 @@ function renderStep4(){
   // Lista de ingredientes para rótulo:
   // usa campo `rotulo` do DB quando disponível (ingredientes compostos com subingredientes)
   // Ordem decrescente de quantidade (legislação RDC 429/2020, Art. 19)
-  const ingList = _textoIngredientesPublico(gv('p_ingredientes_txt') || _buildIngredientesList());
+  const ingList = _padronizaVit(_textoIngredientesPublico(gv('p_ingredientes_txt') || _buildIngredientesList()));
 
   document.getElementById('s4content').innerHTML = `
   <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px">
@@ -4218,7 +4332,8 @@ function renderStep4(){
   </div>
   ${ftpDocCompacto({
     tipo: tipoSel||classeSel, T, ehSIF: _ehSIF,
-    nut: {tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF,porcoes:_lerPorcoes(),poCafe:parseFloat(gv('p_cafe_po'))||20},
+    nut: {tipo:tipoSel||classeSel,T,P100,pesoTotal,medida:mc,alertas,ehSIF:_ehSIF,porcoes:_lerPorcoes(),poCafe:parseFloat(gv('p_cafe_po'))||20,gramaturas:_lerGramaturas(),semLactose:_semLactose(),grupoPop:_lerGrupoPop()},
+    semLactose: _semLactose(),
     nome: gv('p_nome','—'), codigo: _ftpCodigo, revisao: _ftpRevisao, data,
     denominacao: gv('p_denominacao','—'), marca: _ftpMarca, registro: _ftpRegistro, gramatura: _ftpGramatura,
     validade: gv('p_validade','12 meses'), classe: classeNomes[classeSel]||'—',
