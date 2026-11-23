@@ -63,3 +63,13 @@ Pedido: vitaminas, minerais e demais nutrientes opcionais do cadastro do ingredi
 - **Item 6 — Anexo VIII (IN 75/2020):** novo campo "Grupo populacional" (0-6 m, 7-11 m, 1-3, 4-8, 9-18, ≥19 anos, gestantes, lactantes) para suplementos (padrão ≥19 anos) e alimentos para dietas com fins especiais (padrão: não informar = Anexo II). A tabela usa os VDR do Anexo VIII e informa o grupo na nota; onde o anexo não tem valor, "—".
 - **Item 7 — categoria "Alimento para Dietas com Fins Especiais":** nova categoria, com a base legal do documento (Decreto-Lei 986/1969, Lei 13.305/2016, RDC 715/2022, RDC 727/2022, RDC 429/2020, IN 75/2020) e os critérios de lactose (isento ≤100 mg/100 g; baixo teor >100 mg a 1 g). Microbiologia, contaminantes e matérias estranhas seguem o "produto lácteo de base" escolhido na ficha (padrão: leite em pó integral).
 - **Para confirmar:** a nova categoria não leva selo SIF nem registro; fabricante padrão DMS. Se for produto inspecionado (SIF 5460), basta incluir.
+
+## 23/11/2026 — Correções do documento "Correções 23-11"
+
+- **Porções por embalagem:** "Cerca de 8 (200 g), 12 (300 g) e 40 (1 kg)": primeiro o número de porções, depois o peso entre parênteses, em ordem crescente; "Cerca de" só antes das porções. Uma gramatura só: "Cerca de 50".
+- **Biotina:** a Vitamina B7 aparece como "Biotina (µg)" na tabela nutricional.
+- **Edição e exclusão de ingredientes:** a lista de ingredientes mostrava "—" na coluna Ações para todos (os cadastros novos eram tratados como base fixa), por isso Editar e Excluir sumiram. Agora todos os ingredientes, da base e cadastrados, têm Editar e Excluir.
+  - Editar abre o formulário com a lista completa de macro e micronutrientes expandida e permite alterar nome, sublista (grupo), rótulo, referência e todos os valores.
+  - Item da base fixa editado vira um cadastro "ajustado" (mesmo nome) na tabela do banco. Se o nome mudar, o antigo sai da lista.
+  - Excluir de item da base grava uma marca de exclusão na tabela `ingredientes_custom` (`dados._excluido`); de item cadastrado, apaga a linha. Produtos já salvos não mudam.
+  - Nova coluna "Conferência" aponta preenchimento suspeito por 100 g (açúcares > carboidratos, adicionados > totais, saturadas + trans > gorduras totais, macros somando mais de 100 g, kcal diferente do calculado) e filtro "mostrar só os com ⚠".
