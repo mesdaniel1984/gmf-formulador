@@ -73,14 +73,14 @@ check(nu('suplemento-po', T0).includes('PROIBIDA') && !nu('suplemento-po', T0).i
 const TE = { kcal: 370, cho: 92, act: 0, acad: 0, ptn: 0, gt: 0, gs: 0, tr: 0, fi: 0, na: 0 };
 const nuE = ctx.ftpSecNutri({ tipo: 'espessante', T: TE, P100: 4, pesoTotal: 1000, medida: '1 colher de chá', alertas: [], ehSIF: false, porcoes: ctx.NUTRI_CFG.espessante.porcoesDef });
 check(['Textura Néctar','Textura Mel','Textura Pudim','4 g','6 g','8 g','100 mL**','1 colher de chá','1 + 1/2 colher de chá','2 colheres de chá'].every(x => nuE.includes(x)), 'espessante: 3 blocos com título, porções e medida caseira próprios');
-check(nuE.includes('cerca de 250') && nuE.includes('cerca de 167') && nuE.includes('cerca de 125'), 'espessante: porções por embalagem por bloco (1000 ÷ 4, 6, 8)');
+check(nuE.includes('Cerca de 250') && nuE.includes('Cerca de 167') && nuE.includes('Cerca de 125'), 'espessante: porções por embalagem por bloco (1000 ÷ 4, 6, 8)');
 check(!nuE.includes('Proteínas') && nuE.includes('Não contém quantidades significativas de açúcares totais, açúcares adicionados, proteínas, gorduras totais, gorduras saturadas, gorduras trans, fibras alimentares e sódio.') && nuE.includes('**No alimento pronto para o consumo'), 'espessante: linhas suprimidas + frase de nutrientes não significativos');
 check(/>15<\/td><td[^>]*>15<\/td>/.test(nuE.replace(/\s+/g, '')) || (nuE.match(/>15</g) || []).length >= 2, 'espessante: 100 mL = quantidade da porção (4 g → 15 kcal)');
 const nuM = nu('maltodextrina', { kcal: 380, cho: 94, act: 1, acad: 0, ptn: 0, gt: 0, gs: 0, tr: 0, fi: 0, na: 0 });
-check(nuM.includes('Porções por embalagem: cerca de 50') && nuM.includes('Porção: 20 g (2 colheres de sopa)'), 'porções por embalagem automática (peso ÷ porção) e medida caseira na tabela');
+check(nuM.includes('Porções por embalagem: Cerca de 50') && nuM.includes('Porção: 20 g (2 colheres de sopa)'), 'porções por embalagem automática (peso ÷ porção) e medida caseira na tabela');
 check(nu('achocolatado', T0).includes('Proteínas') && !nu('achocolatado', T0).includes('Não contém quantidades significativas'), 'com nutrientes significativos as linhas aparecem e não há frase de supressão');
 const nuC = ctx.ftpSecNutri({ tipo: 'cafe-torrado-moido', T: { kcal: 300, cho: 40, act: 0, acad: 0, ptn: 12, gt: 12, gs: 4, tr: 0, fi: 20, na: 5 }, P100: 200, pesoTotal: 500, medida: '1 xícara de chá', alertas: [], ehSIF: false, poCafe: 20 });
-check(nuC.includes('Porção: 200 ml (1 xícara de chá — preparado com 20 g de pó)') && nuC.includes('cerca de 25') && nuC.includes('100 ml**') && nuC.includes('200 ml') && nuC.includes('%VD*'), 'café: porção 200 ml com pó por porção, 100 ml / 200 ml / %VD e rendimento 500 ÷ 20');
+check(nuC.includes('Porção: 200 ml (1 xícara de chá — preparado com 20 g de pó)') && nuC.includes('Cerca de 25') && nuC.includes('100 ml**') && nuC.includes('200 ml') && nuC.includes('%VD*'), 'café: porção 200 ml com pó por porção, 100 ml / 200 ml / %VD e rendimento 500 ÷ 20');
 check(!nuC.includes('Proteínas') && !nuC.includes('Valor energético (kcal)') && nuC.includes('Não contém quantidades significativas de valor energético, carboidratos, açúcares totais, açúcares adicionados, proteínas, gorduras totais, gorduras saturadas, gorduras trans, fibras alimentares e sódio.') && nuC.includes('**No alimento pronto para o consumo'), 'café: linhas ocultas (tudo 0) e frase obrigatória + nota **');
 check(ctx.NUTRI_CFG['cafe-torrado'].modo === 'cafe' && ctx.NUTRI_CFG['cafe-torrado'].porcao === 200, 'café em grão também em bebida de 200 ml');
 // campos do ingrediente
@@ -146,10 +146,14 @@ check(/\|6%\|/.test(rows(vdb,'Gorduras totais')), '%VD gorduras totais pelo Anex
 check(/\|10%\|/.test(rows(vdb,'Gorduras saturadas')), '%VD saturadas pelo Anexo II (VDR 20 g): 2 g = 10%');
 check(/\|10%\|/.test(rows(vdb,'Sódio')), '%VD sódio pelo Anexo II (VDR 2000 mg): 200 mg = 10%');
 const g2 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: base, P100: 20, pesoTotal: 25000, gramaturas: [25000, 300, 1000], medida: '2 colheres', alertas: [], ehSIF: false });
-check(g2.includes('cerca de 25 kg: 1250 · 300 g: 15 · 1 kg: 50'), 'porções por embalagem para cada gramatura (25 kg, 300 g e 1 kg)');
+check(g2.includes('Cerca de 15 (300 g), 50 (1 kg) e 1250 (25 kg)'), 'porções por embalagem: número primeiro, peso entre parênteses, ordem crescente, "Cerca de" só antes das porções');
 const g1 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: base, P100: 20, pesoTotal: 1000, gramaturas: [1000], medida: '2 colheres', alertas: [], ehSIF: false });
-check(g1.includes('Porções por embalagem: cerca de 50') && !g1.includes('1 kg:'), 'uma gramatura só: texto igual ao anterior');
+check(g1.includes('Porções por embalagem: Cerca de 50') && !g1.includes('(1 kg)'), 'uma gramatura só: texto igual ao anterior');
 
+// ---- Correções de 23/11 ----
+check(/Biotina \(µg\)/.test(c2 + nu('leite-integral', Object.assign({}, base, { x_b7: 15 }))) && !/Vitamina B7/.test(nu('leite-integral', Object.assign({}, base, { x_b7: 15 }))), 'Vitamina B7 aparece como Biotina na tabela nutricional');
+const g3 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: base, P100: 20, pesoTotal: 200, gramaturas: [1000, 200, 500, 300], medida: 'x', alertas: [], ehSIF: false });
+check(g3.includes('Cerca de 10 (200 g), 15 (300 g), 25 (500 g) e 50 (1 kg)') && !g3.includes('cerca de'), 'ordem crescente de peso e "Cerca de" só uma vez, antes das porções');
 // ---- Correções de 18/11: itens 1, 6 e 7 ----
 const bS = { kcal: 380, cho: 70, act: 40, acad: 0, ptn: 25, gt: 8, gs: 5, tr: 0, fi: 2, na: 300 };
 const sl0 = ctx.ftpSecNutri({ tipo: 'leite-integral', T: Object.assign({}, bS), P100: 20, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false, semLactose: true });

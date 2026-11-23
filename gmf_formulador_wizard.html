@@ -1172,7 +1172,7 @@ function goStep(n) {
     if (n === 2 && _sb && _currentUser) {
       _sb.from('ingredientes_custom').select('nome,dados').order('nome').then(({data}) => {
         if(data?.length) {
-          data.forEach(r=>{ const ex=DB.findIndex(d=>d.n===r.dados.n); if(ex>=0) DB[ex]=r.dados; else DB.push(r.dados); });
+          _aplicarCustomNoDB(data);
           const sel = document.getElementById('selIng');
           if(sel) {
             sel.innerHTML = '<option value="">— selecione o ingrediente —</option>';
@@ -1317,6 +1317,57 @@ function montarCamposExtraIng() {
 }
 document.addEventListener('DOMContentLoaded', montarCamposExtraIng);
 
+// ===== Banco de ingredientes: edição e exclusão de qualquer ingrediente (base e cadastrados) =====
+const _DB_BASE_NOMES = new Set(DB.filter(d => d && d.n).map(d => d.n));   // nomes que vêm da base fixa do programa
+let _ingEditNome = '';                                                    // nome original do ingrediente em edição (permite renomear)
+// Sublista (grupo) efetiva: o rótulo g aparece só no primeiro item de cada grupo; os seguintes herdam
+function _grpDe(i) { for (let k = i; k >= 0; k--) if (DB[k] && DB[k].g) return DB[k].g; return ''; }
+function _removerDoDB(nome) {
+  const i = DB.findIndex(d => d && d.n === nome); if (i < 0) return;
+  const rem = DB[i]; DB.splice(i, 1);
+  if (rem.g && DB[i] && DB[i].n && !DB[i].g) DB[i] = Object.assign({}, DB[i], { g: rem.g });   // o grupo continua para o item seguinte
+}
+function _inserirNoDB(d) {
+  const i = DB.findIndex(x => x && x.n === d.n);
+  if (i >= 0) { DB[i] = d; return; }
+  if (d.g) { let last = -1; for (let k = 0; k < DB.length; k++) if (DB[k] && DB[k].n && _grpDe(k) === d.g) last = k; if (last >= 0) { DB.splice(last + 1, 0, d); return; } }
+  DB.push(d);
+}
+// registros de ingredientes_custom: ajustes/cadastros próprios e marcas de exclusão (dados._excluido) de itens da base
+function _aplicarCustomNoDB(rows) {
+  (rows || []).forEach(r => {
+    const d = r && r.dados; if (!d || !d.n) return;
+    if (d._excluido) { _removerDoDB(d.n); return; }
+    const i = DB.findIndex(x => x && x.n === d.n);
+    if (i >= 0 && (!d.g || d.g === _grpDe(i))) DB[i] = d;
+    else { if (i >= 0) _removerDoDB(d.n); _inserirNoDB(d); }
+  });
+}
+// Conferência de preenchimento (por 100 g): aponta valores que costumam gerar cálculo errado
+function _confereIng(d) {
+  const n = k => Number(d[k]) || 0, m = [];
+  if (n('act') > n('cho') + 0.05) m.push('açúcares totais maiores que carboidratos');
+  if (n('acad') > n('act') + 0.05) m.push('açúcares adicionados maiores que açúcares totais');
+  if (n('gs') + n('tr') > n('gt') + 0.05) m.push('gorduras saturadas + trans maiores que gorduras totais');
+  if (n('fi') > n('cho') + 0.05) m.push('fibras maiores que carboidratos');
+  if (n('cho') + n('ptn') + n('gt') > 100.5) m.push('carboidratos + proteínas + gorduras somam mais de 100 g');
+  const calc = 4 * n('ptn') + 4 * Math.max(0, n('cho') - n('fi')) + 2 * n('fi') + 9 * n('gt');
+  if (n('kcal') > 0 || calc > 0) { if (Math.abs(n('kcal') - calc) > Math.max(25, 0.15 * Math.max(n('kcal'), calc))) m.push('kcal (' + n('kcal') + ') difere do calculado pelos macronutrientes (≈' + Math.round(calc) + ')'); }
+  if (n('na') > 40000) m.push('sódio acima de 40000 mg');
+  return m;
+}
+let _soIncons = false;
+function _atualizaListaGrupos() {
+  const dl = document.getElementById('ing_g_list'); if (!dl) return;
+  const gs = []; DB.forEach(d => { if (d && d.g && !gs.includes(d.g)) gs.push(d.g); });
+  dl.innerHTML = gs.map(g => '<option value="' + g.replace(/"/g, '&quot;') + '">').join('');
+}
+function editarIngPorNome(nomeEnc) {
+  const nome = decodeURIComponent(nomeEnc), i = DB.findIndex(d => d && d.n === nome);
+  if (i < 0) { alert('Ingrediente não encontrado.'); return; }
+  editarIngCustom(encodeURIComponent(JSON.stringify(Object.assign({}, DB[i], { g: _grpDe(i) }))));
+}
+
 async function salvarIngrediente() {
   if (!_currentUser) { alert('Faça login para salvar ingredientes.'); return; }
   const nome = document.getElementById('ing_nome')?.value?.trim();
@@ -1350,14 +1401,23 @@ async function salvarIngrediente() {
     alergenicos: Array.from(document.querySelectorAll('[id^="ing_al_"]:checked')).map(el=>el.value),
     cadastradoPor: _currentUser.email,
   };
+  { const _g = document.getElementById('ing_g')?.value?.trim(); if (_g) ing.g = _g; }
   montarCamposExtraIng();
   NUTRI_EXT.forEach(g => g[1].forEach(([k]) => { const v = parseFloat(document.getElementById('ing_x_' + k)?.value); if (v) ing['x_' + k] = v; }));
   const { error } = await _sb.from('ingredientes_custom').upsert({nome:ing.n,dados:ing,usuario_id:_currentUser.id},{onConflict:'nome'});
   const msg = document.getElementById('ing_msg');
   if (error) { msg.style.color='#dc2626'; msg.textContent='❌ '+error.message; }
   else {
-    const ex = DB.findIndex(d=>d.n===ing.n);
-    if(ex>=0) DB[ex]=ing; else DB.push(ing);
+    const antigo = _ingEditNome;
+    if (antigo && antigo !== ing.n) {   // nome alterado: o cadastro com o nome antigo sai (base fixa: marca de exclusão)
+      const r = _DB_BASE_NOMES.has(antigo)
+        ? await _sb.from('ingredientes_custom').upsert({nome:antigo,dados:{n:antigo,_excluido:true},usuario_id:_currentUser.id},{onConflict:'nome'})
+        : await _sb.from('ingredientes_custom').delete().eq('nome', antigo);
+      if (r.error) { msg.style.color='#dc2626'; msg.textContent='⚠️ Salvo com o novo nome, mas o nome antigo não pôde ser removido: '+r.error.message; }
+      _removerDoDB(antigo);
+    }
+    { const i0 = DB.findIndex(d => d && d.n === ing.n); if (i0 >= 0 && ing.g && ing.g !== _grpDe(i0)) _removerDoDB(ing.n); }
+    _inserirNoDB(ing);
     msg.style.color='#166534'; msg.textContent='✅ Ingrediente salvo!';
     limparFormIngrediente(); carregarListaIngredientes();
     setTimeout(()=>msg.textContent='',3000);
@@ -1365,12 +1425,15 @@ async function salvarIngrediente() {
 }
 
 
-async function excluirIngCustom(nome) {
-  if (!confirm('Excluir ingrediente "' + nome + '"?\nEsta ação não pode ser desfeita.')) return;
-  const { error } = await _sb.from('ingredientes_custom').delete().eq('nome', nome);
+async function excluirIngCustom(nomeEnc) {
+  const nome = decodeURIComponent(nomeEnc);
+  if (!_sb || !_currentUser) { alert('Faça login para excluir ingredientes.'); return; }
+  if (!confirm('Excluir o ingrediente "' + nome + '" da lista?\nEle deixa de aparecer para todos os usuários. Produtos já salvos não são alterados.')) return;
+  const { error } = _DB_BASE_NOMES.has(nome)
+    ? await _sb.from('ingredientes_custom').upsert({nome,dados:{n:nome,_excluido:true},usuario_id:_currentUser.id},{onConflict:'nome'})   // item da base fixa: marca de exclusão
+    : await _sb.from('ingredientes_custom').delete().eq('nome', nome);
   if (error) { alert('Erro ao excluir: ' + error.message); return; }
-  const idx = DB.findIndex(d=>d.n===nome);
-  if (idx>=0) DB.splice(idx,1);
+  _removerDoDB(nome);
   carregarListaIngredientes();
 }
 
@@ -1378,7 +1441,9 @@ function editarIngCustom(dadosEncoded) {
   const d = JSON.parse(decodeURIComponent(dadosEncoded));
   // Preenche o formulário de ingrediente com os dados existentes
   const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  _ingEditNome = d.n;
   set('ing_nome', d.n);
+  _atualizaListaGrupos(); set('ing_g', d.g);
   set('ing_ref', d.ref);
   set('ing_rotulo', d.rotulo);
   set('ing_rotuloCompleto', d.rotuloCompleto);
@@ -1404,7 +1469,8 @@ function editarIngCustom(dadosEncoded) {
   montarCamposExtraIng();
   EXT_KEYS.forEach(k => set('ing_' + k, d[k]));
   { const _dt = document.querySelector('#ing_ext_wrap details'); if (_dt) _dt.open = true; }   // edição: abre a lista completa de macro e micronutrientes
-  const s = document.getElementById('ing_src'); if(s) s.value = d.src||'Usuário';
+  const s = document.getElementById('ing_src');
+  if (s) { const v = d.src || 'Usuário'; if (![...s.options].some(o => o.value === v)) s.add(new Option(v, v)); s.value = v; }
   // Navegar para a tela de ingredientes
   irParaIngredientes();
   // Scroll para o topo do formulário
@@ -1422,6 +1488,7 @@ function limparFormIngrediente() {
   document.querySelectorAll('[id^="ing_al_"]').forEach(el=>el.checked=false);;
   EXT_KEYS.forEach(k=>{const el=document.getElementById('ing_'+k); if(el) el.value='';});
   const s=document.getElementById('ing_src'); if(s) s.value='FT';
+  _ingEditNome = ''; const _gg = document.getElementById('ing_g'); if (_gg) _gg.value = '';
 }
 
 async function carregarListaIngredientes() {
@@ -1433,7 +1500,7 @@ async function carregarListaIngredientes() {
     const {data} = await _sb.from('ingredientes_custom').select('nome,dados').order('nome');
     if(data?.length) {
       customData = data;
-      data.forEach(r=>{ const ex=DB.findIndex(d=>d.n===r.dados.n); if(ex>=0) DB[ex]=r.dados; else DB.push(r.dados); });
+      _aplicarCustomNoDB(data);
       // Repopula o dropdown de ingredientes com os custom carregados
       const sel = document.getElementById('selIng');
       if(sel) {
@@ -1450,14 +1517,15 @@ async function carregarListaIngredientes() {
     }
   }
 
-  // Combinar DB fixo + custom
-  const customNomes = new Set(customData.map(r=>r.dados.n));
-  const todosIng = [
-    ...DB.filter(d=>d && d.n).map(d => ({dados:d, custom:false})),
-    ...customData.filter(r=>!DB.find(d=>d.n===r.dados.n)).map(r=>({dados:r.dados,custom:true}))
-  ].sort((a,b)=>(a.dados?.n||'').localeCompare(b.dados?.n||''));
+  // Combinar DB fixo + custom (todos podem ser editados/excluídos)
+  const customNomes = new Set(customData.filter(r=>r.dados && !r.dados._excluido).map(r=>r.dados.n));
+  let todosIng = DB.map((d,i) => d && d.n ? {dados:Object.assign({}, d, {g: _grpDe(i) || d.g}), custom:customNomes.has(d.n), base:_DB_BASE_NOMES.has(d.n), msgs:_confereIng(d)} : null).filter(Boolean)
+    .sort((a,b)=>(a.dados?.n||'').localeCompare(b.dados?.n||''));
+  const totalIng = todosIng.length, totalInc = todosIng.filter(x=>x.msgs.length).length;
+  if (_soIncons) todosIng = todosIng.filter(x=>x.msgs.length);
+  _atualizaListaGrupos();
 
-  lista.innerHTML=`<div style="margin-bottom:12px;font-size:12px;color:#6b7280">${todosIng.length} ingredientes cadastrados</div>
+  lista.innerHTML=`<div style="margin-bottom:12px;font-size:12px;color:#6b7280">${totalIng} ingredientes cadastrados · <b style="color:#b45309">${totalInc} com possível erro de preenchimento (⚠)</b> · <label style="cursor:pointer"><input type="checkbox" style="width:auto;height:auto;display:inline;margin:0 4px 0 0;vertical-align:middle" ${_soIncons?'checked':''} onchange="_soIncons=this.checked;carregarListaIngredientes()"> mostrar só os com ⚠</label></div>
   <table style="width:100%;border-collapse:collapse;font-size:12px">
     <tr style="background:#f8fafc;position:sticky;top:0">
       <th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb;min-width:200px">Nome</th>
@@ -1473,9 +1541,10 @@ async function carregarListaIngredientes() {
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Na mg</th>
       <th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb">Fornecedor</th>
       <th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb">Ações</th>
+      <th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb;min-width:160px">Conferência</th>
     </tr>
-    ${todosIng.map(({dados:d,custom})=>`<tr style="border-bottom:1px solid #f3f4f6${custom?' background:#f0fdf4':''}">
-      <td style="padding:8px;font-weight:600">${d.n}${custom?' <span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:10px">novo</span>':''}</td>
+    ${todosIng.map(({dados:d,custom,base,msgs})=>`<tr style="border-bottom:1px solid #f3f4f6${custom?' background:#f0fdf4':''}">
+      <td style="padding:8px;font-weight:600">${d.n}${custom?` <span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:10px">${base?'ajustado':'novo'}</span>`:''}</td>
       <td style="padding:8px;color:#6b7280;font-size:11px">${d.rotulo||'—'}</td>
       <td style="padding:8px;text-align:center">${d.kcal||0}</td>
       <td style="padding:8px;text-align:center">${d.cho||0}</td>
@@ -1487,7 +1556,8 @@ async function carregarListaIngredientes() {
       <td style="padding:8px;text-align:center">${d.fi||0}</td>
       <td style="padding:8px;text-align:center">${d.na||0}</td>
       <td style="padding:8px;color:#6b7280;font-size:11px">${d.ref||'—'}</td>
-      <td style="padding:8px;text-align:center">${custom?`<button onclick="editarIngCustom('${encodeURIComponent(JSON.stringify(d))}')" style="background:#1e3a8a;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;margin-right:4px">✏️ Editar</button><button onclick="excluirIngCustom('${d.n}')" style="background:#dc2626;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer">🗑️</button>`:'—'}</td>
+      <td style="padding:8px;text-align:center;white-space:nowrap"><button onclick="editarIngPorNome('${encodeURIComponent(d.n)}')" style="background:#1e3a8a;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;margin-right:4px">✏️ Editar</button><button onclick="excluirIngCustom('${encodeURIComponent(d.n)}')" style="background:#dc2626;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer" title="Excluir">🗑️</button></td>
+      <td style="padding:8px;font-size:11px;color:#b45309">${msgs.length?'⚠ '+msgs.join('; '):'<span style="color:#9ca3af">—</span>'}</td>
     </tr>`).join('')}
   </table>`;
 }
@@ -3048,7 +3118,7 @@ const _XL = {   // posição → linhas opcionais que vêm logo depois da linha-
   fi:   [['x_fis','Fibras solúveis (g)',null,1,'x'],['x_fii','Fibras insolúveis (g)',null,1,'x']],
   na:   [['x_vA','Vitamina A (µg RAE)',800,0,'xmg'],['x_vD','Vitamina D (µg)',15,0,'xmg'],['x_vE','Vitamina E (mg)',15,0,'xmg'],['x_vK','Vitamina K (µg)',120,0,'xmg'],['x_vC','Vitamina C (mg)',100,0,'xmg'],
          ['x_b1','Vitamina B1 (mg)',1.2,0,'xmg'],['x_b2','Vitamina B2 (mg)',1.2,0,'xmg'],['x_b3','Vitamina B3 (mg NE)',15,0,'xmg'],['x_b5','Vitamina B5 (mg)',5,0,'xmg'],
-         ['x_b6','Vitamina B6 (mg)',1.3,0,'xmg'],['x_b7','Vitamina B7 (µg)',30,0,'xmg'],['x_b9','Vitamina B9 (µg DFE)',400,0,'xmg'],['x_b12','Vitamina B12 (µg)',2.4,0,'xmg'],
+         ['x_b6','Vitamina B6 (mg)',1.3,0,'xmg'],['x_b7','Biotina (µg)',30,0,'xmg'],['x_b9','Vitamina B9 (µg DFE)',400,0,'xmg'],['x_b12','Vitamina B12 (µg)',2.4,0,'xmg'],
          ['x_ca','Cálcio (mg)',1000,0,'xmg'],['x_cl','Cloreto (mg)',2300,0,'xmg'],['x_cu','Cobre (µg)',900,0,'xmg'],['x_cr','Cromo (µg)',35,0,'xmg'],['x_fe','Ferro (mg)',14,0,'xmg'],['x_fl','Flúor (mg)',4,0,'xmg'],
          ['x_p','Fósforo (mg)',700,0,'xmg'],['x_i','Iodo (µg)',150,0,'xmg'],['x_mgn','Magnésio (mg)',420,0,'xmg'],['x_mn','Manganês (mg)',3,0,'xmg'],['x_mo','Molibdênio (µg)',45,0,'xmg'],['x_k','Potássio (mg)',3500,0,'xmg'],
          ['x_se','Selênio (µg)',60,0,'xmg'],['x_zn','Zinco (mg)',11,0,'xmg'],['x_boro','Boro (mg)',null,0,'xmg'],['x_si','Silício (mg)',null,0,'xmg'],['x_colina','Colina (mg)',550,0,'xmg'],['m_aa_tau','Taurina (mg)',null,0,'xmg'],
@@ -3109,6 +3179,8 @@ function _padronizaVit(t) {
   return String(t || '').replace(/\b(vitaminas?\s+)([a-k]\d{0,2})\b((?:(?:,\s*|\s+e\s+)[a-k]\d{0,2}\b)*)/gi,
     (m, v, l, resto) => v + l.toUpperCase() + resto.replace(/(,\s*|\s+e\s+)([a-k]\d{0,2})\b/gi, (mm, sep, x) => sep + x.toUpperCase()));
 }
+// "Cerca de 8 (200 g), 12 (300 g) e 40 (1 kg)": primeiro as porções, depois o peso entre parênteses, em ordem crescente
+const _juntaE = (a) => a.length > 1 ? a.slice(0, -1).join(', ') + ' e ' + a[a.length - 1] : (a[0] || '');
 const _fmtPeso = (g) => g >= 1000 ? _vfmt(g / 1000, 3).replace(/,?0+$/, '') + ' kg' : _gfmt(g) + ' g';
 
 function ftpSecNutri(o) {
@@ -3151,7 +3223,7 @@ function ftpSecNutri(o) {
   const _grs = (o.gramaturas && o.gramaturas.length > 1) ? o.gramaturas : null;
   const nPor = (b) => {
     const gp = cafe ? (o.poCafe || 20) : b.g;
-    return _grs ? 'cerca de ' + _grs.map(w => _fmtPeso(w) + ': ' + _nPorcEmb(w, gp)).join(' · ') : 'cerca de ' + _nPorcEmb(o.pesoTotal, gp);
+    return 'Cerca de ' + (_grs ? _juntaE(_grs.slice().sort((x, y) => x - y).map(w => _nPorcEmb(w, gp) + ' (' + _fmtPeso(w) + ')')) : _nPorcEmb(o.pesoTotal, gp));
   };
   const medidaTxt = (b) => `${b.medida || '—'}${cafe ? ' — preparado com ' + _gfmt(o.poCafe || 20) + ' g de pó' : ''}`;
   const porcTxt = (b) => `Porção: ${_gfmt(b.g)} ${un} (${medidaTxt(b)})`;
@@ -3443,7 +3515,7 @@ function _lerGramaturas() {
     if (!m) return; const g = parseFloat(m[1]) * (m[2] === 'kg' ? 1000 : 1);
     if (g > 0 && !arr.includes(g)) arr.push(g);
   });
-  return arr;
+  return arr.sort((a, b) => a - b);   // ordem crescente de peso
 }
 const _semLactose = () => document.getElementById('p_sem_lactose')?.value === '1';
 function _lerGrupoPop() {
@@ -3475,8 +3547,8 @@ function atualizarNPorcAuto() {
   const arr = _lerPorcoes();
   const txt = arr.map(b => {
     const gr = _lerGramaturas();
-    const nn = gr.length > 1 ? gr.map(w => _fmtPeso(w) + ': ' + _nPorcEmb(w, cafe ? poCafe : b.g)).join(' / ') : _nPorcEmb(peso, cafe ? poCafe : b.g);
-    return (arr.length > 1 && b.titulo ? b.titulo + ': ' : '') + 'cerca de ' + nn;
+    const nn = gr.length > 1 ? _juntaE(gr.map(w => _nPorcEmb(w, cafe ? poCafe : b.g) + ' (' + _fmtPeso(w) + ')')) : _nPorcEmb(peso, cafe ? poCafe : b.g);
+    return (arr.length > 1 && b.titulo ? b.titulo + ': ' : '') + 'Cerca de ' + nn;
   }).join(' · ');
   el.value = peso ? txt : '';
 }
@@ -4940,6 +5012,7 @@ _initAuth().then(async()=>{ if (!_currentUser) return; try { await _sincronizarS
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
         <div class="field" style="grid-column:1/3"><label>Nome do ingrediente *</label><input id="ing_nome" type="text" placeholder="Ex: Leite em Pó Integral"></div>
         <div class="field"><label>Denominação pública na ficha *</label><input id="ing_rotulo" type="text" required aria-describedby="ing_rotulo_ajuda" placeholder="Ex: composto lácteo"><small id="ing_rotulo_ajuda">Obrigatório. Use o nome genérico, sem marca ou código do fornecedor. Mantenha a identificação do fornecedor nos campos internos.</small></div>
+        <div class="field"><label>Sublista (grupo em que aparece na lista de ingredientes)</label><input id="ing_g" type="text" list="ing_g_list" placeholder="Ex: 🥛 Leite fluido"><datalist id="ing_g_list"></datalist></div>
         <div class="field"><label>Fornecedor / Referência</label><input id="ing_ref" type="text" placeholder="Ex: Horizonte (FT 2024)"></div>
         <div class="field"><label>Fonte</label><select id="ing_src"><option value="FT">Ficha Técnica (FT)</option><option value="Usuário">Usuário</option><option value="TACO">TACO</option><option value="IBGE">IBGE</option></select></div>
         <div class="field"><label>Rótulo completo (subingredientes)</label><input id="ing_rotuloCompleto" type="text" placeholder="Ex: leite em pó (ingrediente A, B)"></div>
