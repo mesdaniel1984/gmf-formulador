@@ -74,9 +74,7 @@ Pedido: vitaminas, minerais e demais nutrientes opcionais do cadastro do ingredi
   - Excluir de item da base grava uma marca de exclusão na tabela `ingredientes_custom` (`dados._excluido`); de item cadastrado, apaga a linha. Produtos já salvos não mudam.
   - Nova coluna "Conferência" aponta preenchimento suspeito por 100 g (açúcares > carboidratos, adicionados > totais, saturadas + trans > gorduras totais, macros somando mais de 100 g, kcal diferente do calculado) e filtro "mostrar só os com ⚠".
 
-## 25/11 — %VD por público (Anexo II × grupo populacional)
-- Padrão de todo produto: VDR do público geral/adulto (Anexo II da IN 75/2020).
-- Caixa "Produto destinado a público específico?" (desmarcada). Marcada, habilita o menu: lactentes 0–6 m, lactentes 7–11 m, crianças 1–3 a, crianças 4–8 a, gestantes, lactantes (VDR do Anexo VIII).
-- Desmarcar zera o grupo e volta ao adulto.
-- Nutriente sem VDR (adulto ou grupo): célula "*" e nota "* Valor Diário de Referência não estabelecido." (antes "—").
-- Suplemento deixa de assumir ≥19 anos por padrão (agora Anexo II).
+## 25/11 — Correções 25/11
+- Grupo populacional (%VD) disponível em todas as categorias, sempre visível; padrão adultos ≥ 19 anos; demais grupos do Anexo VIII (lactentes 0–6 e 7–11 m, 1–3 a, 4–8 a, 9–18 a, gestantes, lactantes). Trocar o grupo recalcula todos os %VD, vale para todas as porções e atualiza a nota. Sem VDR no grupo: "—".
+- Código interno / FT = código do produto no Omie (digitado); obrigatório para gerar a ficha técnica (etapa 4).
+- Item 2 do anexo (contaminantes/microbiologia/matérias estranhas pela fórmula): não feito nesta entrega.
