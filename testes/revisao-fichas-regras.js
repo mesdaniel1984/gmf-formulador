@@ -124,7 +124,7 @@ check(c2.includes('>400</td>') && c2.includes('>80</td>') && c2.includes('>10%</
 check(c2.includes('>900</td>') && c2.includes('>180</td>') && c2.includes('>18%</td>'), 'Cálcio: 900 mg/100 g · 180 mg/porção · 18% VD (VDR 1000 mg)');
 check(c2.includes('>1,2</td>') && c2.includes('>0,24</td>') && c2.includes('>2%</td>'), 'Vitamina B12: 1,2 / 0,24 µg · 2% VD (VDR 2,4 µg)');
 check(c2.includes('>0,24</td>') && c2.includes('>50</td>'), 'Leucina 2,5 g/100 g = 2500 mg/100 g -> 500 mg na porção (conversão g→mg)'.slice(0,0) + 'Taurina 0,05 g = 50 mg/100 g');
-check(/Lactose \(g\)<\/td><td[^>]*>38<\/td>[^]*?>7,6<\/td>[^]*?>—<\/td>/.test(c2), 'Lactose: 38 g/100 g · 7,6 g/porção · % VD "—" (sem VDR)');
+check(/Lactose \(g\)<\/td><td[^>]*>38<\/td>[^]*?>7,6<\/td>[^]*?>\*<\/td>/.test(c2), 'Lactose: 38 g/100 g · 7,6 g/porção · % VD "*" (sem VDR)');
 // ômega 3 soma ALA+EPA+DHA e mostra os filhos
 const c3 = nu('leite-integral', Object.assign({}, base, { x_ala: 0.5, x_epa: 100, x_dha: 200 }));
 check(c3.includes('Ômega 3 (mg)') && c3.includes('>800</td>') && c3.includes('Ácido linolênico (mg)') && c3.includes('EPA (mg)') && c3.includes('DHA (mg)'), 'Ômega 3 total (ALA 500 + EPA 100 + DHA 200 = 800 mg) com subitens');
@@ -169,8 +169,8 @@ const gsup = (gp) => ctx.ftpSecNutri({ tipo: 'suplemento-po', T: Object.assign({
 const rowOf = (h, nome) => (h.match(new RegExp('<tr>(?:(?!</tr>).)*' + nome + '(?:(?!</tr>).)*</tr>'))||[''])[0].replace(/<[^>]+>/g,'|');
 check(/\|10%\|/.test(rowOf(gsup(5), 'Proteínas')) && /\|10%\|/.test(rowOf(gsup(5), 'Vitamina C')), 'Anexo VIII ≥19 anos: proteínas 5 g/50 g = 10% · vitamina C 10 mg/100 mg = 10%');
 check(/\|20%\|/.test(rowOf(gsup(2), 'Proteínas')) && /\|67%\|/.test(rowOf(gsup(2), 'Vitamina C')), 'Anexo VIII 1 a 3 anos: proteínas 5/25 = 20% · vitamina C 10/15 = 67%');
-check(gsup(2).includes('Anexo VIII da IN 75/2020 — 1 a 3 anos'), 'nota informa o grupo populacional do Anexo VIII');
-check(/\|—\|/.test(rowOf(gsup(0), 'Gorduras saturadas')), 'Anexo VIII 0 a 6 meses: sem VDR de gorduras saturadas → "—"');
+check(gsup(2).includes('para 1 a 3 anos (Anexo VIII)'), 'nota informa o grupo populacional do Anexo VIII');
+check(/\|\*\|/.test(rowOf(gsup(0), 'Gorduras saturadas')) && gsup(0).includes('Valor Diário de Referência não estabelecido'), 'Anexo VIII 0 a 6 meses: sem VDR de gorduras saturadas → "*" + nota');
 check(!nu('leite-integral', Object.assign({}, bS)).includes('Anexo VIII'), 'sem grupo: Anexo II (sem nota do Anexo VIII)');
 // categoria dietas especiais: regras do produto lácteo de base
 ctx.tipoSel = 'dietas-especiais'; ctx.classeSel = 'dietas-especiais'; ctx.baseDietaSel = 'mistura';
