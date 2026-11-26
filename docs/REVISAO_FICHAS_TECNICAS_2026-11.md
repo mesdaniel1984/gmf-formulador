@@ -78,3 +78,12 @@ Pedido: vitaminas, minerais e demais nutrientes opcionais do cadastro do ingredi
 - Grupo populacional (%VD) disponível em todas as categorias, sempre visível; padrão adultos ≥ 19 anos; demais grupos do Anexo VIII (lactentes 0–6 e 7–11 m, 1–3 a, 4–8 a, 9–18 a, gestantes, lactantes). Trocar o grupo recalcula todos os %VD, vale para todas as porções e atualiza a nota. Sem VDR no grupo: "—".
 - Código interno / FT = código do produto no Omie (digitado); obrigatório para gerar a ficha técnica (etapa 4).
 - Item 2 do anexo (contaminantes/microbiologia/matérias estranhas pela fórmula): não feito nesta entrega.
+
+## 26/11 — PR 1 (base de declaração, energia, %VD, rodapé, validações)
+- Campo "Base de declaração da tabela nutricional" (A = 100 g como exposto à venda + porção; B = 100 mL pronto, ainda desabilitada até o PR 2). Suplemento: travado, só a porção. A base aparece impressa na seção nutricional.
+- Valor energético: calculado por coluna, a partir dos nutrientes já arredondados, com os fatores do Anexo XXII. O campo kcal do cadastro deixou de entrar na tabela.
+  - Carboidratos ×4 (sem polióis e sem fibras), proteínas ×4, gorduras ×9, álcool ×7, ácidos orgânicos ×3, polióis por tipo, fibra solúvel ×2, polidextrose ×1, insolúvel ×0.
+  - Novos campos no cadastro: lactitol, xilitol, maltitol, sorbitol, manitol, eritritol, isomalte, tagatose, álcool, ácidos orgânicos. Fibra declarada = solúveis + polidextrose + insolúveis (quando o cadastro traz os tipos).
+- %VD: Anexo II para alimentos em geral; Anexo VIII só em suplemento e alimento para fins especiais, com uma coluna de %VD por grupo marcado. Calculado sobre o valor sem arredondar; nutriente declarado como 0 (Anexo IV) tem %VD 0%.
+- Rodapé: apenas "*Percentual de valores diários fornecidos pela porção." (removidas a frase do Anexo VIII e a nota "**" do pó para preparo na base A).
+- Validações ao gerar a ficha: açúcares totais ≤ carboidratos, adicionados ≤ totais, saturadas + trans ≤ gorduras totais, campos nutricionais obrigatórios preenchidos.
