@@ -391,7 +391,7 @@ tr:last-child td{border-bottom:none}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
       <div class="field" style="grid-column:1/3"><label>Nome comercial do produto</label><input id="p_nome" type="text" placeholder="Ex: OKEY LAC 100" oninput="syncNome()"></div>
-      <div class="field"><label>Código interno / FT</label><input id="p_codigo" type="text" placeholder="Ex: 031/5460"></div>
+      <div class="field"><label>Código interno / FT (mesmo código do produto no Omie)</label><input id="p_codigo" type="text" placeholder="Código do produto no Omie"></div>
       <div class="field"><label>Revisão</label><input id="p_revisao" type="text" value="00"></div>
     </div>
     <div class="divider"></div>
@@ -584,7 +584,8 @@ tr:last-child td{border-bottom:none}
         <select id="p_fabricante"><option value="dms">DMS Indústria de Alimentos Ltda — CNPJ 33.174.960/0001-27</option><option value="mfparis">MFPARIS Indústria de Alimentos Ltda — CNPJ 26.855.558/0001-42</option></select></div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px">
         <div class="field"><label>Produto sem lactose</label><select id="p_sem_lactose" onchange="aplicarSemLactose();recalc()"><option value="">Não</option><option value="1">Sim — isento de lactose (máx. 100 mg/100 g)</option></select></div>
-        <div class="field" id="grupoPopField" style="display:none"><label>Grupo populacional (%VD — Anexo VIII da IN 75/2020)</label><select id="p_grupo_pop" onchange="recalc()"><option value="">Não informar (população em geral — Anexo II)</option><option value="0">0 a 6 meses</option><option value="1">7 a 11 meses</option><option value="2">1 a 3 anos</option><option value="3">4 a 8 anos</option><option value="4">9 a 18 anos</option><option value="5">≥ 19 anos</option><option value="6">Gestantes</option><option value="7">Lactantes</option></select></div>
+        <div class="field" id="grupoPopField"><label>Grupo populacional (%VD — IN 75/2020, Anexo VIII)</label><select id="p_grupo_pop" onchange="recalc()"><option value="5" selected>Adultos ≥ 19 anos (padrão)</option><option value="0">Lactentes 0 a 6 meses</option><option value="1">Lactentes 7 a 11 meses</option><option value="2">Crianças 1 a 3 anos</option><option value="3">Crianças 4 a 8 anos</option><option value="4">9 a 18 anos</option><option value="6">Gestantes</option><option value="7">Lactantes</option></select>
+          <div style="font-size:11px;color:#666;margin-top:3px">Padrão: adultos ≥ 19 anos. Escolha outro grupo apenas se o produto for destinado a público específico; todos os %VD são recalculados.</div></div>
         <div class="field" id="baseDietaField" style="display:none"><label>Produto lácteo de base (micro, contaminantes e matérias estranhas)</label><select id="p_base_dieta" onchange="baseDietaSel=this.value"><option value="leite-integral">Leite em pó integral</option><option value="leite-instantaneo">Leite em pó instantâneo</option><option value="leite-desnatado">Leite em pó desnatado</option><option value="composto-sem">Composto lácteo sem adição</option><option value="composto-com">Composto lácteo com adição</option><option value="mistura">Mistura láctea</option></select></div>
       </div>
       <div style="font-size:12px;font-weight:700;margin-bottom:8px">Padrões físico-químicos do produto <span style="font-weight:400;color:#6b7280">(opcional — o item só aparece na ficha se for preenchido)</span></div>
@@ -1137,6 +1138,10 @@ function goStep(n) {
   else if (n > 1 && receita.length === 0 && !_prodOrigem) {
     if (n > 2) { alert('Adicione ingredientes na receita antes de avançar.'); return; }
   }
+  if (n === 4 && !(document.getElementById('p_codigo')?.value || (_prodOrigem && _prodOrigem.codigo) || '').trim()) {
+    alert('Informe o Código interno / FT, que deve ser o mesmo código do produto no Omie, antes de gerar a Ficha Técnica.');
+    const _c = document.getElementById('p_codigo'); if (_c) { goStep(0); _c.focus(); } return;
+  }
   currentStep = n;
 
   [0,1,2,3,4,5,6].forEach(i => {
@@ -1687,6 +1692,7 @@ function novoProduto() {
   ['p_nome','p_codigo','p_denominacao','p_gramaturas_extra','p_sem_lactose','p_grupo_pop','p_umidade','p_ph','p_acidez','p_cafe_tipo','p_cafe_especie','p_cafe_torra','p_cafe_moagem'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
+  { const _g=document.getElementById('p_grupo_pop'); if(_g) _g.value='5'; }
   document.getElementById('p_revisao').value='00';
   renderReceita();
   _destravarTipoProduto(); // Liberar botões de tipo
@@ -1844,7 +1850,7 @@ function editarProduto(id) {
   ['umidade','ph','acidez'].forEach(k => { const el = document.getElementById('p_' + k); if (el) el.value = prod[k] || ''; });
   { const _ge = document.getElementById('p_gramaturas_extra'); if (_ge) _ge.value = prod.gramaturasExtra || ''; }
   { const _sl = document.getElementById('p_sem_lactose'); if (_sl) _sl.value = prod.semLactose ? '1' : '';
-    const _gp = document.getElementById('p_grupo_pop'); if (_gp && prod.grupoPop !== undefined) _gp.value = prod.grupoPop;
+    const _gp = document.getElementById('p_grupo_pop'); if (_gp) { _gp.value = (prod.grupoPop === undefined || prod.grupoPop === null || prod.grupoPop === '') ? '5' : String(prod.grupoPop); if (!_gp.value) _gp.value = '5'; }
     baseDietaSel = prod.baseDieta || 'leite-integral'; const _bd = document.getElementById('p_base_dieta'); if (_bd) _bd.value = baseDietaSel; }
   { const _t = document.getElementById('p_porcao_titulo'); if (_t) _t.value = prod.porcaoTitulo || '';
     _porcoesExtra = (prod.porcoesExtra || []).map(x => ({ ...x })); renderPorcoesExtra();
@@ -3264,11 +3270,11 @@ function ftpSecNutri(o) {
     notas.push(`Não contém quantidades significativas de ${_listaE(lista)}.`);
   }
   notas.push('*Percentual de valores diários fornecidos pela porção.');
-  if (gi !== null) notas.push('%VD calculado com os valores de referência do Anexo VIII da IN 75/2020 — ' + GRUPOS_POP[gi] + '.');
+  if (gi !== null) notas.push('%VD calculado com os valores de referência da IN 75/2020 (Anexo VIII) — ' + GRUPOS_POP[gi] + '.');
   if (cfg.modo === 'preparo') notas.push('**No alimento pronto para o consumo.');
   if (esp) notas.push('**No alimento pronto para o consumo.', 'Declaração obrigatória: valor energético e carboidratos (alimento para fins especiais).');
   if (cafe) notas.push('**No alimento pronto para o consumo.', 'Bebidas não alcoólicas (chás, infusões) — IN 75/2020, Anexo V.');
-  if (cfg.modo === 'sem100') notas.push('Suplemento alimentar: sem coluna de 100 g (RDC 429/2020, art. 8º §1º). %VD pelos VDR do Anexo VIII (grupo populacional informado na ficha); declarar também nutrientes, substâncias bioativas e enzimas adicionados (art. 5º §3º).');
+  if (cfg.modo === 'sem100') notas.push('Suplemento alimentar: sem coluna de 100 g (RDC 429/2020, art. 8º §1º). %VD pelo grupo populacional selecionado (Anexo VIII; padrão adultos ≥ 19 anos); declarar também nutrientes, substâncias bioativas e enzimas adicionados (art. 5º §3º).');
 
   // lupa
   let lupa;
@@ -3519,11 +3525,8 @@ function _lerGramaturas() {
 }
 const _semLactose = () => document.getElementById('p_sem_lactose')?.value === '1';
 function _lerGrupoPop() {
-  const t = tipoSel || classeSel;
-  if (t !== 'suplemento-po' && t !== 'dietas-especiais') return null;
   const v = document.getElementById('p_grupo_pop')?.value;
-  if (v !== '' && v != null) return Number(v);
-  return t === 'suplemento-po' ? 5 : null;   // suplemento sem escolha: adultos (≥ 19 anos)
+  return (v !== '' && v != null) ? Number(v) : 5;   // padrão: adultos ≥ 19 anos
 }
 // produto sem lactose: ajusta a frase de glúten/lactose da ficha (isento ≤ 100 mg/100 g — RDC 715/2022)
 function aplicarSemLactose() {
@@ -3535,8 +3538,8 @@ function aplicarSemLactose() {
 function atualizarCamposTipo(tipo) {
   const show = (id, on) => { const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
   const esp = tipo === 'dietas-especiais', sup = tipo === 'suplemento-po';
-  show('baseDietaField', esp); show('grupoPopField', esp || sup);
-  const g = document.getElementById('p_grupo_pop'); if (g) g.value = sup ? '5' : '';
+  show('baseDietaField', esp);
+  const g = document.getElementById('p_grupo_pop'); if (g) g.value = '5';
   const b = document.getElementById('p_base_dieta'); if (b) b.value = baseDietaSel = 'leite-integral';
 }
 function atualizarNPorcAuto() {

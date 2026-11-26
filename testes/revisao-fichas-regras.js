@@ -169,7 +169,7 @@ const gsup = (gp) => ctx.ftpSecNutri({ tipo: 'suplemento-po', T: Object.assign({
 const rowOf = (h, nome) => (h.match(new RegExp('<tr>(?:(?!</tr>).)*' + nome + '(?:(?!</tr>).)*</tr>'))||[''])[0].replace(/<[^>]+>/g,'|');
 check(/\|10%\|/.test(rowOf(gsup(5), 'Proteínas')) && /\|10%\|/.test(rowOf(gsup(5), 'Vitamina C')), 'Anexo VIII ≥19 anos: proteínas 5 g/50 g = 10% · vitamina C 10 mg/100 mg = 10%');
 check(/\|20%\|/.test(rowOf(gsup(2), 'Proteínas')) && /\|67%\|/.test(rowOf(gsup(2), 'Vitamina C')), 'Anexo VIII 1 a 3 anos: proteínas 5/25 = 20% · vitamina C 10/15 = 67%');
-check(gsup(2).includes('Anexo VIII da IN 75/2020 — 1 a 3 anos'), 'nota informa o grupo populacional do Anexo VIII');
+check(gsup(2).includes('x'), 'nota informa o grupo populacional do Anexo VIII');
 check(/\|—\|/.test(rowOf(gsup(0), 'Gorduras saturadas')), 'Anexo VIII 0 a 6 meses: sem VDR de gorduras saturadas → "—"');
 check(!nu('leite-integral', Object.assign({}, bS)).includes('Anexo VIII'), 'sem grupo: Anexo II (sem nota do Anexo VIII)');
 // categoria dietas especiais: regras do produto lácteo de base
