@@ -87,7 +87,7 @@ check(ctx.NUTRI_CFG['cafe-torrado'].modo === 'cafe' && ctx.NUTRI_CFG['cafe-torra
 const docLabels = ["Valor energético", "Carboidratos", "Açúcares totais", "Açúcares adicionados", "Polióis", "Polidextrose", "Amido", "Galactose", "Lactose", "Proteínas", "Gorduras totais", "Gorduras saturadas", "Gorduras trans", "Gorduras monoinsaturadas", "Gorduras poli-insaturadas", "Ômega 3 - Ácido Alfa-Linolênico / ALA", "EPA - Ácido Eicosapentaenoico", "DHA - Ácido Docosahexaenoico", "Ômega 6 - Ácido Linoleico", "Ômega 9 - Ácido Oleico", "Colesterol", "Fibras alimentares totais", "Fibras solúveis", "Fibras insolúveis", "Sódio", "Vitamina A", "Vitamina D", "Vitamina E", "Vitamina K", "Vitamina C", "Tiamina - Vitamina B1", "Riboflavina - Vitamina B2", "Niacina - Vitamina B3", "Ácido pantotênico - Vitamina B5", "Vitamina B6", "Biotina - Vitamina B7", "Ácido fólico - Vitamina B9", "Vitamina B12", "Colina", "Boro", "Cálcio", "Cloreto", "Cobre", "Cromo", "Ferro", "Flúor", "Fósforo", "Iodo", "Magnésio", "Manganês", "Molibdênio", "Potássio", "Selênio", "Silício", "Zinco", "Cafeína", "Creatina", "Carnitina", "Coenzima Q10", "Luteína", "Zeaxantina", "Licopeno", "Astaxantina", "Fitoesteróis", "Antocianinas / Compostos Fenólicos Totais", "Alanina", "Arginina", "Ácido Aspártico", "Cisteína", "Glutamina / Ácido Glutâmico", "Glicina", "Histidina", "Isoleucina", "Leucina", "Lisina", "Metionina", "Fenilalanina", "Prolina", "Serina", "Treonina", "Triptofano", "Tirosina", "Valina", "Hidroxilisina", "Hidroxiprolina", "Taurina"];
 check(docLabels.every(l => src.includes(l)), 'ingrediente: todos os ' + docLabels.length + ' campos do documento de correções presentes');
 check(src.includes("id:'st-300g', label:'📦 Embalagem 300 g'") && src.includes("id: 'st-outra'") && src.includes("'st-300g':300"), 'embalagens: 300 g e Outra');
-check(nu('maltodextrina', T0).includes('NÃO SE APLICA') && nu('po-preparo', T0).includes('**No alimento pronto para o consumo'), 'malto sem lupa; pó para preparo com nota "**"');
+check(nu('maltodextrina', T0).includes('NÃO SE APLICA') && !nu('po-preparo', T0).includes('**No alimento pronto'), 'malto sem lupa; pó para preparo (base A): sem nota "**" (só na opção B)');
 check(ctx.NUTRI_CFG['leite-integral'].porcao === 26 && ctx.NUTRI_CFG['achocolatado'].porcao === 20 && ctx.NUTRI_CFG['glicose'].porcao === 5, 'porções padrão: leite 26 g · achocolatado 20 g · maltodextrina/glicose 5 g');
 check(!/color:#(?!000|fff)/i.test(nu('achocolatado', T0).replace(/ftp-sec-t[^>]*>/g, '')), 'tabela nutricional sem cores (apenas preto)');
 
@@ -169,7 +169,7 @@ const gsup = (gp) => ctx.ftpSecNutri({ tipo: 'suplemento-po', T: Object.assign({
 const rowOf = (h, nome) => (h.match(new RegExp('<tr>(?:(?!</tr>).)*' + nome + '(?:(?!</tr>).)*</tr>'))||[''])[0].replace(/<[^>]+>/g,'|');
 check(/\|10%\|/.test(rowOf(gsup(5), 'Proteínas')) && /\|10%\|/.test(rowOf(gsup(5), 'Vitamina C')), 'Anexo VIII ≥19 anos: proteínas 5 g/50 g = 10% · vitamina C 10 mg/100 mg = 10%');
 check(/\|20%\|/.test(rowOf(gsup(2), 'Proteínas')) && /\|67%\|/.test(rowOf(gsup(2), 'Vitamina C')), 'Anexo VIII 1 a 3 anos: proteínas 5/25 = 20% · vitamina C 10/15 = 67%');
-check(gsup(2).includes('x'), 'nota informa o grupo populacional do Anexo VIII');
+check(gsup(2).includes('1 a 3 anos'), 'cabeçalho da coluna informa o grupo populacional');
 check(/\|—\|/.test(rowOf(gsup(0), 'Gorduras saturadas')), 'Anexo VIII 0 a 6 meses: sem VDR de gorduras saturadas → "—"');
 check(!nu('leite-integral', Object.assign({}, bS)).includes('Anexo VIII'), 'sem grupo: Anexo II (sem nota do Anexo VIII)');
 // categoria dietas especiais: regras do produto lácteo de base
@@ -181,3 +181,19 @@ check(ctx.ftpSecME().includes('Ausência'), 'dietas especiais: matérias estranh
 check(ctx.TIPOS_LACTEOS.includes('dietas-especiais') && !!ctx.NUTRI_CFG['dietas-especiais'], 'dietas especiais: configuração nutricional e de lácteos definida');
 console.log('\n' + ok + ' ok, ' + fail + ' falha(s)');
 process.exit(fail ? 1 : 0);
+// ===== Correções 26/11 — PR 1 =====
+const kc = (T, g) => { const h = ctx.ftpSecNutri({ tipo: 'leite-integral', T: Object.assign({ kcal: 999, cho: 0, act: 0, acad: 0, ptn: 0, gt: 0, gs: 0, tr: 0, fi: 0, na: 0 }, T), P100: g, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false }); return h; };
+check(ctx._kcalXXII({ cho: 50, ptn: 10, gt: 5, fi: 0, na: 0 }) === 4 * 50 + 4 * 10 + 9 * 5, 'energia = 4·cho + 4·ptn + 9·gt (Anexo XXII), calculada dos nutrientes arredondados');
+check(ctx._kcalXXII({ cho: 50, ptn: 0, gt: 0, fi: 10, x_fis: 6, x_pdx: 2, x_fii: 2, na: 0 }) === 4 * 40 + 2 * 6 + 1 * 2, 'fibras: solúvel ×2, polidextrose ×1, insolúvel ×0, fora da parcela ×4');
+check(ctx._kcalXXII({ cho: 50, ptn: 0, gt: 0, fi: 0, x_maltitol: 10, x_eritritol: 10, na: 0 }) === 4 * 30 + 2.1 * 10 + 0, 'polióis saem da parcela ×4 e entram com fator próprio');
+check(ctx._kcalXXII({ cho: 0, ptn: 0, gt: 0, fi: 0, x_alcool: 2, x_acorg: 3, na: 0 }) === 7 * 2 + 3 * 3, 'álcool ×7 e ácidos orgânicos ×3');
+check(!kc({ cho: 10 }, 100).includes('>999<'), 'kcal do cadastro não entra na tabela');
+const t26 = kc({ cho: 50, ptn: 10, gt: 5 }, 100);
+check(/Base de declaração: 100 g do produto como exposto à venda \+ porção/.test(t26), 'base de declaração A impressa na seção nutricional');
+const tcol = (gp) => ctx.ftpSecNutri({ tipo: 'suplemento-po', T: Object.assign({}, bS, { x_vC: 50 }), P100: 20, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false, grupoPop: gp });
+check(tcol([2, 5]).includes('Crianças 1 a 3 anos') === false && tcol([2, 5]).includes('1 a 3 anos') && tcol([2, 5]).includes('≥ 19 anos'), 'suplemento: uma coluna de %VD por grupo marcado');
+check(!tcol([5]).includes('Anexo VIII da IN 75'), 'sem a frase do Anexo VIII no rodapé');
+check(tcol([5]).includes('Base de declaração: porção'), 'suplemento: base = porção');
+const gtr = ctx.ftpSecNutri({ tipo: 'leite-integral', T: Object.assign({}, bS, { tr: 0.04, gt: 8 }), P100: 26, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false });
+check(/Gorduras trans \(g\)<\/td>[^]*?>0<\/td>/.test(gtr), 'trans abaixo do limite do Anexo IV declarada como 0');
+check(!ctx.ftpSecNutri({ tipo: 'leite-integral', T: Object.assign({}, bS), P100: 26, pesoTotal: 1000, medida: 'x', alertas: [], ehSIF: false, grupoPop: [5] }).includes('Anexo VIII'), 'alimento em geral usa Anexo II mesmo que venha grupo');
